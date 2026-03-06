@@ -2,7 +2,7 @@
 
 > ⚠️ **Experimental**: This is an architectural spike for ReqLLM v2. It explores a metadata-driven approach where adding new models requires only LLMDB updates, not code changes.
 
-ReqLlmNext is a metadata-driven LLM client library for Elixir. It provides a unified interface for working with multiple LLM providers (OpenAI, Anthropic, etc.) through a clean three-layer architecture.
+ReqLlmNext is a metadata-driven LLM client library for Elixir. It provides a unified interface for working with multiple LLM providers (OpenAI, Anthropic, etc.) through a clean boundary-driven architecture.
 
 ## Quick Start
 
@@ -26,27 +26,58 @@ resp.object #=> %{"name" => "Alice", "age" => 30}
 
 ## Architecture
 
-ReqLlmNext uses a **three-layer API client architecture** that separates concerns:
+ReqLlmNext is moving toward a **boundary-driven architecture** that separates model normalization, planning, protocol semantics, transport, and provider concerns:
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         ReqLlmNext Public API                           │
-│  generate_text/3 · stream_text/3 · generate_object/4 · embed/3          │
-└─────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│                    ReqLlmNext.Executor (Central Pipeline)               │
-│  1. ModelResolver    → LLMDB lookup + config overrides                  │
-│  2. Validation       → Modalities, operation compatibility              │
-│  3. Constraints      → Parameter transforms from LLMDB metadata         │
-│  4. Adapter Pipeline → Per-model customizations (~5% of models)         │
-│  5. Wire Protocol    → JSON encode/decode per API family                │
-│  6. Provider HTTP    → Base URL, auth, Finch orchestration              │
-└─────────────────────────────────────────────────────────────────────────┘
+Public API
+  -> Model Input Boundary
+  -> Model Profile
+  -> Operation Planner
+  -> Semantic Protocol
+  -> Session Runtime
+  -> Transport
+  -> Provider
+
+Overrides and adapters feed model normalization and planning.
 ```
 
-### Layer 1: Wire Protocols
+The current codebase still reflects an earlier spike architecture in places. The specs in `specs/` define the target refactor boundary model.
+
+## Specs
+
+Architecture and override specifications live in [`specs/`](./specs):
+
+- [`specs/README.md`](./specs/README.md) - Spec index
+- [`specs/project_summary.md`](./specs/project_summary.md) - High-level project summary
+- [`specs/architecture.md`](./specs/architecture.md) - Overall architecture
+- [`specs/enforcement.md`](./specs/enforcement.md) - Runtime hard-fail boundary and CI guardrails
+- [`specs/model_source.md`](./specs/model_source.md) - Public model-spec forms and local descriptors
+- [`specs/model_profile.md`](./specs/model_profile.md) - Resolved model profile
+- [`specs/operation_planner.md`](./specs/operation_planner.md) - Request planning
+- [`specs/semantic_protocol.md`](./specs/semantic_protocol.md) - Protocol semantics
+- [`specs/session_runtime.md`](./specs/session_runtime.md) - Persistent session state
+- [`specs/transport.md`](./specs/transport.md) - Transport contract
+- [`specs/provider.md`](./specs/provider.md) - Provider boundary
+- [`specs/overrides.md`](./specs/overrides.md) - Overrides and adapters
+
+## Current Direction
+
+The current design direction is:
+
+1. Public APIs accept flexible `model_input` values:
+   - registry strings
+   - `%LLMDB.Model{}`
+   - local structs
+   - local maps
+2. That input is normalized at a strict runtime boundary.
+3. Invalid model input hard-fails under a closed schema.
+4. Internal execution works from `%ModelProfile{}` and `%ExecutionPlan{}` only.
+5. Semantic protocol and transport are separate so one API family can run over SSE or WebSocket.
+6. Session runtime is first-class for continuation-based APIs such as OpenAI Responses over WebSocket.
+
+The sections below describe the current spike implementation, not the final target architecture.
+
+### Current Spike Layer 1: Wire Protocols
 
 Wire protocols handle **pure encoding/decoding** between ReqLlmNext types and provider JSON formats. They know nothing about HTTP—just data transformation.
 
@@ -64,7 +95,7 @@ Current wire implementations:
 - `Wire.OpenAIEmbeddings` — `/v1/embeddings` format
 - `Wire.Anthropic` — `/v1/messages` with thinking support
 
-### Layer 2: Providers
+### Current Spike Layer 2: Providers
 
 Providers handle **HTTP configuration only**—base URLs, authentication headers, API keys.
 
@@ -78,7 +109,7 @@ defmodule ReqLlmNext.Providers.OpenAI do
 end
 ```
 
-### Layer 3: Model Adapters (Optional)
+### Current Spike Layer 3: Model Adapters (Optional)
 
 Adapters handle **per-model customizations** for the ~5% of models that need special handling beyond what LLMDB metadata can express.
 
@@ -99,7 +130,7 @@ ReqLlmNext is built on [LLMDB](https://github.com/your-org/llmdb), a comprehensi
 - Parameter constraints (token limits, temperature ranges, etc.)
 - Provider configuration
 
-The goal is that **adding a new model requires only LLMDB updates**, not code changes.
+The long-term goal is that production model support should usually require only LLMDB updates, while local descriptors remain available for development and testing.
 
 ### Model Resolution
 
@@ -107,11 +138,13 @@ The goal is that **adding a new model requires only LLMDB updates**, not code ch
 # Models are resolved via LLMDB
 {:ok, model} = ReqLlmNext.model("openai:gpt-4o-mini")
 
-# Model metadata drives the pipeline
+# Current spike metadata access
 model.capabilities      #=> %{chat: true, tools: %{enabled: true}, ...}
 model.extra.wire        #=> %{protocol: "openai_chat"}
 model.extra.constraints #=> %{...}
 ```
+
+The target architecture moves this raw metadata access behind the model input boundary and `%ModelProfile{}` normalization.
 
 ### Model Overrides
 
