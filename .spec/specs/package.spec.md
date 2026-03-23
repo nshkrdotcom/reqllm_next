@@ -59,4 +59,10 @@ surface:
   execute: true
   covers:
     - reqllm.package.model_slice_verification
+
+- kind: command
+  target: mix test test/model_slices/openai_gpt_4o_mini_test.exs
+  execute: true
+  covers:
+    - reqllm.package.model_slice_verification
 ```
