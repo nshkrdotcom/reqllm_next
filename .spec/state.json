@@ -239,6 +239,14 @@
       },
       {
         "file": ".spec/specs/package.spec.md",
+        "id": "reqllm.package.model_slice_verification",
+        "priority": "should",
+        "stability": "evolving",
+        "statement": "ReqLlmNext shall be able to lock supported scenario sets to explicit starter-model slices with fixture-backed tests so provider-specific support stays visible as the planning path evolves.",
+        "subject_id": "reqllm.package"
+      },
+      {
+        "file": ".spec/specs/package.spec.md",
         "id": "reqllm.package.multi_provider_api",
         "priority": "must",
         "stability": "evolving",
@@ -777,6 +785,16 @@
       },
       {
         "covers": [
+          "reqllm.package.model_slice_verification"
+        ],
+        "execute": true,
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/model_slices/anthropic_haiku_4_5_test.exs"
+      },
+      {
+        "covers": [
           "reqllm.policy_rules.five_scopes",
           "reqllm.policy_rules.match_patch",
           "reqllm.policy_rules.capability_safe"
@@ -880,10 +898,10 @@
     "decisions": 8,
     "exceptions": 0,
     "findings": 0,
-    "requirements": 29,
+    "requirements": 30,
     "scenarios": 0,
     "subjects": 10,
-    "verifications": 30
+    "verifications": 31
   },
   "verification": {
     "claims": [
@@ -1262,6 +1280,17 @@
         "verification_index": 1
       },
       {
+        "cover_id": "reqllm.package.model_slice_verification",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/model_slices/anthropic_haiku_4_5_test.exs",
+        "verification_index": 2
+      },
+      {
         "cover_id": "reqllm.policy_rules.capability_safe",
         "file": ".spec/specs/policy_rules.spec.md",
         "kind": "source_file",
@@ -1431,7 +1460,7 @@
     "default_minimum_strength": "claimed",
     "strength_summary": {
       "claimed": 2,
-      "executed": 8,
+      "executed": 9,
       "linked": 39
     },
     "threshold_failures": 0

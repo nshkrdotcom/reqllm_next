@@ -30,6 +30,11 @@ surface:
   statement: ReqLlmNext shall route supported requests through a deterministic planning path that normalizes model facts into `ModelProfile`, request intent into `ExecutionMode`, selects explicit `ExecutionSurface` support, and materializes an `ExecutionPlan` before executing provider and wire bridges.
   priority: must
   stability: evolving
+
+- id: reqllm.package.model_slice_verification
+  statement: ReqLlmNext shall be able to lock supported scenario sets to explicit starter-model slices with fixture-backed tests so provider-specific support stays visible as the planning path evolves.
+  priority: should
+  stability: evolving
 ```
 
 ## Verification
@@ -48,4 +53,10 @@ surface:
   execute: true
   covers:
     - reqllm.package.execution_planning
+
+- kind: command
+  target: mix test test/model_slices/anthropic_haiku_4_5_test.exs
+  execute: true
+  covers:
+    - reqllm.package.model_slice_verification
 ```
