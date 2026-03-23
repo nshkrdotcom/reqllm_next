@@ -69,28 +69,30 @@ defmodule ReqLlmNext.AdaptersTest do
   end
 
   describe "integration - adapter affects wire encoding" do
-    alias ReqLlmNext.Wire.OpenAIChat
+    alias ReqLlmNext.Wire.Resolver
 
     test "gpt-4o-mini gets default temperature in encoded body" do
       {:ok, model} = LLMDB.model("openai:gpt-4o-mini")
       opts = [max_tokens: 100]
       adapted_opts = Pipeline.apply(model, opts)
+      %{wire_mod: wire_mod} = Resolver.resolve!(model)
 
-      body = OpenAIChat.encode_body(model, "hello", adapted_opts)
+      body = wire_mod.encode_body(model, "hello", adapted_opts)
 
       assert body.temperature == 0.7
-      assert body.max_tokens == 100
+      assert body.max_output_tokens == 100
     end
 
     test "gpt-4o does not get default temperature" do
       {:ok, model} = LLMDB.model("openai:gpt-4o")
       opts = [max_tokens: 100]
       adapted_opts = Pipeline.apply(model, opts)
+      %{wire_mod: wire_mod} = Resolver.resolve!(model)
 
-      body = OpenAIChat.encode_body(model, "hello", adapted_opts)
+      body = wire_mod.encode_body(model, "hello", adapted_opts)
 
       refute Map.has_key?(body, :temperature)
-      assert body.max_tokens == 100
+      assert body.max_output_tokens == 100
     end
   end
 end

@@ -22,7 +22,13 @@ defmodule ReqLlmNext.MixProject do
       ],
       docs: [
         main: "ReqLlmNext",
-        extras: ["README.md"]
+        extras: [
+          "README.md",
+          "guides/package_thesis.md"
+        ],
+        groups_for_extras: [
+          Guides: ["guides/package_thesis.md"]
+        ]
       ]
     ]
   end
@@ -53,7 +59,7 @@ defmodule ReqLlmNext.MixProject do
       {:jason, "~> 1.4"},
       {:finch, "~> 0.19"},
       {:server_sent_events, "~> 0.2"},
-      {:llm_db, github: "agentjido/llm_db", branch: "main"},
+      {:llm_db, "~> 2026.3"},
       {:zoi, "~> 0.17"},
       {:spec_led_ex,
        github: "specleddev/specled_ex",

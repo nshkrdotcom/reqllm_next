@@ -17,7 +17,7 @@ surface:
 
 ```spec-requirements
 - id: reqllm.package.multi_provider_api
-  statement: ReqLlmNext shall provide a unified public API for text generation, structured output, streaming, and embeddings across supported model providers.
+  statement: ReqLlmNext shall provide a unified public API for text generation, structured output, streaming, and embeddings across supported model providers using the same operations whether callers start from an `LLMDB` `model_spec` string or an `%LLMDB.Model{}`, including handcrafted structs used for local development.
   priority: must
   stability: evolving
 

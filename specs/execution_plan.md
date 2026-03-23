@@ -2,7 +2,7 @@
 
 Status: Proposed
 
-<!-- covers: reqllm.execution_plan.prescriptive_object reqllm.execution_plan.surface_and_fallbacks -->
+<!-- covers: reqllm.execution_plan.prescriptive_object reqllm.execution_plan.surface_and_fallbacks reqllm.execution_plan.deterministic_stack -->
 
 ## Objective
 
@@ -57,6 +57,8 @@ Everything before the plan is descriptive or declarative. Everything after the p
 3. Fallback surfaces must also exist in `ModelProfile`.
 4. All generation parameters in the plan must already be normalized against constraints.
 5. Downstream layers must not perform their own independent surface selection.
+6. For the same `ModelProfile`, `ExecutionMode`, and policy set, plan assembly must be deterministic.
+7. A plan must resolve one implementation stack tuple: provider, session runtime mode, semantic protocol, wire format, transport, and ordered plan adapters.
 
 ## Prescriptive Rule
 
@@ -68,6 +70,18 @@ That means:
 2. `ExecutionMode` describes request intent
 3. policy rules describe preferences
 4. `ExecutionPlan` records the final decision
+
+## Deterministic Stack Rule
+
+The plan must fully determine the execution implementation.
+
+That means downstream execution must not:
+
+1. remap the surface to a different protocol or transport
+2. discover extra adapters by model name
+3. reinterpret the model to choose different layer modules
+
+If a model needs special handling, that handling must enter through declared surfaces, matching policy rules, or explicit plan-adapter refs so it stays isolated to the matching plan rather than leaking into other models.
 
 ## Example
 

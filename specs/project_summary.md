@@ -11,7 +11,7 @@ The project is trying to solve two problems at once:
 1. support a broad and changing model ecosystem without hard-coding model behavior into the core client
 2. keep the architecture clean enough that model facts, execution modes, policy rules, surfaces, sessions, protocols, wire formats, transports, and providers can evolve independently
 
-The target is a client where production support is mostly metadata-driven while the public runtime boundary stays narrow and explicit.
+The target is a client where the default production support path is metadata-driven while the public runtime boundary stays narrow and explicit, with explicit adapters reserved for the smaller set of quirks metadata and policy cannot express cleanly.
 
 It now also has a second primary purpose: act as the live model compatibility and pressure-test harness for the ReqLLM ecosystem.
 
@@ -47,10 +47,12 @@ The same architecture is meant to serve two consumers:
 
 Public APIs may accept:
 
-1. registry strings such as `"openai:gpt-5.4"`
+1. `LLMDB` `model_spec` strings such as `"openai:gpt-5.4"` or `"gpt-5.4@openai"`
 2. `%LLMDB.Model{}`
 
 The important rule is that these are input forms only. After the boundary normalizes them, execution code should no longer see raw `%LLMDB.Model{}` values.
+
+`%LLMDB.Model{}` is also the intentional local-iteration hook that breaks the old “must land in `LLMDB` first” coupling. A model may be handcrafted locally in that struct shape for development and local-provider support.
 
 ### 2. Model profile is descriptive, not prescriptive
 

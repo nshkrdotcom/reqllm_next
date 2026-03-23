@@ -6,7 +6,7 @@ Status: Proposed
 
 ## Objective
 
-Define the public model-spec input contract so ReqLlmNext accepts only registry model specs and `%LLMDB.Model{}` values through the runtime API.
+Define the public model input contract so ReqLlmNext accepts only `LLMDB` `model_spec` strings and `%LLMDB.Model{}` values through the runtime API.
 
 ## Purpose
 
@@ -18,11 +18,11 @@ This is a strict runtime boundary. Public model input is treated like untrusted 
 
 ReqLlmNext public APIs must accept any of the following as a model spec:
 
-1. Registry spec string
-   - Example: `"openai:gpt-5.4"`
+1. `LLMDB` `model_spec` string
+   - Examples: `"openai:gpt-5.4"` or `"gpt-5.4@openai"`
 
 2. `%LLMDB.Model{}`
-   - Existing production registry model struct
+   - Either a resolved catalog model struct or a handcrafted local model struct that satisfies the `LLMDB.Model` shape
 
 ## Boundary Behavior
 
@@ -38,26 +38,28 @@ After this boundary:
 
 The boundary must reject any runtime model input that is not:
 
-1. a binary registry spec
+1. a binary `model_spec`
 2. an `%LLMDB.Model{}`
 
 For binary specs:
 
 1. resolve through `LLMDB.model/1`
-2. preserve the original spec for diagnostics
-3. fail immediately if the spec does not resolve
+2. let `LLMDB` own string parsing, alias resolution, provider normalization, and provider-specific model-spec edge cases
+3. preserve the original string for diagnostics
+4. fail immediately if the spec does not resolve
 
 For `%LLMDB.Model{}` input:
 
-1. treat the struct as already-resolved registry metadata
+1. treat the struct as an accepted model boundary object, whether catalog-resolved or handcrafted
 2. preserve provider and model id for downstream profile construction
-3. still apply canonical profile validation after normalization
+3. allow local iteration with models not yet present in `LLMDB`
+4. still apply canonical profile validation after normalization
 
 All accepted public forms are normalized into a canonical `ModelSource`.
 
 ```elixir
 %ModelSource{
-  kind: :registry_spec | :llmdb_struct,
+  kind: :model_spec | :llmdb_struct,
   source: :llmdb,
   provider: :openai,
   id: "gpt-5.4",
@@ -67,8 +69,9 @@ All accepted public forms are normalized into a canonical `ModelSource`.
 
 ## Resolution Rules
 
-1. String registry specs resolve through LLMDB.
-2. `%LLMDB.Model{}` values are treated as resolved registry models.
+1. String `model_spec` values resolve through `LLMDB`.
+2. ReqLlmNext must not reimplement `model_spec` parsing rules that already belong to `LLMDB`.
+3. `%LLMDB.Model{}` values are treated as accepted model boundary objects and are not required to have been loaded from the current `LLMDB` snapshot.
 
 ## Validation Rules
 
@@ -85,8 +88,20 @@ There is no best-effort fallback after normalization.
 ## Override Interaction
 
 1. Provider overrides apply to all model sources.
-2. Family and model-id overrides apply to resolved registry models.
-3. A provided `%LLMDB.Model{}` should receive the same override treatment as the equivalent resolved registry model.
+2. Family and model-id overrides apply to any accepted normalized model identity, whether it came from a `model_spec` or a handcrafted `%LLMDB.Model{}`.
+3. A provided `%LLMDB.Model{}` should receive the same override treatment as the equivalent resolved `model_spec` when identities match.
+
+## Local Iteration Rule
+
+Supporting `%LLMDB.Model{}` directly is a deliberate developer-experience hook.
+
+It enables:
+
+1. local iteration on unreleased models before catalog updates land
+2. testing provider behavior without first changing `LLMDB`
+3. local-provider development such as Ollama-style integrations
+
+This flexibility exists at the struct boundary only. ReqLlmNext still rejects ad hoc maps, tuples, or local descriptor types.
 
 ## What Does Not Belong Here
 

@@ -2,12 +2,14 @@ defmodule ReqLlmNext.ModelResolver do
   @moduledoc """
   Thin runtime boundary over the `llm_db` package.
 
-  String model specs are delegated to `LLMDB.model/1`.
-  Already-resolved `%LLMDB.Model{}` values pass through unchanged.
+  String `model_spec` values are delegated to `LLMDB.model/1`.
+  `%LLMDB.Model{}` values pass through unchanged, whether they came from `LLMDB`
+  catalog lookup or were handcrafted locally for development.
 
   Accepted public input forms are:
-  - `"provider:model_id"` strings (e.g., `"openai:gpt-4o"`)
-  - `LLMDB.Model` structs (passthrough)
+  - `LLMDB` string `model_spec` values, including both `"provider:model"` and
+    `"model@provider"` forms plus any provider-specific parsing behavior owned by `LLMDB`
+  - `LLMDB.Model` structs, including handcrafted local structs (passthrough)
   """
 
   @spec resolve(ReqLlmNext.model_spec()) ::

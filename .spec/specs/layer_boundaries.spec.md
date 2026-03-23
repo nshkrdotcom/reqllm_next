@@ -6,7 +6,7 @@ Current-truth execution-layer handoff contract for ReqLlmNext 2.0.
 id: reqllm.layer_boundaries
 kind: layer_boundaries
 status: active
-summary: Explicit handoff rules for provider, session runtime, transport, wire format, semantic protocol, and plan adapters.
+summary: Explicit handoff rules for provider, session runtime, transport, wire format, semantic protocol, and plan adapters, with one deterministic layer stack per resolved plan.
 surface:
   - specs/layer_boundaries.md
   - specs/semantic_protocol.md
@@ -24,7 +24,7 @@ decisions:
 
 ```spec-requirements
 - id: reqllm.layer_boundaries.separated_io
-  statement: ReqLlmNext shall keep provider, session runtime, transport, wire format, and semantic protocol responsibilities separated so no layer skips across another layer's ownership boundary.
+  statement: ReqLlmNext shall keep provider, session runtime, transport, wire format, and semantic protocol responsibilities separated so no layer skips across another layer's ownership boundary and each resolved plan binds one deterministic layer stack.
   priority: must
   stability: evolving
 

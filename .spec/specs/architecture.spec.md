@@ -6,10 +6,12 @@ Current-truth boundary and execution-layer contract for ReqLlmNext 2.0.
 id: reqllm.architecture
 kind: architecture
 status: active
-summary: Current-truth runtime boundary and layer-separation contract for model input and execution flow.
+summary: Current-truth runtime boundary and layer-separation contract for model input and execution flow, including handcrafted `LLMDB.Model` support at the boundary and supporting package-thesis guides.
 surface:
   - README.md
   - AGENTS.md
+  - specs/README.md
+  - guides/package_thesis.md
   - specs/architecture.md
   - specs/model_source.md
   - specs/model_profile.md
@@ -41,7 +43,7 @@ decisions:
 
 ```spec-requirements
 - id: reqllm.architecture.model_input_boundary
-  statement: ReqLlmNext runtime APIs shall accept model inputs only as registry spec strings or `%LLMDB.Model{}` values.
+  statement: ReqLlmNext runtime APIs shall accept model inputs only as `LLMDB` `model_spec` strings or `%LLMDB.Model{}` values, with handcrafted `LLMDB.Model` structs supported as a local-iteration boundary hook.
   priority: must
   stability: evolving
 

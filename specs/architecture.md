@@ -61,7 +61,7 @@ This is a concern graph, not a strict call stack.
 
 1. Model Input Boundary
    - Accept public model inputs.
-   - Interpret registry specs and `%LLMDB.Model{}` values only.
+   - Interpret `LLMDB` `model_spec` strings and `%LLMDB.Model{}` values only.
    - Translate all valid inputs into a canonical internal representation.
    - Reject unsupported input types immediately.
 

@@ -55,12 +55,12 @@ defmodule ReqLlmNext.Fixtures do
     case {mode(), Keyword.get(opts, :fixture)} do
       {:replay, fixture_name} when is_binary(fixture_name) ->
         fixture_path = path(model, fixture_name)
-        wire_mod = Resolver.wire_module!(model)
 
         case File.read(fixture_path) do
           {:ok, contents} ->
             fixture = Jason.decode!(contents)
-            stream = build_replay_stream(fixture, wire_mod)
+            wire_mod = replay_wire_module(fixture, model)
+            stream = build_replay_stream(fixture, wire_mod, model)
             {:ok, stream}
 
           {:error, _} ->
@@ -75,7 +75,7 @@ defmodule ReqLlmNext.Fixtures do
     end
   end
 
-  defp build_replay_stream(%{"chunks" => chunks}, wire_mod) do
+  defp build_replay_stream(%{"chunks" => chunks}, wire_mod, model) do
     Stream.resource(
       fn -> {chunks, ""} end,
       fn
@@ -89,7 +89,7 @@ defmodule ReqLlmNext.Fixtures do
 
           text_chunks =
             events
-            |> Enum.flat_map(&wire_mod.decode_sse_event(&1, nil))
+            |> Enum.flat_map(&wire_mod.decode_sse_event(&1, model))
             |> Enum.reject(&is_nil/1)
 
           {text_chunks, {rest, remaining}}
@@ -97,6 +97,17 @@ defmodule ReqLlmNext.Fixtures do
       fn _ -> :ok end
     )
   end
+
+  defp replay_wire_module(%{"request" => %{"url" => url}}, model) when is_binary(url) do
+    cond do
+      String.contains?(url, "/v1/chat/completions") -> ReqLlmNext.Wire.OpenAIChat
+      String.contains?(url, "/v1/responses") -> ReqLlmNext.Wire.OpenAIResponses
+      String.contains?(url, "/v1/messages") -> ReqLlmNext.Wire.Anthropic
+      true -> Resolver.wire_module!(model)
+    end
+  end
+
+  defp replay_wire_module(_fixture, model), do: Resolver.wire_module!(model)
 
   @doc """
   Create a recorder struct to capture Finch stream data.

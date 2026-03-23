@@ -25,6 +25,21 @@ defmodule ReqLlmNext.ModelResolverTest do
       assert resolved == original
     end
 
+    test "passes through handcrafted LLMDB.Model struct" do
+      handcrafted =
+        LLMDB.Model.new!(%{
+          id: "ollama:llama3-local",
+          provider: :openai,
+          name: "Local Llama 3",
+          capabilities: %{chat: true},
+          extra: %{
+            wire: %{protocol: "openai_chat"}
+          }
+        })
+
+      assert {:ok, ^handcrafted} = ModelResolver.resolve(handcrafted)
+    end
+
     test "returns error for unknown model" do
       result = ModelResolver.resolve("openai:nonexistent-model-xyz")
 

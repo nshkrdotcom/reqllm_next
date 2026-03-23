@@ -111,7 +111,7 @@
         "id": "reqllm.architecture.model_input_boundary",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext runtime APIs shall accept model inputs only as registry spec strings or `%LLMDB.Model{}` values.",
+        "statement": "ReqLlmNext runtime APIs shall accept model inputs only as `LLMDB` `model_spec` strings or `%LLMDB.Model{}` values, with handcrafted `LLMDB.Model` structs supported as a local-iteration boundary hook.",
         "subject_id": "reqllm.architecture"
       },
       {
@@ -129,6 +129,14 @@
         "stability": "evolving",
         "statement": "ReqLlmNext shall normalize mode-affecting request intent into a provider-agnostic `ExecutionMode` that captures operation, streaming, tools, structured output, session preference, latency class, reasoning, conversation shape, and input modalities.",
         "subject_id": "reqllm.execution_mode"
+      },
+      {
+        "file": ".spec/specs/execution_plan.spec.md",
+        "id": "reqllm.execution_plan.deterministic_stack",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "`ExecutionPlan` shall deterministically resolve one implementation stack of provider, session runtime mode, semantic protocol, wire format, transport, and ordered plan adapters for a given profile, mode, and policy input.",
+        "subject_id": "reqllm.execution_plan"
       },
       {
         "file": ".spec/specs/execution_plan.spec.md",
@@ -183,7 +191,7 @@
         "id": "reqllm.layer_boundaries.separated_io",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall keep provider, session runtime, transport, wire format, and semantic protocol responsibilities separated so no layer skips across another layer's ownership boundary.",
+        "statement": "ReqLlmNext shall keep provider, session runtime, transport, wire format, and semantic protocol responsibilities separated so no layer skips across another layer's ownership boundary and each resolved plan binds one deterministic layer stack.",
         "subject_id": "reqllm.layer_boundaries"
       },
       {
@@ -215,7 +223,7 @@
         "id": "reqllm.package.multi_provider_api",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall provide a unified public API for text generation, structured output, streaming, and embeddings across supported model providers.",
+        "statement": "ReqLlmNext shall provide a unified public API for text generation, structured output, streaming, and embeddings across supported model providers using the same operations whether callers start from an `LLMDB` `model_spec` string or an `%LLMDB.Model{}`, including handcrafted structs used for local development.",
         "subject_id": "reqllm.package"
       },
       {
@@ -263,7 +271,7 @@
         "id": "reqllm.workflow.specled_loop",
         "priority": "must",
         "stability": "evolving",
-        "statement": "Contributor workflow shall keep a canonical .spec workspace and use mix spec.prime, mix spec.next, and mix spec.check to maintain current truth alongside the existing specs/ architecture notes.",
+        "statement": "Contributor workflow shall keep a canonical .spec workspace and use mix spec.prime, mix spec.next, and mix spec.check to maintain current truth alongside the existing specs/ architecture notes while keeping README, AGENTS, and the shareable package-thesis guide aligned with that current truth.",
         "subject_id": "reqllm.workflow"
       },
       {
@@ -325,10 +333,12 @@
           "id": "reqllm.architecture",
           "kind": "architecture",
           "status": "active",
-          "summary": "Current-truth runtime boundary and layer-separation contract for model input and execution flow.",
+          "summary": "Current-truth runtime boundary and layer-separation contract for model input and execution flow, including handcrafted `LLMDB.Model` support at the boundary and supporting package-thesis guides.",
           "surface": [
             "README.md",
             "AGENTS.md",
+            "specs/README.md",
+            "guides/package_thesis.md",
             "specs/architecture.md",
             "specs/model_source.md",
             "specs/model_profile.md",
@@ -425,7 +435,7 @@
           "id": "reqllm.layer_boundaries",
           "kind": "layer_boundaries",
           "status": "active",
-          "summary": "Explicit handoff rules for provider, session runtime, transport, wire format, semantic protocol, and plan adapters.",
+          "summary": "Explicit handoff rules for provider, session runtime, transport, wire format, semantic protocol, and plan adapters, with one deterministic layer stack per resolved plan.",
           "surface": [
             "specs/layer_boundaries.md",
             "specs/semantic_protocol.md",
@@ -527,10 +537,11 @@
           "id": "reqllm.workflow",
           "kind": "workflow",
           "status": "active",
-          "summary": "Contributor workflow contract for durable work tracking and current-truth maintenance.",
+          "summary": "Contributor workflow contract for durable work tracking, current-truth maintenance, and keeping contributor docs aligned with the Spec Led workspace, including the public model-input boundary contract and the repo's package-thesis narrative.",
           "surface": [
             "README.md",
             "AGENTS.md",
+            "guides/package_thesis.md",
             "mix.exs"
           ],
           "verification_minimum_strength": null
@@ -613,7 +624,8 @@
       {
         "covers": [
           "reqllm.execution_plan.prescriptive_object",
-          "reqllm.execution_plan.surface_and_fallbacks"
+          "reqllm.execution_plan.surface_and_fallbacks",
+          "reqllm.execution_plan.deterministic_stack"
         ],
         "file": ".spec/specs/execution_plan.spec.md",
         "kind": "source_file",
@@ -829,7 +841,7 @@
     "decisions": 7,
     "exceptions": 0,
     "findings": 0,
-    "requirements": 27,
+    "requirements": 28,
     "scenarios": 0,
     "subjects": 10,
     "verifications": 29
@@ -988,6 +1000,17 @@
         "strength": "linked",
         "subject_id": "reqllm.execution_mode",
         "target": "specs/execution_mode.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.execution_plan.deterministic_stack",
+        "file": ".spec/specs/execution_plan.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.execution_plan",
+        "target": "specs/execution_plan.md",
         "verification_index": 0
       },
       {
@@ -1348,7 +1371,7 @@
     "strength_summary": {
       "claimed": 2,
       "executed": 6,
-      "linked": 38
+      "linked": 39
     },
     "threshold_failures": 0
   },

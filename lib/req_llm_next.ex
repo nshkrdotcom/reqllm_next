@@ -353,13 +353,16 @@ defmodule ReqLlmNext do
 
   ## Parameters
 
-    * `model_spec` - Model specification in one of two formats:
-      - String format: `"anthropic:claude-3-sonnet"`
+    * `model_spec` - Model input in one of two forms:
+      - `LLMDB` string `model_spec`, interpreted by `LLMDB.model/1`
       - Model struct: `%LLMDB.Model{}`
 
   ## Examples
 
       ReqLlmNext.model("anthropic:claude-3-sonnet")
+      #=> {:ok, %LLMDB.Model{provider: :anthropic, id: "claude-3-sonnet"}}
+
+      ReqLlmNext.model("claude-3-sonnet@anthropic")
       #=> {:ok, %LLMDB.Model{provider: :anthropic, id: "claude-3-sonnet"}}
 
       {:ok, model} = LLMDB.model("anthropic:claude-3-sonnet")

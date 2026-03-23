@@ -6,10 +6,11 @@ Repository workflow contract for Beadwork and Spec Led Development.
 id: reqllm.workflow
 kind: workflow
 status: active
-summary: Contributor workflow contract for durable work tracking and current-truth maintenance.
+summary: Contributor workflow contract for durable work tracking, current-truth maintenance, and keeping contributor docs aligned with the Spec Led workspace, including the public model-input boundary contract and the repo's package-thesis narrative.
 surface:
   - README.md
   - AGENTS.md
+  - guides/package_thesis.md
   - mix.exs
 ```
 
@@ -22,7 +23,7 @@ surface:
   stability: evolving
 
 - id: reqllm.workflow.specled_loop
-  statement: Contributor workflow shall keep a canonical .spec workspace and use mix spec.prime, mix spec.next, and mix spec.check to maintain current truth alongside the existing specs/ architecture notes.
+  statement: Contributor workflow shall keep a canonical .spec workspace and use mix spec.prime, mix spec.next, and mix spec.check to maintain current truth alongside the existing specs/ architecture notes while keeping README, AGENTS, and the shareable package-thesis guide aligned with that current truth.
   priority: must
   stability: evolving
 

@@ -5,19 +5,19 @@ defmodule ReqLlmNext.Adapters.OpenAI.ReasoningTest do
   alias ReqLlmNext.TestModels
 
   describe "matches?/1" do
-    test "matches models with api: responses in extra" do
+    test "does not match responses metadata alone without reasoning capability" do
       model = TestModels.openai(%{id: "some-custom-model", extra: %{api: "responses"}})
-      assert Reasoning.matches?(model)
+      refute Reasoning.matches?(model)
     end
 
-    test "matches models with wire.protocol: openai_responses in extra" do
+    test "does not match openai_responses wire metadata alone without reasoning capability" do
       model =
         TestModels.openai(%{
           id: "some-custom-model",
           extra: %{wire: %{protocol: :openai_responses}}
         })
 
-      assert Reasoning.matches?(model)
+      refute Reasoning.matches?(model)
     end
 
     test "matches reasoning models from factory (has wire.protocol metadata)" do

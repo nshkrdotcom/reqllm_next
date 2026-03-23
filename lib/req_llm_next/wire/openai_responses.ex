@@ -33,6 +33,7 @@ defmodule ReqLlmNext.Wire.OpenAIResponses do
       stream_options: %{include_usage: true}
     }
     |> maybe_add(:max_output_tokens, get_max_tokens(opts))
+    |> maybe_add(:temperature, Keyword.get(opts, :temperature))
     |> maybe_add(:reasoning, encode_reasoning_effort(Keyword.get(opts, :reasoning_effort)))
     |> maybe_add_tools(opts)
     |> maybe_add_tool_choice(opts)

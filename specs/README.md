@@ -28,3 +28,5 @@ This folder defines the architecture contracts for ReqLlmNext v2.
 ## Status
 
 These specs are normative for future refactors unless a newer spec supersedes them.
+
+For the higher-level package narrative that ties these specs to the test, fixture, compat, and agent workflow, see [`guides/package_thesis.md`](/Users/mhostetler/Source/ReqLLM/reqllm_next/guides/package_thesis.md).

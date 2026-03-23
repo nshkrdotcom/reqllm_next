@@ -31,6 +31,11 @@ decisions:
   priority: must
   stability: evolving
 
+- id: reqllm.execution_plan.deterministic_stack
+  statement: `ExecutionPlan` shall deterministically resolve one implementation stack of provider, session runtime mode, semantic protocol, wire format, transport, and ordered plan adapters for a given profile, mode, and policy input.
+  priority: must
+  stability: evolving
+
 - id: reqllm.execution_plan.planner_owns_assembly
   statement: ReqLlmNext shall keep plan assembly in the planner boundary, including mode normalization, rule evaluation, surface selection, parameter normalization, session planning, and adapter selection.
   priority: must
@@ -45,6 +50,7 @@ decisions:
   covers:
     - reqllm.execution_plan.prescriptive_object
     - reqllm.execution_plan.surface_and_fallbacks
+    - reqllm.execution_plan.deterministic_stack
 
 - kind: source_file
   target: specs/operation_planner.md

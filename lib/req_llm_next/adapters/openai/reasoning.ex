@@ -23,7 +23,7 @@ defmodule ReqLlmNext.Adapters.OpenAI.Reasoning do
 
   @impl true
   def matches?(%LLMDB.Model{} = model) do
-    Resolver.responses_api?(model)
+    Resolver.responses_api?(model) and reasoning_model?(model)
   end
 
   @impl true
@@ -59,4 +59,18 @@ defmodule ReqLlmNext.Adapters.OpenAI.Reasoning do
       opts
     end
   end
+
+  defp reasoning_model?(%LLMDB.Model{} = model) do
+    reasoning_enabled?(model) or reasoning_model_id?(model.id)
+  end
+
+  defp reasoning_enabled?(%LLMDB.Model{} = model) do
+    get_in(model, [Access.key(:capabilities, %{}), :reasoning, :enabled]) == true
+  end
+
+  defp reasoning_model_id?(id) when is_binary(id) do
+    String.starts_with?(id, ["o1", "o3", "o4", "gpt-5"])
+  end
+
+  defp reasoning_model_id?(_), do: false
 end

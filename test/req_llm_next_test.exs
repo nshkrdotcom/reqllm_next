@@ -81,6 +81,21 @@ defmodule ReqLlmNextTest do
       assert {:ok, ^original} = ReqLlmNext.model(original)
     end
 
+    test "accepts handcrafted LLMDB.Model struct" do
+      handcrafted =
+        LLMDB.Model.new!(%{
+          id: "ollama:llama3-local",
+          provider: :openai,
+          name: "Local Llama 3",
+          capabilities: %{chat: true},
+          extra: %{
+            wire: %{protocol: "openai_chat"}
+          }
+        })
+
+      assert {:ok, ^handcrafted} = ReqLlmNext.model(handcrafted)
+    end
+
     test "rejects tuple model specs" do
       assert {:error, {:invalid_model_spec, {:openai, "gpt-4o-mini", [temperature: 0.7]}}} =
                ReqLlmNext.model({:openai, "gpt-4o-mini", temperature: 0.7})
