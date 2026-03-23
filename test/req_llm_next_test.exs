@@ -81,15 +81,14 @@ defmodule ReqLlmNextTest do
       assert {:ok, ^original} = ReqLlmNext.model(original)
     end
 
-    test "resolves tuple format with options" do
-      assert {:ok, model} = ReqLlmNext.model({:openai, "gpt-4o-mini", temperature: 0.7})
-      assert model.provider == :openai
-      assert model.id == "gpt-4o-mini"
+    test "rejects tuple model specs" do
+      assert {:error, {:invalid_model_spec, {:openai, "gpt-4o-mini", [temperature: 0.7]}}} =
+               ReqLlmNext.model({:openai, "gpt-4o-mini", temperature: 0.7})
     end
 
-    test "resolves tuple format with keyword list" do
-      assert {:ok, model} = ReqLlmNext.model({:openai, id: "gpt-4o-mini"})
-      assert model.provider == :openai
+    test "rejects provider keyword tuples" do
+      assert {:error, {:invalid_model_spec, {:openai, [id: "gpt-4o-mini"]}}} =
+               ReqLlmNext.model({:openai, id: "gpt-4o-mini"})
     end
 
     test "returns error for invalid spec" do
@@ -114,6 +113,19 @@ defmodule ReqLlmNextTest do
       assert %ReqLlmNext.Response{} = result
       assert is_binary(ReqLlmNext.Response.text(result))
       assert result.model.provider == :openai
+    end
+
+    test "accepts LLMDB.Model inputs through the public API" do
+      {:ok, model} = LLMDB.model("openai:gpt-4o-mini")
+      {:ok, result} = ReqLlmNext.generate_text(model, "Hello!", fixture: "basic")
+
+      assert %ReqLlmNext.Response{} = result
+      assert result.model == model
+    end
+
+    test "rejects tuple model inputs through the public API" do
+      assert {:error, {:invalid_model_spec, {:openai, "gpt-4o-mini"}}} =
+               ReqLlmNext.generate_text({:openai, "gpt-4o-mini"}, "Hello!")
     end
   end
 
@@ -375,7 +387,7 @@ defmodule ReqLlmNextTest do
 
   describe "model/1 edge cases" do
     test "returns error for tuple with keyword list missing id" do
-      assert {:error, {:invalid_model_spec, [not_id: "value"]}} =
+      assert {:error, {:invalid_model_spec, {:openai, [not_id: "value"]}}} =
                ReqLlmNext.model({:openai, not_id: "value"})
     end
   end

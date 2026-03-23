@@ -2,9 +2,11 @@
 
 Status: Proposed
 
+<!-- covers: reqllm.layer_boundaries.separated_io -->
+
 ## Objective
 
-Define the provider boundary so auth and endpoint policy remain separate from protocol and transport behavior.
+Define the provider boundary so auth and endpoint policy remain separate from protocol, wire-format, and transport behavior.
 
 ## Purpose
 
@@ -46,10 +48,10 @@ A provider represents infrastructure and authentication policy for a service suc
 To avoid ambiguous URL ownership:
 
 1. Provider owns endpoint roots.
-2. Semantic protocol owns relative routes or event targets.
+2. Wire format owns relative routes, event targets, and content-type expectations.
 3. Transport composes the two.
 
-This prevents duplicated path ownership such as `/v1` being embedded in both provider and protocol layers.
+This prevents duplicated path ownership such as `/v1` being embedded in both provider and wire-format layers.
 
 ## Example: OpenAI
 
@@ -57,7 +59,7 @@ For OpenAI:
 
 1. Provider owns auth via bearer token.
 2. Provider owns roots such as `https://api.openai.com` and `wss://api.openai.com`.
-3. Semantic protocol decides whether the route is `/v1/responses`, `/v1/chat/completions`, or another protocol path.
+3. Wire format decides whether the route is `/v1/responses`, `/v1/chat/completions`, or another provider-facing target.
 
 ## Example: `openai:gpt-5.4`
 
@@ -69,4 +71,4 @@ The provider should not need special code for:
 2. websocket responses mode
 3. tool-heavy sessions
 
-Those belong to profile, planning, session, or protocol layers.
+Those belong to profile, planning, session, protocol, or wire-format layers.

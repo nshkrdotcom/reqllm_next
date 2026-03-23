@@ -30,7 +30,7 @@ defmodule ReqLlmNext.Executor do
 
   @default_stream_timeout Application.compile_env(:req_llm_next, :stream_timeout, 30_000)
 
-  @spec generate_text(String.t(), String.t() | Context.t(), keyword()) ::
+  @spec generate_text(ReqLlmNext.model_spec(), String.t() | Context.t(), keyword()) ::
           {:ok, Response.t()} | {:error, term()}
   def generate_text(model_spec, prompt, opts \\ []) do
     with {:ok, %StreamResponse{} = stream_resp} <- stream_text(model_spec, prompt, opts),
@@ -57,7 +57,7 @@ defmodule ReqLlmNext.Executor do
     Uniq.UUID.uuid7()
   end
 
-  @spec stream_text(String.t(), String.t(), keyword()) ::
+  @spec stream_text(ReqLlmNext.model_spec(), String.t() | Context.t(), keyword()) ::
           {:ok, StreamResponse.t()} | {:error, term()}
   def stream_text(model_spec, prompt, opts \\ []) do
     with {:ok, model} <- ModelResolver.resolve(model_spec),
@@ -79,7 +79,7 @@ defmodule ReqLlmNext.Executor do
     end
   end
 
-  @spec stream_object(String.t(), String.t(), term(), keyword()) ::
+  @spec stream_object(ReqLlmNext.model_spec(), String.t() | Context.t(), term(), keyword()) ::
           {:ok, StreamResponse.t()} | {:error, term()}
   def stream_object(model_spec, prompt, object_schema, opts \\ []) do
     with {:ok, model} <- ModelResolver.resolve(model_spec),
@@ -106,7 +106,7 @@ defmodule ReqLlmNext.Executor do
     end
   end
 
-  @spec generate_object(String.t(), String.t() | Context.t(), term(), keyword()) ::
+  @spec generate_object(ReqLlmNext.model_spec(), String.t() | Context.t(), term(), keyword()) ::
           {:ok, Response.t()} | {:error, term()}
   def generate_object(model_spec, prompt, object_schema, opts \\ []) do
     with {:ok, compiled_schema} <- Schema.compile(object_schema),
@@ -255,7 +255,7 @@ defmodule ReqLlmNext.Executor do
     :ok
   end
 
-  @spec embed(String.t(), String.t() | [String.t()], keyword()) ::
+  @spec embed(ReqLlmNext.model_spec(), String.t() | [String.t()], keyword()) ::
           {:ok, [float()] | [[float()]]} | {:error, term()}
   def embed(model_spec, input, opts \\ []) do
     with {:ok, model} <- ModelResolver.resolve(model_spec),

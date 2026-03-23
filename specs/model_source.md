@@ -1,14 +1,14 @@
-# Model Source Spec
+# Model Input Boundary Spec
 
 Status: Proposed
 
+<!-- covers: reqllm.architecture.model_input_boundary -->
+
 ## Objective
 
-Define the public model-spec input contract so ReqLlmNext can accept production registry models and local development models through the same API.
+Define the public model-spec input contract so ReqLlmNext accepts only registry model specs and `%LLMDB.Model{}` values through the runtime API.
 
 ## Purpose
-
-ReqLlmNext should not require an LLMDB patch for every model iteration. LLMDB remains the preferred production registry, but local model descriptors must be a first-class input for development, testing, and experimentation.
 
 This is a strict runtime boundary. Public model input is treated like untrusted configuration and must be validated before execution.
 
@@ -24,119 +24,43 @@ ReqLlmNext public APIs must accept any of the following as a model spec:
 2. `%LLMDB.Model{}`
    - Existing production registry model struct
 
-3. `%ReqLlmNext.Model{}`
-   - Proposed lightweight local model struct for ReqLlmNext-owned model definitions
-
-4. Naked map
-   - Raw local model descriptor map following the contract below
-
 ## Boundary Behavior
 
-The public API may accept many model input forms, but the system must treat them as input only.
+The public API accepts two model input forms, but the system must treat them as input only.
 
 After this boundary:
 
 1. raw model input is discarded
 2. execution code does not branch on `%LLMDB.Model{}`
-3. execution code does not read raw local maps
-4. the system works from a validated canonical profile
-
-## Local Descriptor Modes
-
-### 1. Standalone Local Descriptor
-
-Used when no LLMDB base exists or when full metadata is supplied locally.
-
-Required minimum fields:
-
-1. `provider`
-2. `id`
-3. `operations`
-4. `modalities`
-5. `defaults.protocol` or enough metadata to infer one
-
-### 2. Overlay Local Descriptor
-
-Used to iterate on top of an existing model.
-
-Required fields:
-
-1. `provider`
-2. `id`
-3. `extends`
-
-Optional fields:
-
-1. `operations`
-2. `features`
-3. `modalities`
-4. `limits`
-5. `defaults`
-6. `constraints`
-7. `adapters`
-
-The overlay descriptor resolves `extends` first, then deep-merges local fields over the base.
-
-## Canonical Descriptor Shape
-
-```elixir
-%{
-  provider: :openai,
-  id: "gpt-5.4-dev",
-  extends: "openai:gpt-5.4",
-  operations: %{
-    text: %{supported: true, stream: true, protocols: [:openai_responses], transports: [:http_sse, :websocket]},
-    object: %{supported: true, stream: true, protocols: [:openai_responses], transports: [:http_sse, :websocket]},
-    embedding: %{supported: false}
-  },
-  features: %{
-    tool_calling: %{supported: true, parallel: true},
-    structured_outputs: %{supported: true},
-    reasoning: %{supported: true}
-  },
-  modalities: %{input: [:text], output: [:text]},
-  limits: %{context: 1_000_000, output: 128_000},
-  defaults: %{
-    protocol: %{text: :openai_responses, object: :openai_responses, embedding: :openai_embeddings},
-    transport: %{text: :http_sse, object: :http_sse, embedding: :http}
-  },
-  constraints: %{
-    token_limit_key: :max_output_tokens
-  },
-  adapters: [
-    ReqLlmNext.Adapters.OpenAI.Reasoning
-  ]
-}
-```
+3. the system works from a validated canonical profile
 
 ## Validation and Normalization Contract
 
-Local descriptors should be validated with a strict `zoi` schema before profile construction.
+The boundary must reject any runtime model input that is not:
 
-That schema must reject:
+1. a binary registry spec
+2. an `%LLMDB.Model{}`
 
-1. unknown keys
-2. unknown operation names
-3. unknown feature names
-4. invalid protocol names
-5. invalid transport names
-6. unsupported combinations
+For binary specs:
 
-Operation names must describe stable operation families such as `:text`, `:object`, and `:embedding`. Request modes such as streaming are expressed as properties of an operation family, not as standalone operation names.
+1. resolve through `LLMDB.model/1`
+2. preserve the original spec for diagnostics
+3. fail immediately if the spec does not resolve
 
-String values may be accepted for local input, but they must be normalized through an allowlisted mapping. User input must never create new atoms.
+For `%LLMDB.Model{}` input:
 
-Normalization then produces a canonical internal source representation.
+1. treat the struct as already-resolved registry metadata
+2. preserve provider and model id for downstream profile construction
+3. still apply canonical profile validation after normalization
 
 All accepted public forms are normalized into a canonical `ModelSource`.
 
 ```elixir
 %ModelSource{
-  kind: :registry | :llmdb_struct | :local_struct | :local_map,
-  source: :llmdb | :local,
+  kind: :registry_spec | :llmdb_struct,
+  source: :llmdb,
   provider: :openai,
-  id: "gpt-5.4-dev",
-  extends: "openai:gpt-5.4" | nil,
+  id: "gpt-5.4",
   raw: term()
 }
 ```
@@ -145,49 +69,29 @@ All accepted public forms are normalized into a canonical `ModelSource`.
 
 1. String registry specs resolve through LLMDB.
 2. `%LLMDB.Model{}` values are treated as resolved registry models.
-3. `%ReqLlmNext.Model{}` and naked maps are treated as local sources.
-4. If `extends` is present, the base model is resolved first.
-5. If `extends` is absent, the local descriptor must supply enough metadata to build a profile.
 
 ## Validation Rules
 
-Local model descriptors must fail fast if they do not supply enough information to produce:
+Model input must fail fast if:
 
-1. provider identity
-2. model identity
-3. operation and feature surface needed for validation
-4. default protocol selection
-5. transport eligibility
+1. the input is not a binary or `%LLMDB.Model{}`
+2. the binary spec does not resolve through LLMDB
+3. the normalized source cannot produce provider identity
+4. the normalized source cannot produce model identity
+5. canonical profile construction fails
 
-If a local descriptor uses unsupported or unknown fields, normalization fails. There is no best-effort fallback.
+There is no best-effort fallback after normalization.
 
 ## Override Interaction
 
 1. Provider overrides apply to all model sources.
-2. Family and model-id overrides apply automatically only to registry-backed sources.
-3. Local sources may opt into family/model-id override application explicitly.
-
-## Example: `openai:gpt-5.4-dev`
-
-This should be valid:
-
-```elixir
-%{
-  provider: :openai,
-  id: "gpt-5.4-dev",
-  extends: "openai:gpt-5.4",
-  defaults: %{
-    protocol: %{text: :openai_responses, object: :openai_responses},
-    transport: %{text: :websocket, object: :websocket}
-  }
-}
-```
-
-That lets a developer test websocket-only iteration for `gpt-5.4` behavior in ReqLlmNext without patching LLMDB first.
+2. Family and model-id overrides apply to resolved registry models.
+3. A provided `%LLMDB.Model{}` should receive the same override treatment as the equivalent resolved registry model.
 
 ## What Does Not Belong Here
 
-1. request-scoped options such as `temperature`
-2. live session handles
-3. encoded HTTP or WebSocket payloads
-4. provider auth tokens
+1. local descriptor structs or naked maps
+2. request-scoped options such as `temperature`
+3. live session handles
+4. encoded HTTP or WebSocket payloads
+5. provider auth tokens

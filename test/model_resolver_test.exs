@@ -36,5 +36,10 @@ defmodule ReqLlmNext.ModelResolverTest do
 
       assert {:error, {:model_not_found, "invalid-format", _reason}} = result
     end
+
+    test "rejects tuple model specs" do
+      assert {:error, {:invalid_model_spec, {:openai, "gpt-4o-mini"}}} =
+               ModelResolver.resolve({:openai, "gpt-4o-mini"})
+    end
   end
 end

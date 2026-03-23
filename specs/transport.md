@@ -2,13 +2,15 @@
 
 Status: Proposed
 
+<!-- covers: reqllm.layer_boundaries.separated_io -->
+
 ## Objective
 
-Define the contract for moving protocol payloads over HTTP, SSE, or WebSocket without changing semantic behavior.
+Define the contract for moving wire-formatted requests and frames over HTTP, SSE, or WebSocket without changing semantic behavior.
 
 ## Purpose
 
-Transport owns connection mechanics. It does not own provider semantics.
+Transport owns connection mechanics and frame movement. It does not own provider semantics or wire envelopes.
 
 ## Supported Modes
 
@@ -22,21 +24,21 @@ Additional modes may be added later if they preserve the same contract.
 
 1. Open connections when needed.
 2. Apply provider auth and provider headers.
-3. Apply framing for the selected transport.
-4. Send outbound protocol payloads.
-5. Receive inbound frames or responses.
+3. Send outbound wire-formatted requests or client events.
+4. Receive inbound frames or responses.
 6. Surface transport-level failures.
+7. Emit structured lifecycle diagnostics for compat tooling.
 
 ## Inputs
 
 1. `ExecutionPlan`
 2. Provider endpoint root and auth data
-3. Protocol route or event target
+3. Wire-format route or event target
 4. Optional session handle
 
 ## Outputs
 
-1. Raw inbound provider events or payload maps
+1. Raw inbound transport frames or response bodies
 2. Transport lifecycle signals
 3. Structured transport errors
 
@@ -44,16 +46,17 @@ Additional modes may be added later if they preserve the same contract.
 
 ```elixir
 @callback transport_id() :: atom()
-@callback execute(ExecutionPlan.t(), ProviderContext.t(), payload :: map(), session :: term()) ::
+@callback execute(ExecutionPlan.t(), ProviderContext.t(), request :: term(), session :: term()) ::
   {:ok, Enumerable.t() | term()} | {:error, term()}
 ```
 
 ## Invariants
 
 1. Transport must not inspect model names.
-2. Transport must not mutate semantic request structure.
-3. Transport must not decode semantic event meaning.
+2. Transport must not mutate wire-format request structure.
+3. Transport must not decode wire-format envelopes into semantic meaning.
 4. Transport must emit structured failures for connect, timeout, framing, and disconnect problems.
+5. Transport diagnostics must distinguish lifecycle problems from semantic protocol problems.
 
 ## WebSocket Requirements
 
@@ -70,9 +73,9 @@ For WebSocket mode:
 For `openai:gpt-5.4` on Responses WebSocket mode:
 
 1. Transport connects to the provider websocket endpoint root.
-2. Transport sends a websocket client event containing the protocol payload.
-3. Transport receives websocket messages and passes parsed payload maps upstream.
-4. Transport does not interpret `previous_response_id`, tool calls, or finish reasons.
+2. Transport sends a websocket text frame containing the wire-format client event.
+3. Transport receives websocket messages and passes raw frames upstream.
+4. Transport does not interpret `previous_response_id`, tool calls, event names, or finish reasons.
 
 ## Fixture Impact
 

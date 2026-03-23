@@ -125,6 +125,8 @@ defmodule ReqLlmNext do
     Tool
   }
 
+  @type model_spec :: String.t() | LLMDB.Model.t()
+
   @doc """
   Generate text from a model (non-streaming).
 
@@ -136,7 +138,7 @@ defmodule ReqLlmNext do
       IO.puts(text)
 
   """
-  @spec generate_text(String.t(), String.t(), keyword()) ::
+  @spec generate_text(model_spec(), String.t() | Context.t(), keyword()) ::
           {:ok, %{text: String.t(), model: LLMDB.Model.t()}} | {:error, term()}
   def generate_text(model_spec, prompt, opts \\ []) do
     Executor.generate_text(model_spec, prompt, opts)
@@ -156,7 +158,7 @@ defmodule ReqLlmNext do
       text = ReqLlmNext.StreamResponse.text(resp)
 
   """
-  @spec stream_text(String.t(), String.t(), keyword()) ::
+  @spec stream_text(model_spec(), String.t() | Context.t(), keyword()) ::
           {:ok, StreamResponse.t()} | {:error, term()}
   def stream_text(model_spec, prompt, opts \\ []) do
     Executor.stream_text(model_spec, prompt, opts)
@@ -184,7 +186,7 @@ defmodule ReqLlmNext do
       object = ReqLlmNext.StreamResponse.object(resp)
 
   """
-  @spec stream_object(String.t(), String.t(), term(), keyword()) ::
+  @spec stream_object(model_spec(), String.t() | Context.t(), term(), keyword()) ::
           {:ok, StreamResponse.t()} | {:error, term()}
   def stream_object(model_spec, prompt, object_schema, opts \\ []) do
     Executor.stream_object(model_spec, prompt, object_schema, opts)
@@ -207,7 +209,7 @@ defmodule ReqLlmNext do
       #=> %{"name" => "John", "age" => 30}
 
   """
-  @spec generate_object(String.t(), String.t() | Context.t(), keyword() | map(), keyword()) ::
+  @spec generate_object(model_spec(), String.t() | Context.t(), keyword() | map(), keyword()) ::
           {:ok, Response.t()} | {:error, term()}
   def generate_object(model_spec, prompt, schema, opts \\ []) do
     Executor.generate_object(model_spec, prompt, schema, opts)
@@ -225,7 +227,7 @@ defmodule ReqLlmNext do
       resp.object["name"]
 
   """
-  @spec generate_object!(String.t(), String.t() | Context.t(), keyword() | map(), keyword()) ::
+  @spec generate_object!(model_spec(), String.t() | Context.t(), keyword() | map(), keyword()) ::
           Response.t()
   def generate_object!(model_spec, prompt, schema, opts \\ []) do
     case generate_object(model_spec, prompt, schema, opts) do
@@ -347,13 +349,12 @@ defmodule ReqLlmNext do
   # ===========================================================================
 
   @doc """
-  Creates a model struct from various specifications.
+  Resolves an accepted public model input into an `LLMDB.Model`.
 
   ## Parameters
 
-    * `model_spec` - Model specification in various formats:
+    * `model_spec` - Model specification in one of two formats:
       - String format: `"anthropic:claude-3-sonnet"`
-      - Tuple format: `{:anthropic, "claude-3-sonnet", temperature: 0.7}`
       - Model struct: `%LLMDB.Model{}`
 
   ## Examples
@@ -361,32 +362,13 @@ defmodule ReqLlmNext do
       ReqLlmNext.model("anthropic:claude-3-sonnet")
       #=> {:ok, %LLMDB.Model{provider: :anthropic, id: "claude-3-sonnet"}}
 
-      ReqLlmNext.model({:anthropic, "claude-3-sonnet", temperature: 0.5})
+      {:ok, model} = LLMDB.model("anthropic:claude-3-sonnet")
+      ReqLlmNext.model(model)
       #=> {:ok, %LLMDB.Model{provider: :anthropic, id: "claude-3-sonnet"}}
 
   """
-  @spec model(String.t() | {atom(), String.t(), keyword()} | {atom(), keyword()} | struct()) ::
-          {:ok, LLMDB.Model.t()} | {:error, term()}
-  def model(%LLMDB.Model{} = model), do: {:ok, model}
-
-  def model({provider, model_id, _opts}) when is_atom(provider) and is_binary(model_id) do
-    ModelResolver.resolve("#{provider}:#{model_id}")
-  end
-
-  def model({provider, kw}) when is_atom(provider) and is_list(kw) do
-    case kw[:id] || kw[:model] do
-      id when is_binary(id) -> ModelResolver.resolve("#{provider}:#{id}")
-      _ -> {:error, {:invalid_model_spec, kw}}
-    end
-  end
-
-  def model(spec) when is_binary(spec) do
-    ModelResolver.resolve(spec)
-  end
-
-  def model(other) do
-    {:error, {:invalid_model_spec, other}}
-  end
+  @spec model(model_spec()) :: {:ok, LLMDB.Model.t()} | {:error, term()}
+  def model(model_spec), do: ModelResolver.resolve(model_spec)
 
   # ===========================================================================
   # Tool API
@@ -425,8 +407,6 @@ defmodule ReqLlmNext do
   # ===========================================================================
   # Embeddings API
   # ===========================================================================
-
-  @type model_spec :: String.t() | {atom(), String.t(), keyword()} | LLMDB.Model.t()
 
   @doc """
   Generate embeddings for text input(s).

@@ -1,220 +1,128 @@
-# Overrides and Adapters Spec
+# Policy Rules and Adapters Spec
 
 Status: Proposed
 
+<!-- covers: reqllm.policy_rules.five_scopes reqllm.policy_rules.match_patch reqllm.policy_rules.capability_safe -->
+
 ## Objective
 
-Define a single override structure for provider-level and model-level behavior so custom behavior is explicit and predictable, and define when adapters are allowed.
+Define how ReqLlmNext resolves behavior declaratively across five scopes and where imperative adapter patches are still allowed.
 
-## Override Domains
+## Purpose
 
-1. Provider overrides
-   - Auth/header policy
-   - Endpoint root
-   - Default transport by operation family
-   - Default protocol by operation family
-   - Timeout defaults
+The earlier deep-merge override model is not expressive enough for:
 
-2. Model overrides
-   - Default protocol
-   - Default transport
-   - Operation-family patch
-   - Feature patch
-   - Constraints patch
-   - Adapter selection and adapter-local config
-   - Per-model operational defaults such as tokens or reasoning effort
+1. very specific model and mode combinations
+2. surface selection across multiple endpoint styles
+3. fallback and timeout choices that depend on request mode
 
-3. Adapters
-   - Ordered, imperative transforms that run after declarative overrides and request options are resolved.
-   - Used only when metadata and overrides cannot express the behavior cleanly.
+ReqLlmNext v2 should use ordered policy rules, not only nested override maps.
 
-## Canonical Config Shape
+## Five Policy Scopes
+
+Policy rules resolve in this order:
+
+1. provider
+2. family
+3. model
+4. operation
+5. mode
+
+Later scopes are more specific and may refine earlier choices. Within a scope, declaration order must be deterministic.
+
+## Match-and-Patch Shape
 
 ```elixir
-config :req_llm_next, :overrides, %{
-  providers: %{
-    openai: %{
-      endpoint_root: "https://api.openai.com",
-      auth: %{env_key: "OPENAI_API_KEY", style: :bearer},
-      defaults: %{
-        transport: %{text: :http_sse, object: :http_sse, embedding: :http},
-        protocol: %{text: :openai_chat, object: :openai_chat, embedding: :openai_embeddings},
-        timeout_ms: 30_000
-      },
-      headers: %{}
-    },
-    anthropic: %{
-      endpoint_root: "https://api.anthropic.com",
-      auth: %{env_key: "ANTHROPIC_API_KEY", style: :x_api_key},
-      defaults: %{
-        transport: %{text: :http_sse, object: :http_sse},
-        protocol: %{text: :anthropic, object: :anthropic},
-        timeout_ms: 30_000
-      },
-      headers: %{}
+%PolicyRule{
+  id: :gpt5_codex_tools_session,
+  scope: :mode,
+  match: %{
+    provider: :openai,
+    family: "gpt-5",
+    model: "openai:gpt-5-codex",
+    operation: :text,
+    mode: %{
+      stream?: true,
+      tools?: true,
+      session: :preferred
     }
   },
-  models: %{
-    by_id: %{
-      "openai:gpt-4o-mini" => %{
-        defaults: %{temperature: 0.7},
-        adapters: [ReqLlmNext.Adapters.OpenAI.GPT4oMini]
-      },
-      "openai:o3-mini" => %{
-        defaults: %{
-          protocol: %{text: :openai_responses, object: :openai_responses},
-          max_completion_tokens: 16_000,
-          receive_timeout: 300_000
-        },
-        adapters: [ReqLlmNext.Adapters.OpenAI.Reasoning]
-      },
-      "anthropic:claude-sonnet-4-20250514" => %{
-        adapters: [ReqLlmNext.Adapters.Anthropic.Thinking]
-      }
-    },
-    by_family: %{
-      "gpt-5" => %{
-        defaults: %{
-          protocol: %{text: :openai_responses, object: :openai_responses},
-          max_completion_tokens: 16_000
-        }
-      }
-    }
+  patch: %{
+    preferred_surfaces: [:responses_ws_text, :responses_http_text],
+    fallback_surfaces: [:responses_http_text],
+    timeout_class: :long_running,
+    session_strategy: %{mode: :attach_or_create},
+    parameter_defaults: %{reasoning_effort: :high},
+    plan_adapters: [ReqLlmNext.Adapters.OpenAI.Reasoning]
   }
 }
 ```
 
-Unknown override keys must fail during normalization. Overrides patch canonical profile fields only. They do not create new execution concepts or add new top-level profile sections.
+## Allowed Patch Domains
 
-## Merge and Precedence Rules
+Rules may patch:
 
-1. Merge semantics
-   - Maps: deep merge
-   - Scalars: last writer wins
-   - Lists: replace by default
+1. preferred surfaces
+2. fallback surfaces
+3. timeout class
+4. session strategy defaults
+5. stable parameter defaults for this mode
+6. plan-adapter refs
 
-2. Precedence lowest to highest
-   1. Built-in provider defaults
-   2. Built-in model metadata from LLMDB
-   3. Provider override config
-   4. Model family override
-   5. Model id override
-   6. Request options
-   7. Adapter transforms
+Rules may not patch:
 
-3. Protected keys
-   - `provider`
-   - `model.id`
-   - `operation`
+1. model identity
+2. provider identity
+3. unsupported operation support
+4. unsupported surface support
+5. raw payloads or transport handles
 
-Adapters may not mutate protected keys.
+## Capability-Safety Rule
 
-## Local Model Descriptor Interaction
+Policy rules may only choose among behavior already supported by `ModelProfile`.
 
-When the public model spec is a local model descriptor:
+They must not invent:
 
-1. Provider overrides still apply.
-2. Family and model-id overrides do not apply by default unless the local descriptor explicitly opts into them.
-3. Request options still apply normally.
-4. Adapters still run normally once the local descriptor has been normalized into a `ModelProfile`.
+1. a surface absent from the profile
+2. a feature absent from the profile
+3. a session capability absent from the profile
 
-This prevents surprising environment-level overrides from mutating a local development model unless the caller asks for that behavior.
+Rules select and refine. They do not create support.
 
-## Provider-Specific Override Guidance
+## Request Decomposition Rule
 
-1. OpenAI
-   - Use chat protocol by default for standard text/object families.
-   - Use responses protocol for reasoning families and models that require it.
-   - Support transport policy that can switch responses operations to websocket where enabled.
+Public request input must be split into two categories before rule resolution:
 
-2. Anthropic
-   - Use the anthropic messages protocol.
-   - Keep thinking and prompt-caching policy in adapter or protocol config, not provider auth logic.
+1. mode hints
+   - affect `ExecutionMode`
+   - examples: stream, tool use, structured output, session preference, latency class
 
-## Model-Specific Override Guidance
+2. generation parameters
+   - affect payload content after a surface is chosen
+   - examples: temperature, max output tokens, stop sequences
 
-1. Prefer constraints metadata for generic behavior:
-   - token key mapping
-   - min output token enforcement
-   - unsupported parameter stripping
+Mode hints are normalized before policy rules run. Generation parameters are normalized after surface selection.
 
-2. Use adapters only when metadata is insufficient:
-   - provider-family quirks
-   - reasoning defaults
-   - thinking mode transformations
+## Adapter Rule
 
-3. Keep model overrides declarative:
-   - avoid name-based branching outside adapter match predicates
-   - keep override data colocated with model id and family matchers
+Adapters remain the imperative escape hatch, but they must be layer-scoped.
 
-4. Prefer patching typed profile fields:
-   - operations
-   - features
-   - limits
-   - defaults
-   - modalities
-   - constraints
+ReqLlmNext v2 starts with `PlanAdapter` as the primary adapter type:
 
-5. Do not patch request-mode concepts directly:
-   - `stream?` belongs to planning
-   - websocket preference belongs in defaults or transport policy, not as a new operation family
+```elixir
+@callback patch(ExecutionPlan.t()) :: {:ok, ExecutionPlan.t()} | {:error, term()}
+```
 
-## Adapter Contract
+Future adapter kinds are allowed only if they are explicit and owned by one layer, such as a protocol-specific adapter. A global raw-model adapter pipeline is not part of the target design.
 
-1. Input
-   - `ModelProfile`
-   - `ExecutionPlan`
+## Example Resolution Order
 
-2. Output
-   - Updated `ExecutionPlan`
+For `openai:gpt-5-codex` text generation:
 
-3. Allowed changes
-   - request defaults
-   - request-scoped timeout changes
-   - provider-family quirks
-   - protocol-specific option normalization
+1. provider rule may prefer chat-style HTTP for simple OpenAI text calls
+2. family rule may prefer Responses surfaces for `gpt-5`
+3. model rule may increase timeout class for `gpt-5-codex`
+4. operation rule may prefer object-capable surfaces for `:object`
+5. mode rule may switch a tool-heavy persistent request to WebSocket
 
-4. Forbidden changes
-   - changing model identity
-   - changing provider identity
-   - mutating live transport or session handles
-   - introducing side effects
-
-5. Ordering
-   - adapters run in deterministic order
-   - each adapter sees the previous adapter's output
-   - adapters run after declarative overrides and request options are merged
-
-## WebSocket-Specific Overrides
-
-For responses websocket mode, model or provider overrides may set:
-
-1. `defaults.transport.text: :websocket` or `defaults.transport.object: :websocket`
-2. connection timeout and keepalive policy
-3. reconnect policy and continuation strategy
-
-This must be expressed in override config and resolved before transport selection.
-
-## Example: `openai:gpt-5.4`
-
-1. Family override
-   - `defaults.protocol.text: :openai_responses`
-   - `defaults.protocol.object: :openai_responses`
-   - allowed transports include `:http_sse` and `:websocket`
-
-2. Model override
-   - reasoning defaults
-   - receive-timeout defaults
-   - tool policy defaults if needed
-
-3. Planner choice
-   - stateless request can use `:http_sse`
-   - persistent tool-heavy request can choose `:websocket`
-
-## Example: `openai:gpt-5.4-dev`
-
-For a local development descriptor such as `openai:gpt-5.4-dev`:
-
-1. The descriptor may extend `openai:gpt-5.4` and override only the experimental fields.
-2. Provider overrides still apply so auth and roots stay consistent.
-3. Model-id overrides for the production `openai:gpt-5.4` should not automatically bleed into the dev model.
+The final chosen behavior is the result of all matching rules, not one nested override map.

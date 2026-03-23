@@ -26,19 +26,26 @@ resp.object #=> %{"name" => "Alice", "age" => 30}
 
 ## Architecture
 
-ReqLlmNext is moving toward a **boundary-driven architecture** that separates model normalization, planning, protocol semantics, transport, and provider concerns:
+<!-- covers: reqllm.architecture.model_input_boundary reqllm.architecture.facts_mode_policy_plan reqllm.architecture.execution_layers -->
+
+ReqLlmNext is moving toward a **boundary-driven architecture** that separates model normalization, planning, protocol semantics, wire format, transport, and provider concerns:
 
 ```
 Public API
   -> Model Input Boundary
   -> Model Profile
+  -> Execution Mode
+  -> Policy Rules
+  -> Execution Plan
   -> Operation Planner
   -> Semantic Protocol
+  -> Wire Format
   -> Session Runtime
   -> Transport
   -> Provider
 
-Overrides and adapters feed model normalization and planning.
+Execution surfaces are the stable support unit for endpoint styles.
+Policy rules and plan-aware adapters shape execution without collapsing layers together.
 ```
 
 The current codebase still reflects an earlier spike architecture in places. The specs in `specs/` define the target refactor boundary model.
@@ -51,35 +58,70 @@ Architecture and override specifications live in [`specs/`](./specs):
 - [`specs/project_summary.md`](./specs/project_summary.md) - High-level project summary
 - [`specs/architecture.md`](./specs/architecture.md) - Overall architecture
 - [`specs/enforcement.md`](./specs/enforcement.md) - Runtime hard-fail boundary and CI guardrails
-- [`specs/model_source.md`](./specs/model_source.md) - Public model-spec forms and local descriptors
-- [`specs/model_profile.md`](./specs/model_profile.md) - Resolved model profile
-- [`specs/operation_planner.md`](./specs/operation_planner.md) - Request planning
+- [`specs/layer_boundaries.md`](./specs/layer_boundaries.md) - Cross-layer handoff rules
+- [`specs/model_source.md`](./specs/model_source.md) - Public model-spec input boundary
+- [`specs/model_profile.md`](./specs/model_profile.md) - Descriptive model profile and surface catalog
+- [`specs/execution_mode.md`](./specs/execution_mode.md) - Normalized request mode
+- [`specs/execution_surface.md`](./specs/execution_surface.md) - Endpoint-style support unit
+- [`specs/overrides.md`](./specs/overrides.md) - Policy rules and plan-aware adapters
+- [`specs/execution_plan.md`](./specs/execution_plan.md) - Fully resolved execution behavior
+- [`specs/operation_planner.md`](./specs/operation_planner.md) - Planner assembly boundary
 - [`specs/semantic_protocol.md`](./specs/semantic_protocol.md) - Protocol semantics
+- [`specs/wire_format.md`](./specs/wire_format.md) - Wire envelopes and framing contract
 - [`specs/session_runtime.md`](./specs/session_runtime.md) - Persistent session state
 - [`specs/transport.md`](./specs/transport.md) - Transport contract
 - [`specs/provider.md`](./specs/provider.md) - Provider boundary
-- [`specs/overrides.md`](./specs/overrides.md) - Overrides and adapters
+
+## Contributor Workflow
+
+<!-- covers: reqllm.workflow.beadwork_primed reqllm.workflow.specled_loop -->
+
+This repository now keeps two complementary kinds of project truth:
+
+- `bw` (Beadwork) for durable work tracking across sessions and agent hand-offs
+- `.spec/` for current-truth package and workflow contracts validated by `mix spec.*`
+
+The existing [`specs/`](./specs) directory remains the long-form architecture and refactor reference. The new [`.spec/`](./.spec) workspace is the smaller checked contract that drives the Spec Led Development loop.
+ReqLlmNext itself currently targets Elixir `~> 1.19`.
+
+Start a working session with:
+
+```bash
+bw prime
+mix spec.prime --base HEAD
+```
+
+Then use the default loop:
+
+```bash
+mix spec.next
+mix spec.check --base HEAD
+```
 
 ## Current Direction
 
 The current design direction is:
 
-1. Public APIs accept flexible `model_input` values:
+1. Public APIs accept only two model input forms:
    - registry strings
    - `%LLMDB.Model{}`
-   - local structs
-   - local maps
 2. That input is normalized at a strict runtime boundary.
-3. Invalid model input hard-fails under a closed schema.
-4. Internal execution works from `%ModelProfile{}` and `%ExecutionPlan{}` only.
-5. Semantic protocol and transport are separate so one API family can run over SSE or WebSocket.
-6. Session runtime is first-class for continuation-based APIs such as OpenAI Responses over WebSocket.
+3. `ModelProfile` is descriptive only and declares named `ExecutionSurface`s instead of implying a free mix of protocol, wire format, and transport choices.
+4. Public request intent is normalized into `%ExecutionMode{}` before policy resolution.
+5. Ordered policy rules match across provider, family, model, operation, and mode scopes to choose surfaces, defaults, and fallbacks.
+6. `%ExecutionPlan{}` is the only prescriptive runtime object consumed by downstream execution layers.
+7. Semantic protocol, wire format, transport, and provider remain separate so one API family can run over multiple endpoint styles without fusing meaning, envelopes, and byte movement.
+8. Session runtime is first-class for continuation-based APIs such as OpenAI Responses over WebSocket.
+9. Adapters are a narrow escape hatch and the target architecture treats them as plan-aware, layer-scoped patches rather than a global raw-model mutation pipeline.
 
-The sections below describe the current spike implementation, not the final target architecture.
+The sections below describe the current spike implementation, not the final target architecture. In the current code, `ReqLlmNext.Wire.*` modules still combine semantic protocol and wire-format duties that the 2.0 architecture now treats as separate layers.
 
-### Current Spike Layer 1: Wire Protocols
+### Current Spike Layer 1: `Wire.*` Modules
 
-Wire protocols handle **pure encoding/decoding** between ReqLlmNext types and provider JSON formats. They know nothing about HTTP—just data transformation.
+The current `Wire.*` modules handle **request/response mapping plus provider-family envelopes** between ReqLlmNext types and provider JSON formats. In the 2.0 target, this responsibility splits into:
+
+- semantic protocol for API-family meaning and canonical event decoding
+- wire format for transport-facing routes, headers, envelopes, and framing shapes
 
 ```elixir
 # Behaviour: ReqLlmNext.Wire.Streaming
@@ -130,7 +172,7 @@ ReqLlmNext is built on [LLMDB](https://github.com/your-org/llmdb), a comprehensi
 - Parameter constraints (token limits, temperature ranges, etc.)
 - Provider configuration
 
-The long-term goal is that production model support should usually require only LLMDB updates, while local descriptors remain available for development and testing.
+The long-term goal is that production model support should usually require only LLMDB updates while the public runtime boundary stays narrow and predictable.
 
 ### Model Resolution
 
@@ -305,9 +347,9 @@ mix format && mix compile
 
 ## Design Goals
 
-1. **LLMDB is the single source of truth** — Model capabilities, constraints, and wire protocol selection flow from metadata
+1. **LLMDB is the single source of truth** — Model capabilities, protocol defaults, wire-format compatibility, and constraints flow from metadata
 2. **Adding models should require metadata only** — Ideally zero code changes for new models
-3. **Three-layer separation** — Wire (encoding), Provider (HTTP), Adapter (quirks)
+3. **Boundary-driven separation** — Semantic protocol, wire format, transport, provider, and adapters have distinct jobs
 4. **Streaming-first** — All operations internally use streaming; non-streaming calls buffer
 5. **Fixture-based testing** — Fast, deterministic CI without live API calls
 

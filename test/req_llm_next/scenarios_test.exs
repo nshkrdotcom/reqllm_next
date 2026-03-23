@@ -1997,19 +1997,34 @@ defmodule ReqLlmNext.Scenarios.MultiTurnRunTest do
   describe "run/3 validation logic" do
     test "detects empty turn 1 response" do
       text = ""
-      result = if String.length(text) == 0, do: %{status: :error, error: :empty_turn1_response}, else: :ok
+
+      result =
+        if String.length(text) == 0,
+          do: %{status: :error, error: :empty_turn1_response},
+          else: :ok
+
       assert result == %{status: :error, error: :empty_turn1_response}
     end
 
     test "detects wrong answer in turn 2" do
       text = "I don't remember"
-      result = if String.contains?(text, "42"), do: :ok, else: %{status: :error, error: {:wrong_answer, text}}
+
+      result =
+        if String.contains?(text, "42"),
+          do: :ok,
+          else: %{status: :error, error: {:wrong_answer, text}}
+
       assert result == %{status: :error, error: {:wrong_answer, "I don't remember"}}
     end
 
     test "accepts correct answer in turn 2" do
       text = "Your favorite number is 42"
-      result = if String.contains?(text, "42"), do: :ok, else: %{status: :error, error: {:wrong_answer, text}}
+
+      result =
+        if String.contains?(text, "42"),
+          do: :ok,
+          else: %{status: :error, error: {:wrong_answer, text}}
+
       assert result == :ok
     end
   end

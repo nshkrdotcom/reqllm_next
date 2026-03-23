@@ -44,9 +44,7 @@ defmodule ReqLlmNext.Scenarios.MultiTurn do
     context =
       ReqLlmNext.Context.append(
         response1.context,
-        ReqLlmNext.Context.user(
-          "What is my favorite number? Reply with just the number."
-        )
+        ReqLlmNext.Context.user("What is my favorite number? Reply with just the number.")
       )
 
     turn2_opts = Keyword.merge(opts, fixture: fixture_name(id(), "2"), max_tokens: 50)

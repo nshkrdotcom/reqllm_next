@@ -2,16 +2,38 @@
 
 **IMPORTANT: DO NOT WRITE COMMENTS INTO THE BODY OF ANY FUNCTIONS.**
 
+## Work Management
+
+<!-- covers: reqllm.workflow.agent_instructions -->
+
+This repository tracks durable work with `bw` (Beadwork).
+
+- Start every session with `bw prime`.
+- Treat `bw` as the durable record for tickets, progress, and decisions that must survive session boundaries.
+- This repo uses the `reqllm-XYZ` issue prefix.
+- If `bw prime` reports uncommitted changes, assume they may belong to the user unless you can prove otherwise.
+
+## Spec Led Workflow
+
+- After `bw prime`, run `mix spec.prime --base HEAD` before editing current-truth package guidance.
+- Keep `.spec/` as the canonical checked workflow layer for package and contributor contracts.
+- Keep the existing `specs/` directory as supporting architecture and refactor context.
+- After code, docs, or tests change, run `mix spec.next`.
+- When the branch is ready, run `mix spec.check --base HEAD`.
+
 ## Package Overview
 
-`ReqLlmNext` is a metadata-driven LLM client library for Elixir. The architecture is designed so that, _ideally_, adding new models requires **only metadata updates in LLMDB**, not code changes. However, there are some models that require code changes to support (e.g. image input, audio input, PDF input, etc.). These are handled by the `adapters` layer.
+`ReqLlmNext` is a metadata-driven LLM client library for Elixir. The 2.0 direction is that public runtime entrypoints accept only a registry model spec string or an `%LLMDB.Model{}`. Adding new models should, ideally, require **only metadata updates in LLMDB**, not code changes. The small set of models that still need code changes are handled by the `adapters` layer.
 
 ## Core Design Principles
 
-1. **LLMDB is the single source of truth** - Model capabilities, constraints, and wire protocol selection flow from LLMDB metadata
-2. **Three-layer API client architecture** - Clear separation between Wire (encoding), Provider (HTTP), and Adapter (quirks)
-3. **Scenarios as capability tests** - Model-agnostic test scenarios validate capabilities through the public API
-4. **Streaming-first** - All operations internally use streaming; non-streaming calls buffer the stream
+1. **LLMDB is the preferred source of truth** - Model capabilities, limits, defaults, and surface facts flow from LLMDB metadata
+2. **Narrow public model boundary** - Public runtime calls accept only registry strings and `%LLMDB.Model{}`
+3. **Facts, mode, policy, and plan are separate** - `ModelProfile` is descriptive, `ExecutionMode` is request intent, policy rules resolve behavior, and `ExecutionPlan` is the only prescriptive object
+4. **Execution surfaces are the support unit** - Endpoint styles are declared as named surfaces, not inferred from free combinations of protocol, wire format, and transport
+5. **Separated execution layers** - Semantic protocol, wire format, transport, provider, session runtime, and adapters own different concerns
+6. **Scenarios as capability tests** - Model-agnostic test scenarios validate capabilities through the public API
+7. **Streaming-first** - All operations internally use streaming; non-streaming calls buffer the stream
 
 ## Quick Start
 
@@ -31,23 +53,24 @@ mix format && mix compile
 
 ## Architecture
 
+<!-- covers: reqllm.architecture.model_input_boundary reqllm.architecture.facts_mode_policy_plan reqllm.architecture.execution_layers reqllm.layer_boundaries.plan_aware_adapters -->
+
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         ReqLlmNext Public API                           │
-│  generate_text/3 · stream_text/3 · generate_object/4 · embed/3          │
-└─────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│                    ReqLlmNext.Executor (Central Pipeline)               │
-│  1. ModelResolver    → LLMDB lookup + config overrides                  │
-│  2. Validation       → Modalities, operation compatibility              │
-│  3. Constraints      → Parameter transforms from LLMDB metadata         │
-│  4. Adapter Pipeline → Per-model customizations (~5% of models)         │
-│  5. Wire Protocol    → JSON encode/decode per API family                │
-│  6. Provider HTTP    → Base URL, auth, Finch orchestration              │
-└─────────────────────────────────────────────────────────────────────────┘
+Public API
+  -> Model Input Boundary
+  -> Model Profile
+  -> Execution Mode
+  -> Policy Rules
+  -> Execution Plan
+  -> Operation Planner
+  -> Semantic Protocol
+  -> Wire Format
+  -> Session Runtime
+  -> Transport
+  -> Provider
 ```
+
+The current implementation still collapses semantic protocol and wire format concerns inside `lib/req_llm_next/wire/`, and it still uses a raw-model adapter pipeline. Treat those as spike code, not the final 2.0 layer boundary.
 
 ## Module Structure
 
@@ -70,8 +93,8 @@ lib/req_llm_next/
 │       └── thinking.ex           # Extended thinking mode
 │
 ├── wire/
-│   ├── streaming.ex              # Behaviour for streaming wires
-│   ├── resolver.ex               # Select wire from model metadata
+│   ├── streaming.ex              # Current spike wire behaviour
+│   ├── resolver.ex               # Current spike wire selection from metadata
 │   ├── openai_chat.ex            # /v1/chat/completions
 │   ├── openai_responses.ex       # /v1/responses (reasoning)
 │   ├── openai_embeddings.ex      # /v1/embeddings
@@ -98,11 +121,15 @@ lib/req_llm_next/
 └── error.ex                      # Structured errors (Splode)
 ```
 
-## The Three-Layer API Client Design
+## Current Spike Implementation Layers
 
-### Layer 1: Wire Protocol
+### Layer 1: `Wire.*` Modules
 
-**Purpose**: Pure encoding/decoding between canonical ReqLlmNext types and provider JSON.
+**Purpose**: The current spike `Wire.*` modules combine semantic protocol mapping and wire-format shaping between canonical ReqLlmNext types and provider JSON.
+
+The 2.0 target splits this responsibility into:
+- Semantic Protocol
+- Wire Format
 
 **Files**: `lib/req_llm_next/wire/*.ex`
 
@@ -116,8 +143,8 @@ lib/req_llm_next/
 
 **Decision criteria**: Add a new Wire module when:
 - A provider uses a fundamentally different JSON structure
-- SSE event format differs significantly
-- Different endpoint paths or content types
+- HTTP/SSE/WebSocket envelopes differ significantly
+- Different endpoint paths or content types are required in the current spike
 
 **Current wires**:
 - `Wire.OpenAIChat` - Standard OpenAI `/v1/chat/completions`
@@ -149,7 +176,11 @@ lib/req_llm_next/
 
 ### Layer 3: Model Adapter (Optional)
 
-**Purpose**: Per-model customizations for the ~5% of models that need special handling beyond what LLMDB metadata can express.
+**Purpose**: The current spike adapters handle per-model customizations for the small set of models that need special handling beyond what LLMDB metadata can express.
+
+The 2.0 target moves this toward:
+- ordered policy rules across provider, family, model, operation, and mode
+- plan-aware, layer-scoped adapters that patch `ExecutionPlan`
 
 **Files**: `lib/req_llm_next/adapters/**/*.ex`
 
@@ -176,12 +207,17 @@ lib/req_llm_next/
 - Generic parameter transformations applicable to any model
 - Examples: token key renaming, temperature support, min output tokens
 
-**Adapters** (`adapters/*.ex`):
-- Per-model/family logic that can't be metadata-driven
-- Applied after constraints in the pipeline
-- Examples: injecting required fields, setting model-specific defaults
+**Policy rules** (target v2):
+- Ordered match-and-patch rules over provider, family, model, operation, and mode
+- Choose preferred surfaces, fallback surfaces, timeout classes, session defaults, and plan adapter refs
+- Must not invent unsupported capability
 
-**Rule**: If a behavior can be expressed as LLMDB metadata, use Constraints. If it requires code logic, use an Adapter.
+**Adapters** (`adapters/*.ex` in the current spike, plan adapters in target v2):
+- Reserved for quirks metadata and policy rules cannot express cleanly
+- Target shape is a plan-aware, layer-scoped adapter, not a global raw-model mutation hook
+- Examples: injecting imperative defaults after plan assembly, patching a narrow provider quirk
+
+**Rule**: If a behavior can be expressed as descriptive metadata, surface declarations, or policy rules, keep it there. Use an adapter only when the behavior truly needs imperative code.
 
 ## Scenario System
 
@@ -228,7 +264,7 @@ Fixtures capture raw SSE chunks for replay testing.
 
 ## Adding New Models
 
-### If model uses existing wire protocol and provider:
+### If model uses the existing current `wire/` module and provider:
 
 1. Add model to LLMDB with correct metadata
 2. Ensure `extra.wire.protocol` is set if not default
@@ -246,7 +282,7 @@ Fixtures capture raw SSE chunks for replay testing.
 2. Register in `Adapters.Pipeline.@adapters`
 3. Implement `matches?/1` and `transform_opts/2`
 
-### If model uses new wire protocol:
+### If model needs a new current `wire/` module:
 
 1. Create wire module implementing `Wire.Streaming` behaviour
 2. Add protocol atom to `Wire.Resolver.wire_module!/1`

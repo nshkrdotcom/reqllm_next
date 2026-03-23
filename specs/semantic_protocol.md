@@ -2,9 +2,11 @@
 
 Status: Proposed
 
+<!-- covers: reqllm.layer_boundaries.separated_io -->
+
 ## Objective
 
-Define the contract for provider API families independently from transport.
+Define the contract for provider API families independently from wire format and transport.
 
 ## Purpose
 
@@ -21,9 +23,9 @@ Examples:
 ## Responsibilities
 
 1. Accept an `ExecutionPlan` and produce a protocol payload.
-2. Define the protocol route key or relative path.
-3. Decode provider-family events into canonical chunks.
-4. Normalize protocol-specific terminal metadata such as finish reasons, usage, and continuation ids.
+2. Decode provider-family events into canonical chunks.
+3. Normalize protocol-specific terminal metadata such as finish reasons, usage, and continuation ids.
+4. Emit structured protocol diagnostics so compat tooling can classify semantic anomalies.
 
 ## Input
 
@@ -41,7 +43,6 @@ Examples:
 ```elixir
 @callback protocol_id() :: atom()
 @callback operation_payload(ExecutionPlan.t()) :: map()
-@callback route(Operation.t()) :: String.t()
 @callback decode_event(term(), decode_state :: map()) :: {[canonical_chunk()], map()}
 @callback extract_protocol_meta([canonical_chunk()]) :: map()
 ```
@@ -51,6 +52,7 @@ Examples:
 1. A semantic protocol must not own sockets, HTTP clients, or retries.
 2. A semantic protocol must not know provider auth headers.
 3. A semantic protocol must not decide whether execution uses SSE or WebSocket.
+4. A semantic protocol must not own transport routes or client-event envelopes.
 
 ## Transport Separation Rule
 
@@ -59,22 +61,34 @@ If the same provider API family can run over both SSE and WebSocket, it is still
 `openai:gpt-5.4` using Responses API is:
 
 1. semantic protocol: `:openai_responses`
-2. transport: either `:http_sse` or `:websocket`
+2. wire format: `:openai_responses_http_json` or `:openai_responses_ws_json`
+3. transport: either `:http_sse` or `:websocket`
 
-That is not two wire modules. It is one semantic protocol over two transports.
+That is not two semantic protocols. It is one semantic protocol over multiple wire formats and transports.
 
 ## Example: Responses Over WebSocket
 
 For OpenAI Responses WebSocket mode:
 
 1. The semantic protocol builds the normal Responses request body.
-2. The transport wraps it in the websocket client event envelope such as `response.create`.
-3. The same semantic decoder handles server events because the API family semantics are the same.
+2. The wire format wraps it in the websocket client event envelope such as `response.create`.
+3. The transport moves that client event over the socket.
+4. The same semantic decoder handles server events because the API family semantics are the same.
+
+## Compat Attribution
+
+Protocol-layer anomalies should be attributable here, for example:
+
+1. invalid payload semantics
+2. unexpected event ordering
+3. decode failures
+4. missing finish reasons or usage metadata
 
 ## What Does Not Belong Here
 
 1. `Accept: text/event-stream`
-2. WebSocket connect URLs
-3. reconnect policy
-4. socket keepalive
-5. one-in-flight enforcement
+2. `/v1/responses` or websocket event targets
+3. WebSocket connect URLs
+4. reconnect policy
+5. socket keepalive
+6. one-in-flight enforcement

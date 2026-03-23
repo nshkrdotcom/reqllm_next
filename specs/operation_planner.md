@@ -2,122 +2,97 @@
 
 Status: Proposed
 
+<!-- covers: reqllm.execution_plan.planner_owns_assembly -->
+
 ## Objective
 
-Define how a public API request becomes a validated, fully resolved execution plan.
+Define the planner boundary that turns `ModelProfile`, `ExecutionMode`, and policy rules into one fully resolved `ExecutionPlan`.
 
 ## Purpose
 
-The planner is the policy layer. It decides how a request should run without performing any I/O.
+The planner is the only layer allowed to interpret model facts, mode facts, and policy rules together.
 
-It is also the main interpreter of model facts. Downstream execution layers should receive resolved choices, not raw capability data.
+It owns:
 
-This should remain one ownership boundary, but it does make sense to implement it as several smaller pure policy modules and intermediate structs.
+1. mode normalization
+2. rule evaluation
+3. surface selection
+4. parameter normalization
+5. fallback planning
+6. adapter selection
+
+Downstream execution layers must receive a resolved plan, not raw capability data or half-finished defaults.
 
 ## Responsibilities
 
-1. Accept a public API request, `ModelProfile`, request options, and optional session context.
-2. Resolve request intent into an operation family and request mode.
-3. Validate operation compatibility and modality requirements.
-4. Apply request-scoped constraint normalization.
-5. Merge request options with model defaults.
-6. Select semantic protocol, transport, streaming mode, and session mode.
-7. Produce a canonical `ExecutionPlan`.
-
-## Inputs
-
-1. API intent
-   - `:generate_text`
-   - `:stream_text`
-   - `:generate_object`
-   - `:stream_object`
-   - `:embed`
-2. `ModelProfile`
-3. Prompt or context
-4. Request options
-5. Optional session reference
-
-## Output Shape
-
-```elixir
-%ExecutionPlan{
-  operation: :text,
-  stream?: true,
-  prompt: canonical_prompt,
-  model: model_profile,
-  provider: :openai,
-  semantic_protocol: :openai_responses,
-  transport: :websocket,
-  session_mode: :attach_or_create,
-  continuation_strategy: :previous_response_id,
-  normalized_opts: %{...},
-  timeout_ms: 300_000,
-  fallback: %{transport: :http_sse, on: [:session_unavailable, :websocket_rejected]}
-}
-```
-
-## Invariants
-
-1. Planning must be side-effect free.
-2. The planner must never encode provider payloads.
-3. The planner must never open sockets or send requests.
-4. The planner must return structured errors, not partially executed work.
-5. The planner must consume `%ModelProfile{}` only, not raw `%LLMDB.Model{}` or local maps.
-6. The planner and validation logic are the only layers allowed to interpret operation and feature support from the profile.
+1. Accept API intent, prompt/context, `ModelProfile`, request mode hints, generation parameters, and optional session references.
+2. Normalize intent and mode hints into `ExecutionMode`.
+3. Evaluate ordered policy rules across provider, family, model, operation, and mode scopes.
+4. Select one supported `ExecutionSurface`.
+5. Merge generation parameters with stable defaults and normalize them against constraints.
+6. Build one canonical `ExecutionPlan`.
+7. Produce structured errors when no valid plan can be formed.
 
 ## Recommended Internal Decomposition
 
-One planner boundary can still be built from smaller internal modules or little structs.
+1. `IntentNormalizer`
+   - maps public API verbs onto operation families
 
-Recommended pure sub-concerns:
+2. `ModeNormalizer`
+   - turns mode-affecting hints into `ExecutionMode`
 
-1. `IntentPolicy`
-   - maps public API intent into an operation family and request mode
-   - example: `:stream_text -> %{operation: :text, stream?: true}`
+3. `PolicyResolver`
+   - evaluates ordered match-and-patch rules
 
-2. `ValidationPolicy`
-   - checks operation support, features, and modalities against `ModelProfile`
+4. `SurfaceSelector`
+   - chooses one surface plus fallback surfaces from the supported catalog
 
-3. `ConstraintPolicy`
-   - applies request-scoped option normalization and strips unsupported parameters
+5. `ParameterNormalizer`
+   - applies stable defaults and request-scoped constraints
 
-4. `ProtocolPolicy`
-   - selects the semantic protocol for the resolved operation family
+6. `SessionPlanner`
+   - resolves attach, create, continue, or stateless strategy
 
-5. `TransportPolicy`
-   - selects transport based on operation family, request mode, and request characteristics
+7. `AdapterSelector`
+   - resolves layer-scoped adapter refs for the final plan
 
-6. `SessionPolicy`
-   - selects session mode, continuation strategy, and fallback behavior
+These may be separate modules or pure functions, but the architectural boundary is still one planner.
 
-These can return small intermediate structs such as `%IntentDecision{}`, `%TransportDecision{}`, or `%SessionDecision{}` if that improves clarity. The rest of the system should still see one `%ExecutionPlan{}` output from the planner boundary.
+## Planner Ownership Rules
 
-## Validation and Constraint Ownership
+The planner alone may:
 
-The planner owns:
+1. choose a surface
+2. choose fallback order
+3. interpret `ExecutionMode`
+4. combine rules from multiple scopes
+5. decide whether the request should use a persistent session
 
-1. operation compatibility checks
-2. modality checks
-3. request-scoped constraint application
-4. transport eligibility checks
-5. session eligibility checks
-6. mapping public API verbs onto canonical operation families
+The planner must not:
 
-Transport, provider, and semantic protocol modules must not repeat these checks.
+1. encode provider payloads
+2. open sockets
+3. send HTTP requests
+4. decode provider events
 
-## Example: `openai:gpt-5.4`
+## Common Plan Assembly Order
 
-For `openai:gpt-5.4`, the planner should distinguish between at least two cases:
+1. Resolve `ModelProfile`.
+2. Normalize `ExecutionMode`.
+3. Resolve matching policy rules.
+4. Select one primary `ExecutionSurface`.
+5. Select fallback surfaces if any.
+6. Merge and normalize generation parameters.
+7. Build session strategy and timeout strategy.
+8. Attach plan-aware adapters.
+9. Emit the final `ExecutionPlan`.
 
-1. Stateless one-shot generation
-   - semantic protocol: `:openai_responses`
-   - transport: `:http_sse`
-   - session mode: `:none`
+## Example: `openai:gpt-5-codex`
 
-2. Long-running tool-heavy coding session
-   - semantic protocol: `:openai_responses`
-   - transport: `:websocket`
-   - session mode: `:attach_or_create`
-   - continuation strategy: `:previous_response_id`
+For a tool-heavy streaming text request with persistent session preference:
 
-The model profile says websocket is allowed. The planner says whether websocket is appropriate for this request.
+1. `ExecutionMode` says `operation: :text`, `stream?: true`, `tools?: true`, `session: :preferred`
+2. policy rules prefer `:responses_ws_text`
+3. the surface selector confirms that surface exists in `ModelProfile`
+4. the planner chooses WebSocket as primary and Responses-over-HTTP as fallback
+5. the final plan carries one chosen surface, one fallback set, normalized parameters, and plan adapters

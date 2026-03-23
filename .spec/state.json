@@ -1,0 +1,1359 @@
+{
+  "decisions": {
+    "items": [
+      {
+        "affects": [
+          "reqllm.architecture",
+          "reqllm.package"
+        ],
+        "date": "2026-03-22",
+        "file": ".spec/decisions/execution_layers.md",
+        "id": "reqllm.decision.execution_layers",
+        "status": "accepted",
+        "title": "Separate Semantic Protocol, Wire Format, and Transport"
+      },
+      {
+        "affects": [
+          "reqllm.architecture",
+          "reqllm.execution_mode",
+          "reqllm.execution_plan"
+        ],
+        "date": "2026-03-22",
+        "file": ".spec/decisions/execution_mode_first_class.md",
+        "id": "reqllm.decision.execution_mode_first_class",
+        "status": "accepted",
+        "title": "ExecutionMode Is a First-Class Runtime Object"
+      },
+      {
+        "affects": [
+          "reqllm.architecture",
+          "reqllm.model_profile",
+          "reqllm.execution_surfaces",
+          "reqllm.execution_plan"
+        ],
+        "date": "2026-03-22",
+        "file": ".spec/decisions/execution_surface_support_unit.md",
+        "id": "reqllm.decision.execution_surface_support_unit",
+        "status": "accepted",
+        "title": "ExecutionSurface Is the Unit of Endpoint Support"
+      },
+      {
+        "affects": [
+          "reqllm.architecture",
+          "reqllm.policy_rules",
+          "reqllm.execution_plan"
+        ],
+        "date": "2026-03-22",
+        "file": ".spec/decisions/five_scope_policy_rules.md",
+        "id": "reqllm.decision.five_scope_policy_rules",
+        "status": "accepted",
+        "title": "Policy Resolution Uses Five Ordered Scopes"
+      },
+      {
+        "affects": [
+          "reqllm.architecture",
+          "reqllm.policy_rules",
+          "reqllm.layer_boundaries"
+        ],
+        "date": "2026-03-22",
+        "file": ".spec/decisions/layer_scoped_plan_aware_adapters.md",
+        "id": "reqllm.decision.layer_scoped_plan_aware_adapters",
+        "status": "accepted",
+        "title": "Adapters Are Layer-Scoped and Plan-Aware"
+      },
+      {
+        "affects": [
+          "reqllm.architecture",
+          "reqllm.package"
+        ],
+        "date": "2026-03-22",
+        "file": ".spec/decisions/model_input_boundary.md",
+        "id": "reqllm.decision.model_input_boundary",
+        "status": "accepted",
+        "title": "Narrow Public Model Input Boundary"
+      },
+      {
+        "affects": [
+          "reqllm.architecture",
+          "reqllm.model_profile",
+          "reqllm.execution_plan"
+        ],
+        "date": "2026-03-22",
+        "file": ".spec/decisions/profile_descriptive_not_prescriptive.md",
+        "id": "reqllm.decision.profile_descriptive_not_prescriptive",
+        "status": "accepted",
+        "title": "ModelProfile Is Descriptive, Not Prescriptive"
+      }
+    ]
+  },
+  "findings": [],
+  "index": {
+    "exceptions": [],
+    "requirements": [
+      {
+        "file": ".spec/specs/architecture.spec.md",
+        "id": "reqllm.architecture.execution_layers",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "ReqLlmNext architecture shall separate semantic protocol, wire format, transport, provider, and session-runtime concerns so request meaning, wire envelopes, persistent execution state, and byte movement can evolve independently.",
+        "subject_id": "reqllm.architecture"
+      },
+      {
+        "file": ".spec/specs/architecture.spec.md",
+        "id": "reqllm.architecture.facts_mode_policy_plan",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "ReqLlmNext architecture shall normalize model facts into `ModelProfile`, request intent into `ExecutionMode`, resolve ordered policy rules, and materialize a single `ExecutionPlan` before downstream execution.",
+        "subject_id": "reqllm.architecture"
+      },
+      {
+        "file": ".spec/specs/architecture.spec.md",
+        "id": "reqllm.architecture.model_input_boundary",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "ReqLlmNext runtime APIs shall accept model inputs only as registry spec strings or `%LLMDB.Model{}` values.",
+        "subject_id": "reqllm.architecture"
+      },
+      {
+        "file": ".spec/specs/execution_mode.spec.md",
+        "id": "reqllm.execution_mode.mode_hints_before_policy",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "ReqLlmNext shall resolve mode hints into `ExecutionMode` before policy rules choose surfaces, defaults, timeouts, or fallbacks.",
+        "subject_id": "reqllm.execution_mode"
+      },
+      {
+        "file": ".spec/specs/execution_mode.spec.md",
+        "id": "reqllm.execution_mode.normalized_shape",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "ReqLlmNext shall normalize mode-affecting request intent into a provider-agnostic `ExecutionMode` that captures operation, streaming, tools, structured output, session preference, latency class, reasoning, conversation shape, and input modalities.",
+        "subject_id": "reqllm.execution_mode"
+      },
+      {
+        "file": ".spec/specs/execution_plan.spec.md",
+        "id": "reqllm.execution_plan.planner_owns_assembly",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "ReqLlmNext shall keep plan assembly in the planner boundary, including mode normalization, rule evaluation, surface selection, parameter normalization, session planning, and adapter selection.",
+        "subject_id": "reqllm.execution_plan"
+      },
+      {
+        "file": ".spec/specs/execution_plan.spec.md",
+        "id": "reqllm.execution_plan.prescriptive_object",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "ReqLlmNext shall use `ExecutionPlan` as the only prescriptive runtime object that tells downstream layers how a request attempt will run.",
+        "subject_id": "reqllm.execution_plan"
+      },
+      {
+        "file": ".spec/specs/execution_plan.spec.md",
+        "id": "reqllm.execution_plan.surface_and_fallbacks",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "`ExecutionPlan` shall record exactly one chosen primary execution surface plus any fallback surfaces, normalized parameter values, timeout policy, session strategy, and adapter references for the request attempt.",
+        "subject_id": "reqllm.execution_plan"
+      },
+      {
+        "file": ".spec/specs/execution_surfaces.spec.md",
+        "id": "reqllm.execution_surfaces.non_cartesian",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "ReqLlmNext shall not infer endpoint support from a cartesian product of independent protocol, wire-format, and transport lists and shall instead resolve only declared execution surfaces.",
+        "subject_id": "reqllm.execution_surfaces"
+      },
+      {
+        "file": ".spec/specs/execution_surfaces.spec.md",
+        "id": "reqllm.execution_surfaces.support_unit",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "ReqLlmNext shall represent each valid endpoint style as a named `ExecutionSurface` that bundles semantic protocol, wire format, transport, session compatibility, and feature tags for one operation family.",
+        "subject_id": "reqllm.execution_surfaces"
+      },
+      {
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "id": "reqllm.layer_boundaries.plan_aware_adapters",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "ReqLlmNext shall treat adapters as explicit layer-scoped patches and start the 2.0 architecture with plan-aware adapters that operate on `ExecutionPlan` after policy resolution.",
+        "subject_id": "reqllm.layer_boundaries"
+      },
+      {
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "id": "reqllm.layer_boundaries.separated_io",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "ReqLlmNext shall keep provider, session runtime, transport, wire format, and semantic protocol responsibilities separated so no layer skips across another layer's ownership boundary.",
+        "subject_id": "reqllm.layer_boundaries"
+      },
+      {
+        "file": ".spec/specs/model_profile.spec.md",
+        "id": "reqllm.model_profile.descriptive_facts",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "ReqLlmNext shall normalize resolved model metadata into a request-independent `ModelProfile` that describes operations, features, modalities, limits, parameter defaults, constraints metadata, and session capabilities without choosing concrete request behavior.",
+        "subject_id": "reqllm.model_profile"
+      },
+      {
+        "file": ".spec/specs/model_profile.spec.md",
+        "id": "reqllm.model_profile.execution_surfaces_declared",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "`ModelProfile` shall declare explicit named `ExecutionSurface` entries for supported endpoint styles instead of implying support from independent protocol, wire-format, and transport lists.",
+        "subject_id": "reqllm.model_profile"
+      },
+      {
+        "file": ".spec/specs/package.spec.md",
+        "id": "reqllm.package.fixture_replay",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "ReqLlmNext shall verify package behavior with deterministic automated tests that exercise provider scenarios and replay recorded fixtures by default.",
+        "subject_id": "reqllm.package"
+      },
+      {
+        "file": ".spec/specs/package.spec.md",
+        "id": "reqllm.package.multi_provider_api",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "ReqLlmNext shall provide a unified public API for text generation, structured output, streaming, and embeddings across supported model providers.",
+        "subject_id": "reqllm.package"
+      },
+      {
+        "file": ".spec/specs/policy_rules.spec.md",
+        "id": "reqllm.policy_rules.capability_safe",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "Policy rules shall only choose among capabilities and execution surfaces already declared in `ModelProfile` and shall not invent unsupported behavior.",
+        "subject_id": "reqllm.policy_rules"
+      },
+      {
+        "file": ".spec/specs/policy_rules.spec.md",
+        "id": "reqllm.policy_rules.five_scopes",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "ReqLlmNext shall resolve policy as ordered rules across provider, family, model, operation, and mode scopes.",
+        "subject_id": "reqllm.policy_rules"
+      },
+      {
+        "file": ".spec/specs/policy_rules.spec.md",
+        "id": "reqllm.policy_rules.match_patch",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "Policy rules shall use a declarative match-and-patch model to choose preferred surfaces, fallback surfaces, timeout classes, session defaults, stable parameter defaults, and plan adapter references.",
+        "subject_id": "reqllm.policy_rules"
+      },
+      {
+        "file": ".spec/specs/workflow.spec.md",
+        "id": "reqllm.workflow.agent_instructions",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "Repository agent instructions shall direct agents to run bw prime before work and mix spec.prime --base HEAD before editing current-truth package guidance.",
+        "subject_id": "reqllm.workflow"
+      },
+      {
+        "file": ".spec/specs/workflow.spec.md",
+        "id": "reqllm.workflow.beadwork_primed",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "Contributor and agent workflows shall start by loading Beadwork context so durable work state survives session boundaries.",
+        "subject_id": "reqllm.workflow"
+      },
+      {
+        "file": ".spec/specs/workflow.spec.md",
+        "id": "reqllm.workflow.specled_loop",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "Contributor workflow shall keep a canonical .spec workspace and use mix spec.prime, mix spec.next, and mix spec.check to maintain current truth alongside the existing specs/ architecture notes.",
+        "subject_id": "reqllm.workflow"
+      },
+      {
+        "file": ".spec/specs/spec_system.spec.md",
+        "id": "spec.workspace.agent_prime_context",
+        "priority": "should",
+        "stability": "evolving",
+        "statement": "The repository shall include a .spec/AGENTS.md that tells agents to start a session with mix spec.prime before editing current truth.",
+        "subject_id": "spec.system"
+      },
+      {
+        "file": ".spec/specs/spec_system.spec.md",
+        "id": "spec.workspace.agents_present",
+        "priority": "must",
+        "stability": "stable",
+        "statement": "The repository shall include a .spec/AGENTS.md that gives local operating guidance for agents working inside the .spec workspace.",
+        "subject_id": "spec.system"
+      },
+      {
+        "file": ".spec/specs/spec_system.spec.md",
+        "id": "spec.workspace.decisions_readme_present",
+        "priority": "must",
+        "stability": "stable",
+        "statement": "The repository shall include a .spec/decisions/README.md that explains when durable ADRs belong in the workspace.",
+        "subject_id": "spec.system"
+      },
+      {
+        "file": ".spec/specs/spec_system.spec.md",
+        "id": "spec.workspace.readme_present",
+        "priority": "must",
+        "stability": "stable",
+        "statement": "The repository shall include a .spec/README.md that explains purpose, layout, and workflow.",
+        "subject_id": "spec.system"
+      },
+      {
+        "file": ".spec/specs/spec_system.spec.md",
+        "id": "spec.workspace.state_generated",
+        "priority": "must",
+        "stability": "stable",
+        "statement": "When indexing and validation run, the workspace shall generate .spec/state.json containing indexed subjects, indexed decisions, and verification state.",
+        "subject_id": "spec.system"
+      }
+    ],
+    "scenarios": [],
+    "subjects": [
+      {
+        "file": ".spec/specs/architecture.spec.md",
+        "id": "reqllm.architecture",
+        "meta": {
+          "decisions": [
+            "reqllm.decision.model_input_boundary",
+            "reqllm.decision.execution_layers",
+            "reqllm.decision.profile_descriptive_not_prescriptive",
+            "reqllm.decision.execution_mode_first_class",
+            "reqllm.decision.execution_surface_support_unit",
+            "reqllm.decision.five_scope_policy_rules",
+            "reqllm.decision.layer_scoped_plan_aware_adapters"
+          ],
+          "id": "reqllm.architecture",
+          "kind": "architecture",
+          "status": "active",
+          "summary": "Current-truth runtime boundary and layer-separation contract for model input and execution flow.",
+          "surface": [
+            "README.md",
+            "AGENTS.md",
+            "specs/architecture.md",
+            "specs/model_source.md",
+            "specs/model_profile.md",
+            "specs/execution_mode.md",
+            "specs/execution_surface.md",
+            "specs/overrides.md",
+            "specs/execution_plan.md",
+            "specs/layer_boundaries.md",
+            "specs/semantic_protocol.md",
+            "specs/wire_format.md",
+            "specs/transport.md",
+            "specs/session_runtime.md",
+            "specs/provider.md",
+            "lib/req_llm_next.ex",
+            "lib/req_llm_next/model_resolver.ex",
+            "test/model_resolver_test.exs",
+            "test/req_llm_next_test.exs"
+          ],
+          "verification_minimum_strength": null
+        },
+        "title": "Architecture Direction"
+      },
+      {
+        "file": ".spec/specs/execution_mode.spec.md",
+        "id": "reqllm.execution_mode",
+        "meta": {
+          "decisions": [
+            "reqllm.decision.execution_mode_first_class"
+          ],
+          "id": "reqllm.execution_mode",
+          "kind": "execution_mode",
+          "status": "active",
+          "summary": "Canonical provider-agnostic request mode normalized before policy resolution.",
+          "surface": [
+            "specs/execution_mode.md",
+            "specs/operation_planner.md",
+            "specs/architecture.md"
+          ],
+          "verification_minimum_strength": null
+        },
+        "title": "Execution Mode"
+      },
+      {
+        "file": ".spec/specs/execution_plan.spec.md",
+        "id": "reqllm.execution_plan",
+        "meta": {
+          "decisions": [
+            "reqllm.decision.profile_descriptive_not_prescriptive",
+            "reqllm.decision.execution_mode_first_class",
+            "reqllm.decision.execution_surface_support_unit",
+            "reqllm.decision.five_scope_policy_rules"
+          ],
+          "id": "reqllm.execution_plan",
+          "kind": "execution_plan",
+          "status": "active",
+          "summary": "Single fully resolved runtime plan assembled from profile, mode, and policy rules.",
+          "surface": [
+            "specs/execution_plan.md",
+            "specs/operation_planner.md",
+            "specs/architecture.md"
+          ],
+          "verification_minimum_strength": null
+        },
+        "title": "Execution Plan"
+      },
+      {
+        "file": ".spec/specs/execution_surfaces.spec.md",
+        "id": "reqllm.execution_surfaces",
+        "meta": {
+          "decisions": [
+            "reqllm.decision.execution_surface_support_unit"
+          ],
+          "id": "reqllm.execution_surfaces",
+          "kind": "execution_surface",
+          "status": "active",
+          "summary": "Explicit named execution surfaces as the support unit for endpoint styles.",
+          "surface": [
+            "specs/execution_surface.md",
+            "specs/model_profile.md",
+            "specs/architecture.md"
+          ],
+          "verification_minimum_strength": null
+        },
+        "title": "Execution Surfaces"
+      },
+      {
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "id": "reqllm.layer_boundaries",
+        "meta": {
+          "decisions": [
+            "reqllm.decision.execution_layers",
+            "reqllm.decision.layer_scoped_plan_aware_adapters"
+          ],
+          "id": "reqllm.layer_boundaries",
+          "kind": "layer_boundaries",
+          "status": "active",
+          "summary": "Explicit handoff rules for provider, session runtime, transport, wire format, semantic protocol, and plan adapters.",
+          "surface": [
+            "specs/layer_boundaries.md",
+            "specs/semantic_protocol.md",
+            "specs/wire_format.md",
+            "specs/transport.md",
+            "specs/session_runtime.md",
+            "specs/provider.md",
+            "AGENTS.md"
+          ],
+          "verification_minimum_strength": null
+        },
+        "title": "Layer Boundaries"
+      },
+      {
+        "file": ".spec/specs/model_profile.spec.md",
+        "id": "reqllm.model_profile",
+        "meta": {
+          "decisions": [
+            "reqllm.decision.profile_descriptive_not_prescriptive",
+            "reqllm.decision.execution_surface_support_unit"
+          ],
+          "id": "reqllm.model_profile",
+          "kind": "model_profile",
+          "status": "active",
+          "summary": "Canonical descriptive model facts and execution-surface catalog.",
+          "surface": [
+            "specs/model_profile.md",
+            "specs/execution_surface.md",
+            "specs/architecture.md"
+          ],
+          "verification_minimum_strength": null
+        },
+        "title": "Model Profile"
+      },
+      {
+        "file": ".spec/specs/package.spec.md",
+        "id": "reqllm.package",
+        "meta": {
+          "decisions": null,
+          "id": "reqllm.package",
+          "kind": "package",
+          "status": "active",
+          "summary": "Metadata-driven LLM client runtime and test contract.",
+          "surface": [
+            "lib/**/*.ex",
+            "test/**/*.exs",
+            "test/fixtures/**/*.json"
+          ],
+          "verification_minimum_strength": null
+        },
+        "title": "Package Contract"
+      },
+      {
+        "file": ".spec/specs/policy_rules.spec.md",
+        "id": "reqllm.policy_rules",
+        "meta": {
+          "decisions": [
+            "reqllm.decision.five_scope_policy_rules",
+            "reqllm.decision.layer_scoped_plan_aware_adapters"
+          ],
+          "id": "reqllm.policy_rules",
+          "kind": "policy_rules",
+          "status": "active",
+          "summary": "Ordered match-and-patch policy rules plus capability-safe adapter references.",
+          "surface": [
+            "specs/overrides.md",
+            "specs/architecture.md",
+            "specs/operation_planner.md"
+          ],
+          "verification_minimum_strength": null
+        },
+        "title": "Policy Rules"
+      },
+      {
+        "file": ".spec/specs/spec_system.spec.md",
+        "id": "spec.system",
+        "meta": {
+          "decisions": null,
+          "id": "spec.system",
+          "kind": "policy",
+          "status": "active",
+          "summary": "Canonical workspace contract for authored specs and generated Spec Led state.",
+          "surface": [
+            ".spec/README.md",
+            ".spec/AGENTS.md",
+            ".spec/decisions/README.md",
+            ".spec/specs/*.spec.md",
+            ".spec/decisions/*.md"
+          ],
+          "verification_minimum_strength": null
+        },
+        "title": "Spec System"
+      },
+      {
+        "file": ".spec/specs/workflow.spec.md",
+        "id": "reqllm.workflow",
+        "meta": {
+          "decisions": null,
+          "id": "reqllm.workflow",
+          "kind": "workflow",
+          "status": "active",
+          "summary": "Contributor workflow contract for durable work tracking and current-truth maintenance.",
+          "surface": [
+            "README.md",
+            "AGENTS.md",
+            "mix.exs"
+          ],
+          "verification_minimum_strength": null
+        },
+        "title": "Contributor Workflow"
+      }
+    ],
+    "verifications": [
+      {
+        "covers": [
+          "reqllm.architecture.model_input_boundary",
+          "reqllm.architecture.facts_mode_policy_plan",
+          "reqllm.architecture.execution_layers"
+        ],
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "source_file",
+        "subject_id": "reqllm.architecture",
+        "target": "README.md"
+      },
+      {
+        "covers": [
+          "reqllm.architecture.model_input_boundary",
+          "reqllm.architecture.facts_mode_policy_plan",
+          "reqllm.architecture.execution_layers"
+        ],
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "source_file",
+        "subject_id": "reqllm.architecture",
+        "target": "AGENTS.md"
+      },
+      {
+        "covers": [
+          "reqllm.architecture.model_input_boundary",
+          "reqllm.architecture.facts_mode_policy_plan",
+          "reqllm.architecture.execution_layers"
+        ],
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "source_file",
+        "subject_id": "reqllm.architecture",
+        "target": "specs/architecture.md"
+      },
+      {
+        "covers": [
+          "reqllm.architecture.model_input_boundary"
+        ],
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "source_file",
+        "subject_id": "reqllm.architecture",
+        "target": "specs/model_source.md"
+      },
+      {
+        "covers": [
+          "reqllm.architecture.execution_layers"
+        ],
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "source_file",
+        "subject_id": "reqllm.architecture",
+        "target": "specs/wire_format.md"
+      },
+      {
+        "covers": [
+          "reqllm.architecture.model_input_boundary"
+        ],
+        "execute": true,
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.architecture",
+        "target": "mix test test/model_resolver_test.exs test/req_llm_next_test.exs"
+      },
+      {
+        "covers": [
+          "reqllm.execution_mode.normalized_shape",
+          "reqllm.execution_mode.mode_hints_before_policy"
+        ],
+        "file": ".spec/specs/execution_mode.spec.md",
+        "kind": "source_file",
+        "subject_id": "reqllm.execution_mode",
+        "target": "specs/execution_mode.md"
+      },
+      {
+        "covers": [
+          "reqllm.execution_plan.prescriptive_object",
+          "reqllm.execution_plan.surface_and_fallbacks"
+        ],
+        "file": ".spec/specs/execution_plan.spec.md",
+        "kind": "source_file",
+        "subject_id": "reqllm.execution_plan",
+        "target": "specs/execution_plan.md"
+      },
+      {
+        "covers": [
+          "reqllm.execution_plan.planner_owns_assembly"
+        ],
+        "file": ".spec/specs/execution_plan.spec.md",
+        "kind": "source_file",
+        "subject_id": "reqllm.execution_plan",
+        "target": "specs/operation_planner.md"
+      },
+      {
+        "covers": [
+          "reqllm.execution_surfaces.support_unit",
+          "reqllm.execution_surfaces.non_cartesian"
+        ],
+        "file": ".spec/specs/execution_surfaces.spec.md",
+        "kind": "source_file",
+        "subject_id": "reqllm.execution_surfaces",
+        "target": "specs/execution_surface.md"
+      },
+      {
+        "covers": [
+          "reqllm.layer_boundaries.separated_io",
+          "reqllm.layer_boundaries.plan_aware_adapters"
+        ],
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "source_file",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "specs/layer_boundaries.md"
+      },
+      {
+        "covers": [
+          "reqllm.layer_boundaries.separated_io"
+        ],
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "source_file",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "specs/semantic_protocol.md"
+      },
+      {
+        "covers": [
+          "reqllm.layer_boundaries.separated_io"
+        ],
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "source_file",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "specs/wire_format.md"
+      },
+      {
+        "covers": [
+          "reqllm.layer_boundaries.separated_io"
+        ],
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "source_file",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "specs/transport.md"
+      },
+      {
+        "covers": [
+          "reqllm.layer_boundaries.separated_io"
+        ],
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "source_file",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "specs/session_runtime.md"
+      },
+      {
+        "covers": [
+          "reqllm.layer_boundaries.separated_io"
+        ],
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "source_file",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "specs/provider.md"
+      },
+      {
+        "covers": [
+          "reqllm.layer_boundaries.plan_aware_adapters"
+        ],
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "source_file",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "AGENTS.md"
+      },
+      {
+        "covers": [
+          "reqllm.model_profile.descriptive_facts",
+          "reqllm.model_profile.execution_surfaces_declared"
+        ],
+        "file": ".spec/specs/model_profile.spec.md",
+        "kind": "source_file",
+        "subject_id": "reqllm.model_profile",
+        "target": "specs/model_profile.md"
+      },
+      {
+        "covers": [
+          "reqllm.package.multi_provider_api",
+          "reqllm.package.fixture_replay"
+        ],
+        "execute": true,
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.package",
+        "target": "mix test"
+      },
+      {
+        "covers": [
+          "reqllm.policy_rules.five_scopes",
+          "reqllm.policy_rules.match_patch",
+          "reqllm.policy_rules.capability_safe"
+        ],
+        "file": ".spec/specs/policy_rules.spec.md",
+        "kind": "source_file",
+        "subject_id": "reqllm.policy_rules",
+        "target": "specs/overrides.md"
+      },
+      {
+        "covers": [
+          "reqllm.workflow.beadwork_primed",
+          "reqllm.workflow.specled_loop"
+        ],
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "source_file",
+        "subject_id": "reqllm.workflow",
+        "target": "README.md"
+      },
+      {
+        "covers": [
+          "reqllm.workflow.agent_instructions"
+        ],
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "source_file",
+        "subject_id": "reqllm.workflow",
+        "target": "AGENTS.md"
+      },
+      {
+        "covers": [
+          "reqllm.workflow.beadwork_primed"
+        ],
+        "execute": true,
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.workflow",
+        "target": "bw prime"
+      },
+      {
+        "covers": [
+          "reqllm.workflow.specled_loop",
+          "reqllm.workflow.agent_instructions"
+        ],
+        "execute": true,
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.workflow",
+        "target": "mix spec.prime --base HEAD"
+      },
+      {
+        "covers": [
+          "spec.workspace.readme_present"
+        ],
+        "file": ".spec/specs/spec_system.spec.md",
+        "kind": "source_file",
+        "subject_id": "spec.system",
+        "target": ".spec/README.md"
+      },
+      {
+        "covers": [
+          "spec.workspace.agents_present",
+          "spec.workspace.agent_prime_context"
+        ],
+        "file": ".spec/specs/spec_system.spec.md",
+        "kind": "source_file",
+        "subject_id": "spec.system",
+        "target": ".spec/AGENTS.md"
+      },
+      {
+        "covers": [
+          "spec.workspace.decisions_readme_present"
+        ],
+        "file": ".spec/specs/spec_system.spec.md",
+        "kind": "source_file",
+        "subject_id": "spec.system",
+        "target": ".spec/decisions/README.md"
+      },
+      {
+        "covers": [
+          "spec.workspace.state_generated"
+        ],
+        "file": ".spec/specs/spec_system.spec.md",
+        "kind": "command",
+        "subject_id": "spec.system",
+        "target": "mix spec.index"
+      },
+      {
+        "covers": [
+          "spec.workspace.state_generated"
+        ],
+        "file": ".spec/specs/spec_system.spec.md",
+        "kind": "command",
+        "subject_id": "spec.system",
+        "target": "mix spec.validate"
+      }
+    ]
+  },
+  "specification_version": "1.0",
+  "summary": {
+    "decision_parse_errors": 0,
+    "decisions": 7,
+    "exceptions": 0,
+    "findings": 0,
+    "requirements": 27,
+    "scenarios": 0,
+    "subjects": 10,
+    "verifications": 29
+  },
+  "verification": {
+    "claims": [
+      {
+        "cover_id": "reqllm.architecture.execution_layers",
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.architecture",
+        "target": "README.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.architecture.facts_mode_policy_plan",
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.architecture",
+        "target": "README.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.architecture.model_input_boundary",
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.architecture",
+        "target": "README.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.architecture.execution_layers",
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.architecture",
+        "target": "AGENTS.md",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.architecture.facts_mode_policy_plan",
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.architecture",
+        "target": "AGENTS.md",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.architecture.model_input_boundary",
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.architecture",
+        "target": "AGENTS.md",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.architecture.execution_layers",
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.architecture",
+        "target": "specs/architecture.md",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.architecture.facts_mode_policy_plan",
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.architecture",
+        "target": "specs/architecture.md",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.architecture.model_input_boundary",
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.architecture",
+        "target": "specs/architecture.md",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.architecture.model_input_boundary",
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.architecture",
+        "target": "specs/model_source.md",
+        "verification_index": 3
+      },
+      {
+        "cover_id": "reqllm.architecture.execution_layers",
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.architecture",
+        "target": "specs/wire_format.md",
+        "verification_index": 4
+      },
+      {
+        "cover_id": "reqllm.architecture.model_input_boundary",
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.architecture",
+        "target": "mix test test/model_resolver_test.exs test/req_llm_next_test.exs",
+        "verification_index": 5
+      },
+      {
+        "cover_id": "reqllm.execution_mode.mode_hints_before_policy",
+        "file": ".spec/specs/execution_mode.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.execution_mode",
+        "target": "specs/execution_mode.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.execution_mode.normalized_shape",
+        "file": ".spec/specs/execution_mode.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.execution_mode",
+        "target": "specs/execution_mode.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.execution_plan.prescriptive_object",
+        "file": ".spec/specs/execution_plan.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.execution_plan",
+        "target": "specs/execution_plan.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.execution_plan.surface_and_fallbacks",
+        "file": ".spec/specs/execution_plan.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.execution_plan",
+        "target": "specs/execution_plan.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.execution_plan.planner_owns_assembly",
+        "file": ".spec/specs/execution_plan.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.execution_plan",
+        "target": "specs/operation_planner.md",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.execution_surfaces.non_cartesian",
+        "file": ".spec/specs/execution_surfaces.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.execution_surfaces",
+        "target": "specs/execution_surface.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.execution_surfaces.support_unit",
+        "file": ".spec/specs/execution_surfaces.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.execution_surfaces",
+        "target": "specs/execution_surface.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.layer_boundaries.plan_aware_adapters",
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "specs/layer_boundaries.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.layer_boundaries.separated_io",
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "specs/layer_boundaries.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.layer_boundaries.separated_io",
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "specs/semantic_protocol.md",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.layer_boundaries.separated_io",
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "specs/wire_format.md",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.layer_boundaries.separated_io",
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "specs/transport.md",
+        "verification_index": 3
+      },
+      {
+        "cover_id": "reqllm.layer_boundaries.separated_io",
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "specs/session_runtime.md",
+        "verification_index": 4
+      },
+      {
+        "cover_id": "reqllm.layer_boundaries.separated_io",
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "specs/provider.md",
+        "verification_index": 5
+      },
+      {
+        "cover_id": "reqllm.layer_boundaries.plan_aware_adapters",
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "AGENTS.md",
+        "verification_index": 6
+      },
+      {
+        "cover_id": "reqllm.model_profile.descriptive_facts",
+        "file": ".spec/specs/model_profile.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.model_profile",
+        "target": "specs/model_profile.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.model_profile.execution_surfaces_declared",
+        "file": ".spec/specs/model_profile.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.model_profile",
+        "target": "specs/model_profile.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.package.fixture_replay",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.package.multi_provider_api",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.policy_rules.capability_safe",
+        "file": ".spec/specs/policy_rules.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.policy_rules",
+        "target": "specs/overrides.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.policy_rules.five_scopes",
+        "file": ".spec/specs/policy_rules.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.policy_rules",
+        "target": "specs/overrides.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.policy_rules.match_patch",
+        "file": ".spec/specs/policy_rules.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.policy_rules",
+        "target": "specs/overrides.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.workflow.beadwork_primed",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.workflow",
+        "target": "README.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.workflow.specled_loop",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.workflow",
+        "target": "README.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.workflow.agent_instructions",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.workflow",
+        "target": "AGENTS.md",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.workflow.beadwork_primed",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.workflow",
+        "target": "bw prime",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.workflow.agent_instructions",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.workflow",
+        "target": "mix spec.prime --base HEAD",
+        "verification_index": 3
+      },
+      {
+        "cover_id": "reqllm.workflow.specled_loop",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.workflow",
+        "target": "mix spec.prime --base HEAD",
+        "verification_index": 3
+      },
+      {
+        "cover_id": "spec.workspace.readme_present",
+        "file": ".spec/specs/spec_system.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "spec.system",
+        "target": ".spec/README.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "spec.workspace.agent_prime_context",
+        "file": ".spec/specs/spec_system.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "spec.system",
+        "target": ".spec/AGENTS.md",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "spec.workspace.agents_present",
+        "file": ".spec/specs/spec_system.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "spec.system",
+        "target": ".spec/AGENTS.md",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "spec.workspace.decisions_readme_present",
+        "file": ".spec/specs/spec_system.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "spec.system",
+        "target": ".spec/decisions/README.md",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "spec.workspace.state_generated",
+        "file": ".spec/specs/spec_system.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "claimed",
+        "subject_id": "spec.system",
+        "target": "mix spec.index",
+        "verification_index": 3
+      },
+      {
+        "cover_id": "spec.workspace.state_generated",
+        "file": ".spec/specs/spec_system.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "claimed",
+        "subject_id": "spec.system",
+        "target": "mix spec.validate",
+        "verification_index": 4
+      }
+    ],
+    "cli_minimum_strength": null,
+    "default_minimum_strength": "claimed",
+    "strength_summary": {
+      "claimed": 2,
+      "executed": 6,
+      "linked": 38
+    },
+    "threshold_failures": 0
+  },
+  "workspace": {
+    "decision_count": 7,
+    "spec_count": 10
+  }
+}
