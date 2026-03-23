@@ -92,3 +92,15 @@ Then use the default loop:
 mix spec.next
 mix spec.check --base HEAD
 ```
+
+For the current starter slice, use replay-backed verification by default:
+
+```bash
+mix test.starter_slice
+```
+
+When live API keys are available and you want to refresh fixtures for that slice:
+
+```bash
+REQ_LLM_NEXT_FIXTURES_MODE=record mix test.starter_slice
+```

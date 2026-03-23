@@ -27,7 +27,8 @@
       {
         "affects": [
           "reqllm.architecture",
-          "reqllm.package"
+          "reqllm.package",
+          "reqllm.workflow"
         ],
         "date": "2026-03-23",
         "file": ".spec/decisions/execution_plan_bridge.md",
@@ -302,6 +303,14 @@
         "subject_id": "reqllm.workflow"
       },
       {
+        "file": ".spec/specs/workflow.spec.md",
+        "id": "reqllm.workflow.starter_slice_verification",
+        "priority": "should",
+        "stability": "evolving",
+        "statement": "Contributor workflow shall provide a named verification entry point for the current starter-model slice so replay-backed checks and live fixture refreshes use the same scenario and coverage path.",
+        "subject_id": "reqllm.workflow"
+      },
+      {
         "file": ".spec/specs/spec_system.spec.md",
         "id": "spec.workspace.agent_prime_context",
         "priority": "should",
@@ -361,7 +370,7 @@
           "id": "reqllm.architecture",
           "kind": "architecture",
           "status": "active",
-          "summary": "Current-truth runtime boundary and layer-separation contract for model input and execution flow, including handcrafted `LLMDB.Model` support at the boundary and supporting package-thesis guides.",
+          "summary": "Current-truth runtime boundary and layer-separation contract for model input and execution flow, including handcrafted `LLMDB.Model` support at the boundary, supporting package-thesis guides, and the deterministic planning bridge that drives starter model slices.",
           "surface": [
             "README.md",
             "AGENTS.md",
@@ -805,6 +814,16 @@
       },
       {
         "covers": [
+          "reqllm.package.model_slice_verification"
+        ],
+        "execute": true,
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.package",
+        "target": "mix test.starter_slice"
+      },
+      {
+        "covers": [
           "reqllm.policy_rules.five_scopes",
           "reqllm.policy_rules.match_patch",
           "reqllm.policy_rules.capability_safe"
@@ -853,6 +872,16 @@
         "kind": "command",
         "subject_id": "reqllm.workflow",
         "target": "mix spec.prime --base HEAD"
+      },
+      {
+        "covers": [
+          "reqllm.workflow.starter_slice_verification"
+        ],
+        "execute": true,
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.workflow",
+        "target": "mix test.starter_slice"
       },
       {
         "covers": [
@@ -908,10 +937,10 @@
     "decisions": 8,
     "exceptions": 0,
     "findings": 0,
-    "requirements": 30,
+    "requirements": 31,
     "scenarios": 0,
     "subjects": 10,
-    "verifications": 32
+    "verifications": 34
   },
   "verification": {
     "claims": [
@@ -1312,6 +1341,17 @@
         "verification_index": 3
       },
       {
+        "cover_id": "reqllm.package.model_slice_verification",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test.starter_slice",
+        "verification_index": 4
+      },
+      {
         "cover_id": "reqllm.policy_rules.capability_safe",
         "file": ".spec/specs/policy_rules.spec.md",
         "kind": "source_file",
@@ -1411,6 +1451,17 @@
         "verification_index": 3
       },
       {
+        "cover_id": "reqllm.workflow.starter_slice_verification",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.workflow",
+        "target": "mix test.starter_slice",
+        "verification_index": 4
+      },
+      {
         "cover_id": "spec.workspace.readme_present",
         "file": ".spec/specs/spec_system.spec.md",
         "kind": "source_file",
@@ -1481,7 +1532,7 @@
     "default_minimum_strength": "claimed",
     "strength_summary": {
       "claimed": 2,
-      "executed": 10,
+      "executed": 12,
       "linked": 39
     },
     "threshold_failures": 0

@@ -31,6 +31,11 @@ surface:
   statement: Repository agent instructions shall direct agents to run bw prime before work and mix spec.prime --base HEAD before editing current-truth package guidance.
   priority: must
   stability: evolving
+
+- id: reqllm.workflow.starter_slice_verification
+  statement: Contributor workflow shall provide a named verification entry point for the current starter-model slice so replay-backed checks and live fixture refreshes use the same scenario and coverage path.
+  priority: should
+  stability: evolving
 ```
 
 ## Verification
@@ -59,4 +64,10 @@ surface:
   covers:
     - reqllm.workflow.specled_loop
     - reqllm.workflow.agent_instructions
+
+- kind: command
+  target: mix test.starter_slice
+  execute: true
+  covers:
+    - reqllm.workflow.starter_slice_verification
 ```

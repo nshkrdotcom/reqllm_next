@@ -38,7 +38,8 @@ defmodule ReqLlmNext.MixProject do
       preferred_envs: [
         "test.live": :test,
         "test.all": :test,
-        "test.parity": :test
+        "test.parity": :test,
+        "test.starter_slice": :test
       ]
     ]
   end
@@ -86,7 +87,10 @@ defmodule ReqLlmNext.MixProject do
       test: ["test --exclude integration --exclude live --exclude slow"],
       "test.live": ["test --include live --exclude slow"],
       "test.all": ["test --include integration --include live --include slow"],
-      "test.parity": ["test --only parity"]
+      "test.parity": ["test --only parity"],
+      "test.starter_slice": [
+        "test test/model_slices test/coverage/anthropic_comprehensive_test.exs test/coverage/openai_comprehensive_test.exs"
+      ]
     ]
   end
 end

@@ -65,4 +65,10 @@ surface:
   execute: true
   covers:
     - reqllm.package.model_slice_verification
+
+- kind: command
+  target: mix test.starter_slice
+  execute: true
+  covers:
+    - reqllm.package.model_slice_verification
 ```

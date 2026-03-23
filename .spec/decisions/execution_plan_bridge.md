@@ -5,6 +5,7 @@ date: 2026-03-23
 affects:
   - reqllm.architecture
   - reqllm.package
+  - reqllm.workflow
 ---
 
 # Introduce a Deterministic Planning Bridge Before Rewriting Execution Layers
@@ -36,3 +37,5 @@ The planner becomes the single place where request behavior is selected, which l
 Future refactors can split provider, wire format, semantic protocol, and transport behind the planning boundary while keeping the public API, fixtures, and scenarios stable.
 
 This also gives fixtures and compatibility tests a stable plan-level object to verify against as the lower execution layers continue to evolve.
+
+The contributor workflow can expose starter-model verification as a named command because the deterministic planning bridge keeps those slice tests anchored to explicit execution surfaces instead of implicit legacy resolver behavior.
