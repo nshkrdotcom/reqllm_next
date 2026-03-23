@@ -26,12 +26,21 @@ surface:
   - specs/session_runtime.md
   - specs/provider.md
   - lib/req_llm_next.ex
+  - lib/req_llm_next/execution_mode.ex
+  - lib/req_llm_next/execution_plan.ex
+  - lib/req_llm_next/execution_surface.ex
+  - lib/req_llm_next/model_profile.ex
   - lib/req_llm_next/model_resolver.ex
+  - lib/req_llm_next/operation_planner.ex
+  - lib/req_llm_next/policy_rules.ex
+  - lib/req_llm_next/execution_modules.ex
   - test/model_resolver_test.exs
+  - test/operation_planner_test.exs
   - test/req_llm_next_test.exs
 decisions:
   - reqllm.decision.model_input_boundary
   - reqllm.decision.execution_layers
+  - reqllm.decision.execution_plan_bridge
   - reqllm.decision.profile_descriptive_not_prescriptive
   - reqllm.decision.execution_mode_first_class
   - reqllm.decision.execution_surface_support_unit

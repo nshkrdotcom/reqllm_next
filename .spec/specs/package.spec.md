@@ -25,6 +25,11 @@ surface:
   statement: ReqLlmNext shall verify package behavior with deterministic automated tests that exercise provider scenarios and replay recorded fixtures by default.
   priority: must
   stability: evolving
+
+- id: reqllm.package.execution_planning
+  statement: ReqLlmNext shall route supported requests through a deterministic planning path that normalizes model facts into `ModelProfile`, request intent into `ExecutionMode`, selects explicit `ExecutionSurface` support, and materializes an `ExecutionPlan` before executing provider and wire bridges.
+  priority: must
+  stability: evolving
 ```
 
 ## Verification
@@ -36,4 +41,11 @@ surface:
   covers:
     - reqllm.package.multi_provider_api
     - reqllm.package.fixture_replay
+    - reqllm.package.execution_planning
+
+- kind: command
+  target: mix test test/operation_planner_test.exs
+  execute: true
+  covers:
+    - reqllm.package.execution_planning
 ```

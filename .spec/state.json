@@ -27,6 +27,17 @@
       {
         "affects": [
           "reqllm.architecture",
+          "reqllm.package"
+        ],
+        "date": "2026-03-23",
+        "file": ".spec/decisions/execution_plan_bridge.md",
+        "id": "reqllm.decision.execution_plan_bridge",
+        "status": "accepted",
+        "title": "Introduce a Deterministic Planning Bridge Before Rewriting Execution Layers"
+      },
+      {
+        "affects": [
+          "reqllm.architecture",
           "reqllm.model_profile",
           "reqllm.execution_surfaces",
           "reqllm.execution_plan"
@@ -212,6 +223,14 @@
       },
       {
         "file": ".spec/specs/package.spec.md",
+        "id": "reqllm.package.execution_planning",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "ReqLlmNext shall route supported requests through a deterministic planning path that normalizes model facts into `ModelProfile`, request intent into `ExecutionMode`, selects explicit `ExecutionSurface` support, and materializes an `ExecutionPlan` before executing provider and wire bridges.",
+        "subject_id": "reqllm.package"
+      },
+      {
+        "file": ".spec/specs/package.spec.md",
         "id": "reqllm.package.fixture_replay",
         "priority": "must",
         "stability": "evolving",
@@ -324,6 +343,7 @@
           "decisions": [
             "reqllm.decision.model_input_boundary",
             "reqllm.decision.execution_layers",
+            "reqllm.decision.execution_plan_bridge",
             "reqllm.decision.profile_descriptive_not_prescriptive",
             "reqllm.decision.execution_mode_first_class",
             "reqllm.decision.execution_surface_support_unit",
@@ -353,8 +373,16 @@
             "specs/session_runtime.md",
             "specs/provider.md",
             "lib/req_llm_next.ex",
+            "lib/req_llm_next/execution_mode.ex",
+            "lib/req_llm_next/execution_plan.ex",
+            "lib/req_llm_next/execution_surface.ex",
+            "lib/req_llm_next/model_profile.ex",
             "lib/req_llm_next/model_resolver.ex",
+            "lib/req_llm_next/operation_planner.ex",
+            "lib/req_llm_next/policy_rules.ex",
+            "lib/req_llm_next/execution_modules.ex",
             "test/model_resolver_test.exs",
+            "test/operation_planner_test.exs",
             "test/req_llm_next_test.exs"
           ],
           "verification_minimum_strength": null
@@ -728,13 +756,24 @@
       {
         "covers": [
           "reqllm.package.multi_provider_api",
-          "reqllm.package.fixture_replay"
+          "reqllm.package.fixture_replay",
+          "reqllm.package.execution_planning"
         ],
         "execute": true,
         "file": ".spec/specs/package.spec.md",
         "kind": "command",
         "subject_id": "reqllm.package",
         "target": "mix test"
+      },
+      {
+        "covers": [
+          "reqllm.package.execution_planning"
+        ],
+        "execute": true,
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/operation_planner_test.exs"
       },
       {
         "covers": [
@@ -838,13 +877,13 @@
   "specification_version": "1.0",
   "summary": {
     "decision_parse_errors": 0,
-    "decisions": 7,
+    "decisions": 8,
     "exceptions": 0,
     "findings": 0,
-    "requirements": 28,
+    "requirements": 29,
     "scenarios": 0,
     "subjects": 10,
-    "verifications": 29
+    "verifications": 30
   },
   "verification": {
     "claims": [
@@ -1179,6 +1218,17 @@
         "verification_index": 0
       },
       {
+        "cover_id": "reqllm.package.execution_planning",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test",
+        "verification_index": 0
+      },
+      {
         "cover_id": "reqllm.package.fixture_replay",
         "file": ".spec/specs/package.spec.md",
         "kind": "command",
@@ -1199,6 +1249,17 @@
         "subject_id": "reqllm.package",
         "target": "mix test",
         "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.package.execution_planning",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/operation_planner_test.exs",
+        "verification_index": 1
       },
       {
         "cover_id": "reqllm.policy_rules.capability_safe",
@@ -1370,13 +1431,13 @@
     "default_minimum_strength": "claimed",
     "strength_summary": {
       "claimed": 2,
-      "executed": 6,
+      "executed": 8,
       "linked": 39
     },
     "threshold_failures": 0
   },
   "workspace": {
-    "decision_count": 7,
+    "decision_count": 8,
     "spec_count": 10
   }
 }

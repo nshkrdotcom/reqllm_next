@@ -14,19 +14,19 @@ defmodule ReqLlmNext.Executor do
   alias ReqLlmNext.Adapters.Pipeline, as: AdapterPipeline
 
   alias ReqLlmNext.{
-    Constraints,
     Context,
+    ExecutionModules,
     Error,
     Fixtures,
     ModelResolver,
+    OperationPlanner,
     Response,
     Schema,
-    StreamResponse,
-    Validation
+    StreamResponse
   }
 
   alias ReqLlmNext.Executor.StreamState
-  alias ReqLlmNext.Wire.{Resolver, Streaming}
+  alias ReqLlmNext.Wire.Streaming
 
   @default_stream_timeout Application.compile_env(:req_llm_next, :stream_timeout, 30_000)
 
@@ -61,18 +61,26 @@ defmodule ReqLlmNext.Executor do
           {:ok, StreamResponse.t()} | {:error, term()}
   def stream_text(model_spec, prompt, opts \\ []) do
     with {:ok, model} <- ModelResolver.resolve(model_spec),
-         :ok <- Validation.validate_stream!(model, prompt, opts),
-         opts <- Constraints.apply(model, opts),
-         opts <- AdapterPipeline.apply(model, opts),
-         %{provider_mod: provider_mod, wire_mod: wire_mod} <- Resolver.resolve!(model) do
-      case Fixtures.maybe_replay_stream(model, prompt, opts) do
+         {:ok, plan} <-
+           OperationPlanner.plan(
+             model,
+             :text,
+             prompt,
+             opts
+             |> Keyword.put(:_stream?, true)
+             |> Keyword.put(:_model_spec, inspect_model_spec(model_spec))
+           ),
+         runtime_opts <- runtime_opts(plan, model),
+         %{provider_mod: provider_mod, wire_mod: wire_mod} <- ExecutionModules.resolve(plan) do
+      case Fixtures.maybe_replay_stream(model, prompt, runtime_opts) do
         {:ok, replay_stream} ->
           {:ok, %StreamResponse{stream: replay_stream, model: model}}
 
         :no_fixture ->
           with {:ok, finch_request} <-
-                 Streaming.build_request(provider_mod, wire_mod, model, prompt, opts),
-               {:ok, stream} <- start_stream(finch_request, model, wire_mod, prompt, opts) do
+                 Streaming.build_request(provider_mod, wire_mod, model, prompt, runtime_opts),
+               {:ok, stream} <-
+                 start_stream(finch_request, model, wire_mod, prompt, runtime_opts) do
             {:ok, %StreamResponse{stream: stream, model: model}}
           end
       end
@@ -83,23 +91,25 @@ defmodule ReqLlmNext.Executor do
           {:ok, StreamResponse.t()} | {:error, term()}
   def stream_object(model_spec, prompt, object_schema, opts \\ []) do
     with {:ok, model} <- ModelResolver.resolve(model_spec),
-         :ok <- Validation.validate_stream!(model, prompt, opts),
          {:ok, compiled_schema} <- ReqLlmNext.Schema.compile(object_schema),
-         opts <-
+         planning_opts <-
            opts
            |> Keyword.put(:operation, :object)
-           |> Keyword.put(:compiled_schema, compiled_schema),
-         opts <- Constraints.apply(model, opts),
-         opts <- AdapterPipeline.apply(model, opts),
-         %{provider_mod: provider_mod, wire_mod: wire_mod} <- Resolver.resolve!(model) do
-      case Fixtures.maybe_replay_stream(model, prompt, opts) do
+           |> Keyword.put(:compiled_schema, compiled_schema)
+           |> Keyword.put(:_stream?, true)
+           |> Keyword.put(:_model_spec, inspect_model_spec(model_spec)),
+         {:ok, plan} <- OperationPlanner.plan(model, :object, prompt, planning_opts),
+         runtime_opts <- runtime_opts(plan, model),
+         %{provider_mod: provider_mod, wire_mod: wire_mod} <- ExecutionModules.resolve(plan) do
+      case Fixtures.maybe_replay_stream(model, prompt, runtime_opts) do
         {:ok, replay_stream} ->
           {:ok, %StreamResponse{stream: replay_stream, model: model}}
 
         :no_fixture ->
           with {:ok, finch_request} <-
-                 Streaming.build_request(provider_mod, wire_mod, model, prompt, opts),
-               {:ok, stream} <- start_stream(finch_request, model, wire_mod, prompt, opts) do
+                 Streaming.build_request(provider_mod, wire_mod, model, prompt, runtime_opts),
+               {:ok, stream} <-
+                 start_stream(finch_request, model, wire_mod, prompt, runtime_opts) do
             {:ok, %StreamResponse{stream: stream, model: model}}
           end
       end
@@ -259,14 +269,30 @@ defmodule ReqLlmNext.Executor do
           {:ok, [float()] | [[float()]]} | {:error, term()}
   def embed(model_spec, input, opts \\ []) do
     with {:ok, model} <- ModelResolver.resolve(model_spec),
-         :ok <- Validation.validate!(model, :embed, nil, opts),
          :ok <- validate_embedding_input(input),
-         %{provider_mod: provider_mod, wire_mod: wire_mod} <- Resolver.resolve!(model, :embed),
+         {:ok, plan} <-
+           OperationPlanner.plan(
+             model,
+             :embed,
+             input,
+             opts |> Keyword.put(:_model_spec, inspect_model_spec(model_spec))
+           ),
+         runtime_opts <- runtime_opts(plan, model),
+         %{provider_mod: provider_mod, wire_mod: wire_mod} <- ExecutionModules.resolve(plan),
          {:ok, raw_response} <-
-           execute_embedding_request(provider_mod, wire_mod, model, input, opts) do
+           execute_embedding_request(provider_mod, wire_mod, model, input, runtime_opts) do
       wire_mod.extract_embeddings(raw_response, input)
     end
   end
+
+  defp runtime_opts(plan, model) do
+    plan.parameter_values
+    |> Enum.into([])
+    |> then(&AdapterPipeline.apply_modules(plan.plan_adapters, model, &1))
+  end
+
+  defp inspect_model_spec(model_spec) when is_binary(model_spec), do: model_spec
+  defp inspect_model_spec(_), do: nil
 
   defp validate_embedding_input("") do
     {:error, Error.Invalid.Parameter.exception(parameter: "input: cannot be empty")}
