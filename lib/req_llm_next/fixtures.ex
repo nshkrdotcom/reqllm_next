@@ -75,7 +75,17 @@ defmodule ReqLlmNext.Fixtures do
     end
   end
 
-  defp build_replay_stream(%{"chunks" => chunks}, wire_mod, model) do
+  defp build_replay_stream(%{"chunks" => chunks} = fixture, wire_mod, model) do
+    case request_transport(fixture) do
+      "websocket" ->
+        build_websocket_replay_stream(chunks, wire_mod, model)
+
+      _ ->
+        build_sse_replay_stream(chunks, wire_mod, model)
+    end
+  end
+
+  defp build_sse_replay_stream(chunks, wire_mod, model) do
     Stream.resource(
       fn -> {chunks, ""} end,
       fn
@@ -98,6 +108,27 @@ defmodule ReqLlmNext.Fixtures do
     )
   end
 
+  defp build_websocket_replay_stream(chunks, wire_mod, model) do
+    Stream.resource(
+      fn -> chunks end,
+      fn
+        [] ->
+          {:halt, nil}
+
+        [b64_chunk | rest] ->
+          raw_data = Base.decode64!(b64_chunk)
+
+          text_chunks =
+            %{data: raw_data}
+            |> wire_mod.decode_sse_event(model)
+            |> Enum.reject(&is_nil/1)
+
+          {text_chunks, rest}
+      end,
+      fn _ -> :ok end
+    )
+  end
+
   defp replay_wire_module(%{"request" => %{"url" => url}}, model) when is_binary(url) do
     cond do
       String.contains?(url, "/v1/chat/completions") -> ReqLlmNext.Wire.OpenAIChat
@@ -112,12 +143,12 @@ defmodule ReqLlmNext.Fixtures do
   @doc """
   Create a recorder struct to capture Finch stream data.
   """
-  def start_recorder(model, fixture_name, prompt, finch_request) do
+  def start_recorder(model, fixture_name, prompt, request) do
     %{
       model: model,
       fixture_name: fixture_name,
       prompt: prompt,
-      request: extract_request_info(finch_request),
+      request: extract_request_info(request),
       status: nil,
       headers: %{},
       chunks: [],
@@ -133,6 +164,7 @@ defmodule ReqLlmNext.Fixtures do
     %{
       "method" => to_string(req.method) |> String.upcase(),
       "url" => url,
+      "transport" => infer_transport(req),
       "headers" => redact_headers(req.headers),
       "body" => %{
         "b64" => Base.encode64(body_binary),
@@ -141,8 +173,61 @@ defmodule ReqLlmNext.Fixtures do
     }
   end
 
+  defp extract_request_info(request) when is_map(request) do
+    headers = Map.get(request, "headers") || Map.get(request, :headers) || []
+    body = Map.get(request, "body") || Map.get(request, :body) || %{}
+
+    %{
+      "method" =>
+        request
+        |> Map.get("method", Map.get(request, :method, "WEBSOCKET"))
+        |> to_string()
+        |> String.upcase(),
+      "url" => request |> Map.get("url", Map.get(request, :url)) |> to_string(),
+      "transport" =>
+        request
+        |> Map.get("transport", Map.get(request, :transport, "websocket"))
+        |> to_string(),
+      "headers" => redact_headers(headers),
+      "body" => normalize_body(body)
+    }
+  end
+
+  defp infer_transport(%Finch.Request{} = req) do
+    headers = Map.new(req.headers)
+
+    case headers["Accept"] || headers["accept"] do
+      "text/event-stream" -> "http_sse"
+      _ -> "http"
+    end
+  end
+
+  defp normalize_body(%{"b64" => _encoded, "canonical_json" => _json} = body), do: body
+
+  defp normalize_body(%{b64: _encoded, canonical_json: _json} = body) do
+    %{
+      "b64" => body.b64,
+      "canonical_json" => body.canonical_json
+    }
+  end
+
+  defp normalize_body(binary) when is_binary(binary) do
+    %{
+      "b64" => Base.encode64(binary),
+      "canonical_json" => safe_decode_json(binary)
+    }
+  end
+
+  defp normalize_body(body) when is_map(body) do
+    %{
+      "b64" => body |> Jason.encode!() |> Base.encode64(),
+      "canonical_json" => body
+    }
+  end
+
   defp redact_headers(headers) do
     headers
+    |> normalize_headers()
     |> Enum.map(fn {k, v} ->
       key = String.downcase(to_string(k))
 
@@ -158,6 +243,10 @@ defmodule ReqLlmNext.Fixtures do
     |> Enum.sort_by(fn {k, _v} -> k end)
     |> Map.new()
   end
+
+  defp normalize_headers(headers) when is_map(headers), do: Map.to_list(headers)
+  defp normalize_headers(headers) when is_list(headers), do: headers
+  defp normalize_headers(_), do: []
 
   defp safe_decode_json(binary) do
     case Jason.decode(binary) do
@@ -209,4 +298,9 @@ defmodule ReqLlmNext.Fixtures do
     File.write!(fixture_path, Jason.encode!(fixture, pretty: true))
     :ok
   end
+
+  defp request_transport(%{"request" => %{"transport" => transport}}) when is_binary(transport),
+    do: transport
+
+  defp request_transport(_fixture), do: "http_sse"
 end

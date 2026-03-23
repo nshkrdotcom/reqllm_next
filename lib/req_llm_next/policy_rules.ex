@@ -47,6 +47,16 @@ defmodule ReqLlmNext.PolicyRules do
     end)
   end
 
+  defp prefer_surface(surfaces, %ReqLlmNext.ExecutionMode{transport: transport} = mode)
+       when transport in [:http_sse, :websocket] do
+    surfaces
+    |> Enum.filter(&(&1.transport == transport))
+    |> case do
+      [] -> prefer_surface(surfaces, %{mode | transport: :default})
+      matching -> prefer_surface(matching, %{mode | transport: :default})
+    end
+  end
+
   defp prefer_surface(surfaces, _mode), do: hd(surfaces)
 
   defp timeout_class(%ReqLlmNext.ExecutionMode{latency_class: :long_running}), do: :long_running

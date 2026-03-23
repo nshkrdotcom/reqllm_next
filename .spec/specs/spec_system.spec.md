@@ -2,11 +2,13 @@
 
 This subject defines the contract for the `.spec` workspace itself.
 
+<!-- covers: spec.workspace.readme_present spec.workspace.agents_present spec.workspace.agent_prime_context spec.workspace.decisions_readme_present spec.workspace.state_generated spec.workspace.single_home -->
+
 ```spec-meta
 id: spec.system
 kind: policy
 status: active
-summary: Canonical workspace contract for authored specs and generated Spec Led state.
+summary: Canonical workspace contract for authored subject specs, ADRs, and generated Spec Led state.
 surface:
   - .spec/README.md
   - .spec/AGENTS.md
@@ -42,6 +44,11 @@ surface:
   statement: When indexing and validation run, the workspace shall generate .spec/state.json containing indexed subjects, indexed decisions, and verification state.
   priority: must
   stability: stable
+
+- id: spec.workspace.single_home
+  statement: The repository shall keep `.spec/` as the canonical authored home for package subject specs and ADRs so architectural current truth does not drift across multiple spec trees.
+  priority: must
+  stability: evolving
 ```
 
 ## Verification
@@ -51,6 +58,7 @@ surface:
   target: .spec/README.md
   covers:
     - spec.workspace.readme_present
+    - spec.workspace.single_home
 
 - kind: source_file
   target: .spec/AGENTS.md

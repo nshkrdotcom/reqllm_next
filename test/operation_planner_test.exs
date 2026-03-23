@@ -76,6 +76,24 @@ defmodule ReqLlmNext.OperationPlannerTest do
       assert plan.surface.id == :openai_responses_object_http_sse
       assert plan.surface.features.structured_output == :native_json_schema
     end
+
+    test "supports explicit websocket transport selection for responses models" do
+      {:ok, model} = LLMDB.model("openai:gpt-4o-mini")
+
+      assert {:ok, plan} =
+               OperationPlanner.plan(
+                 model,
+                 :text,
+                 "Hello",
+                 transport: :websocket,
+                 _stream?: true
+               )
+
+      assert plan.surface.id == :openai_responses_text_websocket
+      assert plan.wire_format == :openai_responses_ws_json
+      assert plan.transport == :websocket
+      assert plan.surface.fallback_ids == [:openai_responses_text_http_sse]
+    end
   end
 
   describe "ExecutionModules.resolve/1" do
@@ -83,18 +101,36 @@ defmodule ReqLlmNext.OperationPlannerTest do
       {:ok, model} = LLMDB.model("openai:gpt-4o-mini")
       {:ok, plan} = OperationPlanner.plan(model, :text, "Hello")
 
-      assert %{provider_mod: provider_mod, wire_mod: wire_mod} = ExecutionModules.resolve(plan)
+      assert %{provider_mod: provider_mod, wire_mod: wire_mod, transport_mod: transport_mod} =
+               ExecutionModules.resolve(plan)
+
       assert provider_mod == ReqLlmNext.Providers.OpenAI
       assert wire_mod == ReqLlmNext.Wire.OpenAIResponses
+      assert transport_mod == ReqLlmNext.Transports.HTTPStream
+    end
+
+    test "maps openai websocket plans to the websocket transport module" do
+      {:ok, model} = LLMDB.model("openai:gpt-4o-mini")
+      {:ok, plan} = OperationPlanner.plan(model, :text, "Hello", transport: :websocket)
+
+      assert %{provider_mod: provider_mod, wire_mod: wire_mod, transport_mod: transport_mod} =
+               ExecutionModules.resolve(plan)
+
+      assert provider_mod == ReqLlmNext.Providers.OpenAI
+      assert wire_mod == ReqLlmNext.Wire.OpenAIResponses
+      assert transport_mod == ReqLlmNext.Transports.OpenAIResponsesWebSocket
     end
 
     test "maps anthropic plans to the current bridge modules" do
       {:ok, model} = LLMDB.model("anthropic:claude-haiku-4-5")
       {:ok, plan} = OperationPlanner.plan(model, :text, "Hello")
 
-      assert %{provider_mod: provider_mod, wire_mod: wire_mod} = ExecutionModules.resolve(plan)
+      assert %{provider_mod: provider_mod, wire_mod: wire_mod, transport_mod: transport_mod} =
+               ExecutionModules.resolve(plan)
+
       assert provider_mod == ReqLlmNext.Providers.Anthropic
       assert wire_mod == ReqLlmNext.Wire.Anthropic
+      assert transport_mod == ReqLlmNext.Transports.HTTPStream
     end
   end
 end

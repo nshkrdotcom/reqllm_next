@@ -59,6 +59,7 @@ defmodule ReqLlmNext.MixProject do
       {:splode, "~> 0.2"},
       {:jason, "~> 1.4"},
       {:finch, "~> 0.19"},
+      {:mint_web_socket, "~> 1.0"},
       {:server_sent_events, "~> 0.2"},
       {:llm_db, "~> 2026.3"},
       {:zoi, "~> 0.17"},

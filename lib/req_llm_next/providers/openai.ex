@@ -4,7 +4,7 @@ defmodule ReqLlmNext.Providers.OpenAI do
   """
 
   use ReqLlmNext.Provider,
-    base_url: "https://api.openai.com/v1",
+    base_url: "https://api.openai.com",
     env_key: "OPENAI_API_KEY",
     auth_style: :bearer
 end

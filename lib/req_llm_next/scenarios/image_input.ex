@@ -13,22 +13,20 @@ defmodule ReqLlmNext.Scenarios.ImageInput do
 
   alias ReqLlmNext.ModelHelpers
   alias ReqLlmNext.Context.ContentPart
+  alias ReqLlmNext.ScenarioAssets
 
   @impl true
   def applies?(model), do: ModelHelpers.supports_image_input?(model)
 
   @impl true
   def run(model_spec, _model, opts) do
-    image_url =
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Camponotus_flavomarginatus_ant.jpg/320px-Camponotus_flavomarginatus_ant.jpg"
-
     context =
       ReqLlmNext.context([
         ReqLlmNext.Context.user([
           ContentPart.text(
-            "What animal is shown in this image? Answer with just the animal name."
+            "What is the dominant color in this image? Answer with just the color."
           ),
-          ContentPart.image_url(image_url)
+          ContentPart.image(ScenarioAssets.red_square_png())
         ])
       ])
 
@@ -45,10 +43,7 @@ defmodule ReqLlmNext.Scenarios.ImageInput do
               step("image_describe", :error, response: response, error: :empty_response)
             ])
 
-          String.contains?(normalized, "ant") ->
-            ok([step("image_describe", :ok, response: response)])
-
-          String.contains?(normalized, "insect") ->
+          String.contains?(normalized, "red") ->
             ok([step("image_describe", :ok, response: response)])
 
           true ->

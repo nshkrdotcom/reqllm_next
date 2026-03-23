@@ -5,6 +5,8 @@ defmodule ReqLlmNext.Application do
 
   @impl true
   def start(_type, _args) do
+    ReqLlmNext.Env.load()
+
     children = [
       {Finch, name: ReqLlmNext.Finch}
     ]

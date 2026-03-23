@@ -1,0 +1,52 @@
+# Enforcement
+
+Current-truth boundary-enforcement contract for ReqLlmNext.
+
+<!-- covers: reqllm.enforcement.raw_model_boundary reqllm.enforcement.runtime_hard_fail reqllm.enforcement.zoi_for_facts -->
+
+```spec-meta
+id: reqllm.enforcement
+kind: enforcement
+status: active
+summary: Runtime hard-fail validation and strict model-boundary enforcement for canonical runtime objects.
+surface:
+  - .spec/specs/enforcement.spec.md
+  - lib/req_llm_next/model_resolver.ex
+  - lib/req_llm_next/model_profile.ex
+```
+
+## Requirements
+
+```spec-requirements
+- id: reqllm.enforcement.raw_model_boundary
+  statement: Raw `%LLMDB.Model{}` input and model-spec parsing shall be accepted only at the model boundary and shall not survive into execution after `ModelProfile`, `ExecutionMode`, and `ExecutionPlan` are constructed.
+  priority: must
+  stability: evolving
+
+- id: reqllm.enforcement.runtime_hard_fail
+  statement: ReqLlmNext shall use runtime hard-fail validation for invalid model metadata, unsupported profile combinations, unknown keys, invalid enums, and unsafe source combinations rather than best-effort fallback behavior.
+  priority: must
+  stability: evolving
+
+- id: reqllm.enforcement.zoi_for_facts
+  statement: `zoi` or an equivalent strict validation layer shall validate canonical facts and shapes, but it shall not become the mechanism that decides planning policy or transport behavior.
+  priority: must
+  stability: evolving
+```
+
+## Verification
+
+```spec-verification
+- kind: source_file
+  target: .spec/specs/enforcement.spec.md
+  covers:
+    - reqllm.enforcement.raw_model_boundary
+    - reqllm.enforcement.runtime_hard_fail
+    - reqllm.enforcement.zoi_for_facts
+
+- kind: command
+  target: mix test test/model_resolver_test.exs test/req_llm_next_test.exs
+  execute: true
+  covers:
+    - reqllm.enforcement.raw_model_boundary
+```

@@ -16,6 +16,7 @@ defmodule ReqLlmNext.Executor.StreamState do
           {:status, non_neg_integer()}
           | {:headers, list()}
           | {:data, binary()}
+          | {:frame, binary()}
           | :done
 
   @type result ::
@@ -28,12 +29,12 @@ defmodule ReqLlmNext.Executor.StreamState do
   end
 
   @spec handle_message(msg(), t()) :: result()
-  def handle_message({:status, status}, %__MODULE__{} = state) when status != 200 do
+  def handle_message({:status, status}, %__MODULE__{} = state) when status not in [101, 200] do
     Fixtures.save_fixture(state.recorder)
     {:halt, %{state | error: {:http_error, status}}}
   end
 
-  def handle_message({:status, status}, %__MODULE__{} = state) when status == 200 do
+  def handle_message({:status, status}, %__MODULE__{} = state) when status in [101, 200] do
     new_recorder = Fixtures.record_status(state.recorder, status)
     {:cont, [], %{state | recorder: new_recorder}}
   end
@@ -56,6 +57,17 @@ defmodule ReqLlmNext.Executor.StreamState do
     new_state = %{state | buffer: remaining, recorder: new_recorder}
 
     {:cont, chunks, new_state}
+  end
+
+  def handle_message({:frame, data}, %__MODULE__{} = state) do
+    new_recorder = Fixtures.record_chunk(state.recorder, data)
+
+    chunks =
+      state.wire_mod
+      |> apply(:decode_sse_event, [%{data: data}, nil])
+      |> Enum.reject(&is_nil/1)
+
+    {:cont, chunks, %{state | recorder: new_recorder}}
   end
 
   def handle_message(:done, %__MODULE__{} = state) do

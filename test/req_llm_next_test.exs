@@ -159,6 +159,21 @@ defmodule ReqLlmNextTest do
       refute Enum.empty?(chunks)
     end
 
+    test "supports responses websocket transport through the public API" do
+      {:ok, resp} =
+        ReqLlmNext.stream_text("openai:gpt-4o-mini", "Hello!",
+          fixture: "basic_websocket",
+          transport: :websocket
+        )
+
+      text = ReqLlmNext.StreamResponse.text(resp)
+
+      assert %ReqLlmNext.StreamResponse{} = resp
+      assert resp.model.id == "gpt-4o-mini"
+      assert is_binary(text)
+      assert String.length(text) > 0
+    end
+
     test "works with anthropic" do
       {:ok, resp} =
         ReqLlmNext.stream_text("anthropic:claude-sonnet-4-20250514", "Hello!",

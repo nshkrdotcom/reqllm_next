@@ -114,7 +114,7 @@ defmodule ReqLlmNext.ProviderTest do
     test "OpenAI provider has correct configuration" do
       alias ReqLlmNext.Providers.OpenAI
 
-      assert OpenAI.base_url() == "https://api.openai.com/v1"
+      assert OpenAI.base_url() == "https://api.openai.com"
       assert OpenAI.env_key() == "OPENAI_API_KEY"
       assert OpenAI.auth_headers("key") == [{"Authorization", "Bearer key"}]
     end

@@ -9,6 +9,7 @@ defmodule ReqLlmNext.Wire.OpenAIChat do
   @behaviour ReqLlmNext.Wire.Streaming
 
   alias ReqLlmNext.Response.Usage
+  alias ReqLlmNext.Context.ContentPart
   alias ReqLlmNext.{Tool, ToolCall}
 
   @impl ReqLlmNext.Wire.Streaming
@@ -79,6 +80,9 @@ defmodule ReqLlmNext.Wire.OpenAIChat do
   end
 
   defp encode_content_part(%{type: :text, text: text}), do: %{type: "text", text: text}
+
+  defp encode_content_part(%ContentPart{type: :image} = part),
+    do: %{type: "image_url", image_url: %{url: ContentPart.data_uri(part)}}
 
   defp encode_content_part(%{type: :image_url, url: url}),
     do: %{type: "image_url", image_url: %{url: url}}

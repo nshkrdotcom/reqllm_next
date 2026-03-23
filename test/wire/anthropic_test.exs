@@ -339,6 +339,28 @@ defmodule ReqLlmNext.Wire.AnthropicTest do
                source: %{type: "url", url: "https://example.com/image.png"}
              }
     end
+
+    test "encodes binary image content part as base64 source" do
+      model = TestModels.anthropic()
+
+      context =
+        Context.new([
+          Context.user([
+            Context.ContentPart.text("What color is this image?"),
+            Context.ContentPart.image(<<255, 0, 0>>, "image/png")
+          ])
+        ])
+
+      body = Anthropic.encode_body(model, context, [])
+
+      [msg] = body.messages
+      [_, image_part] = msg.content
+
+      assert image_part == %{
+               type: "image",
+               source: %{type: "base64", media_type: "image/png", data: "/wAA"}
+             }
+    end
   end
 
   describe "options_schema/0" do

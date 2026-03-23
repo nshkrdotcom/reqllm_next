@@ -16,8 +16,8 @@ This repository tracks durable work with `bw` (Beadwork).
 ## Spec Led Workflow
 
 - After `bw prime`, run `mix spec.prime --base HEAD` before editing current-truth package guidance.
-- Keep `.spec/` as the canonical checked workflow layer for package and contributor contracts.
-- Keep the existing `specs/` directory as supporting architecture and refactor context.
+- Keep `.spec/` as the canonical home for architecture subjects, contributor workflow guidance, and ADRs.
+- Treat `.spec/specs/*.spec.md` as the primary architecture source when reconciling spike code toward the target design.
 - After code, docs, or tests change, run `mix spec.next`.
 - When the branch is ready, run `mix spec.check --base HEAD`.
 
@@ -28,7 +28,7 @@ Read [`guides/package_thesis.md`](./guides/package_thesis.md) when you need the 
 The short version is:
 
 1. agents are implementation accelerants, not the source of architectural truth
-2. the source of truth is the combination of architecture docs, ADRs, checked `.spec/` subjects, scenario tests, fixtures, and compat tooling
+2. the source of truth is the combination of `.spec` subject specs, ADRs, scenario tests, fixtures, and compat tooling
 3. do not collapse concerns for convenience; refactor spike code toward the documented boundaries instead
 4. treat handcrafted `%LLMDB.Model{}` support, canonical API normalization, and the fixture/compat loop as product-level design decisions
 
@@ -73,4 +73,4 @@ Public API
   -> Provider
 ```
 
-The current implementation still contains spike code, especially in `lib/req_llm_next/wire/` and the older adapter pipeline. Treat those as transitional code, not as the target architecture. Keep AGENTS focused on the current boundary model and contributor workflow; use [`guides/package_thesis.md`](./guides/package_thesis.md) for the broader package thesis and [`specs/`](./specs) for the detailed architecture contracts.
+The current implementation still contains spike code, especially in `lib/req_llm_next/wire/` and the older adapter pipeline. Treat those as transitional code, not as the target architecture. Keep AGENTS focused on the current boundary model and contributor workflow; use [`guides/package_thesis.md`](./guides/package_thesis.md) for the broader package thesis and [`.spec/`](./.spec) for the detailed architecture contracts.

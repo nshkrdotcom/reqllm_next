@@ -2,7 +2,7 @@
 
 Use this folder to maintain authored Spec Led Development subjects and generated state.
 
-<!-- covers: spec.workspace.agents_present spec.workspace.agent_prime_context -->
+<!-- covers: spec.workspace.agents_present spec.workspace.agent_prime_context spec.workspace.single_home reqllm.workflow.agent_instructions -->
 
 ## First Read
 
@@ -10,7 +10,7 @@ Use this folder to maintain authored Spec Led Development subjects and generated
 2. Read `.spec/README.md`.
 3. Read `.spec/decisions/README.md` and any ADRs that affect the subject you are changing.
 4. Read the current `.spec/specs/*.spec.md` files before editing.
-5. Read repo-level `specs/` notes when the current-truth subject depends on architecture context.
+5. Treat `.spec/specs/*.spec.md` as the canonical architecture source and keep spike implementation changes reconciled to those subjects.
 
 ## Working Rules
 

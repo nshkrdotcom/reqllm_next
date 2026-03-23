@@ -149,6 +149,28 @@ defmodule ReqLlmNext.Wire.OpenAIChatTest do
              }
     end
 
+    test "encodes binary image content as data URI" do
+      model = TestModels.openai()
+
+      context =
+        Context.new([
+          Context.user([
+            ContentPart.text("What color is this image?"),
+            ContentPart.image(<<255, 0, 0>>, "image/png")
+          ])
+        ])
+
+      body = OpenAIChat.encode_body(model, context, [])
+
+      content = Enum.at(body.messages, 0).content
+      assert is_list(content)
+
+      assert Enum.at(content, 1) == %{
+               type: "image_url",
+               image_url: %{url: "data:image/png;base64,/wAA"}
+             }
+    end
+
     test "includes tools when provided" do
       model = TestModels.openai()
 

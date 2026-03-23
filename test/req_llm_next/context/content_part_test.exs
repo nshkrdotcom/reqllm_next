@@ -103,6 +103,32 @@ defmodule ReqLlmNext.Context.ContentPartTest do
     end
   end
 
+  describe "data_uri/1" do
+    test "encodes binary images as data URIs" do
+      part = ContentPart.image(<<255, 0, 0>>, "image/png")
+
+      assert ContentPart.data_uri(part) == "data:image/png;base64,/wAA"
+    end
+
+    test "passes through image URLs unchanged" do
+      part = ContentPart.image_url("https://example.com/image.png")
+
+      assert ContentPart.data_uri(part) == "https://example.com/image.png"
+    end
+  end
+
+  describe "parse_data_uri/1" do
+    test "parses valid base64 data URIs" do
+      assert {:ok, %{media_type: "image/png", data: <<255, 0, 0>>}} =
+               ContentPart.parse_data_uri("data:image/png;base64,/wAA")
+    end
+
+    test "returns error for invalid data URIs" do
+      assert :error = ContentPart.parse_data_uri("https://example.com/image.png")
+      assert :error = ContentPart.parse_data_uri("data:image/png,not-base64")
+    end
+  end
+
   describe "file/3" do
     test "creates file content part with default media type" do
       binary = "file contents"

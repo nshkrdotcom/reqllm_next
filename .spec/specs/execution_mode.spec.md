@@ -2,15 +2,16 @@
 
 Current-truth normalized request-mode contract for ReqLlmNext 2.0.
 
+<!-- covers: reqllm.execution_mode.normalized_shape reqllm.execution_mode.mode_hints_before_policy reqllm.execution_mode.provider_agnostic -->
+
 ```spec-meta
 id: reqllm.execution_mode
 kind: execution_mode
 status: active
 summary: Canonical provider-agnostic request mode normalized before policy resolution.
 surface:
-  - specs/execution_mode.md
-  - specs/operation_planner.md
-  - specs/architecture.md
+  - lib/req_llm_next/execution_mode.ex
+  - lib/req_llm_next/operation_planner.ex
 decisions:
   - reqllm.decision.execution_mode_first_class
 ```
@@ -27,13 +28,26 @@ decisions:
   statement: ReqLlmNext shall resolve mode hints into `ExecutionMode` before policy rules choose surfaces, defaults, timeouts, or fallbacks.
   priority: must
   stability: evolving
+
+- id: reqllm.execution_mode.provider_agnostic
+  statement: `ExecutionMode` shall remain provider-agnostic and shall not contain chosen surfaces, chosen protocols, encoded payloads, or raw tool definitions.
+  priority: must
+  stability: evolving
 ```
 
 ## Verification
 
 ```spec-verification
 - kind: source_file
-  target: specs/execution_mode.md
+  target: .spec/specs/execution_mode.spec.md
+  covers:
+    - reqllm.execution_mode.normalized_shape
+    - reqllm.execution_mode.mode_hints_before_policy
+    - reqllm.execution_mode.provider_agnostic
+
+- kind: command
+  target: mix test test/operation_planner_test.exs
+  execute: true
   covers:
     - reqllm.execution_mode.normalized_shape
     - reqllm.execution_mode.mode_hints_before_policy

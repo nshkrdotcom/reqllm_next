@@ -14,6 +14,7 @@ defmodule ReqLlmNext.ExecutionMode do
               stream?: Zoi.boolean() |> Zoi.default(false),
               tools?: Zoi.boolean() |> Zoi.default(false),
               structured_output?: Zoi.boolean() |> Zoi.default(false),
+              transport: Zoi.enum([:default, :http_sse, :websocket]) |> Zoi.default(:default),
               session: Zoi.enum([:none, :preferred, :required, :continue]) |> Zoi.default(:none),
               latency_class:
                 Zoi.enum([:interactive, :background, :long_running]) |> Zoi.default(:interactive),
@@ -31,6 +32,7 @@ defmodule ReqLlmNext.ExecutionMode do
           stream?: boolean(),
           tools?: boolean(),
           structured_output?: boolean(),
+          transport: :default | :http_sse | :websocket,
           session: :none | :preferred | :required | :continue,
           latency_class: :interactive | :background | :long_running,
           reasoning: :default | :off | :on | :required,
@@ -64,6 +66,7 @@ defmodule ReqLlmNext.ExecutionMode do
       stream?: Keyword.get(opts, :_stream?, false),
       tools?: tools_present?(opts),
       structured_output?: operation == :object or Keyword.has_key?(opts, :compiled_schema),
+      transport: normalize_transport(Keyword.get(opts, :transport, :default)),
       session: normalize_session(Keyword.get(opts, :session, :none)),
       latency_class: normalize_latency(opts),
       reasoning: normalize_reasoning(opts),
@@ -91,6 +94,10 @@ defmodule ReqLlmNext.ExecutionMode do
   defp normalize_session(:preferred), do: :preferred
   defp normalize_session(:continue), do: :continue
   defp normalize_session(_), do: :none
+
+  defp normalize_transport(:websocket), do: :websocket
+  defp normalize_transport(:http_sse), do: :http_sse
+  defp normalize_transport(_), do: :default
 
   defp normalize_latency(opts) do
     case Keyword.get(opts, :latency_class) do

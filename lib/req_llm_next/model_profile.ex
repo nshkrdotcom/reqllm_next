@@ -140,7 +140,7 @@ defmodule ReqLlmNext.ModelProfile do
 
   defp session_capabilities(model) do
     if Resolver.responses_api?(model) do
-      %{persistent: false, continuation_strategies: []}
+      %{persistent: true, continuation_strategies: [:previous_response_id]}
     else
       %{persistent: false, continuation_strategies: []}
     end
@@ -158,7 +158,7 @@ defmodule ReqLlmNext.ModelProfile do
 
   defp text_surfaces(model) do
     if ModelHelpers.chat?(model) do
-      [chat_surface(model, :text)]
+      chat_surfaces(model, :text)
     else
       []
     end
@@ -166,7 +166,7 @@ defmodule ReqLlmNext.ModelProfile do
 
   defp object_surfaces(model) do
     if ModelHelpers.chat?(model) do
-      [chat_surface(model, :object)]
+      chat_surfaces(model, :object)
     else
       []
     end
@@ -190,18 +190,43 @@ defmodule ReqLlmNext.ModelProfile do
     end
   end
 
-  defp chat_surface(model, operation) do
-    {surface_prefix, semantic_protocol, wire_format} = chat_surface_shape(model)
+  defp chat_surfaces(model, operation) do
+    case chat_surface_shape(model) do
+      {:openai_responses, :openai_responses, :openai_responses_sse_json} ->
+        [
+          chat_surface(
+            :openai_responses,
+            operation,
+            :openai_responses,
+            :openai_responses_sse_json,
+            :http_sse,
+            surface_features(model, operation),
+            [surface_id(:openai_responses, operation, :websocket)]
+          ),
+          chat_surface(
+            :openai_responses,
+            operation,
+            :openai_responses,
+            :openai_responses_ws_json,
+            :websocket,
+            Map.put(surface_features(model, operation), :persistent_session, true),
+            [surface_id(:openai_responses, operation, :http_sse)]
+          )
+        ]
 
-    ExecutionSurface.new!(%{
-      id: surface_id(surface_prefix, operation),
-      operation: operation,
-      semantic_protocol: semantic_protocol,
-      wire_format: wire_format,
-      transport: :http_sse,
-      features: surface_features(model, operation),
-      fallback_ids: []
-    })
+      {surface_prefix, semantic_protocol, wire_format} ->
+        [
+          chat_surface(
+            surface_prefix,
+            operation,
+            semantic_protocol,
+            wire_format,
+            :http_sse,
+            surface_features(model, operation),
+            []
+          )
+        ]
+    end
   end
 
   defp chat_surface_shape(%LLMDB.Model{provider: :anthropic}) do
@@ -216,8 +241,28 @@ defmodule ReqLlmNext.ModelProfile do
     end
   end
 
-  defp surface_id(surface_prefix, operation) do
-    :"#{surface_prefix}_#{operation}_http_sse"
+  defp chat_surface(
+         surface_prefix,
+         operation,
+         semantic_protocol,
+         wire_format,
+         transport,
+         features,
+         fallback_ids
+       ) do
+    ExecutionSurface.new!(%{
+      id: surface_id(surface_prefix, operation, transport),
+      operation: operation,
+      semantic_protocol: semantic_protocol,
+      wire_format: wire_format,
+      transport: transport,
+      features: features,
+      fallback_ids: fallback_ids
+    })
+  end
+
+  defp surface_id(surface_prefix, operation, transport) do
+    :"#{surface_prefix}_#{operation}_#{transport}"
   end
 
   defp surface_features(model, :text) do

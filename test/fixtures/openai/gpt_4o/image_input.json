@@ -1,8 +1,14 @@
 {
-  "captured_at": "2025-12-18T17:15:12.218238Z",
+  "captured_at": "2026-03-23T15:53:43.665444Z",
   "chunks": [
-    "ZGF0YTogeyJpZCI6ImNoYXRjbXBsLUNvQnNtbkxTRDRXbkRrSjF5ekg0N2I4NXVwVEtwIiwib2JqZWN0IjoiY2hhdC5jb21wbGV0aW9uLmNodW5rIiwiY3JlYXRlZCI6MTc2NjA3ODExMiwibW9kZWwiOiJncHQtNG8tMjAyNC0wOC0wNiIsInNlcnZpY2VfdGllciI6ImRlZmF1bHQiLCJzeXN0ZW1fZmluZ2VycHJpbnQiOiJmcF9hMGU5NDgwYTJmIiwiY2hvaWNlcyI6W3siaW5kZXgiOjAsImRlbHRhIjp7InJvbGUiOiJhc3Npc3RhbnQiLCJjb250ZW50IjoiIiwicmVmdXNhbCI6bnVsbH0sImxvZ3Byb2JzIjpudWxsLCJmaW5pc2hfcmVhc29uIjpudWxsfV0sInVzYWdlIjpudWxsLCJvYmZ1c2NhdGlvbiI6IkFHUTFEOVp6WTZNUVJ6In0K",
-    "CmRhdGE6IHsiaWQiOiJjaGF0Y21wbC1Db0JzbW5MU0Q0V25Ea0oxeXpINDdiODV1cFRLcCIsIm9iamVjdCI6ImNoYXQuY29tcGxldGlvbi5jaHVuayIsImNyZWF0ZWQiOjE3NjYwNzgxMTIsIm1vZGVsIjoiZ3B0LTRvLTIwMjQtMDgtMDYiLCJzZXJ2aWNlX3RpZXIiOiJkZWZhdWx0Iiwic3lzdGVtX2ZpbmdlcnByaW50IjoiZnBfYTBlOTQ4MGEyZiIsImNob2ljZXMiOlt7ImluZGV4IjowLCJkZWx0YSI6eyJjb250ZW50IjoiQW50In0sImxvZ3Byb2JzIjpudWxsLCJmaW5pc2hfcmVhc29uIjpudWxsfV0sInVzYWdlIjpudWxsLCJvYmZ1c2NhdGlvbiI6Ino5SmRjZmRjRTFUdU0ifQoKZGF0YTogeyJpZCI6ImNoYXRjbXBsLUNvQnNtbkxTRDRXbkRrSjF5ekg0N2I4NXVwVEtwIiwib2JqZWN0IjoiY2hhdC5jb21wbGV0aW9uLmNodW5rIiwiY3JlYXRlZCI6MTc2NjA3ODExMiwibW9kZWwiOiJncHQtNG8tMjAyNC0wOC0wNiIsInNlcnZpY2VfdGllciI6ImRlZmF1bHQiLCJzeXN0ZW1fZmluZ2VycHJpbnQiOiJmcF9hMGU5NDgwYTJmIiwiY2hvaWNlcyI6W3siaW5kZXgiOjAsImRlbHRhIjp7fSwibG9ncHJvYnMiOm51bGwsImZpbmlzaF9yZWFzb24iOiJzdG9wIn1dLCJ1c2FnZSI6bnVsbCwib2JmdXNjYXRpb24iOiJ6cWg3VmpHemcxIn0KCmRhdGE6IHsiaWQiOiJjaGF0Y21wbC1Db0JzbW5MU0Q0V25Ea0oxeXpINDdiODV1cFRLcCIsIm9iamVjdCI6ImNoYXQuY29tcGxldGlvbi5jaHVuayIsImNyZWF0ZWQiOjE3NjYwNzgxMTIsIm1vZGVsIjoiZ3B0LTRvLTIwMjQtMDgtMDYiLCJzZXJ2aWNlX3RpZXIiOiJkZWZhdWx0Iiwic3lzdGVtX2ZpbmdlcnByaW50IjoiZnBfYTBlOTQ4MGEyZiIsImNob2ljZXMiOltdLCJ1c2FnZSI6eyJwcm9tcHRfdG9rZW5zIjoyNzcsImNvbXBsZXRpb25fdG9rZW5zIjoxLCJ0b3RhbF90b2tlbnMiOjI3OCwicHJvbXB0X3Rva2Vuc19kZXRhaWxzIjp7ImNhY2hlZF90b2tlbnMiOjAsImF1ZGlvX3Rva2VucyI6MH0sImNvbXBsZXRpb25fdG9rZW5zX2RldGFpbHMiOnsicmVhc29uaW5nX3Rva2VucyI6MCwiYXVkaW9fdG9rZW5zIjowLCJhY2NlcHRlZF9wcmVkaWN0aW9uX3Rva2VucyI6MCwicmVqZWN0ZWRfcHJlZGljdGlvbl90b2tlbnMiOjB9fSwib2JmdXNjYXRpb24iOiJxUWo2M2I3aWZjTmg3QSJ9CgpkYXRhOiBbRE9ORV0KCg=="
+    "ZXZlbnQ6IHJlc3BvbnNlLmNyZWF0ZWQKZGF0YTogeyJ0eXBlIjoicmVzcG9uc2UuY3JlYXRlZCIsInJlc3BvbnNlIjp7ImlkIjoicmVzcF8wZTdiNjZmNjdlY2UxMzBiMDA2OWMxNjIwN2JjNDg4MTk1YWY5OGVmODg2NGNjODgzZiIsIm9iamVjdCI6InJlc3BvbnNlIiwiY3JlYXRlZF9hdCI6MTc3NDI4MTIyMywic3RhdHVzIjoiaW5fcHJvZ3Jlc3MiLCJiYWNrZ3JvdW5kIjpmYWxzZSwiY29tcGxldGVkX2F0IjpudWxsLCJlcnJvciI6bnVsbCwiZnJlcXVlbmN5X3BlbmFsdHkiOjAuMCwiaW5jb21wbGV0ZV9kZXRhaWxzIjpudWxsLCJpbnN0cnVjdGlvbnMiOm51bGwsIm1heF9vdXRwdXRfdG9rZW5zIjoxMDAsIm1heF90b29sX2NhbGxzIjpudWxsLCJtb2RlbCI6ImdwdC00by0yMDI0LTA4LTA2Iiwib3V0cHV0IjpbXSwicGFyYWxsZWxfdG9vbF9jYWxscyI6dHJ1ZSwicHJlc2VuY2VfcGVuYWx0eSI6MC4wLCJwcmV2aW91c19yZXNwb25zZV9pZCI6bnVsbCwicHJvbXB0X2NhY2hlX2tleSI6bnVsbCwicHJvbXB0X2NhY2hlX3JldGVudGlvbiI6bnVsbCwicmVhc29uaW5nIjp7ImVmZm9ydCI6bnVsbCwic3VtbWFyeSI6bnVsbH0sInNhZmV0eV9pZGVudGlmaWVyIjpudWxsLCJzZXJ2aWNlX3RpZXIiOiJhdXRvIiwic3RvcmUiOnRydWUsInRlbXBlcmF0dXJlIjoxLjAsInRleHQiOnsiZm9ybWF0Ijp7InR5cGUiOiJ0ZXh0In0sInZlcmJvc2l0eSI6Im1lZGl1bSJ9LCJ0b29sX2Nob2ljZSI6ImF1dG8iLCJ0b29scyI6W10sInRvcF9sb2dwcm9icyI6MCwidG9wX3AiOjEuMCwidHJ1bmNhdGlvbiI6ImRpc2FibGVkIiwidXNhZ2UiOm51bGwsInVzZXIiOm51bGwsIm1ldGFkYXRhIjp7fX0sInNlcXVlbmNlX251bWJlciI6MH0KCg==",
+    "ZXZlbnQ6IHJlc3BvbnNlLmluX3Byb2dyZXNzCmRhdGE6IHsidHlwZSI6InJlc3BvbnNlLmluX3Byb2dyZXNzIiwicmVzcG9uc2UiOnsiaWQiOiJyZXNwXzBlN2I2NmY2N2VjZTEzMGIwMDY5YzE2MjA3YmM0ODgxOTVhZjk4ZWY4ODY0Y2M4ODNmIiwib2JqZWN0IjoicmVzcG9uc2UiLCJjcmVhdGVkX2F0IjoxNzc0MjgxMjIzLCJzdGF0dXMiOiJpbl9wcm9ncmVzcyIsImJhY2tncm91bmQiOmZhbHNlLCJjb21wbGV0ZWRfYXQiOm51bGwsImVycm9yIjpudWxsLCJmcmVxdWVuY3lfcGVuYWx0eSI6MC4wLCJpbmNvbXBsZXRlX2RldGFpbHMiOm51bGwsImluc3RydWN0aW9ucyI6bnVsbCwibWF4X291dHB1dF90b2tlbnMiOjEwMCwibWF4X3Rvb2xfY2FsbHMiOm51bGwsIm1vZGVsIjoiZ3B0LTRvLTIwMjQtMDgtMDYiLCJvdXRwdXQiOltdLCJwYXJhbGxlbF90b29sX2NhbGxzIjp0cnVlLCJwcmVzZW5jZV9wZW5hbHR5IjowLjAsInByZXZpb3VzX3Jlc3BvbnNlX2lkIjpudWxsLCJwcm9tcHRfY2FjaGVfa2V5IjpudWxsLCJwcm9tcHRfY2FjaGVfcmV0ZW50aW9uIjpudWxsLCJyZWFzb25pbmciOnsiZWZmb3J0IjpudWxsLCJzdW1tYXJ5IjpudWxsfSwic2FmZXR5X2lkZW50aWZpZXIiOm51bGwsInNlcnZpY2VfdGllciI6ImF1dG8iLCJzdG9yZSI6dHJ1ZSwidGVtcGVyYXR1cmUiOjEuMCwidGV4dCI6eyJmb3JtYXQiOnsidHlwZSI6InRleHQifSwidmVyYm9zaXR5IjoibWVkaXVtIn0sInRvb2xfY2hvaWNlIjoiYXV0byIsInRvb2xzIjpbXSwidG9wX2xvZ3Byb2JzIjowLCJ0b3BfcCI6MS4wLCJ0cnVuY2F0aW9uIjoiZGlzYWJsZWQiLCJ1c2FnZSI6bnVsbCwidXNlciI6bnVsbCwibWV0YWRhdGEiOnt9fSwic2VxdWVuY2VfbnVtYmVyIjoxfQoK",
+    "ZXZlbnQ6IHJlc3BvbnNlLm91dHB1dF9pdGVtLmFkZGVkCmRhdGE6IHsidHlwZSI6InJlc3BvbnNlLm91dHB1dF9pdGVtLmFkZGVkIiwiaXRlbSI6eyJpZCI6Im1zZ18wZTdiNjZmNjdlY2UxMzBiMDA2OWMxNjIwODgyMzg4MTk1YTE4MjgzNzQwZDBlZjI4NyIsInR5cGUiOiJtZXNzYWdlIiwic3RhdHVzIjoiaW5fcHJvZ3Jlc3MiLCJjb250ZW50IjpbXSwicm9sZSI6ImFzc2lzdGFudCJ9LCJvdXRwdXRfaW5kZXgiOjAsInNlcXVlbmNlX251bWJlciI6Mn0KCmV2ZW50OiByZXNwb25zZS5jb250ZW50X3BhcnQuYWRkZWQKZGF0YTogeyJ0eXBlIjoicmVzcG9uc2UuY29udGVudF9wYXJ0LmFkZGVkIiwiY29udGVudF9pbmRleCI6MCwiaXRlbV9pZCI6Im1zZ18wZTdiNjZmNjdlY2UxMzBiMDA2OWMxNjIwODgyMzg4MTk1YTE4MjgzNzQwZDBlZjI4NyIsIm91dHB1dF9pbmRleCI6MCwicGFydCI6eyJ0eXBlIjoib3V0cHV0X3RleHQiLCJhbm5vdGF0aW9ucyI6W10sImxvZ3Byb2JzIjpbXSwidGV4dCI6IiJ9LCJzZXF1ZW5jZV9udW1iZXIiOjN9Cgo=",
+    "ZXZlbnQ6IHJlc3BvbnNlLm91dHB1dF90ZXh0LmRlbHRhCmRhdGE6IHsidHlwZSI6InJlc3BvbnNlLm91dHB1dF90ZXh0LmRlbHRhIiwiY29udGVudF9pbmRleCI6MCwiZGVsdGEiOiJSZWQiLCJpdGVtX2lkIjoibXNnXzBlN2I2NmY2N2VjZTEzMGIwMDY5YzE2MjA4ODIzODgxOTVhMTgyODM3NDBkMGVmMjg3IiwibG9ncHJvYnMiOltdLCJvYmZ1c2NhdGlvbiI6IjJRVmphQTdmUHNONFMiLCJvdXRwdXRfaW5kZXgiOjAsInNlcXVlbmNlX251bWJlciI6NH0KCg==",
+    "ZXZlbnQ6IHJlc3BvbnNlLm91dHB1dF90ZXh0LmRvbmUKZGF0YTogeyJ0eXBlIjoicmVzcG9uc2Uub3V0cHV0X3RleHQuZG9uZSIsImNvbnRlbnRfaW5kZXgiOjAsIml0ZW1faWQiOiJtc2dfMGU3YjY2ZjY3ZWNlMTMwYjAwNjljMTYyMDg4MjM4ODE5NWExODI4Mzc0MGQwZWYyODciLCJsb2dwcm9icyI6W10sIm91dHB1dF9pbmRleCI6MCwic2VxdWVuY2VfbnVtYmVyIjo1LCJ0ZXh0IjoiUmVkIn0KCg==",
+    "ZXZlbnQ6IHJlc3BvbnNlLmNvbnRlbnRfcGFydC5kb25lCmRhdGE6IHsidHlwZSI6InJlc3BvbnNlLmNvbnRlbnRfcGFydC5kb25lIiwiY29udGVudF9pbmRleCI6MCwiaXRlbV9pZCI6Im1zZ18wZTdiNjZmNjdlY2UxMzBiMDA2OWMxNjIwODgyMzg4MTk1YTE4MjgzNzQwZDBlZjI4NyIsIm91dHB1dF9pbmRleCI6MCwicGFydCI6eyJ0eXBlIjoib3V0cHV0X3RleHQiLCJhbm5vdGF0aW9ucyI6W10sImxvZ3Byb2JzIjpbXSwidGV4dCI6IlJlZCJ9LCJzZXF1ZW5jZV9udW1iZXIiOjZ9Cgo=",
+    "ZXZlbnQ6IHJlc3BvbnNlLm91dHB1dF9pdGVtLmRvbmUKZGF0YTogeyJ0eXBlIjoicmVzcG9uc2Uub3V0cHV0X2l0ZW0uZG9uZSIsIml0ZW0iOnsiaWQiOiJtc2dfMGU3YjY2ZjY3ZWNlMTMwYjAwNjljMTYyMDg4MjM4ODE5NWExODI4Mzc0MGQwZWYyODciLCJ0eXBlIjoibWVzc2FnZSIsInN0YXR1cyI6ImNvbXBsZXRlZCIsImNvbnRlbnQiOlt7InR5cGUiOiJvdXRwdXRfdGV4dCIsImFubm90YXRpb25zIjpbXSwibG9ncHJvYnMiOltdLCJ0ZXh0IjoiUmVkIn1dLCJyb2xlIjoiYXNzaXN0YW50In0sIm91dHB1dF9pbmRleCI6MCwic2VxdWVuY2VfbnVtYmVyIjo3fQoK",
+    "ZXZlbnQ6IHJlc3BvbnNlLmNvbXBsZXRlZApkYXRhOiB7InR5cGUiOiJyZXNwb25zZS5jb21wbGV0ZWQiLCJyZXNwb25zZSI6eyJpZCI6InJlc3BfMGU3YjY2ZjY3ZWNlMTMwYjAwNjljMTYyMDdiYzQ4ODE5NWFmOThlZjg4NjRjYzg4M2YiLCJvYmplY3QiOiJyZXNwb25zZSIsImNyZWF0ZWRfYXQiOjE3NzQyODEyMjMsInN0YXR1cyI6ImNvbXBsZXRlZCIsImJhY2tncm91bmQiOmZhbHNlLCJjb21wbGV0ZWRfYXQiOjE3NzQyODEyMjQsImVycm9yIjpudWxsLCJmcmVxdWVuY3lfcGVuYWx0eSI6MC4wLCJpbmNvbXBsZXRlX2RldGFpbHMiOm51bGwsImluc3RydWN0aW9ucyI6bnVsbCwibWF4X291dHB1dF90b2tlbnMiOjEwMCwibWF4X3Rvb2xfY2FsbHMiOm51bGwsIm1vZGVsIjoiZ3B0LTRvLTIwMjQtMDgtMDYiLCJvdXRwdXQiOlt7ImlkIjoibXNnXzBlN2I2NmY2N2VjZTEzMGIwMDY5YzE2MjA4ODIzODgxOTVhMTgyODM3NDBkMGVmMjg3IiwidHlwZSI6Im1lc3NhZ2UiLCJzdGF0dXMiOiJjb21wbGV0ZWQiLCJjb250ZW50IjpbeyJ0eXBlIjoib3V0cHV0X3RleHQiLCJhbm5vdGF0aW9ucyI6W10sImxvZ3Byb2JzIjpbXSwidGV4dCI6IlJlZCJ9XSwicm9sZSI6ImFzc2lzdGFudCJ9XSwicGFyYWxsZWxfdG9vbF9jYWxscyI6dHJ1ZSwicHJlc2VuY2VfcGVuYWx0eSI6MC4wLCJwcmV2aW91c19yZXNwb25zZV9pZCI6bnVsbCwicHJvbXB0X2NhY2hlX2tleSI6bnVsbCwicHJvbXB0X2NhY2hlX3JldGVudGlvbiI6bnVsbCwicmVhc29uaW5nIjp7ImVmZm9ydCI6bnVsbCwic3VtbWFyeSI6bnVsbH0sInNhZmV0eV9pZGVudGlmaWVyIjpudWxsLCJzZXJ2aWNlX3RpZXIiOiJkZWZhdWx0Iiwic3RvcmUiOnRydWUsInRlbXBlcmF0dXJlIjoxLjAsInRleHQiOnsiZm9ybWF0Ijp7InR5cGUiOiJ0ZXh0In0sInZlcmJvc2l0eSI6Im1lZGl1bSJ9LCJ0b29sX2Nob2ljZSI6ImF1dG8iLCJ0b29scyI6W10sInRvcF9sb2dwcm9icyI6MCwidG9wX3AiOjEuMCwidHJ1bmNhdGlvbiI6ImRpc2FibGVkIiwidXNhZ2UiOnsiaW5wdXRfdG9rZW5zIjoyNzcsImlucHV0X3Rva2Vuc19kZXRhaWxzIjp7ImNhY2hlZF90b2tlbnMiOjB9LCJvdXRwdXRfdG9rZW5zIjoyLCJvdXRwdXRfdG9rZW5zX2RldGFpbHMiOnsicmVhc29uaW5nX3Rva2VucyI6MH0sInRvdGFsX3Rva2VucyI6Mjc5fSwidXNlciI6bnVsbCwibWV0YWRhdGEiOnt9fSwic2VxdWVuY2VfbnVtYmVyIjo4fQoK"
   ],
   "model_id": "gpt-4o",
   "prompt": {
@@ -16,19 +22,19 @@
             "data": null,
             "type": "text",
             "filename": null,
-            "text": "What animal is shown in this image? Answer with just the animal name.",
+            "text": "What is the dominant color in this image? Answer with just the color.",
             "metadata": {},
             "url": null,
             "media_type": null
           },
           {
-            "data": null,
-            "type": "image_url",
+            "data": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAEKADAAQAAAABAAAAEAAAAAA0VXHyAAAAHUlEQVQoFWP8z0AaYCJNOQPDqAZiQmw0lAZHKAEAQC4BH9xhSG8AAAAASUVORK5CYII=",
+            "type": "image",
             "filename": null,
             "text": null,
             "metadata": {},
-            "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Camponotus_flavomarginatus_ant.jpg/320px-Camponotus_flavomarginatus_ant.jpg",
-            "media_type": null
+            "url": null,
+            "media_type": "image/png"
           }
         ],
         "tool_calls": null,
@@ -41,31 +47,26 @@
   "provider": "openai",
   "request": {
     "body": {
-      "b64": "eyJtZXNzYWdlcyI6W3sicm9sZSI6InVzZXIiLCJjb250ZW50IjpbeyJ0eXBlIjoidGV4dCIsInRleHQiOiJXaGF0IGFuaW1hbCBpcyBzaG93biBpbiB0aGlzIGltYWdlPyBBbnN3ZXIgd2l0aCBqdXN0IHRoZSBhbmltYWwgbmFtZS4ifSx7InR5cGUiOiJpbWFnZV91cmwiLCJpbWFnZV91cmwiOnsidXJsIjoiaHR0cHM6Ly91cGxvYWQud2lraW1lZGlhLm9yZy93aWtpcGVkaWEvY29tbW9ucy90aHVtYi9hL2E3L0NhbXBvbm90dXNfZmxhdm9tYXJnaW5hdHVzX2FudC5qcGcvMzIwcHgtQ2FtcG9ub3R1c19mbGF2b21hcmdpbmF0dXNfYW50LmpwZyJ9fV19XSwic3RyZWFtIjp0cnVlLCJtb2RlbCI6ImdwdC00byIsIm1heF90b2tlbnMiOjEwMCwic3RyZWFtX29wdGlvbnMiOnsiaW5jbHVkZV91c2FnZSI6dHJ1ZX19",
+      "b64": "eyJpbnB1dCI6W3sicm9sZSI6InVzZXIiLCJjb250ZW50IjpbeyJ0eXBlIjoiaW5wdXRfdGV4dCIsInRleHQiOiJXaGF0IGlzIHRoZSBkb21pbmFudCBjb2xvciBpbiB0aGlzIGltYWdlPyBBbnN3ZXIgd2l0aCBqdXN0IHRoZSBjb2xvci4ifSx7InR5cGUiOiJpbnB1dF9pbWFnZSIsImltYWdlX3VybCI6ImRhdGE6aW1hZ2UvcG5nO2Jhc2U2NCxpVkJPUncwS0dnb0FBQUFOU1VoRVVnQUFBQkFBQUFBUUNBSUFBQUNRa1dnMkFBQUFBWE5TUjBJQXJzNGM2UUFBQUVSbFdFbG1UVTBBS2dBQUFBZ0FBWWRwQUFRQUFBQUJBQUFBR2dBQUFBQUFBNkFCQUFNQUFBQUJBQUVBQUtBQ0FBUUFBQUFCQUFBQUVLQURBQVFBQUFBQkFBQUFFQUFBQUFBMFZYSHlBQUFBSFVsRVFWUW9GV1A4ejBBYVlDSk5PUVBEcUFaaVFtdzBsQVpIS0FFQVFDNEJIOXhoU0c4QUFBQUFTVVZPUks1Q1lJST0ifV19XSwic3RyZWFtIjp0cnVlLCJtb2RlbCI6ImdwdC00byIsIm1heF9vdXRwdXRfdG9rZW5zIjoxMDB9",
       "canonical_json": {
-        "max_tokens": 100,
-        "messages": [
+        "input": [
           {
             "content": [
               {
-                "text": "What animal is shown in this image? Answer with just the animal name.",
-                "type": "text"
+                "text": "What is the dominant color in this image? Answer with just the color.",
+                "type": "input_text"
               },
               {
-                "image_url": {
-                  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Camponotus_flavomarginatus_ant.jpg/320px-Camponotus_flavomarginatus_ant.jpg"
-                },
-                "type": "image_url"
+                "image_url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAEKADAAQAAAABAAAAEAAAAAA0VXHyAAAAHUlEQVQoFWP8z0AaYCJNOQPDqAZiQmw0lAZHKAEAQC4BH9xhSG8AAAAASUVORK5CYII=",
+                "type": "input_image"
               }
             ],
             "role": "user"
           }
         ],
+        "max_output_tokens": 100,
         "model": "gpt-4o",
-        "stream": true,
-        "stream_options": {
-          "include_usage": true
-        }
+        "stream": true
       }
     },
     "headers": {
@@ -74,38 +75,26 @@
       "content-type": "application/json"
     },
     "method": "POST",
-    "url": "https://api.openai.com:443/v1/chat/completions"
+    "url": "https://api.openai.com:443/v1/responses"
   },
   "response": {
     "headers": {
-      "access-control-expose-headers": "X-Request-ID",
       "alt-svc": "h3=\":443\"; ma=86400",
       "cf-cache-status": "DYNAMIC",
-      "cf-ray": "9b004d099826a9c6-ORD",
+      "cf-ray": "9e0e9c501cf43426-ORD",
       "connection": "keep-alive",
       "content-type": "text/event-stream; charset=utf-8",
-      "date": "Thu, 18 Dec 2025 17:15:13 GMT",
+      "date": "Mon, 23 Mar 2026 15:53:43 GMT",
       "openai-organization": "epic-creative-sogybe",
-      "openai-processing-ms": "903",
+      "openai-processing-ms": "57",
       "openai-project": "proj_j5AhgU4eLMRmsoO9FDg7BRD3",
       "openai-version": "2020-10-01",
       "server": "cloudflare",
-      "set-cookie": "_cfuvid=fAwYtpXrebkSQYcItOIbnWYyC5GoGOloOVdcjoiJ3S8-1766078113251-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None",
+      "set-cookie": "__cf_bm=lhsH4j57HXoIF6BuMqGG2f31B5UcPtxDMplNdBgjjrI-1774281223.69371-1.0.1.1-8WyBnsq0fO.lxcN3UK479_9VhdUWoNvx_ThDEiET6BLBG.DfDLADsuuNezk4fA9n0GeXMU.A9xkcqG_f98CbiSdEYIrKjpcSsgDlC.PcSJbPkGlPdvhfxLhdCRAnMgTb; HttpOnly; Secure; Path=/; Domain=api.openai.com; Expires=Mon, 23 Mar 2026 16:23:43 GMT",
       "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
       "transfer-encoding": "chunked",
       "x-content-type-options": "nosniff",
-      "x-envoy-upstream-service-time": "924",
-      "x-openai-proxy-wasm": "v0.1",
-      "x-ratelimit-limit-input-images": "50000",
-      "x-ratelimit-limit-requests": "10000",
-      "x-ratelimit-limit-tokens": "2000000",
-      "x-ratelimit-remaining-input-images": "49999",
-      "x-ratelimit-remaining-requests": "9999",
-      "x-ratelimit-remaining-tokens": "1999215",
-      "x-ratelimit-reset-input-images": "1ms",
-      "x-ratelimit-reset-requests": "6ms",
-      "x-ratelimit-reset-tokens": "23ms",
-      "x-request-id": "req_d5641cb493994104abe3353e08c98ac1"
+      "x-request-id": "req_aae3378552a44f679fd3c005078bda47"
     },
     "status": 200
   }

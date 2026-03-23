@@ -15,7 +15,7 @@ defmodule ReqLlmNext.Wire.StreamingTest do
       assert %Finch.Request{} = request
       assert request.method == "POST"
       assert request.host == "api.openai.com"
-      assert request.path == "/v1/chat/completions"
+      assert request.path == "/chat/completions"
     end
 
     test "includes auth headers" do

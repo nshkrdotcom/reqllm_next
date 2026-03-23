@@ -2,6 +2,8 @@
 
 Repository workflow contract for Beadwork and Spec Led Development.
 
+<!-- covers: reqllm.workflow.beadwork_primed reqllm.workflow.specled_loop reqllm.workflow.agent_instructions reqllm.workflow.starter_slice_verification -->
+
 ```spec-meta
 id: reqllm.workflow
 kind: workflow
@@ -10,6 +12,8 @@ summary: Contributor workflow contract for durable work tracking, current-truth 
 surface:
   - README.md
   - AGENTS.md
+  - .spec/README.md
+  - .spec/AGENTS.md
   - guides/package_thesis.md
   - mix.exs
 ```
@@ -23,7 +27,7 @@ surface:
   stability: evolving
 
 - id: reqllm.workflow.specled_loop
-  statement: Contributor workflow shall keep a canonical .spec workspace and use mix spec.prime, mix spec.next, and mix spec.check to maintain current truth alongside the existing specs/ architecture notes while keeping README, AGENTS, and the shareable package-thesis guide aligned with that current truth.
+  statement: Contributor workflow shall keep `.spec/` as the canonical spec workspace and use `mix spec.prime`, `mix spec.next`, and `mix spec.check` to maintain the subject specs, ADRs, README, AGENTS, and package-thesis guide in sync with current truth.
   priority: must
   stability: evolving
 
@@ -49,6 +53,16 @@ surface:
 
 - kind: source_file
   target: AGENTS.md
+  covers:
+    - reqllm.workflow.agent_instructions
+
+- kind: source_file
+  target: .spec/README.md
+  covers:
+    - reqllm.workflow.specled_loop
+
+- kind: source_file
+  target: .spec/AGENTS.md
   covers:
     - reqllm.workflow.agent_instructions
 

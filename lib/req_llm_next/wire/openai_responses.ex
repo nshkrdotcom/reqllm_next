@@ -15,6 +15,7 @@ defmodule ReqLlmNext.Wire.OpenAIResponses do
 
   @behaviour ReqLlmNext.Wire.Streaming
 
+  alias ReqLlmNext.Context.ContentPart
   alias ReqLlmNext.Tool
 
   @impl ReqLlmNext.Wire.Streaming
@@ -26,11 +27,27 @@ defmodule ReqLlmNext.Wire.OpenAIResponses do
 
   @impl ReqLlmNext.Wire.Streaming
   def encode_body(model, prompt, opts) do
+    base_body(model, prompt, opts)
+    |> Map.put(:stream, true)
+  end
+
+  @spec encode_websocket_event(LLMDB.Model.t(), String.t() | ReqLlmNext.Context.t(), keyword()) ::
+          map()
+  def encode_websocket_event(model, prompt, opts) do
+    model
+    |> base_body(prompt, opts)
+    |> Map.update!(:input, &Enum.map(&1, fn message -> Map.put(message, :type, "message") end))
+    |> Map.delete(:temperature)
+    |> Map.put(:type, "response.create")
+    |> maybe_add(:previous_response_id, Keyword.get(opts, :previous_response_id))
+    |> maybe_add(:store, Keyword.get(opts, :store))
+    |> maybe_add(:generate, Keyword.get(opts, :generate))
+  end
+
+  defp base_body(model, prompt, opts) do
     %{
       model: model.id,
-      input: encode_input(prompt),
-      stream: true,
-      stream_options: %{include_usage: true}
+      input: encode_input(prompt)
     }
     |> maybe_add(:max_output_tokens, get_max_tokens(opts))
     |> maybe_add(:temperature, Keyword.get(opts, :temperature))
@@ -83,9 +100,17 @@ defmodule ReqLlmNext.Wire.OpenAIResponses do
   defp encode_input_content(parts, content_type) when is_list(parts) do
     Enum.flat_map(parts, fn part ->
       case part do
-        %{type: :text, text: text} -> [%{type: content_type, text: text}]
-        %{type: :image_url, url: url} -> [%{type: "image_url", image_url: %{url: url}}]
-        _ -> []
+        %{type: :text, text: text} ->
+          [%{type: content_type, text: text}]
+
+        %ContentPart{type: :image} = image ->
+          [%{type: "input_image", image_url: ContentPart.data_uri(image)}]
+
+        %{type: :image_url, url: url} ->
+          [%{type: "input_image", image_url: url}]
+
+        _ ->
+          []
       end
     end)
   end
@@ -115,7 +140,7 @@ defmodule ReqLlmNext.Wire.OpenAIResponses do
       name: function_def["name"] || function_def[:name],
       description: function_def["description"] || function_def[:description],
       parameters: function_def["parameters"] || function_def[:parameters],
-      strict: tool.strict || true
+      strict: tool.strict
     }
   end
 

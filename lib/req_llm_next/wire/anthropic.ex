@@ -30,6 +30,7 @@ defmodule ReqLlmNext.Wire.Anthropic do
 
   @behaviour ReqLlmNext.Wire.Streaming
 
+  alias ReqLlmNext.Context.ContentPart
   alias ReqLlmNext.Response.Usage
   alias ReqLlmNext.{Tool, ToolCall}
 
@@ -257,8 +258,24 @@ defmodule ReqLlmNext.Wire.Anthropic do
 
   defp encode_content_part(%{type: :text, text: text}), do: %{type: "text", text: text}
 
-  defp encode_content_part(%{type: :image_url, url: url}),
-    do: %{type: "image", source: %{type: "url", url: url}}
+  defp encode_content_part(%ContentPart{type: :image, data: data, media_type: media_type}),
+    do: %{
+      type: "image",
+      source: %{type: "base64", media_type: media_type, data: Base.encode64(data)}
+    }
+
+  defp encode_content_part(%{type: :image_url, url: url}) do
+    case ContentPart.parse_data_uri(url) do
+      {:ok, %{media_type: media_type, data: data}} ->
+        %{
+          type: "image",
+          source: %{type: "base64", media_type: media_type, data: Base.encode64(data)}
+        }
+
+      :error ->
+        %{type: "image", source: %{type: "url", url: url}}
+    end
+  end
 
   @impl ReqLlmNext.Wire.Streaming
   def options_schema do

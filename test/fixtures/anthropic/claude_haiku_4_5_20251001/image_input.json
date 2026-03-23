@@ -1,13 +1,10 @@
 {
-  "captured_at": "2025-12-18T17:14:33.802713Z",
+  "captured_at": "2026-03-23T15:53:16.407827Z",
   "chunks": [
-    "ZXZlbnQ6IG1lc3NhZ2Vfc3RhcnQKZGF0YTogeyJ0eXBlIjoibWVzc2FnZV9zdGFydCIsIm1lc3NhZ2UiOnsibW9kZWwiOiJjbGF1ZGUtaGFpa3UtNC01LTIwMjUxMDAxIiwiaWQiOiJtc2dfMDFCUE54UUtoRVk4ZjZuY3BUb3M3ZU1VIiwidHlwZSI6Im1lc3NhZ2UiLCJyb2xlIjoiYXNzaXN0YW50IiwiY29udGVudCI6W10sInN0b3BfcmVhc29uIjpudWxsLCJzdG9wX3NlcXVlbmNlIjpudWxsLCJ1c2FnZSI6eyJpbnB1dF90b2tlbnMiOjEyMSwiY2FjaGVfY3JlYXRpb25faW5wdXRfdG9rZW5zIjowLCJjYWNoZV9yZWFkX2lucHV0X3Rva2VucyI6MCwiY2FjaGVfY3JlYXRpb24iOnsiZXBoZW1lcmFsXzVtX2lucHV0X3Rva2VucyI6MCwiZXBoZW1lcmFsXzFoX2lucHV0X3Rva2VucyI6MH0sIm91dHB1dF90b2tlbnMiOjIsInNlcnZpY2VfdGllciI6InN0YW5kYXJkIn19fQoKZXZlbnQ6IGNvbnRlbnRfYmxvY2tfc3RhcnQKZGF0YTogeyJ0eXBlIjoiY29udGVudF9ibG9ja19zdGFydCIsImluZGV4IjowLCJjb250ZW50X2Jsb2NrIjp7InR5cGUiOiJ0ZXh0IiwidGV4dCI6IiJ9ICAgICAgICAgfQoK",
-    "ZXZlbnQ6IGNvbnRlbnRfYmxvY2tfZGVsdGEKZA==",
-    "YXRhOiB7InR5cGUiOiJjb250ZW50X2Jsb2NrX2RlbHRhIiwiaW5kZXgiOjAsImRlbHRhIjp7InR5cGUiOiJ0ZXh0X2RlbHRhIiwidGV4dCI6IkFudCJ9ICAgICAgfQoK",
-    "ZXZlbnQ6IGNvbnRlbnRfYmxvY2tfc3RvcApkYXRhOiB7InR5cGUiOiJjb250ZW50X2Jsb2NrX3N0b3AiLCJpbmRleCI6MCAgICAgIH0KCg==",
-    "ZXZlbnQ6IG1lc3NhZ2VfZGVsdGEKZGF0YTogew==",
-    "InR5cGUiOiJtZXNzYWdlX2RlbHRhIiwiZGVsdGEiOnsic3RvcF9yZWFzb24iOiJlbmRfdHVybiIsInN0b3Bfc2VxdWVuY2UiOm51bGx9LCJ1c2FnZSI6eyJpbnB1dF90b2tlbnMiOjEyMSwiY2FjaGVfY3JlYXRpb25faW5wdXRfdG9rZW5zIjowLCJjYWNoZV9yZWFkX2lucHV0X3Rva2VucyI6MCwib3V0cHV0X3Rva2VucyI6NX0gICAgICAgICB9Cgo=",
-    "ZXZlbnQ6IG1lc3NhZ2Vfc3RvcApkYXRhOiB7InR5cGUiOiJtZXNzYWdlX3N0b3AiICAgICAgICAgICAgICB9Cgo="
+    "ZXZlbnQ6IG1lc3NhZ2Vfc3RhcnQKZGF0YTogeyJ0eXBlIjoibWVzc2FnZV9zdGFydCIsIm1lc3NhZ2UiOnsibW9kZWwiOiJjbGF1ZGUtaGFpa3UtNC01LTIwMjUxMDAxIiwiaWQiOiJtc2dfMDE3bU45N2ZkVHJBRXJ0VnRyRVFSVnJNIiwidHlwZSI6Im1lc3NhZ2UiLCJyb2xlIjoiYXNzaXN0YW50IiwiY29udGVudCI6W10sInN0b3BfcmVhc29uIjpudWxsLCJzdG9wX3NlcXVlbmNlIjpudWxsLCJ1c2FnZSI6eyJpbnB1dF90b2tlbnMiOjI2LCJjYWNoZV9jcmVhdGlvbl9pbnB1dF90b2tlbnMiOjAsImNhY2hlX3JlYWRfaW5wdXRfdG9rZW5zIjowLCJjYWNoZV9jcmVhdGlvbiI6eyJlcGhlbWVyYWxfNW1faW5wdXRfdG9rZW5zIjowLCJlcGhlbWVyYWxfMWhfaW5wdXRfdG9rZW5zIjowfSwib3V0cHV0X3Rva2VucyI6MSwic2VydmljZV90aWVyIjoic3RhbmRhcmQiLCJpbmZlcmVuY2VfZ2VvIjoibm90X2F2YWlsYWJsZSJ9fSAgICAgICAgICAgfQoKZXZlbnQ6IGNvbnRlbnRfYmxvY2tfc3RhcnQKZGF0YTogeyJ0eXBlIjoiY29udGVudF9ibG9ja19zdGFydCIsImluZGV4IjowLCJjb250ZW50X2Jsb2NrIjp7InR5cGUiOiJ0ZXh0IiwidGV4dCI6IiJ9ICAgICAgICAgICAgIH0KCmV2ZW50OiBwaW5nCmRhdGE6IHsidHlwZSI6ICJwaW5nIn0KCmV2ZW50OiBjb250ZW50X2Jsb2NrX2RlbHRhCmRhdGE6IHsidHlwZSI6ImNvbnRlbnRfYmxvY2tfZGVsdGEiLCJpbmRleCI6MCwiZGVsdGEiOnsidHlwZSI6InRleHRfZGVsdGEiLCJ0ZXh0IjoiUmVkIn19Cgo=",
+    "ZXZlbnQ6IGNvbnRlbnRfYmxvY2tfc3RvcApkYXRhOiB7InR5cGUiOiJjb250ZW50X2Jsb2NrX3N0b3AiLCJpbmRleCI6MH0KCg==",
+    "ZXZlbnQ6IG1lc3NhZ2VfZGVsdGEKZGF0YTogeyJ0eXBlIjoibWVzc2FnZV9kZWx0YSIsImRlbHRhIjp7InN0b3BfcmVhc29uIjoiZW5kX3R1cm4iLCJzdG9wX3NlcXVlbmNlIjpudWxsfSwidXNhZ2UiOnsiaW5wdXRfdG9rZW5zIjoyNiwiY2FjaGVfY3JlYXRpb25faW5wdXRfdG9rZW5zIjowLCJjYWNoZV9yZWFkX2lucHV0X3Rva2VucyI6MCwib3V0cHV0X3Rva2VucyI6NH0gICAgICAgICAgfQoK",
+    "ZXZlbnQ6IG1lc3NhZ2Vfc3RvcApkYXRhOiB7InR5cGUiOiJtZXNzYWdlX3N0b3AiICAgICAgICAgICAgfQoK"
   ],
   "model_id": "claude-haiku-4-5-20251001",
   "prompt": {
@@ -21,19 +18,19 @@
             "data": null,
             "type": "text",
             "filename": null,
-            "text": "What animal is shown in this image? Answer with just the animal name.",
+            "text": "What is the dominant color in this image? Answer with just the color.",
             "metadata": {},
             "url": null,
             "media_type": null
           },
           {
-            "data": null,
-            "type": "image_url",
+            "data": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAEKADAAQAAAABAAAAEAAAAAA0VXHyAAAAHUlEQVQoFWP8z0AaYCJNOQPDqAZiQmw0lAZHKAEAQC4BH9xhSG8AAAAASUVORK5CYII=",
+            "type": "image",
             "filename": null,
             "text": null,
             "metadata": {},
-            "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Camponotus_flavomarginatus_ant.jpg/320px-Camponotus_flavomarginatus_ant.jpg",
-            "media_type": null
+            "url": null,
+            "media_type": "image/png"
           }
         ],
         "tool_calls": null,
@@ -46,20 +43,21 @@
   "provider": "anthropic",
   "request": {
     "body": {
-      "b64": "eyJtZXNzYWdlcyI6W3sicm9sZSI6InVzZXIiLCJjb250ZW50IjpbeyJ0eXBlIjoidGV4dCIsInRleHQiOiJXaGF0IGFuaW1hbCBpcyBzaG93biBpbiB0aGlzIGltYWdlPyBBbnN3ZXIgd2l0aCBqdXN0IHRoZSBhbmltYWwgbmFtZS4ifSx7InR5cGUiOiJpbWFnZSIsInNvdXJjZSI6eyJ0eXBlIjoidXJsIiwidXJsIjoiaHR0cHM6Ly91cGxvYWQud2lraW1lZGlhLm9yZy93aWtpcGVkaWEvY29tbW9ucy90aHVtYi9hL2E3L0NhbXBvbm90dXNfZmxhdm9tYXJnaW5hdHVzX2FudC5qcGcvMzIwcHgtQ2FtcG9ub3R1c19mbGF2b21hcmdpbmF0dXNfYW50LmpwZyJ9fV19XSwic3RyZWFtIjp0cnVlLCJtb2RlbCI6ImNsYXVkZS1oYWlrdS00LTUtMjAyNTEwMDEiLCJtYXhfdG9rZW5zIjoxMDB9",
+      "b64": "eyJtZXNzYWdlcyI6W3sicm9sZSI6InVzZXIiLCJjb250ZW50IjpbeyJ0eXBlIjoidGV4dCIsInRleHQiOiJXaGF0IGlzIHRoZSBkb21pbmFudCBjb2xvciBpbiB0aGlzIGltYWdlPyBBbnN3ZXIgd2l0aCBqdXN0IHRoZSBjb2xvci4ifSx7InR5cGUiOiJpbWFnZSIsInNvdXJjZSI6eyJkYXRhIjoiaVZCT1J3MEtHZ29BQUFBTlNVaEVVZ0FBQUJBQUFBQVFDQUlBQUFDUWtXZzJBQUFBQVhOU1IwSUFyczRjNlFBQUFFUmxXRWxtVFUwQUtnQUFBQWdBQVlkcEFBUUFBQUFCQUFBQUdnQUFBQUFBQTZBQkFBTUFBQUFCQUFFQUFLQUNBQVFBQUFBQkFBQUFFS0FEQUFRQUFBQUJBQUFBRUFBQUFBQTBWWEh5QUFBQUhVbEVRVlFvRldQOHowQWFZQ0pOT1FQRHFBWmlRbXcwbEFaSEtBRUFRQzRCSDl4aFNHOEFBQUFBU1VWT1JLNUNZSUk9IiwidHlwZSI6ImJhc2U2NCIsIm1lZGlhX3R5cGUiOiJpbWFnZS9wbmcifX1dfV0sInN0cmVhbSI6dHJ1ZSwibW9kZWwiOiJjbGF1ZGUtaGFpa3UtNC01LTIwMjUxMDAxIiwibWF4X3Rva2VucyI6MTAwfQ==",
       "canonical_json": {
         "max_tokens": 100,
         "messages": [
           {
             "content": [
               {
-                "text": "What animal is shown in this image? Answer with just the animal name.",
+                "text": "What is the dominant color in this image? Answer with just the color.",
                 "type": "text"
               },
               {
                 "source": {
-                  "type": "url",
-                  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Camponotus_flavomarginatus_ant.jpg/320px-Camponotus_flavomarginatus_ant.jpg"
+                  "data": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAEKADAAQAAAABAAAAEAAAAAA0VXHyAAAAHUlEQVQoFWP8z0AaYCJNOQPDqAZiQmw0lAZHKAEAQC4BH9xhSG8AAAAASUVORK5CYII=",
+                  "media_type": "image/png",
+                  "type": "base64"
                 },
                 "type": "image"
               }
@@ -85,28 +83,31 @@
       "anthropic-organization-id": "a71659e7-a922-4ff7-99de-f3ba615face1",
       "anthropic-ratelimit-input-tokens-limit": "1000000",
       "anthropic-ratelimit-input-tokens-remaining": "999000",
-      "anthropic-ratelimit-input-tokens-reset": "2025-12-18T17:14:34Z",
+      "anthropic-ratelimit-input-tokens-reset": "2026-03-23T15:53:16Z",
       "anthropic-ratelimit-output-tokens-limit": "200000",
       "anthropic-ratelimit-output-tokens-remaining": "200000",
-      "anthropic-ratelimit-output-tokens-reset": "2025-12-18T17:14:33Z",
+      "anthropic-ratelimit-output-tokens-reset": "2026-03-23T15:53:16Z",
       "anthropic-ratelimit-requests-limit": "2000",
       "anthropic-ratelimit-requests-remaining": "1999",
-      "anthropic-ratelimit-requests-reset": "2025-12-18T17:14:33Z",
+      "anthropic-ratelimit-requests-reset": "2026-03-23T15:53:16Z",
       "anthropic-ratelimit-tokens-limit": "1200000",
       "anthropic-ratelimit-tokens-remaining": "1199000",
-      "anthropic-ratelimit-tokens-reset": "2025-12-18T17:14:33Z",
+      "anthropic-ratelimit-tokens-reset": "2026-03-23T15:53:16Z",
       "cache-control": "no-cache",
       "cf-cache-status": "DYNAMIC",
-      "cf-ray": "9b004c198f55eaf4-ORD",
+      "cf-ray": "9e0e9ba5af6ee894-ORD",
       "connection": "keep-alive",
+      "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
       "content-type": "text/event-stream; charset=utf-8",
-      "date": "Thu, 18 Dec 2025 17:14:34 GMT",
-      "request-id": "req_011CWEXd4LrfHpE1BCM6uZ57",
+      "date": "Mon, 23 Mar 2026 15:53:16 GMT",
+      "request-id": "req_011CZLHGWf734iFATHCMSTYK",
       "server": "cloudflare",
+      "server-timing": "x-originResponse;dur=462",
+      "set-cookie": "_cfuvid=BWfyb.ciGULQmTpcQNT0DphDMMoQPJBVKaZs8umx29A-1774281196.4265835-1.0.1.1-TcCJPIEIeYOQ.4VRMpsSCZhdQugRhoKV3GikNckvHa8; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.anthropic.com",
       "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
       "transfer-encoding": "chunked",
-      "vary": "accept-encoding",
-      "x-envoy-upstream-service-time": "873",
+      "vary": "Accept-Encoding",
+      "x-envoy-upstream-service-time": "460",
       "x-robots-tag": "none"
     },
     "status": 200

@@ -35,6 +35,11 @@ surface:
   statement: ReqLlmNext shall be able to lock supported scenario sets to explicit starter-model slices with fixture-backed tests so provider-specific support stays visible as the planning path evolves.
   priority: should
   stability: evolving
+
+- id: reqllm.package.local_env_loading
+  statement: ReqLlmNext shall support local development and replay or live verification by loading a local `.env` file without overriding shell-provided environment variables, so API keys can be supplied for tests and compatibility runs without being committed.
+  priority: should
+  stability: evolving
 ```
 
 ## Verification
@@ -71,4 +76,10 @@ surface:
   execute: true
   covers:
     - reqllm.package.model_slice_verification
+
+- kind: command
+  target: mix test test/env_test.exs
+  execute: true
+  covers:
+    - reqllm.package.local_env_loading
 ```

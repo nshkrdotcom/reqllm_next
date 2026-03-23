@@ -100,11 +100,11 @@ That is what keeps model-specific handling from silently affecting the rest of t
 
 ReqLlmNext has several systems that reinforce this thesis.
 
-### 1. Long-Form Specs
+### 1. Canonical Subject Specs
 
-The `specs/` directory describes the intended architecture in human-readable terms.
+The `.spec/specs/` directory describes the intended architecture in human-readable, current-truth terms.
 
-These docs are where the project captures:
+These subject specs are where the project captures:
 
 1. boundary definitions
 2. layer ownership
@@ -116,9 +116,9 @@ They are the architectural reference, not generated commentary.
 
 ### 2. Checked Current Truth
 
-The `.spec/` workspace is the smaller, enforced contract layer.
+The same `.spec/` workspace is also the enforced contract layer.
 
-It exists so the project does not rely on long prose alone. The current-truth subjects:
+It exists so the project does not rely on prose alone. The current-truth subjects:
 
 1. name the active requirements
 2. point to the relevant surfaces

@@ -124,6 +124,38 @@ defmodule ReqLlmNext.FixturesTest do
       assert recorder.request["headers"]["content-type"] == "application/json"
       assert recorder.request["body"]["canonical_json"]["model"] == "gpt-4o-mini"
     end
+
+    test "normalizes websocket request maps with redacted auth" do
+      model = TestModels.openai(%{id: "gpt-4o-mini"})
+
+      request = %{
+        method: "WEBSOCKET",
+        url: "wss://api.openai.com/v1/responses",
+        transport: "websocket",
+        headers: [
+          {"Authorization", "Bearer sk-secret"},
+          {"OpenAI-Beta", "responses=v1"}
+        ],
+        body: %{
+          type: "response.create",
+          model: "gpt-4o-mini"
+        }
+      }
+
+      recorder = Fixtures.start_recorder(model, "websocket", "Hello!", request)
+
+      assert recorder.request["method"] == "WEBSOCKET"
+      assert recorder.request["transport"] == "websocket"
+      assert recorder.request["url"] == "wss://api.openai.com/v1/responses"
+      assert recorder.request["headers"]["authorization"] == "[REDACTED]"
+      assert recorder.request["headers"]["openai-beta"] == "responses=v1"
+
+      assert (recorder.request["body"]["canonical_json"]["type"] ||
+                recorder.request["body"]["canonical_json"][:type]) == "response.create"
+
+      assert (recorder.request["body"]["canonical_json"]["model"] ||
+                recorder.request["body"]["canonical_json"][:model]) == "gpt-4o-mini"
+    end
   end
 
   describe "maybe_replay_stream/3" do
@@ -167,6 +199,56 @@ defmodule ReqLlmNext.FixturesTest do
 
       assert Fixtures.save_fixture(recorder) == :ok
       assert File.exists?(fixture_path)
+
+      File.rm!(fixture_path)
+      File.rmdir(Path.dirname(fixture_path))
+    end
+
+    test "saves and replays websocket fixtures using recorded transport" do
+      model = TestModels.openai(%{id: "ws-test-model"})
+      fixture_path = Fixtures.path(model, "integration_websocket")
+
+      File.rm(fixture_path)
+
+      recorder = %{
+        model: model,
+        fixture_name: "integration_websocket",
+        prompt: "Test prompt",
+        captured_at: DateTime.utc_now() |> DateTime.to_iso8601(),
+        request: %{
+          "method" => "WEBSOCKET",
+          "url" => "wss://api.openai.com/v1/responses",
+          "transport" => "websocket",
+          "headers" => %{"authorization" => "[REDACTED]"},
+          "body" => %{
+            "canonical_json" => %{"type" => "response.create", "model" => "ws-test-model"},
+            "b64" => Base.encode64(~s({"type":"response.create","model":"ws-test-model"}))
+          }
+        },
+        status: 101,
+        headers: %{"upgrade" => "websocket"},
+        chunks: [
+          Base.encode64(~s({"type":"response.output_text.delta","delta":"Hi"})),
+          Base.encode64(~s({"type":"response.completed","response":{"id":"resp_123"}}))
+        ]
+      }
+
+      assert Fixtures.save_fixture(recorder) == :ok
+      assert File.exists?(fixture_path)
+
+      assert {:ok, stream} =
+               Fixtures.maybe_replay_stream(model, "Test prompt",
+                 fixture: "integration_websocket"
+               )
+
+      chunks = Enum.to_list(stream)
+
+      assert "Hi" in chunks
+
+      assert Enum.any?(chunks, fn
+               {:meta, %{terminal?: true, response_id: "resp_123", finish_reason: :stop}} -> true
+               _ -> false
+             end)
 
       File.rm!(fixture_path)
       File.rmdir(Path.dirname(fixture_path))

@@ -73,6 +73,31 @@ defmodule ReqLlmNext.Context.ContentPart do
   def image(data, media_type \\ "image/png"),
     do: %__MODULE__{type: :image, data: data, media_type: media_type}
 
+  @spec data_uri(t()) :: String.t() | nil
+  def data_uri(%__MODULE__{type: :image, data: data, media_type: media_type})
+      when is_binary(data) and is_binary(media_type) do
+    "data:#{media_type};base64,#{Base.encode64(data)}"
+  end
+
+  def data_uri(%__MODULE__{type: :image_url, url: url}) when is_binary(url), do: url
+  def data_uri(_), do: nil
+
+  @spec parse_data_uri(String.t()) :: {:ok, %{media_type: String.t(), data: binary()}} | :error
+  def parse_data_uri("data:" <> rest) do
+    case String.split(rest, ";base64,", parts: 2) do
+      [media_type, encoded] when media_type != "" ->
+        case Base.decode64(encoded) do
+          {:ok, data} -> {:ok, %{media_type: media_type, data: data}}
+          :error -> :error
+        end
+
+      _ ->
+        :error
+    end
+  end
+
+  def parse_data_uri(_), do: :error
+
   @spec file(binary(), String.t(), String.t()) :: t()
   def file(data, filename, media_type \\ "application/octet-stream"),
     do: %__MODULE__{type: :file, data: data, filename: filename, media_type: media_type}

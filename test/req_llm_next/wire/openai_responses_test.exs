@@ -33,11 +33,11 @@ defmodule ReqLlmNext.Wire.OpenAIResponsesTest do
       assert body.input == [%{role: "user", content: [%{type: "input_text", text: "Hello"}]}]
     end
 
-    test "includes stream_options for usage" do
+    test "does not include legacy stream_options usage flag" do
       model = TestModels.openai_reasoning()
       body = OpenAIResponses.encode_body(model, "Hello", [])
 
-      assert body.stream_options == %{include_usage: true}
+      refute Map.has_key?(body, :stream_options)
     end
 
     test "converts system role to developer role" do
@@ -104,8 +104,30 @@ defmodule ReqLlmNext.Wire.OpenAIResponsesTest do
       assert Enum.at(msg.content, 0) == %{type: "input_text", text: "What is this?"}
 
       assert Enum.at(msg.content, 1) == %{
-               type: "image_url",
-               image_url: %{url: "https://example.com/image.png"}
+               type: "input_image",
+               image_url: "https://example.com/image.png"
+             }
+    end
+
+    test "encodes binary image content in user messages" do
+      model = TestModels.openai_reasoning()
+
+      context =
+        Context.new([
+          Context.user([
+            Context.ContentPart.text("What color is this image?"),
+            Context.ContentPart.image(<<255, 0, 0>>, "image/png")
+          ])
+        ])
+
+      body = OpenAIResponses.encode_body(model, context, [])
+
+      [msg] = body.input
+      assert length(msg.content) == 2
+
+      assert Enum.at(msg.content, 1) == %{
+               type: "input_image",
+               image_url: "data:image/png;base64,/wAA"
              }
     end
 
@@ -180,6 +202,24 @@ defmodule ReqLlmNext.Wire.OpenAIResponsesTest do
       assert encoded_tool.type == "function"
       assert encoded_tool.name == "get_weather"
       assert encoded_tool.description == "Get weather"
+      assert encoded_tool.strict == false
+    end
+
+    test "respects explicit strict tools" do
+      model = TestModels.openai_reasoning()
+
+      tool =
+        ReqLlmNext.Tool.new!(
+          name: "get_weather",
+          description: "Get weather",
+          parameter_schema: [location: [type: :string, required: true]],
+          callback: fn _ -> {:ok, "sunny"} end,
+          strict: true
+        )
+
+      body = OpenAIResponses.encode_body(model, "Hello", tools: [tool])
+
+      assert [encoded_tool] = body.tools
       assert encoded_tool.strict == true
     end
 
@@ -306,6 +346,48 @@ defmodule ReqLlmNext.Wire.OpenAIResponsesTest do
       body = OpenAIResponses.encode_body(model, "Hello", operation: :text)
 
       refute Map.has_key?(body, :text)
+    end
+  end
+
+  describe "encode_websocket_event/3" do
+    test "encodes a response.create event for websocket mode" do
+      model = TestModels.openai_reasoning()
+      body = OpenAIResponses.encode_websocket_event(model, "Hello", [])
+
+      assert body.type == "response.create"
+      assert body.model == "o1-test"
+
+      assert body.input == [
+               %{
+                 type: "message",
+                 role: "user",
+                 content: [%{type: "input_text", text: "Hello"}]
+               }
+             ]
+
+      refute Map.has_key?(body, :stream)
+    end
+
+    test "includes websocket-only continuation fields when provided" do
+      model = TestModels.openai_reasoning()
+
+      body =
+        OpenAIResponses.encode_websocket_event(model, "Hello",
+          previous_response_id: "resp_123",
+          store: false,
+          generate: false
+        )
+
+      assert body.previous_response_id == "resp_123"
+      assert body.store == false
+      assert body.generate == false
+    end
+
+    test "omits temperature from websocket events" do
+      model = TestModels.openai_reasoning()
+      body = OpenAIResponses.encode_websocket_event(model, "Hello", temperature: 0.7)
+
+      refute Map.has_key?(body, :temperature)
     end
   end
 

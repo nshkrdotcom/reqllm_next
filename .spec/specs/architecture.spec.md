@@ -2,29 +2,18 @@
 
 Current-truth boundary and execution-layer contract for ReqLlmNext 2.0.
 
+<!-- covers: reqllm.architecture.model_input_boundary reqllm.architecture.facts_mode_policy_plan reqllm.architecture.execution_layers -->
+
 ```spec-meta
 id: reqllm.architecture
 kind: architecture
 status: active
-summary: Current-truth runtime boundary and layer-separation contract for model input and execution flow, including handcrafted `LLMDB.Model` support at the boundary, supporting package-thesis guides, and the deterministic planning bridge that drives starter model slices.
+summary: Current-truth runtime boundary and layer-separation contract for model input and execution flow, including handcrafted `LLMDB.Model` support at the boundary, the deterministic planning bridge, and the separated execution stack.
 surface:
   - README.md
   - AGENTS.md
-  - specs/README.md
+  - .spec/README.md
   - guides/package_thesis.md
-  - specs/architecture.md
-  - specs/model_source.md
-  - specs/model_profile.md
-  - specs/execution_mode.md
-  - specs/execution_surface.md
-  - specs/overrides.md
-  - specs/execution_plan.md
-  - specs/layer_boundaries.md
-  - specs/semantic_protocol.md
-  - specs/wire_format.md
-  - specs/transport.md
-  - specs/session_runtime.md
-  - specs/provider.md
   - lib/req_llm_next.ex
   - lib/req_llm_next/execution_mode.ex
   - lib/req_llm_next/execution_plan.ex
@@ -85,20 +74,10 @@ decisions:
     - reqllm.architecture.execution_layers
 
 - kind: source_file
-  target: specs/architecture.md
+  target: .spec/specs/architecture.spec.md
   covers:
     - reqllm.architecture.model_input_boundary
     - reqllm.architecture.facts_mode_policy_plan
-    - reqllm.architecture.execution_layers
-
-- kind: source_file
-  target: specs/model_source.md
-  covers:
-    - reqllm.architecture.model_input_boundary
-
-- kind: source_file
-  target: specs/wire_format.md
-  covers:
     - reqllm.architecture.execution_layers
 
 - kind: command

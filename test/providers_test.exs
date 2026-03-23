@@ -46,7 +46,7 @@ defmodule ReqLlmNext.ProvidersTest do
 
   describe "Providers.OpenAI" do
     test "base_url returns OpenAI API URL" do
-      assert OpenAI.base_url() == "https://api.openai.com/v1"
+      assert OpenAI.base_url() == "https://api.openai.com"
     end
 
     test "env_key returns OPENAI_API_KEY" do

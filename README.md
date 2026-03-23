@@ -64,20 +64,20 @@ The longer explanation lives in [`guides/package_thesis.md`](./guides/package_th
 Start with:
 
 1. [`guides/package_thesis.md`](./guides/package_thesis.md) for the package thesis
-2. `specs/project_summary.md` for the architecture overview
-3. `specs/README.md` for the full architecture-spec map
-4. `.spec/` for the checked current-truth contracts used in the Spec Led workflow
+2. [`.spec/README.md`](/Users/mhostetler/Source/ReqLLM/reqllm_next/.spec/README.md) for the canonical Spec Led workspace
+3. [`.spec/specs/architecture.spec.md`](/Users/mhostetler/Source/ReqLLM/reqllm_next/.spec/specs/architecture.spec.md) for the runtime architecture contract
+4. [`.spec/specs/package.spec.md`](/Users/mhostetler/Source/ReqLLM/reqllm_next/.spec/specs/package.spec.md) for the package runtime and verification contract
 
 ## Contributor Workflow
 
 <!-- covers: reqllm.workflow.beadwork_primed reqllm.workflow.specled_loop -->
 
-This repository keeps two complementary kinds of project truth:
+This repository keeps two complementary systems:
 
 - `bw` (Beadwork) for durable work tracking across sessions and hand-offs
-- `.spec/` for current-truth package and workflow contracts validated by `mix spec.*`
+- `.spec/` for the canonical architecture, package contracts, ADRs, and Spec Led checks validated by `mix spec.*`
 
-The long-form architecture lives in `specs/`. The smaller checked contract layer lives in `.spec/`. ReqLlmNext currently targets Elixir `~> 1.19`.
+ReqLlmNext currently targets Elixir `~> 1.19`.
 
 Start a working session with:
 
