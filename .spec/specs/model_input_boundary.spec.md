@@ -20,6 +20,7 @@ surface:
   - test/model_resolver_test.exs
 decisions:
   - reqllm.decision.model_input_boundary
+  - reqllm.decision.zoi_backed_struct_contracts
 ```
 
 ## Requirements
@@ -39,6 +40,11 @@ decisions:
   statement: The model boundary shall fail fast on tuples, ad hoc maps, unsupported types, or invalid model metadata and shall not let raw unvalidated model input continue into execution, while leaving later provider-native helper validation and surface-specific request validation to the planning boundary rather than reintroducing raw model checks downstream, and the public contract lane shall load the top-level facade before export assertions so model-boundary contract coverage is checking the real compiled API surface.
   priority: must
   stability: evolving
+
+- id: reqllm.model_input.zoi_handoff_contracts
+  statement: Accepted model input shall hand off into Zoi-backed internal package contracts such as `ModelProfile`, `ExecutionMode`, `ExecutionPlan`, `Response`, and `StreamResponse` rather than into plain ad hoc structs so the public boundary feeds explicit internal schemas.
+  priority: should
+  stability: evolving
 ```
 
 ## Verification
@@ -50,6 +56,7 @@ decisions:
     - reqllm.model_input.accepted_forms
     - reqllm.model_input.llmdb_resolution
     - reqllm.model_input.fail_fast
+    - reqllm.model_input.zoi_handoff_contracts
 
 - kind: command
   target: mix test test/model_resolver_test.exs test/public_api/contract_test.exs test/public_api/text_generation_test.exs

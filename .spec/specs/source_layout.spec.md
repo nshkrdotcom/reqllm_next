@@ -16,6 +16,8 @@ surface:
   - lib/req_llm_next/anthropic/**/*.ex
   - test/support/**/*.ex
   - test/**/*.exs
+decisions:
+  - reqllm.decision.zoi_backed_struct_contracts
 ```
 
 ## Requirements
@@ -50,6 +52,11 @@ surface:
   statement: Compile-time execution extension contracts shall live in a dedicated `lib/req_llm_next/extensions/` home, including the plain runtime structs, Spark DSL authoring modules, inheritance expansion, manifest verifiers, compiled manifest modules, runtime registries, and provider or family definition packs under `extensions/definitions/`, so default execution families and edge-case override rules are defined outside the shared planner and executor code.
   priority: should
   stability: evolving
+
+- id: reqllm.source_layout.zoi_struct_contracts
+  statement: Package-owned structs under `lib/req_llm_next/` shall use Zoi-backed schemas when they model canonical package contracts, planning objects, runtime state, response materialization state, or compiled extension-manifest data, so struct shape, defaults, and required fields remain explicit and introspectable.
+  priority: should
+  stability: evolving
 ```
 
 ## Verification
@@ -64,4 +71,5 @@ surface:
     - reqllm.source_layout.compat_outside_runtime
     - reqllm.source_layout.provider_utilities
     - reqllm.source_layout.extension_contract_home
+    - reqllm.source_layout.zoi_struct_contracts
 ```

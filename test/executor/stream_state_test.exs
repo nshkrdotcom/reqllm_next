@@ -13,6 +13,27 @@ defmodule ReqLlmNext.Executor.StreamStateTest do
     def decode_event(%{"text" => text}, _model), do: [text]
   end
 
+  describe "struct definition (Zoi)" do
+    test "schema/0 returns Zoi schema" do
+      assert is_struct(StreamState.schema())
+    end
+
+    test "new!/1 provides default values" do
+      state = StreamState.new!(%{protocol_mod: FakeProtocol, wire_mod: FakeWire})
+
+      assert state.buffer == ""
+      assert state.model == nil
+      assert state.recorder == nil
+      assert state.error == nil
+    end
+
+    test "new!/1 raises on missing required fields" do
+      assert_raise ArgumentError, fn ->
+        StreamState.new!(%{})
+      end
+    end
+  end
+
   describe "new/4" do
     test "creates initial state with empty buffer" do
       state = StreamState.new(nil, nil, FakeWire, FakeProtocol)

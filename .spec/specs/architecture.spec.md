@@ -38,6 +38,7 @@ decisions:
   - reqllm.decision.execution_surface_support_unit
   - reqllm.decision.five_scope_policy_rules
   - reqllm.decision.layer_scoped_plan_aware_adapters
+  - reqllm.decision.zoi_backed_struct_contracts
 ```
 
 ## Requirements
@@ -56,6 +57,11 @@ decisions:
 - id: reqllm.architecture.execution_layers
   statement: ReqLlmNext architecture shall separate semantic protocol, wire format, transport, provider, and session-runtime concerns so request meaning, wire envelopes, persistent execution state, and byte movement can evolve independently.
   priority: must
+  stability: evolving
+
+- id: reqllm.architecture.zoi_struct_contracts
+  statement: ReqLlmNext architecture shall model package-owned planning, response, streaming, runtime-state, and extension-manifest structs as Zoi-backed schema contracts so the execution spine carries explicit required fields, defaults, and introspection instead of ad hoc plain structs.
+  priority: should
   stability: evolving
 
 - id: reqllm.architecture.provider_specific_utilities
@@ -87,6 +93,7 @@ decisions:
     - reqllm.architecture.model_input_boundary
     - reqllm.architecture.facts_mode_policy_plan
     - reqllm.architecture.execution_layers
+    - reqllm.architecture.zoi_struct_contracts
 
 - kind: command
   target: mix test test/model_resolver_test.exs test/public_api

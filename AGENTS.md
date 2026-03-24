@@ -33,6 +33,7 @@ The short version is:
 2. the source of truth is the combination of `.spec` subjects, ADRs, public API tests, scenario tests, fixtures, and compat tooling
 3. do not collapse concerns for convenience; reconcile spike-era code toward the documented boundaries instead
 4. treat handcrafted `%LLMDB.Model{}` input, canonical API normalization, and the fixture and compat loop as product-level design decisions
+5. treat package-owned structs as schema contracts and standardize them on Zoi
 
 ## Hard Package Boundaries
 
@@ -154,5 +155,7 @@ REQ_LLM_NEXT_FIXTURES_MODE=record mix test.starter_slice
 - Keep execution-plan behavior deterministic and inspectable.
 - Prefer small, explicit surfaces over hidden branching.
 - Keep provider-specific expansion explainable in guides, specs, and tests.
+- Any package-owned struct in `lib/req_llm_next` should be Zoi-backed unless there is a very strong reason it cannot be.
+- When a new struct is added, prefer a Zoi schema, Zoi-backed enforce keys, and constructor helpers such as `schema/0`, `new/1`, and `new!/1` when they add practical value.
 - If a change is cross-cutting and durable, update the relevant ADR.
 - If a change affects current truth, reconcile `.spec` in the same branch.

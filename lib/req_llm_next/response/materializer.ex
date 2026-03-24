@@ -5,10 +5,16 @@ defmodule ReqLlmNext.Response.Materializer do
   alias ReqLlmNext.Context.{ContentPart, Message}
   alias ReqLlmNext.Response
 
-  defstruct content_parts: [],
-            tool_acc: %{},
-            usage: nil,
-            meta: %{}
+  @schema Zoi.struct(
+            __MODULE__,
+            %{
+              content_parts: Zoi.array(Zoi.any()) |> Zoi.default([]),
+              tool_acc: Zoi.map() |> Zoi.default(%{}),
+              usage: Zoi.map() |> Zoi.nullish() |> Zoi.default(nil),
+              meta: Zoi.map() |> Zoi.default(%{})
+            },
+            coerce: true
+          )
 
   @type t :: %__MODULE__{
           content_parts: [ContentPart.t()],
@@ -17,10 +23,28 @@ defmodule ReqLlmNext.Response.Materializer do
           meta: map()
         }
 
+  @enforce_keys Zoi.Struct.enforce_keys(@schema)
+  defstruct Zoi.Struct.struct_fields(@schema)
+
+  def schema, do: @schema
+
+  @spec new(map()) :: {:ok, t()} | {:error, term()}
+  def new(attrs \\ %{}) when is_map(attrs) do
+    Zoi.parse(@schema, attrs)
+  end
+
+  @spec new!(map()) :: t()
+  def new!(attrs \\ %{}) when is_map(attrs) do
+    case new(attrs) do
+      {:ok, materialized} -> materialized
+      {:error, reason} -> raise ArgumentError, "Invalid materializer state: #{inspect(reason)}"
+    end
+  end
+
   @spec collect(Enumerable.t()) :: {:ok, t()} | {:error, term()}
   def collect(stream) do
     stream
-    |> Enum.reduce_while({:ok, new()}, &consume_chunk/2)
+    |> Enum.reduce_while({:ok, empty()}, &consume_chunk/2)
     |> case do
       {:ok, %__MODULE__{} = materialized} ->
         {:ok, finalize(materialized)}
@@ -104,8 +128,8 @@ defmodule ReqLlmNext.Response.Materializer do
     }
   end
 
-  defp new do
-    %__MODULE__{}
+  defp empty do
+    new!(%{})
   end
 
   defp finalize(%__MODULE__{} = materialized) do

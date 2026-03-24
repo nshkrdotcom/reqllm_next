@@ -12,6 +12,8 @@ surface:
   - test/support/**/*.ex
   - test/**/*.exs
   - test/fixtures/**/*.json
+decisions:
+  - reqllm.decision.zoi_backed_struct_contracts
 ```
 
 ## Requirements
@@ -59,6 +61,11 @@ surface:
 
 - id: reqllm.package.compile_time_extensions
   statement: ReqLlmNext shall move provider and model edge-case support toward a compile-time extension manifest with provider registrations, explicit provider default families, global fallback families, family inheritance for reusing a happy-path stack, narrow opt-in override rules, manifest-backed provider facts and surface catalogs, definition-pack-based built-in declarations, and compile-time manifest verification so common paths stay simple while edge cases remain explicit.
+  priority: should
+  stability: evolving
+
+- id: reqllm.package.zoi_struct_contracts
+  statement: ReqLlmNext shall standardize package-owned structs on Zoi-backed schemas rather than plain `defstruct` declarations so canonical package, planning, response, runtime-state, and extension-manifest contracts expose explicit schema metadata, enforced required keys, and stable defaults.
   priority: should
   stability: evolving
 ```
@@ -163,4 +170,10 @@ surface:
   execute: true
   covers:
     - reqllm.package.compile_time_extensions
+
+- kind: command
+  target: mix test test/stream_response_test.exs test/executor/stream_state_test.exs test/req_llm_next/response/materializer_test.exs
+  execute: true
+  covers:
+    - reqllm.package.zoi_struct_contracts
 ```

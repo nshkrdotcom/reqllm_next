@@ -19,6 +19,8 @@ surface:
   - guides/anthropic_surface_map.md
   - guides/anthropic_openai_compatibility.md
   - mix.exs
+decisions:
+  - reqllm.decision.zoi_backed_struct_contracts
 ```
 
 ## Requirements
@@ -35,7 +37,7 @@ surface:
   stability: evolving
 
 - id: reqllm.workflow.agent_instructions
-  statement: Repository agent instructions shall direct agents to run bw prime before work and mix spec.prime --base HEAD before editing current-truth package guidance, and they shall keep provider-native behavior behind planning, layer, and provider-utility boundaries instead of reintroducing shared executor shortcuts.
+  statement: Repository agent instructions shall direct agents to run bw prime before work and mix spec.prime --base HEAD before editing current-truth package guidance, and they shall keep provider-native behavior behind planning, layer, and provider-utility boundaries instead of reintroducing shared executor shortcuts while standardizing package-owned structs on Zoi-backed schemas instead of plain `defstruct` declarations.
   priority: must
   stability: evolving
 

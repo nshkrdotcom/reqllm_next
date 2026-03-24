@@ -77,7 +77,7 @@ defmodule ReqLlmNext.Executor do
            ExecutionModules.resolve(plan) do
       case Fixtures.maybe_replay_stream(model, prompt, runtime_opts) do
         {:ok, replay_stream} ->
-          {:ok, %StreamResponse{stream: replay_stream, model: model}}
+          {:ok, StreamResponse.new!(%{stream: replay_stream, model: model})}
 
         :no_fixture ->
           with {:ok, stream} <-
@@ -89,7 +89,7 @@ defmodule ReqLlmNext.Executor do
                    prompt,
                    runtime_opts
                  ) do
-            {:ok, %StreamResponse{stream: stream, model: model}}
+            {:ok, StreamResponse.new!(%{stream: stream, model: model})}
           end
       end
     end
@@ -118,7 +118,7 @@ defmodule ReqLlmNext.Executor do
            ExecutionModules.resolve(plan) do
       case Fixtures.maybe_replay_stream(model, execution_prompt, runtime_opts) do
         {:ok, replay_stream} ->
-          {:ok, %StreamResponse{stream: replay_stream, model: model}}
+          {:ok, StreamResponse.new!(%{stream: replay_stream, model: model})}
 
         :no_fixture ->
           with {:ok, stream} <-
@@ -130,7 +130,7 @@ defmodule ReqLlmNext.Executor do
                    execution_prompt,
                    runtime_opts
                  ) do
-            {:ok, %StreamResponse{stream: stream, model: model}}
+            {:ok, StreamResponse.new!(%{stream: stream, model: model})}
           end
       end
     end

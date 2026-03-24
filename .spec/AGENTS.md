@@ -30,3 +30,4 @@ Use this folder to maintain authored Spec Led Development subjects and generated
 - If next says `ready for check`, move to `mix spec.check --base ...`.
 - Use `mix spec.validate --debug` when you need low-level verifier output.
 - Run `mix spec.status` when you need coverage or weak-spot summaries.
+- Treat package-owned structs as architectural contracts and standardize them on Zoi-backed schemas instead of plain `defstruct` declarations.

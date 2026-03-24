@@ -3,7 +3,18 @@ defmodule ReqLlmNext.Executor.StreamState do
 
   alias ReqLlmNext.Fixtures
 
-  defstruct [:buffer, :model, :protocol_mod, :recorder, :wire_mod, :error]
+  @schema Zoi.struct(
+            __MODULE__,
+            %{
+              buffer: Zoi.string() |> Zoi.default(""),
+              model: Zoi.any() |> Zoi.nullish() |> Zoi.default(nil),
+              protocol_mod: Zoi.atom(),
+              recorder: Zoi.map() |> Zoi.nullish() |> Zoi.default(nil),
+              wire_mod: Zoi.atom(),
+              error: Zoi.any() |> Zoi.nullish() |> Zoi.default(nil)
+            },
+            coerce: true
+          )
 
   @type t :: %__MODULE__{
           buffer: binary(),
@@ -25,16 +36,34 @@ defmodule ReqLlmNext.Executor.StreamState do
           {:cont, [String.t()], t()}
           | {:halt, t()}
 
+  @enforce_keys Zoi.Struct.enforce_keys(@schema)
+  defstruct Zoi.Struct.struct_fields(@schema)
+
+  def schema, do: @schema
+
+  @spec new(map()) :: {:ok, t()} | {:error, term()}
+  def new(attrs) when is_map(attrs) do
+    Zoi.parse(@schema, attrs)
+  end
+
+  @spec new!(map()) :: t()
+  def new!(attrs) when is_map(attrs) do
+    case new(attrs) do
+      {:ok, state} -> state
+      {:error, reason} -> raise ArgumentError, "Invalid stream state: #{inspect(reason)}"
+    end
+  end
+
   @spec new(map() | nil, LLMDB.Model.t() | nil, module(), module()) :: t()
   def new(recorder, model, wire_mod, protocol_mod) do
-    %__MODULE__{
+    new!(%{
       buffer: "",
       model: model,
       protocol_mod: protocol_mod,
       recorder: recorder,
       wire_mod: wire_mod,
       error: nil
-    }
+    })
   end
 
   @spec handle_message(msg(), t()) :: result()

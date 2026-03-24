@@ -8,6 +8,25 @@ defmodule ReqLlmNext.StreamResponseTest do
     %LLMDB.Model{id: "test-model", provider: :openai}
   end
 
+  describe "struct definition (Zoi)" do
+    test "schema/0 returns Zoi schema" do
+      assert is_struct(StreamResponse.schema())
+    end
+
+    test "new!/1 provides default values for optional fields" do
+      response = StreamResponse.new!(%{stream: [], model: mock_model()})
+
+      assert response.cancel_fn == nil
+      assert response.metadata_ref == nil
+    end
+
+    test "new!/1 raises on missing required fields" do
+      assert_raise ArgumentError, fn ->
+        StreamResponse.new!(%{})
+      end
+    end
+  end
+
   describe "text/1" do
     test "extracts text from stream of strings" do
       stream = ["Hello", " ", "world", "!"]

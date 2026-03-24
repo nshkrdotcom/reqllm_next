@@ -14,7 +14,16 @@ defmodule ReqLlmNext.StreamResponse do
 
   alias ReqLlmNext.Response.Materializer
 
-  defstruct [:stream, :model, :cancel_fn, :metadata_ref]
+  @schema Zoi.struct(
+            __MODULE__,
+            %{
+              stream: Zoi.any(),
+              model: Zoi.any(),
+              cancel_fn: Zoi.any() |> Zoi.nullish() |> Zoi.default(nil),
+              metadata_ref: Zoi.any() |> Zoi.nullish() |> Zoi.default(nil)
+            },
+            coerce: true
+          )
 
   @type t :: %__MODULE__{
           stream: Enumerable.t(),
@@ -22,6 +31,25 @@ defmodule ReqLlmNext.StreamResponse do
           cancel_fn: (-> :ok) | nil,
           metadata_ref: reference() | nil
         }
+
+  @enforce_keys Zoi.Struct.enforce_keys(@schema)
+  defstruct Zoi.Struct.struct_fields(@schema)
+
+  @doc "Returns the Zoi schema for StreamResponse"
+  def schema, do: @schema
+
+  @spec new(map()) :: {:ok, t()} | {:error, term()}
+  def new(attrs) when is_map(attrs) do
+    Zoi.parse(@schema, attrs)
+  end
+
+  @spec new!(map()) :: t()
+  def new!(attrs) when is_map(attrs) do
+    case new(attrs) do
+      {:ok, response} -> response
+      {:error, reason} -> raise ArgumentError, "Invalid stream response: #{inspect(reason)}"
+    end
+  end
 
   @doc """
   Cancel an in-progress stream.

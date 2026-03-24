@@ -22,6 +22,7 @@ decisions:
   - reqllm.decision.execution_layers
   - reqllm.decision.layer_scoped_plan_aware_adapters
   - reqllm.decision.execution_plan_bridge
+  - reqllm.decision.zoi_backed_struct_contracts
 ```
 
 ## Requirements
@@ -51,6 +52,11 @@ decisions:
   statement: Provider-specific utility modules for non-canonical endpoints shall sit outside the core execution-plan layer stack and may reuse provider auth or endpoint roots without becoming alternate semantic-protocol or wire layers for the main public API.
   priority: should
   stability: evolving
+
+- id: reqllm.layer_boundaries.zoi_runtime_state
+  statement: Package-owned structs that cross layer boundaries for streaming, response materialization, or transport state shall be modeled as Zoi-backed schema contracts so runtime handoffs keep explicit defaults and required fields rather than passing around plain ad hoc structs.
+  priority: should
+  stability: evolving
 ```
 
 ## Verification
@@ -64,6 +70,7 @@ decisions:
     - reqllm.layer_boundaries.no_cross_layer_skips
     - reqllm.layer_boundaries.replay_uses_recorded_stack
     - reqllm.layer_boundaries.provider_utilities_outside_stack
+    - reqllm.layer_boundaries.zoi_runtime_state
 
 - kind: source_file
   target: AGENTS.md
@@ -76,4 +83,10 @@ decisions:
   covers:
     - reqllm.layer_boundaries.separated_io
     - reqllm.layer_boundaries.replay_uses_recorded_stack
+
+- kind: command
+  target: mix test test/stream_response_test.exs test/executor/stream_state_test.exs test/req_llm_next/response/materializer_test.exs
+  execute: true
+  covers:
+    - reqllm.layer_boundaries.zoi_runtime_state
 ```
