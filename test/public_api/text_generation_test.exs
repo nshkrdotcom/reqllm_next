@@ -39,6 +39,46 @@ defmodule ReqLlmNext.PublicAPI.TextGenerationTest do
       assert is_binary(Response.text(result))
       assert %Context{} = result.context
     end
+
+    test "accepts OpenAI prompt caching options through the public API" do
+      {:ok, result} =
+        ReqLlmNext.generate_text("openai:gpt-4o-mini", "Hello!",
+          fixture: "basic",
+          prompt_cache_key: "shared-prefix",
+          prompt_cache_retention: "24h"
+        )
+
+      assert %Response{} = result
+      assert is_binary(Response.text(result))
+    end
+
+    test "accepts OpenAI document inputs through the public API for attachment-capable models" do
+      context =
+        ReqLlmNext.context([
+          Context.user([
+            Context.ContentPart.text("Summarize this document"),
+            Context.ContentPart.document_text("Quarterly revenue increased by 12 percent.")
+          ])
+        ])
+
+      {:ok, result} =
+        ReqLlmNext.generate_text("openai:gpt-4o-mini", context, fixture: "basic")
+
+      assert %Response{} = result
+      assert is_binary(Response.text(result))
+    end
+
+    test "accepts OpenAI built-in helper tools through the public API" do
+      {:ok, result} =
+        ReqLlmNext.generate_text("openai:gpt-4o-mini", "Search the web",
+          fixture: "basic",
+          tools: [ReqLlmNext.OpenAI.web_search_tool()],
+          include: [ReqLlmNext.OpenAI.web_search_sources_include()]
+        )
+
+      assert %Response{} = result
+      assert is_binary(Response.text(result))
+    end
   end
 
   describe "generate_text!/3" do
@@ -84,6 +124,27 @@ defmodule ReqLlmNext.PublicAPI.TextGenerationTest do
       assert %StreamResponse{} = resp
       assert resp.model.id == "gpt-4o-mini"
       assert String.length(StreamResponse.text(resp)) > 0
+    end
+
+    test "supports websocket continuation through continue_from responses" do
+      {:ok, seed} =
+        ReqLlmNext.generate_text("openai:gpt-4o-mini", "Say hello briefly.",
+          fixture: "continuation_seed_websocket",
+          transport: :websocket
+        )
+
+      {:ok, followup} =
+        ReqLlmNext.generate_text("openai:gpt-4o-mini", "Now continue with one more sentence.",
+          fixture: "continuation_followup_websocket",
+          transport: :websocket,
+          session: :continue,
+          continue_from: seed
+        )
+
+      assert %Response{} = seed
+      assert %Response{} = followup
+      assert is_binary(Response.text(seed))
+      assert is_binary(Response.text(followup))
     end
 
     test "returns an error when websocket mode receives unsupported temperature" do

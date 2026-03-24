@@ -30,12 +30,12 @@ ReqLlmNext 2.0 treats the execution stack as four separate concerns:
 
 The planner is responsible for choosing semantic protocol, wire format, and transport for a request.
 
-The current `Wire.*` modules remain transitional implementation code until the refactor splits them, but the architectural target and current-truth documentation now treat those concerns as distinct.
+ReqLlmNext now embodies those concerns as distinct lower-layer seams, with runtime module resolution, session runtime, transport dispatch, and shared response materialization all driven from the plan instead of through transitional mixed ownership.
 
 ## Consequences
 
 The long-form specs and README can describe WebSocket and SSE execution without overloading the word "wire."
 
-Future refactors should split current `wire/` code along these boundaries instead of creating larger mixed modules.
+Future refactors should keep sharpening these boundaries instead of creating larger mixed modules or reintroducing cross-layer shortcuts.
 
 Compatibility diagnostics and source ownership become clearer because semantic mistakes, envelope mistakes, and transport mistakes now have separate homes.

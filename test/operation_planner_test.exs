@@ -6,6 +6,7 @@ defmodule ReqLlmNext.OperationPlannerTest do
     Context,
     Error,
     ExecutionModules,
+    OpenAI,
     OperationPlanner,
     TestModels,
     Tool
@@ -58,6 +59,20 @@ defmodule ReqLlmNext.OperationPlannerTest do
                )
 
       assert [%{name: "web_search", type: "web_search_20250305"}] = plan.parameter_values.tools
+    end
+
+    test "preserves Anthropic dynamic web-search tool versions through planning" do
+      model = TestModels.anthropic()
+
+      assert {:ok, plan} =
+               OperationPlanner.plan(
+                 model,
+                 :text,
+                 "Hello",
+                 tools: [Anthropic.web_search_tool(dynamic_filtering: true)]
+               )
+
+      assert [%{name: "web_search", type: "web_search_20260209"}] = plan.parameter_values.tools
     end
 
     test "preserves canonical ReqLlmNext.Tool values on Anthropic surfaces" do
@@ -194,6 +209,20 @@ defmodule ReqLlmNext.OperationPlannerTest do
       assert plan.transport == :websocket
     end
 
+    test "resolves an explicit session runtime for OpenAI Responses continuation plans" do
+      {:ok, model} = LLMDB.model("openai:gpt-4o-mini")
+
+      assert {:ok, plan} =
+               OperationPlanner.plan(
+                 model,
+                 :text,
+                 "Hello",
+                 session: :continue
+               )
+
+      assert plan.session_runtime == :openai_responses
+    end
+
     test "rejects temperature on the websocket responses surface" do
       {:ok, model} = LLMDB.model("openai:gpt-4o-mini")
 
@@ -220,7 +249,8 @@ defmodule ReqLlmNext.OperationPlannerTest do
                  tools: [Anthropic.web_search_tool()]
                )
 
-      assert Exception.message(error) =~ "ReqLlmNext.Tool values on non-Anthropic surfaces"
+      assert Exception.message(error) =~
+               "ReqLlmNext.Tool values on canonical cross-provider surfaces"
     end
 
     test "rejects raw tool maps on OpenAI surfaces" do
@@ -234,7 +264,24 @@ defmodule ReqLlmNext.OperationPlannerTest do
                  tools: [[type: "function"] |> Enum.into(%{})]
                )
 
-      assert Exception.message(error) =~ "ReqLlmNext.Tool values on non-Anthropic surfaces"
+      assert Exception.message(error) =~
+               "ReqLlmNext.Tool values on canonical cross-provider surfaces"
+    end
+
+    test "accepts OpenAI provider-native helper tools on OpenAI Responses surfaces" do
+      {:ok, model} = LLMDB.model("openai:gpt-4o-mini")
+
+      assert {:ok, plan} =
+               OperationPlanner.plan(
+                 model,
+                 :text,
+                 "Search the web",
+                 tools: [OpenAI.web_search_tool()],
+                 include: [OpenAI.web_search_sources_include()]
+               )
+
+      assert [%{type: "web_search"}] = plan.parameter_values.tools
+      assert ["web_search_call.action.sources"] = plan.parameter_values.include
     end
 
     test "preserves canonical ReqLlmNext.Tool values on OpenAI surfaces" do
@@ -270,7 +317,8 @@ defmodule ReqLlmNext.OperationPlannerTest do
                  mcp_servers: [Anthropic.mcp_server("https://mcp.example.com")]
                )
 
-      assert Exception.message(error) =~ "mcp_servers are only supported on Anthropic surfaces"
+      assert Exception.message(error) =~
+               "mcp_servers are only supported on provider-native surfaces"
     end
   end
 
@@ -281,6 +329,7 @@ defmodule ReqLlmNext.OperationPlannerTest do
 
       assert %{
                provider_mod: provider_mod,
+               session_runtime_mod: session_runtime_mod,
                protocol_mod: protocol_mod,
                wire_mod: wire_mod,
                transport_mod: transport_mod
@@ -288,6 +337,7 @@ defmodule ReqLlmNext.OperationPlannerTest do
                ExecutionModules.resolve(plan)
 
       assert provider_mod == ReqLlmNext.Providers.OpenAI
+      assert session_runtime_mod == ReqLlmNext.SessionRuntimes.None
       assert protocol_mod == ReqLlmNext.SemanticProtocols.OpenAIResponses
       assert wire_mod == ReqLlmNext.Wire.OpenAIResponses
       assert transport_mod == ReqLlmNext.Transports.HTTPStream
@@ -299,6 +349,7 @@ defmodule ReqLlmNext.OperationPlannerTest do
 
       assert %{
                provider_mod: provider_mod,
+               session_runtime_mod: session_runtime_mod,
                protocol_mod: protocol_mod,
                wire_mod: wire_mod,
                transport_mod: transport_mod
@@ -306,6 +357,26 @@ defmodule ReqLlmNext.OperationPlannerTest do
                ExecutionModules.resolve(plan)
 
       assert provider_mod == ReqLlmNext.Providers.OpenAI
+      assert session_runtime_mod == ReqLlmNext.SessionRuntimes.None
+      assert protocol_mod == ReqLlmNext.SemanticProtocols.OpenAIResponses
+      assert wire_mod == ReqLlmNext.Wire.OpenAIResponses
+      assert transport_mod == ReqLlmNext.Transports.OpenAIResponsesWebSocket
+    end
+
+    test "maps OpenAI session-continuation plans to the OpenAI Responses session runtime" do
+      {:ok, model} = LLMDB.model("openai:gpt-4o-mini")
+      {:ok, plan} = OperationPlanner.plan(model, :text, "Hello", session: :continue)
+
+      assert %{
+               provider_mod: provider_mod,
+               session_runtime_mod: session_runtime_mod,
+               protocol_mod: protocol_mod,
+               wire_mod: wire_mod,
+               transport_mod: transport_mod
+             } = ExecutionModules.resolve(plan)
+
+      assert provider_mod == ReqLlmNext.Providers.OpenAI
+      assert session_runtime_mod == ReqLlmNext.SessionRuntimes.OpenAIResponses
       assert protocol_mod == ReqLlmNext.SemanticProtocols.OpenAIResponses
       assert wire_mod == ReqLlmNext.Wire.OpenAIResponses
       assert transport_mod == ReqLlmNext.Transports.OpenAIResponsesWebSocket
@@ -317,6 +388,7 @@ defmodule ReqLlmNext.OperationPlannerTest do
 
       assert %{
                provider_mod: provider_mod,
+               session_runtime_mod: session_runtime_mod,
                protocol_mod: protocol_mod,
                wire_mod: wire_mod,
                transport_mod: transport_mod
@@ -324,6 +396,7 @@ defmodule ReqLlmNext.OperationPlannerTest do
                ExecutionModules.resolve(plan)
 
       assert provider_mod == ReqLlmNext.Providers.Anthropic
+      assert session_runtime_mod == ReqLlmNext.SessionRuntimes.None
       assert protocol_mod == ReqLlmNext.SemanticProtocols.AnthropicMessages
       assert wire_mod == ReqLlmNext.Wire.Anthropic
       assert transport_mod == ReqLlmNext.Transports.HTTPStream
@@ -335,12 +408,14 @@ defmodule ReqLlmNext.OperationPlannerTest do
 
       assert %{
                provider_mod: provider_mod,
+               session_runtime_mod: session_runtime_mod,
                protocol_mod: protocol_mod,
                wire_mod: wire_mod,
                transport_mod: transport_mod
              } = ExecutionModules.resolve(plan)
 
       assert provider_mod == ReqLlmNext.Providers.OpenAI
+      assert session_runtime_mod == ReqLlmNext.SessionRuntimes.None
       assert protocol_mod == nil
       assert wire_mod == ReqLlmNext.Wire.OpenAIEmbeddings
       assert transport_mod == ReqLlmNext.Transports.HTTPRequest

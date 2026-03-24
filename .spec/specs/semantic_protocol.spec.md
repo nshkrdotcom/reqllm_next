@@ -12,7 +12,7 @@ summary: Provider API-family meaning, payload mapping, and canonical chunk decod
 surface:
   - .spec/specs/semantic_protocol.spec.md
   - .spec/specs/layer_boundaries.spec.md
-  - lib/req_llm_next/semantic_protocols/anthropic_messages.ex
+  - lib/req_llm_next/providers/anthropic/semantic_protocol_messages.ex
 decisions:
   - reqllm.decision.execution_layers
 ```
@@ -53,7 +53,7 @@ decisions:
     - reqllm.semantic_protocol.provider_rich_events
 
 - kind: command
-  target: mix test test/semantic_protocols/anthropic_messages_test.exs
+  target: mix test test/providers/anthropic/semantic_protocol_messages_test.exs
   execute: true
   covers:
     - reqllm.semantic_protocol.provider_rich_events

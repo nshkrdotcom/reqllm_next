@@ -1,0 +1,126 @@
+{
+  "captured_at": "2026-03-24T18:38:54.526491Z",
+  "chunks": [
+    "eyJ0eXBlIjoicmVzcG9uc2UuY3JlYXRlZCIsInJlc3BvbnNlIjp7ImlkIjoicmVzcF8wYzQyYTZhYTI0YTE5YTYxMDA2OWMyZGEzZWVlYjg4MTkzODg3MTkzNDk0OTdhZTBjMiIsIm9iamVjdCI6InJlc3BvbnNlIiwiY3JlYXRlZF9hdCI6MTc3NDM3NzUzNCwic3RhdHVzIjoiaW5fcHJvZ3Jlc3MiLCJiYWNrZ3JvdW5kIjpmYWxzZSwiY29tcGxldGVkX2F0IjpudWxsLCJlcnJvciI6bnVsbCwiZnJlcXVlbmN5X3BlbmFsdHkiOjAuMCwiaW5jb21wbGV0ZV9kZXRhaWxzIjpudWxsLCJpbnN0cnVjdGlvbnMiOm51bGwsIm1heF9vdXRwdXRfdG9rZW5zIjo1MDAsIm1heF90b29sX2NhbGxzIjpudWxsLCJtb2RlbCI6ImdwdC00by1taW5pLTIwMjQtMDctMTgiLCJvdXRwdXQiOltdLCJwYXJhbGxlbF90b29sX2NhbGxzIjp0cnVlLCJwcmVzZW5jZV9wZW5hbHR5IjowLjAsInByZXZpb3VzX3Jlc3BvbnNlX2lkIjpudWxsLCJwcm9tcHRfY2FjaGVfa2V5IjpudWxsLCJwcm9tcHRfY2FjaGVfcmV0ZW50aW9uIjpudWxsLCJyZWFzb25pbmciOnsiZWZmb3J0IjpudWxsLCJzdW1tYXJ5IjpudWxsfSwic2FmZXR5X2lkZW50aWZpZXIiOm51bGwsInNlcnZpY2VfdGllciI6ImF1dG8iLCJzdG9yZSI6dHJ1ZSwidGVtcGVyYXR1cmUiOjEuMCwidGV4dCI6eyJmb3JtYXQiOnsidHlwZSI6InRleHQifSwidmVyYm9zaXR5IjoibWVkaXVtIn0sInRvb2xfY2hvaWNlIjoiYXV0byIsInRvb2xzIjpbeyJ0eXBlIjoiZnVuY3Rpb24iLCJkZXNjcmlwdGlvbiI6IkdldCBjdXJyZW50IHdlYXRoZXIgaW5mb3JtYXRpb24gZm9yIGEgbG9jYXRpb24iLCJuYW1lIjoiZ2V0X3dlYXRoZXIiLCJwYXJhbWV0ZXJzIjp7ImFkZGl0aW9uYWxQcm9wZXJ0aWVzIjpmYWxzZSwicHJvcGVydGllcyI6eyJsb2NhdGlvbiI6eyJkZXNjcmlwdGlvbiI6IkNpdHkgbmFtZSIsInR5cGUiOiJzdHJpbmcifSwidW5pdCI6eyJkZXNjcmlwdGlvbiI6IlRlbXBlcmF0dXJlIHVuaXQiLCJlbnVtIjpbImNlbHNpdXMiLCJmYWhyZW5oZWl0Il0sInR5cGUiOiJzdHJpbmcifX0sInJlcXVpcmVkIjpbImxvY2F0aW9uIl0sInR5cGUiOiJvYmplY3QifSwic3RyaWN0IjpmYWxzZX0seyJ0eXBlIjoiZnVuY3Rpb24iLCJkZXNjcmlwdGlvbiI6IlRlbGwgYSBmdW5ueSBqb2tlIiwibmFtZSI6InRlbGxfam9rZSIsInBhcmFtZXRlcnMiOnsiYWRkaXRpb25hbFByb3BlcnRpZXMiOmZhbHNlLCJwcm9wZXJ0aWVzIjp7InRvcGljIjp7ImRlc2NyaXB0aW9uIjoiVG9waWMgZm9yIHRoZSBqb2tlIiwidHlwZSI6InN0cmluZyJ9fSwidHlwZSI6Im9iamVjdCJ9LCJzdHJpY3QiOmZhbHNlfSx7InR5cGUiOiJmdW5jdGlvbiIsImRlc2NyaXB0aW9uIjoiR2V0IHRoZSBjdXJyZW50IHRpbWUiLCJuYW1lIjoiZ2V0X3RpbWUiLCJwYXJhbWV0ZXJzIjp7InByb3BlcnRpZXMiOnt9LCJ0eXBlIjoib2JqZWN0In0sInN0cmljdCI6ZmFsc2V9XSwidG9wX2xvZ3Byb2JzIjowLCJ0b3BfcCI6MS4wLCJ0cnVuY2F0aW9uIjoiZGlzYWJsZWQiLCJ1c2FnZSI6bnVsbCwidXNlciI6bnVsbCwibWV0YWRhdGEiOnt9fSwic2VxdWVuY2VfbnVtYmVyIjowfQ==",
+    "eyJ0eXBlIjoicmVzcG9uc2UuaW5fcHJvZ3Jlc3MiLCJyZXNwb25zZSI6eyJpZCI6InJlc3BfMGM0MmE2YWEyNGExOWE2MTAwNjljMmRhM2VlZWI4ODE5Mzg4NzE5MzQ5NDk3YWUwYzIiLCJvYmplY3QiOiJyZXNwb25zZSIsImNyZWF0ZWRfYXQiOjE3NzQzNzc1MzQsInN0YXR1cyI6ImluX3Byb2dyZXNzIiwiYmFja2dyb3VuZCI6ZmFsc2UsImNvbXBsZXRlZF9hdCI6bnVsbCwiZXJyb3IiOm51bGwsImZyZXF1ZW5jeV9wZW5hbHR5IjowLjAsImluY29tcGxldGVfZGV0YWlscyI6bnVsbCwiaW5zdHJ1Y3Rpb25zIjpudWxsLCJtYXhfb3V0cHV0X3Rva2VucyI6NTAwLCJtYXhfdG9vbF9jYWxscyI6bnVsbCwibW9kZWwiOiJncHQtNG8tbWluaS0yMDI0LTA3LTE4Iiwib3V0cHV0IjpbXSwicGFyYWxsZWxfdG9vbF9jYWxscyI6dHJ1ZSwicHJlc2VuY2VfcGVuYWx0eSI6MC4wLCJwcmV2aW91c19yZXNwb25zZV9pZCI6bnVsbCwicHJvbXB0X2NhY2hlX2tleSI6bnVsbCwicHJvbXB0X2NhY2hlX3JldGVudGlvbiI6bnVsbCwicmVhc29uaW5nIjp7ImVmZm9ydCI6bnVsbCwic3VtbWFyeSI6bnVsbH0sInNhZmV0eV9pZGVudGlmaWVyIjpudWxsLCJzZXJ2aWNlX3RpZXIiOiJhdXRvIiwic3RvcmUiOnRydWUsInRlbXBlcmF0dXJlIjoxLjAsInRleHQiOnsiZm9ybWF0Ijp7InR5cGUiOiJ0ZXh0In0sInZlcmJvc2l0eSI6Im1lZGl1bSJ9LCJ0b29sX2Nob2ljZSI6ImF1dG8iLCJ0b29scyI6W3sidHlwZSI6ImZ1bmN0aW9uIiwiZGVzY3JpcHRpb24iOiJHZXQgY3VycmVudCB3ZWF0aGVyIGluZm9ybWF0aW9uIGZvciBhIGxvY2F0aW9uIiwibmFtZSI6ImdldF93ZWF0aGVyIiwicGFyYW1ldGVycyI6eyJhZGRpdGlvbmFsUHJvcGVydGllcyI6ZmFsc2UsInByb3BlcnRpZXMiOnsibG9jYXRpb24iOnsiZGVzY3JpcHRpb24iOiJDaXR5IG5hbWUiLCJ0eXBlIjoic3RyaW5nIn0sInVuaXQiOnsiZGVzY3JpcHRpb24iOiJUZW1wZXJhdHVyZSB1bml0IiwiZW51bSI6WyJjZWxzaXVzIiwiZmFocmVuaGVpdCJdLCJ0eXBlIjoic3RyaW5nIn19LCJyZXF1aXJlZCI6WyJsb2NhdGlvbiJdLCJ0eXBlIjoib2JqZWN0In0sInN0cmljdCI6ZmFsc2V9LHsidHlwZSI6ImZ1bmN0aW9uIiwiZGVzY3JpcHRpb24iOiJUZWxsIGEgZnVubnkgam9rZSIsIm5hbWUiOiJ0ZWxsX2pva2UiLCJwYXJhbWV0ZXJzIjp7ImFkZGl0aW9uYWxQcm9wZXJ0aWVzIjpmYWxzZSwicHJvcGVydGllcyI6eyJ0b3BpYyI6eyJkZXNjcmlwdGlvbiI6IlRvcGljIGZvciB0aGUgam9rZSIsInR5cGUiOiJzdHJpbmcifX0sInR5cGUiOiJvYmplY3QifSwic3RyaWN0IjpmYWxzZX0seyJ0eXBlIjoiZnVuY3Rpb24iLCJkZXNjcmlwdGlvbiI6IkdldCB0aGUgY3VycmVudCB0aW1lIiwibmFtZSI6ImdldF90aW1lIiwicGFyYW1ldGVycyI6eyJwcm9wZXJ0aWVzIjp7fSwidHlwZSI6Im9iamVjdCJ9LCJzdHJpY3QiOmZhbHNlfV0sInRvcF9sb2dwcm9icyI6MCwidG9wX3AiOjEuMCwidHJ1bmNhdGlvbiI6ImRpc2FibGVkIiwidXNhZ2UiOm51bGwsInVzZXIiOm51bGwsIm1ldGFkYXRhIjp7fX0sInNlcXVlbmNlX251bWJlciI6MX0=",
+    "eyJ0eXBlIjoicmVzcG9uc2Uub3V0cHV0X2l0ZW0uYWRkZWQiLCJpdGVtIjp7ImlkIjoiZmNfMGM0MmE2YWEyNGExOWE2MTAwNjljMmRhM2Y2OTZjODE5MzkyY2M5MGU4M2QxN2FhYjciLCJ0eXBlIjoiZnVuY3Rpb25fY2FsbCIsInN0YXR1cyI6ImluX3Byb2dyZXNzIiwiYXJndW1lbnRzIjoiIiwiY2FsbF9pZCI6ImNhbGxfd0F1MGF0blhPYVBUenM1QnoydEJkeEpBIiwibmFtZSI6ImdldF93ZWF0aGVyIn0sIm91dHB1dF9pbmRleCI6MCwic2VxdWVuY2VfbnVtYmVyIjoyfQ==",
+    "eyJ0eXBlIjoicmVzcG9uc2UuZnVuY3Rpb25fY2FsbF9hcmd1bWVudHMuZGVsdGEiLCJkZWx0YSI6IntcIiIsIml0ZW1faWQiOiJmY18wYzQyYTZhYTI0YTE5YTYxMDA2OWMyZGEzZjY5NmM4MTkzOTJjYzkwZTgzZDE3YWFiNyIsIm9iZnVzY2F0aW9uIjoiVERnc1QxM0tKNjhsSUQiLCJvdXRwdXRfaW5kZXgiOjAsInNlcXVlbmNlX251bWJlciI6M30=",
+    "eyJ0eXBlIjoicmVzcG9uc2UuZnVuY3Rpb25fY2FsbF9hcmd1bWVudHMuZGVsdGEiLCJkZWx0YSI6ImxvY2F0aW9uIiwiaXRlbV9pZCI6ImZjXzBjNDJhNmFhMjRhMTlhNjEwMDY5YzJkYTNmNjk2YzgxOTM5MmNjOTBlODNkMTdhYWI3Iiwib2JmdXNjYXRpb24iOiJ4bmZYR0lTVCIsIm91dHB1dF9pbmRleCI6MCwic2VxdWVuY2VfbnVtYmVyIjo0fQ==",
+    "eyJ0eXBlIjoicmVzcG9uc2UuZnVuY3Rpb25fY2FsbF9hcmd1bWVudHMuZGVsdGEiLCJkZWx0YSI6IlwiOlwiIiwiaXRlbV9pZCI6ImZjXzBjNDJhNmFhMjRhMTlhNjEwMDY5YzJkYTNmNjk2YzgxOTM5MmNjOTBlODNkMTdhYWI3Iiwib2JmdXNjYXRpb24iOiJwbmZ6ZDlKS0hCdVVsIiwib3V0cHV0X2luZGV4IjowLCJzZXF1ZW5jZV9udW1iZXIiOjV9",
+    "eyJ0eXBlIjoicmVzcG9uc2UuZnVuY3Rpb25fY2FsbF9hcmd1bWVudHMuZGVsdGEiLCJkZWx0YSI6IlBhcmlzIiwiaXRlbV9pZCI6ImZjXzBjNDJhNmFhMjRhMTlhNjEwMDY5YzJkYTNmNjk2YzgxOTM5MmNjOTBlODNkMTdhYWI3Iiwib2JmdXNjYXRpb24iOiJHdmFCTjVEbGZIYiIsIm91dHB1dF9pbmRleCI6MCwic2VxdWVuY2VfbnVtYmVyIjo2fQ==",
+    "eyJ0eXBlIjoicmVzcG9uc2UuZnVuY3Rpb25fY2FsbF9hcmd1bWVudHMuZGVsdGEiLCJkZWx0YSI6IiwiLCJpdGVtX2lkIjoiZmNfMGM0MmE2YWEyNGExOWE2MTAwNjljMmRhM2Y2OTZjODE5MzkyY2M5MGU4M2QxN2FhYjciLCJvYmZ1c2NhdGlvbiI6InNpaFMxbHViU2ozQ0Y3WSIsIm91dHB1dF9pbmRleCI6MCwic2VxdWVuY2VfbnVtYmVyIjo3fQ==",
+    "eyJ0eXBlIjoicmVzcG9uc2UuZnVuY3Rpb25fY2FsbF9hcmd1bWVudHMuZGVsdGEiLCJkZWx0YSI6IiBGcmFuY2UiLCJpdGVtX2lkIjoiZmNfMGM0MmE2YWEyNGExOWE2MTAwNjljMmRhM2Y2OTZjODE5MzkyY2M5MGU4M2QxN2FhYjciLCJvYmZ1c2NhdGlvbiI6IlhzMFJUbHRsayIsIm91dHB1dF9pbmRleCI6MCwic2VxdWVuY2VfbnVtYmVyIjo4fQ==",
+    "eyJ0eXBlIjoicmVzcG9uc2UuZnVuY3Rpb25fY2FsbF9hcmd1bWVudHMuZGVsdGEiLCJkZWx0YSI6IlwifSIsIml0ZW1faWQiOiJmY18wYzQyYTZhYTI0YTE5YTYxMDA2OWMyZGEzZjY5NmM4MTkzOTJjYzkwZTgzZDE3YWFiNyIsIm9iZnVzY2F0aW9uIjoiRFBydUFiakxzdE9qREUiLCJvdXRwdXRfaW5kZXgiOjAsInNlcXVlbmNlX251bWJlciI6OX0=",
+    "eyJ0eXBlIjoicmVzcG9uc2UuZnVuY3Rpb25fY2FsbF9hcmd1bWVudHMuZG9uZSIsImFyZ3VtZW50cyI6IntcImxvY2F0aW9uXCI6XCJQYXJpcywgRnJhbmNlXCJ9IiwiaXRlbV9pZCI6ImZjXzBjNDJhNmFhMjRhMTlhNjEwMDY5YzJkYTNmNjk2YzgxOTM5MmNjOTBlODNkMTdhYWI3Iiwib3V0cHV0X2luZGV4IjowLCJzZXF1ZW5jZV9udW1iZXIiOjEwfQ==",
+    "eyJ0eXBlIjoicmVzcG9uc2Uub3V0cHV0X2l0ZW0uZG9uZSIsIml0ZW0iOnsiaWQiOiJmY18wYzQyYTZhYTI0YTE5YTYxMDA2OWMyZGEzZjY5NmM4MTkzOTJjYzkwZTgzZDE3YWFiNyIsInR5cGUiOiJmdW5jdGlvbl9jYWxsIiwic3RhdHVzIjoiY29tcGxldGVkIiwiYXJndW1lbnRzIjoie1wibG9jYXRpb25cIjpcIlBhcmlzLCBGcmFuY2VcIn0iLCJjYWxsX2lkIjoiY2FsbF93QXUwYXRuWE9hUFR6czVCejJ0QmR4SkEiLCJuYW1lIjoiZ2V0X3dlYXRoZXIifSwib3V0cHV0X2luZGV4IjowLCJzZXF1ZW5jZV9udW1iZXIiOjExfQ==",
+    "eyJ0eXBlIjoicmVzcG9uc2UuY29tcGxldGVkIiwicmVzcG9uc2UiOnsiaWQiOiJyZXNwXzBjNDJhNmFhMjRhMTlhNjEwMDY5YzJkYTNlZWViODgxOTM4ODcxOTM0OTQ5N2FlMGMyIiwib2JqZWN0IjoicmVzcG9uc2UiLCJjcmVhdGVkX2F0IjoxNzc0Mzc3NTM0LCJzdGF0dXMiOiJjb21wbGV0ZWQiLCJiYWNrZ3JvdW5kIjpmYWxzZSwiY29tcGxldGVkX2F0IjoxNzc0Mzc3NTM1LCJlcnJvciI6bnVsbCwiZnJlcXVlbmN5X3BlbmFsdHkiOjAuMCwiaW5jb21wbGV0ZV9kZXRhaWxzIjpudWxsLCJpbnN0cnVjdGlvbnMiOm51bGwsIm1heF9vdXRwdXRfdG9rZW5zIjo1MDAsIm1heF90b29sX2NhbGxzIjpudWxsLCJtb2RlbCI6ImdwdC00by1taW5pLTIwMjQtMDctMTgiLCJvdXRwdXQiOlt7ImlkIjoiZmNfMGM0MmE2YWEyNGExOWE2MTAwNjljMmRhM2Y2OTZjODE5MzkyY2M5MGU4M2QxN2FhYjciLCJ0eXBlIjoiZnVuY3Rpb25fY2FsbCIsInN0YXR1cyI6ImNvbXBsZXRlZCIsImFyZ3VtZW50cyI6IntcImxvY2F0aW9uXCI6XCJQYXJpcywgRnJhbmNlXCJ9IiwiY2FsbF9pZCI6ImNhbGxfd0F1MGF0blhPYVBUenM1QnoydEJkeEpBIiwibmFtZSI6ImdldF93ZWF0aGVyIn1dLCJwYXJhbGxlbF90b29sX2NhbGxzIjp0cnVlLCJwcmVzZW5jZV9wZW5hbHR5IjowLjAsInByZXZpb3VzX3Jlc3BvbnNlX2lkIjpudWxsLCJwcm9tcHRfY2FjaGVfa2V5IjpudWxsLCJwcm9tcHRfY2FjaGVfcmV0ZW50aW9uIjpudWxsLCJyZWFzb25pbmciOnsiZWZmb3J0IjpudWxsLCJzdW1tYXJ5IjpudWxsfSwic2FmZXR5X2lkZW50aWZpZXIiOm51bGwsInNlcnZpY2VfdGllciI6ImRlZmF1bHQiLCJzdG9yZSI6dHJ1ZSwidGVtcGVyYXR1cmUiOjEuMCwidGV4dCI6eyJmb3JtYXQiOnsidHlwZSI6InRleHQifSwidmVyYm9zaXR5IjoibWVkaXVtIn0sInRvb2xfY2hvaWNlIjoiYXV0byIsInRvb2xzIjpbeyJ0eXBlIjoiZnVuY3Rpb24iLCJkZXNjcmlwdGlvbiI6IkdldCBjdXJyZW50IHdlYXRoZXIgaW5mb3JtYXRpb24gZm9yIGEgbG9jYXRpb24iLCJuYW1lIjoiZ2V0X3dlYXRoZXIiLCJwYXJhbWV0ZXJzIjp7ImFkZGl0aW9uYWxQcm9wZXJ0aWVzIjpmYWxzZSwicHJvcGVydGllcyI6eyJsb2NhdGlvbiI6eyJkZXNjcmlwdGlvbiI6IkNpdHkgbmFtZSIsInR5cGUiOiJzdHJpbmcifSwidW5pdCI6eyJkZXNjcmlwdGlvbiI6IlRlbXBlcmF0dXJlIHVuaXQiLCJlbnVtIjpbImNlbHNpdXMiLCJmYWhyZW5oZWl0Il0sInR5cGUiOiJzdHJpbmcifX0sInJlcXVpcmVkIjpbImxvY2F0aW9uIl0sInR5cGUiOiJvYmplY3QifSwic3RyaWN0IjpmYWxzZX0seyJ0eXBlIjoiZnVuY3Rpb24iLCJkZXNjcmlwdGlvbiI6IlRlbGwgYSBmdW5ueSBqb2tlIiwibmFtZSI6InRlbGxfam9rZSIsInBhcmFtZXRlcnMiOnsiYWRkaXRpb25hbFByb3BlcnRpZXMiOmZhbHNlLCJwcm9wZXJ0aWVzIjp7InRvcGljIjp7ImRlc2NyaXB0aW9uIjoiVG9waWMgZm9yIHRoZSBqb2tlIiwidHlwZSI6InN0cmluZyJ9fSwidHlwZSI6Im9iamVjdCJ9LCJzdHJpY3QiOmZhbHNlfSx7InR5cGUiOiJmdW5jdGlvbiIsImRlc2NyaXB0aW9uIjoiR2V0IHRoZSBjdXJyZW50IHRpbWUiLCJuYW1lIjoiZ2V0X3RpbWUiLCJwYXJhbWV0ZXJzIjp7InByb3BlcnRpZXMiOnt9LCJ0eXBlIjoib2JqZWN0In0sInN0cmljdCI6ZmFsc2V9XSwidG9wX2xvZ3Byb2JzIjowLCJ0b3BfcCI6MS4wLCJ0cnVuY2F0aW9uIjoiZGlzYWJsZWQiLCJ1c2FnZSI6eyJpbnB1dF90b2tlbnMiOjEwNSwiaW5wdXRfdG9rZW5zX2RldGFpbHMiOnsiY2FjaGVkX3Rva2VucyI6MH0sIm91dHB1dF90b2tlbnMiOjE3LCJvdXRwdXRfdG9rZW5zX2RldGFpbHMiOnsicmVhc29uaW5nX3Rva2VucyI6MH0sInRvdGFsX3Rva2VucyI6MTIyfSwidXNlciI6bnVsbCwibWV0YWRhdGEiOnt9fSwic2VxdWVuY2VfbnVtYmVyIjoxMn0="
+  ],
+  "execution": {
+    "semantic_protocol": "openai_responses",
+    "surface_id": "openai_responses_text_websocket",
+    "transport": "websocket",
+    "wire_format": "openai_responses_ws_json"
+  },
+  "model_id": "gpt-4o-mini",
+  "prompt": "What's the weather like in Paris, France?",
+  "provider": "openai",
+  "request": {
+    "body": {
+      "b64": "eyJpbnB1dCI6W3sidHlwZSI6Im1lc3NhZ2UiLCJyb2xlIjoidXNlciIsImNvbnRlbnQiOlt7InR5cGUiOiJpbnB1dF90ZXh0IiwidGV4dCI6IldoYXQncyB0aGUgd2VhdGhlciBsaWtlIGluIFBhcmlzLCBGcmFuY2U/In1dfV0sInR5cGUiOiJyZXNwb25zZS5jcmVhdGUiLCJ0b29scyI6W3sibmFtZSI6ImdldF93ZWF0aGVyIiwidHlwZSI6ImZ1bmN0aW9uIiwic3RyaWN0IjpmYWxzZSwiZGVzY3JpcHRpb24iOiJHZXQgY3VycmVudCB3ZWF0aGVyIGluZm9ybWF0aW9uIGZvciBhIGxvY2F0aW9uIiwicGFyYW1ldGVycyI6eyJhZGRpdGlvbmFsUHJvcGVydGllcyI6ZmFsc2UsInByb3BlcnRpZXMiOnsibG9jYXRpb24iOnsiZGVzY3JpcHRpb24iOiJDaXR5IG5hbWUiLCJ0eXBlIjoic3RyaW5nIn0sInVuaXQiOnsiZGVzY3JpcHRpb24iOiJUZW1wZXJhdHVyZSB1bml0IiwiZW51bSI6WyJjZWxzaXVzIiwiZmFocmVuaGVpdCJdLCJ0eXBlIjoic3RyaW5nIn19LCJyZXF1aXJlZCI6WyJsb2NhdGlvbiJdLCJ0eXBlIjoib2JqZWN0In19LHsibmFtZSI6InRlbGxfam9rZSIsInR5cGUiOiJmdW5jdGlvbiIsInN0cmljdCI6ZmFsc2UsImRlc2NyaXB0aW9uIjoiVGVsbCBhIGZ1bm55IGpva2UiLCJwYXJhbWV0ZXJzIjp7ImFkZGl0aW9uYWxQcm9wZXJ0aWVzIjpmYWxzZSwicHJvcGVydGllcyI6eyJ0b3BpYyI6eyJkZXNjcmlwdGlvbiI6IlRvcGljIGZvciB0aGUgam9rZSIsInR5cGUiOiJzdHJpbmcifX0sInR5cGUiOiJvYmplY3QifX0seyJuYW1lIjoiZ2V0X3RpbWUiLCJ0eXBlIjoiZnVuY3Rpb24iLCJzdHJpY3QiOmZhbHNlLCJkZXNjcmlwdGlvbiI6IkdldCB0aGUgY3VycmVudCB0aW1lIiwicGFyYW1ldGVycyI6eyJwcm9wZXJ0aWVzIjp7fSwidHlwZSI6Im9iamVjdCJ9fV0sIm1vZGVsIjoiZ3B0LTRvLW1pbmkiLCJtYXhfb3V0cHV0X3Rva2VucyI6NTAwfQ==",
+      "canonical_json": {
+        "input": [
+          {
+            "type": "message",
+            "role": "user",
+            "content": [
+              {
+                "type": "input_text",
+                "text": "What's the weather like in Paris, France?"
+              }
+            ]
+          }
+        ],
+        "type": "response.create",
+        "tools": [
+          {
+            "name": "get_weather",
+            "type": "function",
+            "strict": false,
+            "description": "Get current weather information for a location",
+            "parameters": {
+              "additionalProperties": false,
+              "properties": {
+                "location": {
+                  "description": "City name",
+                  "type": "string"
+                },
+                "unit": {
+                  "description": "Temperature unit",
+                  "enum": [
+                    "celsius",
+                    "fahrenheit"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "location"
+              ],
+              "type": "object"
+            }
+          },
+          {
+            "name": "tell_joke",
+            "type": "function",
+            "strict": false,
+            "description": "Tell a funny joke",
+            "parameters": {
+              "additionalProperties": false,
+              "properties": {
+                "topic": {
+                  "description": "Topic for the joke",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          {
+            "name": "get_time",
+            "type": "function",
+            "strict": false,
+            "description": "Get the current time",
+            "parameters": {
+              "properties": {},
+              "type": "object"
+            }
+          }
+        ],
+        "model": "gpt-4o-mini",
+        "max_output_tokens": 500
+      }
+    },
+    "headers": {
+      "authorization": "[REDACTED]"
+    },
+    "method": "WEBSOCKET",
+    "transport": "websocket",
+    "url": "wss://api.openai.com/v1/responses"
+  },
+  "response": {
+    "headers": {
+      "alt-svc": "h3=\":443\"; ma=86400",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "9e17cba7cbbde256-ORD",
+      "connection": "upgrade",
+      "date": "Tue, 24 Mar 2026 18:38:54 GMT",
+      "sec-websocket-accept": "lEs2MYfd5tG2RBmPD5X5nPHl3xo=",
+      "server": "cloudflare",
+      "set-cookie": "_cfuvid=sDKfY5k3foqVwlZBLMa2.lkr3mp9O90oZHl85fmYYDg-1774377534885-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None",
+      "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+      "upgrade": "websocket",
+      "x-content-type-options": "nosniff"
+    },
+    "status": 101
+  }
+}

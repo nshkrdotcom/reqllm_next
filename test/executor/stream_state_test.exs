@@ -64,18 +64,26 @@ defmodule ReqLlmNext.Executor.StreamStateTest do
       assert new_state.error == nil
     end
 
-    test "non-200 status halts with http_error" do
+    test "non-200 status yields an explicit error chunk" do
       state = StreamState.new(nil, nil, FakeWire, FakeProtocol)
 
-      {:halt, new_state} = StreamState.handle_message({:status, 500}, state)
+      {:cont, chunks, new_state} = StreamState.handle_message({:status, 500}, state)
+
+      assert chunks == [
+               {:error, %{message: "HTTP request failed with status 500", type: "http_error"}}
+             ]
 
       assert new_state.error == {:http_error, 500}
     end
 
-    test "404 status halts with http_error" do
+    test "404 status yields an explicit error chunk" do
       state = StreamState.new(nil, nil, FakeWire, FakeProtocol)
 
-      {:halt, new_state} = StreamState.handle_message({:status, 404}, state)
+      {:cont, chunks, new_state} = StreamState.handle_message({:status, 404}, state)
+
+      assert chunks == [
+               {:error, %{message: "HTTP request failed with status 404", type: "http_error"}}
+             ]
 
       assert new_state.error == {:http_error, 404}
     end
@@ -177,10 +185,14 @@ defmodule ReqLlmNext.Executor.StreamStateTest do
       assert final_state.buffer == ""
     end
 
-    test "error status short-circuits stream" do
+    test "error status produces an explicit error chunk" do
       state = StreamState.new(nil, nil, FakeWire, FakeProtocol)
 
-      {:halt, final_state} = StreamState.handle_message({:status, 401}, state)
+      {:cont, chunks, final_state} = StreamState.handle_message({:status, 401}, state)
+
+      assert chunks == [
+               {:error, %{message: "HTTP request failed with status 401", type: "http_error"}}
+             ]
 
       assert final_state.error == {:http_error, 401}
     end

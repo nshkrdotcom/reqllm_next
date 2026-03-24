@@ -61,6 +61,7 @@ defmodule ReqLlmNext.Extensions.Dsl.Verifiers.VerifySeamModules do
     |> maybe_module([:seams, :provider_facts_module], seams.provider_facts_module)
     |> maybe_module([:seams, :surface_catalog_module], seams.surface_catalog_module)
     |> seam_map_modules([:seams, :surface_preparation_modules], seams.surface_preparation_modules)
+    |> seam_map_modules([:seams, :session_runtime_modules], seams.session_runtime_modules)
     |> seam_map_modules([:seams, :semantic_protocol_modules], seams.semantic_protocol_modules)
     |> seam_map_modules([:seams, :wire_modules], seams.wire_modules)
     |> seam_map_modules([:seams, :transport_modules], seams.transport_modules)

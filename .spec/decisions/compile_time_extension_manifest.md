@@ -44,7 +44,7 @@ The package therefore has three distinct pieces:
 2. Spark authoring modules such as `ReqLlmNext.Extensions.Dsl` and `ReqLlmNext.Extensions.Definition`
 3. compiled built-in manifest modules such as `ReqLlmNext.Extensions.Compiled`
 
-Built-in declarations should live in small provider or family definition packs rather than one monolithic built-ins file so OpenAI-compatible defaults, provider-specific families, and narrow model or mode overrides stay obvious to contributors.
+Built-in declarations should live in small provider or family definition packs under `lib/req_llm_next/families/**/definition.ex` and `lib/req_llm_next/providers/**/definition.ex` rather than one monolithic built-ins file or a hand-maintained central registration list so OpenAI-compatible defaults, provider-specific families, and narrow model or mode overrides stay obvious to contributors.
 
 Family resolution must prefer declarative criteria matches first, then provider-registered default families, and finally explicit global default families.
 
@@ -68,5 +68,5 @@ Tradeoffs:
 
 Guardrails:
 1. Spark declarations may not become the runtime extension API
-2. built-in declarations must still compile down to plain manifest data before execution
+2. built-in declarations must still compile down to plain manifest data before execution, even when discovered automatically from definition-pack files
 3. contributor-facing extension work should prefer declared families and rules over edits to shared planner or executor branching

@@ -33,7 +33,7 @@ defmodule ReqLlmNext.Executor.StreamState do
           | :done
 
   @type result ::
-          {:cont, [String.t()], t()}
+          {:cont, [term()], t()}
           | {:halt, t()}
 
   @enforce_keys Zoi.Struct.enforce_keys(@schema)
@@ -68,8 +68,13 @@ defmodule ReqLlmNext.Executor.StreamState do
 
   @spec handle_message(msg(), t()) :: result()
   def handle_message({:status, status}, %__MODULE__{} = state) when status not in [101, 200] do
-    Fixtures.save_fixture(state.recorder)
-    {:halt, %{state | error: {:http_error, status}}}
+    new_recorder = Fixtures.record_status(state.recorder, status)
+    Fixtures.save_fixture(new_recorder)
+
+    error_chunk =
+      {:error, %{message: "HTTP request failed with status #{status}", type: "http_error"}}
+
+    {:cont, [error_chunk], %{state | recorder: new_recorder, error: {:http_error, status}}}
   end
 
   def handle_message({:status, status}, %__MODULE__{} = state) when status in [101, 200] do

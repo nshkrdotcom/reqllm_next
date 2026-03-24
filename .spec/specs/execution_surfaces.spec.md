@@ -21,7 +21,7 @@ decisions:
 
 ```spec-requirements
 - id: reqllm.execution_surfaces.support_unit
-  statement: ReqLlmNext shall represent each valid endpoint style as a named `ExecutionSurface` that bundles semantic protocol, wire format, transport, session compatibility, and feature tags for one operation family, including provider-native structured-output strategies and provider-native request-preparation rules declared on an existing semantic family such as Anthropic Messages.
+  statement: ReqLlmNext shall represent each valid endpoint style as a named `ExecutionSurface` that bundles semantic protocol, wire format, transport, session compatibility, and feature tags for one operation family, including provider-native structured-output strategies, provider-native request-preparation rules, and any session-runtime seam selection implied by that semantic family.
   priority: must
   stability: evolving
 

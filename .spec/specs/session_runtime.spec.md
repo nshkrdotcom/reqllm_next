@@ -12,6 +12,9 @@ summary: Continuation and persistent execution-state ownership for multi-turn an
 surface:
   - .spec/specs/session_runtime.spec.md
   - .spec/specs/layer_boundaries.spec.md
+  - lib/req_llm_next/session_runtime.ex
+  - lib/req_llm_next/session_runtimes/**/*.ex
+  - test/providers/openai/session_runtime_responses_test.exs
 decisions:
   - reqllm.decision.execution_layers
 ```
@@ -40,6 +43,14 @@ decisions:
 ```spec-verification
 - kind: source_file
   target: .spec/specs/session_runtime.spec.md
+  covers:
+    - reqllm.session_runtime.persistence_owner
+    - reqllm.session_runtime.runtime_state
+    - reqllm.session_runtime.fallback_and_diagnostics
+
+- kind: command
+  target: mix test test/providers/openai/session_runtime_responses_test.exs test/operation_planner_test.exs
+  execute: true
   covers:
     - reqllm.session_runtime.persistence_owner
     - reqllm.session_runtime.runtime_state

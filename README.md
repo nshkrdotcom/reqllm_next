@@ -1,6 +1,6 @@
 # ReqLlmNext
 
-> ⚠️ **Experimental**: This is the architecture spike for ReqLLM v2.
+> ⚠️ **Experimental**: ReqLlmNext is still evolving quickly, but its core v2 architecture is now implemented as the working package foundation.
 
 ReqLlmNext is a metadata-driven LLM client library for Elixir. The goal is to support a wide range of provider APIs behind one canonical ReqLlm-style surface, without letting one model's quirks leak into the rest of the system.
 
@@ -43,7 +43,7 @@ The core rules are:
 4. one resolved plan selects one deterministic stack of provider, session runtime, semantic protocol, wire format, transport, and plan adapters
 5. results are normalized back to the canonical ReqLlm API surface
 
-The implementation still contains spike code in places, especially around the current `wire` and adapter paths. The architecture docs define the target boundary model the code is being reconciled toward.
+Concrete provider and family implementation code is co-located in vertical slice homes under `lib/req_llm_next/families/` and `lib/req_llm_next/providers/`, while shared contracts and planning code stay central.
 
 ## Package Thesis
 
@@ -64,9 +64,11 @@ The longer explanation lives in [`guides/package_thesis.md`](./guides/package_th
 Start with:
 
 1. [`guides/package_thesis.md`](./guides/package_thesis.md) for the package thesis
-2. `.spec/README.md` for the canonical Spec Led workspace
-3. `.spec/specs/architecture.spec.md` for the runtime architecture contract
-4. `.spec/specs/package.spec.md` for the package runtime and verification contract
+2. [`guides/openai_surface_map.md`](./guides/openai_surface_map.md) for the current OpenAI coverage boundary
+3. [`guides/anthropic_surface_map.md`](./guides/anthropic_surface_map.md) for the current Anthropic coverage boundary
+4. `.spec/README.md` for the canonical Spec Led workspace
+5. `.spec/specs/architecture.spec.md` for the runtime architecture contract
+6. `.spec/specs/package.spec.md` for the package runtime and verification contract
 
 ## Contributor Workflow
 

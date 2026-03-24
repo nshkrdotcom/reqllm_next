@@ -7,6 +7,7 @@ defmodule ReqLlmNext.ExecutionModules do
 
   @type resolution :: %{
           provider_mod: module(),
+          session_runtime_mod: module(),
           protocol_mod: module() | nil,
           wire_mod: module(),
           transport_mod: module() | nil
@@ -18,10 +19,24 @@ defmodule ReqLlmNext.ExecutionModules do
 
     %{
       provider_mod: provider_module_from_seams!(seams, plan.provider),
+      session_runtime_mod: session_runtime_module_from_seams!(seams, plan.session_runtime),
       protocol_mod: protocol_module_from_seams!(seams, plan.semantic_protocol),
       wire_mod: wire_module_from_seams!(seams, plan.wire_format),
       transport_mod: transport_module_from_seams!(seams, plan.transport, plan.wire_format)
     }
+  end
+
+  @spec session_runtime_module!(atom()) :: module()
+  def session_runtime_module!(:none), do: ReqLlmNext.SessionRuntimes.None
+
+  def session_runtime_module!(session_runtime) when is_atom(session_runtime) do
+    case Map.fetch(
+           Extensions.Compiled.runtime_registry().session_runtime_modules,
+           session_runtime
+         ) do
+      {:ok, module} -> module
+      :error -> raise("Unknown session runtime: #{inspect(session_runtime)}")
+    end
   end
 
   @spec protocol_module!(atom()) :: module() | nil
@@ -69,6 +84,17 @@ defmodule ReqLlmNext.ExecutionModules do
     case Map.fetch(modules, semantic_protocol) do
       {:ok, module} -> module
       :error -> protocol_module!(semantic_protocol)
+    end
+  end
+
+  defp session_runtime_module_from_seams!(%{session_runtime_modules: _modules}, :none) do
+    ReqLlmNext.SessionRuntimes.None
+  end
+
+  defp session_runtime_module_from_seams!(%{session_runtime_modules: modules}, session_runtime) do
+    case Map.fetch(modules, session_runtime) do
+      {:ok, module} -> module
+      :error -> session_runtime_module!(session_runtime)
     end
   end
 

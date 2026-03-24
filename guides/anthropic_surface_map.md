@@ -14,7 +14,7 @@ This guide is intentionally practical. It is not trying to restate all Anthropic
 4. what is still missing
 5. which runtime layer should own each gap
 
-As of March 23, 2026, the official Anthropic surface is broader than the current ReqLlmNext Anthropic lane.
+As of March 24, 2026, the official Anthropic surface is broader than the current ReqLlmNext Anthropic lane.
 
 ## Official Surface
 
@@ -67,23 +67,26 @@ ReqLlmNext currently supports a real Anthropic Messages lane through the v2 plan
 8. 1M-context beta-header injection
 9. document blocks, `file_id` document references, and container-upload content blocks
 10. token counting utility support
-11. message batches utility support
-12. provider-native tool helpers for web search, code execution, MCP connectors, and computer use
-13. curated live and replay verification for Haiku 4.5, Sonnet 4.6, and Opus 4.6
+11. files utility support for upload, get, list, delete, and binary download
+12. message batches utility support for create, get, list, cancel, delete, and JSONL results retrieval
+13. provider-native tool helpers for web search, code execution, MCP connectors, and computer use
+14. curated live and replay verification for Haiku 4.5, Sonnet 4.6, and Opus 4.6
+15. version-aware beta-header handling for newer MCP, computer-use, and dynamic web-tool lanes
 
 Current implementation homes:
 
-1. [anthropic.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/wire/anthropic.ex)
-2. [anthropic_messages.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/semantic_protocols/anthropic_messages.ex)
+1. [anthropic.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/providers/anthropic/wire_messages.ex)
+2. [anthropic_messages.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/providers/anthropic/semantic_protocol_messages.ex)
 3. [anthropic.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/anthropic.ex)
-4. [client.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/anthropic/client.ex)
-5. [files.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/anthropic/files.ex)
-6. [token_count.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/anthropic/token_count.ex)
-7. [message_batches.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/anthropic/message_batches.ex)
-8. [tools.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/anthropic/tools.ex)
+4. [client.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/providers/anthropic/client.ex)
+5. [files.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/providers/anthropic/files.ex)
+6. [token_count.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/providers/anthropic/token_count.ex)
+7. [message_batches.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/providers/anthropic/message_batches.ex)
+8. [tools.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/providers/anthropic/tools.ex)
 9. [support_matrix.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/support_matrix.ex)
 10. [anthropic_comprehensive_test.exs](/Users/mhostetler/Source/ReqLLM/reqllm_next/test/coverage/anthropic_comprehensive_test.exs)
 11. [anthropic_beta_features_test.exs](/Users/mhostetler/Source/ReqLLM/reqllm_next/test/provider_features/anthropic_beta_features_test.exs)
+12. [anthropic_advanced_messages_test.exs](/Users/mhostetler/Source/ReqLLM/reqllm_next/test/provider_features/anthropic_advanced_messages_test.exs)
 
 ### Partial
 
@@ -94,7 +97,11 @@ These areas exist in some form but are not yet first-class Anthropic surfaces:
 2. Context editing and compaction:
    ReqLlmNext now forwards `context_management` controls and preserves richer stop metadata, but there is not yet a full session-runtime story around automatic compaction loops or pause-turn continuation.
 3. Provider-native tools:
-   web search, code execution, MCP, and computer-use tool definitions now have first-class helper constructors, but only the common request-side shapes are pressure-tested so far rather than every live tool lifecycle.
+   web search and code execution now have live provider-feature coverage for the native Messages lane, but MCP, computer use, and the full range of server-tool result shapes are not yet exhaustively pressure-tested.
+4. Versioned tool defaults:
+   ReqLlmNext now distinguishes between broadly compatible defaults and newer doc versions for Anthropic server tools. Newer tool variants can opt in through helper options and trigger the matching beta headers, but the package does not yet have exhaustive live verification for every versioned tool combination across Claude model families.
+5. Context management:
+   request shaping is implemented and covered at the wire layer, but ReqLlmNext is not yet claiming a stable live context-management lane in the broader provider coverage suite.
 
 ## Missing Surface Areas
 

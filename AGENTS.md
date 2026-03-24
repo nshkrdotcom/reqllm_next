@@ -79,6 +79,13 @@ The key runtime rules are:
 5. explicit transport choice must be honored when a matching surface exists
 6. surface-specific parameter validation belongs before wire encoding, not as quiet mutation deeper in the stack
 
+Concrete provider and family implementation modules should be co-located in slice homes:
+
+- `lib/req_llm_next/families/` for reusable family defaults such as OpenAI-compatible behavior
+- `lib/req_llm_next/providers/` for provider-owned deltas, utilities, and native surfaces
+
+Shared planning, manifest, response, and contract code should stay central.
+
 ## Layer Ownership
 
 Use the layers for their intended concerns.

@@ -26,7 +26,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.policy_rules.match_patch
-  statement: Policy resolution shall choose preferred and fallback surfaces, timeout classes, session defaults, and plan adapter references from `ExecutionMode` plus declared `ExecutionSurface` capabilities, with explicit compatibility checks for transport, streaming, structured output, tools, reasoning, and session semantics before ranking matching surfaces, and any adapter references ultimately resolved through compiled extension seams.
+  statement: Policy resolution shall choose preferred and fallback surfaces, timeout classes, session defaults, and plan adapter references from `ExecutionMode` plus declared `ExecutionSurface` capabilities, with explicit compatibility checks for transport, streaming, structured output, tools, reasoning, and session semantics before ranking matching surfaces, and any adapter or session-runtime references ultimately resolved through compiled extension seams during plan assembly.
   priority: must
   stability: evolving
 

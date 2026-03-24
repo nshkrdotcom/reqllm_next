@@ -13,7 +13,8 @@ surface:
   - AGENTS.md
   - .spec/specs/source_layout.spec.md
   - lib/req_llm_next/**/*.ex
-  - lib/req_llm_next/anthropic/**/*.ex
+  - lib/req_llm_next/families/**/*.ex
+  - lib/req_llm_next/providers/**/*.ex
   - test/support/**/*.ex
   - test/**/*.exs
 decisions:
@@ -24,7 +25,7 @@ decisions:
 
 ```spec-requirements
 - id: reqllm.source_layout.concern_homes
-  statement: ReqLlmNext shall keep model-boundary concerns, provider-scoped fact extraction, manifest-backed provider registration, family-owned surface catalog modules, profile construction, mode normalization, policy resolution, surface-owned request preparation, semantic protocol normalization, wire envelopes, transport mechanics, shared response stream materialization, fixture replay, and session state in distinct source locations that match the architecture.
+  statement: ReqLlmNext shall keep model-boundary concerns, provider-scoped fact extraction, manifest-backed provider registration, family-owned surface catalog modules, profile construction, mode normalization, policy resolution, surface-owned request preparation, session-runtime modules, semantic protocol normalization, wire envelopes, transport mechanics, shared response stream materialization, fixture replay, and session state in distinct source locations that match the architecture, while co-locating concrete family implementations under `lib/req_llm_next/families/` and provider-owned implementations and utilities under `lib/req_llm_next/providers/`.
   priority: must
   stability: evolving
 
@@ -49,7 +50,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.source_layout.extension_contract_home
-  statement: Compile-time execution extension contracts shall live in a dedicated `lib/req_llm_next/extensions/` home, including the plain runtime structs, Spark DSL authoring modules, inheritance expansion, manifest verifiers, compiled manifest modules, runtime registries, and provider or family definition packs under `extensions/definitions/`, so default execution families and edge-case override rules are defined outside the shared planner and executor code.
+  statement: Compile-time execution extension contracts shall live in a dedicated `lib/req_llm_next/extensions/` home for the plain runtime structs, Spark DSL authoring modules, inheritance expansion, manifest verifiers, compiled manifest modules, and runtime registries, while built-in provider or family definition packs are discovered from co-located slice homes under `lib/req_llm_next/families/**/definition.ex` and `lib/req_llm_next/providers/**/definition.ex`, so default execution families and edge-case override rules are defined outside the shared planner and executor code.
   priority: should
   stability: evolving
 

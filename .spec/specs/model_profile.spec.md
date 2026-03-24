@@ -34,7 +34,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.model_profile.request_independent
-  statement: `ModelProfile` shall remain request-independent, serializable, and safe to cache, and it shall not contain chosen surfaces, prompt state, continuation state, or network handles.
+  statement: `ModelProfile` shall remain request-independent, serializable, and safe to cache, and it shall not contain chosen surfaces, prompt state, continuation state, session runtime handles, or network handles.
   priority: must
   stability: evolving
 ```

@@ -12,6 +12,7 @@ defmodule ReqLlmNext.Extensions.Seams do
               provider_facts_module: Zoi.any() |> Zoi.nullish() |> Zoi.default(nil),
               surface_catalog_module: Zoi.any() |> Zoi.nullish() |> Zoi.default(nil),
               surface_preparation_modules: Zoi.map() |> Zoi.default(%{}),
+              session_runtime_modules: Zoi.map() |> Zoi.default(%{}),
               semantic_protocol_modules: Zoi.map() |> Zoi.default(%{}),
               wire_modules: Zoi.map() |> Zoi.default(%{}),
               transport_modules: Zoi.map() |> Zoi.default(%{}),
@@ -27,6 +28,7 @@ defmodule ReqLlmNext.Extensions.Seams do
           provider_facts_module: module() | nil,
           surface_catalog_module: module() | nil,
           surface_preparation_modules: map(),
+          session_runtime_modules: map(),
           semantic_protocol_modules: map(),
           wire_modules: map(),
           transport_modules: map(),
@@ -58,6 +60,8 @@ defmodule ReqLlmNext.Extensions.Seams do
       surface_catalog_module: right.surface_catalog_module || left.surface_catalog_module,
       surface_preparation_modules:
         Map.merge(left.surface_preparation_modules, right.surface_preparation_modules),
+      session_runtime_modules:
+        Map.merge(left.session_runtime_modules, right.session_runtime_modules),
       semantic_protocol_modules:
         Map.merge(left.semantic_protocol_modules, right.semantic_protocol_modules),
       wire_modules: Map.merge(left.wire_modules, right.wire_modules),

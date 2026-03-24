@@ -62,6 +62,12 @@ defmodule ReqLlmNext.Anthropic do
   @spec get_file(String.t(), keyword()) :: {:ok, map()} | {:error, term()}
   def get_file(file_id, opts \\ []), do: Files.get(file_id, opts)
 
+  @spec download_file(String.t(), keyword()) ::
+          {:ok,
+           %{data: binary(), content_type: String.t() | nil, headers: [{String.t(), String.t()}]}}
+          | {:error, term()}
+  def download_file(file_id, opts \\ []), do: Files.download(file_id, opts)
+
   @spec list_files(keyword()) :: {:ok, map()} | {:error, term()}
   def list_files(opts \\ []), do: Files.list(opts)
 
@@ -88,6 +94,12 @@ defmodule ReqLlmNext.Anthropic do
   @spec list_batches(keyword()) :: {:ok, map()} | {:error, term()}
   def list_batches(opts \\ []), do: MessageBatches.list(opts)
 
+  @spec get_batch_results(String.t() | map(), keyword()) :: {:ok, [map()]} | {:error, term()}
+  def get_batch_results(batch_or_id, opts \\ []), do: MessageBatches.results(batch_or_id, opts)
+
   @spec cancel_batch(String.t(), keyword()) :: {:ok, map()} | {:error, term()}
   def cancel_batch(batch_id, opts \\ []), do: MessageBatches.cancel(batch_id, opts)
+
+  @spec delete_batch(String.t(), keyword()) :: {:ok, map()} | {:error, term()}
+  def delete_batch(batch_id, opts \\ []), do: MessageBatches.delete(batch_id, opts)
 end

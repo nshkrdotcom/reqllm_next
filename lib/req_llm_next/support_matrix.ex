@@ -1,6 +1,14 @@
 defmodule ReqLlmNext.SupportMatrix do
   @moduledoc """
-  Curated provider/model coverage matrix for pressure-testing the execution-plan architecture.
+  Curated scenario-backed provider/model coverage matrix for pressure-testing the execution-plan architecture.
+
+  The support matrix is intentionally not the whole coverage story.
+
+  It covers cross-provider scenario lanes that should remain cost-aware, replayable,
+  and stable enough to run as the package's broader compatibility sweep.
+
+  Provider-native surfaces that do not fit the generic scenario system belong in
+  focused `test/provider_features/` coverage instead of being forced into this matrix.
   """
 
   @type group :: :coverage | :websocket
@@ -107,7 +115,7 @@ defmodule ReqLlmNext.SupportMatrix do
       provider: :openai,
       lane: :baseline,
       group: :websocket,
-      scenarios: [:basic, :object_streaming],
+      scenarios: [:basic, :object_streaming, :tool_multi],
       opts: [transport: :websocket, fixture_suffix: "websocket"]
     },
     %{

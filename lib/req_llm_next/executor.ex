@@ -24,6 +24,7 @@ defmodule ReqLlmNext.Executor do
     OperationPlanner,
     Response,
     Schema,
+    SessionRuntime,
     StreamResponse
   }
 
@@ -67,14 +68,15 @@ defmodule ReqLlmNext.Executor do
              |> Keyword.put(:_stream?, true)
              |> Keyword.put(:_model_spec, inspect_model_spec(model_spec))
            ),
-         runtime_opts <- runtime_opts(plan, model),
          %{
            provider_mod: provider_mod,
+           session_runtime_mod: session_runtime_mod,
            protocol_mod: protocol_mod,
            wire_mod: wire_mod,
            transport_mod: transport_mod
          } <-
-           ExecutionModules.resolve(plan) do
+           ExecutionModules.resolve(plan),
+         {:ok, runtime_opts} <- runtime_opts(plan, model, opts, session_runtime_mod) do
       case Fixtures.maybe_replay_stream(model, prompt, runtime_opts) do
         {:ok, replay_stream} ->
           {:ok, StreamResponse.new!(%{stream: replay_stream, model: model})}
@@ -108,14 +110,15 @@ defmodule ReqLlmNext.Executor do
            |> Keyword.put(:_model_spec, inspect_model_spec(model_spec)),
          {:ok, plan} <- OperationPlanner.plan(model, :object, prompt, planning_opts),
          {:ok, execution_prompt} <- object_prompt(prompt, plan, compiled_schema),
-         runtime_opts <- runtime_opts(plan, model),
          %{
            provider_mod: provider_mod,
+           session_runtime_mod: session_runtime_mod,
            protocol_mod: protocol_mod,
            wire_mod: wire_mod,
            transport_mod: transport_mod
          } <-
-           ExecutionModules.resolve(plan) do
+           ExecutionModules.resolve(plan),
+         {:ok, runtime_opts} <- runtime_opts(plan, model, opts, session_runtime_mod) do
       case Fixtures.maybe_replay_stream(model, execution_prompt, runtime_opts) do
         {:ok, replay_stream} ->
           {:ok, StreamResponse.new!(%{stream: replay_stream, model: model})}
@@ -205,30 +208,42 @@ defmodule ReqLlmNext.Executor do
              input,
              opts |> Keyword.put(:_model_spec, inspect_model_spec(model_spec))
            ),
-         runtime_opts <- runtime_opts(plan, model),
          %{
            provider_mod: provider_mod,
+           session_runtime_mod: session_runtime_mod,
            wire_mod: wire_mod,
            transport_mod: transport_mod
          } <- ExecutionModules.resolve(plan),
+         {:ok, runtime_opts} <- runtime_opts(plan, model, opts, session_runtime_mod),
          {:ok, raw_response} <-
            transport_mod.request(provider_mod, wire_mod, model, input, runtime_opts) do
       wire_mod.extract_embeddings(raw_response, input)
     end
   end
 
-  defp runtime_opts(plan, model) do
+  defp runtime_opts(plan, model, user_opts, session_runtime_mod) do
     plan.parameter_values
     |> Enum.into([])
     |> Keyword.drop([:transport])
     |> then(&AdapterPipeline.apply_modules(plan.plan_adapters, model, &1))
-    |> Keyword.merge(
-      _execution_surface_id: plan.surface.id,
-      _execution_semantic_protocol: plan.semantic_protocol,
-      _execution_wire_format: plan.wire_format,
-      _execution_transport: plan.transport,
-      _structured_output_strategy: plan.surface.features.structured_output
-    )
+    |> SessionRuntime.prepare(session_runtime_mod, plan, user_opts)
+    |> case do
+      {:ok, prepared_opts} ->
+        {:ok,
+         Keyword.merge(
+           prepared_opts,
+           _execution_surface_id: plan.surface.id,
+           _execution_semantic_protocol: plan.semantic_protocol,
+           _execution_wire_format: plan.wire_format,
+           _execution_transport: plan.transport,
+           _structured_output_strategy: plan.surface.features.structured_output,
+           _session_strategy: plan.session_strategy,
+           _session_runtime: plan.session_runtime
+         )}
+
+      {:error, _} = error ->
+        error
+    end
   end
 
   defp object_prompt(prompt, plan, compiled_schema) do

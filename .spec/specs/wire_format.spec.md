@@ -12,7 +12,7 @@ summary: Transport-facing request envelopes, routes, headers, and frame decoding
 surface:
   - .spec/specs/wire_format.spec.md
   - .spec/specs/layer_boundaries.spec.md
-  - lib/req_llm_next/wire/anthropic.ex
+  - lib/req_llm_next/providers/anthropic/wire_messages.ex
 decisions:
   - reqllm.decision.execution_layers
 ```

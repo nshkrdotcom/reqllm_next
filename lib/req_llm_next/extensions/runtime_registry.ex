@@ -7,6 +7,7 @@ defmodule ReqLlmNext.Extensions.RuntimeRegistry do
 
   @type t :: %{
           provider_modules: %{optional(atom()) => module()},
+          session_runtime_modules: %{optional(atom()) => module()},
           semantic_protocol_modules: %{optional(atom()) => module() | nil},
           wire_modules: %{optional(atom()) => module()},
           transport_modules: %{optional(atom()) => module() | nil}
@@ -23,6 +24,7 @@ defmodule ReqLlmNext.Extensions.RuntimeRegistry do
 
     %{
       provider_modules: provider_modules(manifest),
+      session_runtime_modules: merge_module_maps!(seams, :session_runtime_modules),
       semantic_protocol_modules: merge_module_maps!(seams, :semantic_protocol_modules),
       wire_modules: merge_module_maps!(seams, :wire_modules),
       transport_modules: merge_module_maps!(seams, :transport_modules)

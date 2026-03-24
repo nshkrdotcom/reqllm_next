@@ -1,0 +1,128 @@
+{
+  "captured_at": "2026-03-24T18:39:52.799339Z",
+  "chunks": [],
+  "execution": {
+    "semantic_protocol": "openai_responses",
+    "surface_id": "openai_responses_text_websocket",
+    "transport": "websocket",
+    "wire_format": "openai_responses_ws_json"
+  },
+  "model_id": "gpt-4o-mini",
+  "prompt": {
+    "messages": [
+      {
+        "name": null,
+        "metadata": {},
+        "role": "user",
+        "content": [
+          {
+            "data": null,
+            "type": "text",
+            "filename": null,
+            "text": "Use the add tool to compute 2 + 3. After the tool result arrives, respond with 'sum=<value>'.",
+            "metadata": {},
+            "url": null,
+            "media_type": null
+          }
+        ],
+        "tool_calls": null,
+        "tool_call_id": null,
+        "reasoning_details": null
+      },
+      {
+        "name": null,
+        "metadata": {},
+        "role": "assistant",
+        "content": [],
+        "tool_calls": [
+          {
+            "function": {
+              "arguments": "{\"a\":2,\"b\":3}",
+              "name": "add"
+            },
+            "id": "call_CSCsxHxwIbL7XYYBgPg5uk8T",
+            "type": "function"
+          }
+        ],
+        "tool_call_id": null,
+        "reasoning_details": null
+      },
+      {
+        "name": "add",
+        "metadata": {},
+        "role": "tool",
+        "content": [
+          {
+            "data": null,
+            "type": "text",
+            "filename": null,
+            "text": "5",
+            "metadata": {},
+            "url": null,
+            "media_type": null
+          }
+        ],
+        "tool_calls": null,
+        "tool_call_id": "call_CSCsxHxwIbL7XYYBgPg5uk8T",
+        "reasoning_details": null
+      }
+    ],
+    "tools": []
+  },
+  "provider": "openai",
+  "request": {
+    "body": {
+      "b64": "eyJpbnB1dCI6W3sidHlwZSI6Im1lc3NhZ2UiLCJyb2xlIjoidXNlciIsImNvbnRlbnQiOlt7InR5cGUiOiJpbnB1dF90ZXh0IiwidGV4dCI6IlVzZSB0aGUgYWRkIHRvb2wgdG8gY29tcHV0ZSAyICsgMy4gQWZ0ZXIgdGhlIHRvb2wgcmVzdWx0IGFycml2ZXMsIHJlc3BvbmQgd2l0aCAnc3VtPTx2YWx1ZT4nLiJ9XX0seyJuYW1lIjoiYWRkIiwidHlwZSI6ImZ1bmN0aW9uX2NhbGwiLCJhcmd1bWVudHMiOiJ7XCJhXCI6MixcImJcIjozfSIsImNhbGxfaWQiOiJjYWxsX0NTQ3N4SHh3SWJMN1hZWUJnUGc1dWs4VCJ9LHsib3V0cHV0IjoiNSIsInR5cGUiOiJmdW5jdGlvbl9jYWxsX291dHB1dCIsImNhbGxfaWQiOiJjYWxsX0NTQ3N4SHh3SWJMN1hZWUJnUGc1dWs4VCJ9XSwidHlwZSI6InJlc3BvbnNlLmNyZWF0ZSIsIm1vZGVsIjoiZ3B0LTRvLW1pbmkiLCJtYXhfb3V0cHV0X3Rva2VucyI6NTAwfQ==",
+      "canonical_json": {
+        "input": [
+          {
+            "type": "message",
+            "role": "user",
+            "content": [
+              {
+                "type": "input_text",
+                "text": "Use the add tool to compute 2 + 3. After the tool result arrives, respond with 'sum=<value>'."
+              }
+            ]
+          },
+          {
+            "name": "add",
+            "type": "function_call",
+            "arguments": "{\"a\":2,\"b\":3}",
+            "call_id": "call_CSCsxHxwIbL7XYYBgPg5uk8T"
+          },
+          {
+            "output": "5",
+            "type": "function_call_output",
+            "call_id": "call_CSCsxHxwIbL7XYYBgPg5uk8T"
+          }
+        ],
+        "type": "response.create",
+        "model": "gpt-4o-mini",
+        "max_output_tokens": 500
+      }
+    },
+    "headers": {
+      "authorization": "[REDACTED]"
+    },
+    "method": "WEBSOCKET",
+    "transport": "websocket",
+    "url": "wss://api.openai.com/v1/responses"
+  },
+  "response": {
+    "headers": {
+      "alt-svc": "h3=\":443\"; ma=86400",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "9e17cd13eb3432fd-ORD",
+      "connection": "upgrade",
+      "date": "Tue, 24 Mar 2026 18:39:53 GMT",
+      "sec-websocket-accept": "DK9gOMjDbU3HmnBqXTP5TMvuTfs=",
+      "server": "cloudflare",
+      "set-cookie": "_cfuvid=rWjR89ei2WlDyt26oFz8O9hAGWFM4LBJWivt7j7hDoY-1774377593134-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None",
+      "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+      "upgrade": "websocket",
+      "x-content-type-options": "nosniff"
+    },
+    "status": 101
+  }
+}

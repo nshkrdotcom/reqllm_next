@@ -30,6 +30,11 @@ surface:
   statement: The top-level `ReqLlmNext` module shall remain a thin compatibility facade over the internal planning and execution pipeline rather than accumulating provider, protocol, wire, transport, fixture-specific, provider-utility, or provider-native helper branching logic.
   priority: must
   stability: evolving
+
+- id: reqllm.public_api.provider_scoped_utilities
+  statement: Provider-scoped public helper modules such as `ReqLlmNext.Anthropic` may expose explicit provider-native utility surfaces outside the top-level facade, including Anthropic document helpers, file upload and download helpers, token counting, and message-batch lifecycle helpers such as create, get, list, cancel, delete, and results retrieval.
+  priority: should
+  stability: evolving
 ```
 
 ## Verification
@@ -41,6 +46,7 @@ surface:
     - reqllm.public_api.hard_surface
     - reqllm.public_api.canonical_shapes
     - reqllm.public_api.thin_facade
+    - reqllm.public_api.provider_scoped_utilities
 
 - kind: command
   target: mix test test/public_api
@@ -48,4 +54,10 @@ surface:
   covers:
     - reqllm.public_api.hard_surface
     - reqllm.public_api.canonical_shapes
+
+- kind: command
+  target: mix test test/providers/anthropic
+  execute: true
+  covers:
+    - reqllm.public_api.provider_scoped_utilities
 ```

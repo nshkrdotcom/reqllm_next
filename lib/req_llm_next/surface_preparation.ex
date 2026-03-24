@@ -13,8 +13,6 @@ defmodule ReqLlmNext.SurfacePreparation do
     Tool
   }
 
-  alias ReqLlmNext.Anthropic.Tools, as: AnthropicTools
-
   @meta_opts [:_stream?, :_model_spec]
 
   @spec prepare(
@@ -38,86 +36,90 @@ defmodule ReqLlmNext.SurfacePreparation do
       |> Keyword.drop(@meta_opts)
       |> then(&Constraints.apply(model, &1))
 
-    with {:ok, prepared_opts} <- prepare_surface(profile, mode, surface, prompt, normalized_opts),
-         :ok <- validate_tool_inputs(surface, prepared_opts),
-         :ok <- validate_mcp_servers(surface, prepared_opts),
+    with {:ok, preparation_module, prepared_opts} <-
+           prepare_surface(profile, mode, surface, prompt, normalized_opts),
+         :ok <- validate_surface_inputs(preparation_module, surface, prepared_opts),
          :ok <- validate_surface_parameters(surface, prepared_opts) do
       {:ok, Enum.into(prepared_opts, %{})}
     end
   end
 
   defp prepare_surface(profile, mode, surface, prompt, opts) do
-    case Extensions.resolve_compiled(extension_context(profile, mode, surface)) do
-      {:ok, %{seams: %{surface_preparation_modules: modules}}} ->
-        case Map.get(modules, surface.semantic_protocol) do
-          nil -> {:ok, opts}
-          module -> module.prepare(surface, prompt, opts)
-        end
+    case surface_preparation_module(profile, mode, surface) do
+      nil ->
+        {:ok, nil, opts}
 
-      {:error, :no_matching_family} ->
-        {:ok, opts}
+      module ->
+        with {:ok, prepared_opts} <- module.prepare(surface, prompt, opts) do
+          {:ok, module, prepared_opts}
+        end
     end
   end
 
-  defp validate_tool_inputs(surface, opts) do
+  @spec validate_canonical_inputs(keyword()) :: :ok | {:error, term()}
+  def validate_canonical_inputs(opts) when is_list(opts) do
+    case validate_canonical_tool_inputs(opts) do
+      :ok -> validate_no_mcp_servers(opts)
+      {:error, _} = error -> error
+    end
+  end
+
+  defp validate_surface_inputs(nil, _surface, opts) do
+    validate_canonical_inputs(opts)
+  end
+
+  defp validate_surface_inputs(module, surface, opts) do
+    if function_exported?(module, :validate, 2) do
+      module.validate(surface, opts)
+    else
+      validate_canonical_inputs(opts)
+    end
+  end
+
+  defp validate_canonical_tool_inputs(opts) do
     tools = Keyword.get(opts, :tools, [])
 
-    case Enum.find(tools, &invalid_tool_input?(surface, &1)) do
+    case Enum.find(tools, &invalid_canonical_tool_input?/1) do
       nil ->
         :ok
 
       %Tool{} ->
         :ok
 
-      invalid ->
+      _invalid ->
         {:error,
-         Error.Invalid.Parameter.exception(parameter: invalid_tool_message(surface, invalid))}
+         Error.Invalid.Parameter.exception(
+           parameter: "tools must be ReqLlmNext.Tool values on canonical cross-provider surfaces"
+         )}
     end
   end
 
-  defp invalid_tool_input?(_surface, %Tool{}), do: false
+  defp invalid_canonical_tool_input?(%Tool{}), do: false
+  defp invalid_canonical_tool_input?(_tool), do: true
 
-  defp invalid_tool_input?(%ExecutionSurface{semantic_protocol: :anthropic_messages}, tool)
-       when is_map(tool) do
-    not AnthropicTools.provider_native_tool?(tool)
-  end
-
-  defp invalid_tool_input?(%ExecutionSurface{}, tool) when is_map(tool), do: true
-  defp invalid_tool_input?(_surface, _tool), do: true
-
-  defp invalid_tool_message(%ExecutionSurface{semantic_protocol: :anthropic_messages}, _tool) do
-    "tools must be ReqLlmNext.Tool values or ReqLlmNext.Anthropic helper maps on Anthropic surfaces"
-  end
-
-  defp invalid_tool_message(%ExecutionSurface{}, _tool) do
-    "tools must be ReqLlmNext.Tool values on non-Anthropic surfaces"
-  end
-
-  defp validate_mcp_servers(surface, opts) do
+  defp validate_no_mcp_servers(opts) do
     servers = Keyword.get(opts, :mcp_servers, [])
 
-    case Enum.find(servers, &invalid_mcp_server?(surface, &1)) do
+    case Enum.find(servers, fn _server -> true end) do
       nil ->
         :ok
 
-      invalid ->
+      _invalid ->
         {:error,
-         Error.Invalid.Parameter.exception(parameter: invalid_mcp_message(surface, invalid))}
+         Error.Invalid.Parameter.exception(
+           parameter: "mcp_servers are only supported on provider-native surfaces"
+         )}
     end
   end
 
-  defp invalid_mcp_server?(%ExecutionSurface{semantic_protocol: :anthropic_messages}, server) do
-    not AnthropicTools.provider_native_mcp_server?(server)
-  end
+  defp surface_preparation_module(profile, mode, surface) do
+    case Extensions.resolve_compiled(extension_context(profile, mode, surface)) do
+      {:ok, %{seams: %{surface_preparation_modules: modules}}} ->
+        Map.get(modules, surface.semantic_protocol)
 
-  defp invalid_mcp_server?(%ExecutionSurface{}, _server), do: true
-
-  defp invalid_mcp_message(%ExecutionSurface{semantic_protocol: :anthropic_messages}, _server) do
-    "mcp_servers must come from ReqLlmNext.Anthropic.mcp_server/2 on Anthropic surfaces"
-  end
-
-  defp invalid_mcp_message(%ExecutionSurface{}, _server) do
-    "mcp_servers are only supported on Anthropic surfaces"
+      {:error, :no_matching_family} ->
+        nil
+    end
   end
 
   defp validate_surface_parameters(_surface, _opts), do: :ok

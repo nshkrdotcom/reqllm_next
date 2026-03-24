@@ -17,6 +17,7 @@ surface:
   - guides/extension_architecture.md
   - guides/package_thesis.md
   - guides/anthropic_surface_map.md
+  - guides/openai_surface_map.md
   - guides/anthropic_openai_compatibility.md
   - mix.exs
 decisions:
@@ -52,7 +53,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.workflow.extension_dsl_guidance
-  statement: Contributor workflow shall keep the extension-architecture guide, Spark dependency, compile-time manifest proof, definition-pack layout, match or stack or patch authoring surface, inheritance behavior, and manifest-backed provider fallback and verification behavior in sync so contributors add edge-case support through declared extension rules instead of editing shared imperative branching directly.
+  statement: Contributor workflow shall keep the extension-architecture guide, Spark dependency, compile-time manifest proof, definition-pack layout, discovery of built-in definitions from co-located family and provider slice homes, match or stack or patch authoring surface, inheritance behavior, and manifest-backed provider fallback and verification behavior in sync so contributors add edge-case support through declared extension rules instead of editing shared imperative branching directly.
   priority: should
   stability: evolving
 ```

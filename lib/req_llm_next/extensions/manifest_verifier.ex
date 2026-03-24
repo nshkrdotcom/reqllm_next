@@ -169,6 +169,7 @@ defmodule ReqLlmNext.Extensions.ManifestVerifier do
   defp invalid_provider_seams?(seams) do
     not is_nil(seams.surface_catalog_module) or
       seams.surface_preparation_modules != %{} or
+      seams.session_runtime_modules != %{} or
       seams.semantic_protocol_modules != %{} or
       seams.wire_modules != %{} or
       seams.transport_modules != %{} or
@@ -224,6 +225,10 @@ defmodule ReqLlmNext.Extensions.ManifestVerifier do
     |> append_map_modules(
       "#{path_prefix}.surface_preparation_modules",
       seams.surface_preparation_modules
+    )
+    |> append_map_modules(
+      "#{path_prefix}.session_runtime_modules",
+      seams.session_runtime_modules
     )
     |> append_map_modules(
       "#{path_prefix}.semantic_protocol_modules",

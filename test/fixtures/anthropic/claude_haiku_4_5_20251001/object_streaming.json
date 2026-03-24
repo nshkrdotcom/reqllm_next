@@ -1,11 +1,13 @@
 {
-  "captured_at": "2026-03-24T00:00:45.423462Z",
+  "captured_at": "2026-03-24T18:38:38.447172Z",
   "chunks": [
-    "ZXZlbnQ6IG1lc3NhZ2Vfc3RhcnQKZGF0YTogeyJ0eXBlIjoibWVzc2FnZV9zdGFydCIsIm1lc3NhZ2UiOnsibW9kZWwiOiJjbGF1ZGUtaGFpa3UtNC01LTIwMjUxMDAxIiwiaWQiOiJtc2dfMDFDekhrTjVadVNXOXFNeVkyQTJDaWZuIiwidHlwZSI6Im1lc3NhZ2UiLCJyb2xlIjoiYXNzaXN0YW50IiwiY29udGVudCI6W10sInN0b3BfcmVhc29uIjpudWxsLCJzdG9wX3NlcXVlbmNlIjpudWxsLCJ1c2FnZSI6eyJpbnB1dF90b2tlbnMiOjEzMSwiY2FjaGVfY3JlYXRpb25faW5wdXRfdG9rZW5zIjowLCJjYWNoZV9yZWFkX2lucHV0X3Rva2VucyI6MCwiY2FjaGVfY3JlYXRpb24iOnsiZXBoZW1lcmFsXzVtX2lucHV0X3Rva2VucyI6MCwiZXBoZW1lcmFsXzFoX2lucHV0X3Rva2VucyI6MH0sIm91dHB1dF90b2tlbnMiOjgsInNlcnZpY2VfdGllciI6InN0YW5kYXJkIiwiaW5mZXJlbmNlX2dlbyI6Im5vdF9hdmFpbGFibGUifX0gICAgICAgIH0KCmV2ZW50OiBjb250ZW50X2Jsb2NrX3N0YXJ0CmRhdGE6IHsidHlwZSI6ImNvbnRlbnRfYmxvY2tfc3RhcnQiLCJpbmRleCI6MCwiY29udGVudF9ibG9jayI6eyJ0eXBlIjoidGV4dCIsInRleHQiOiIifSAgICB9CgpldmVudDogcGluZwpkYXRhOiB7InR5cGUiOiAicGluZyJ9CgpldmVudDogY29udGVudF9ibG9ja19kZWx0YQpkYXRhOiB7InR5cGUiOiJjb250ZW50X2Jsb2NrX2RlbHRhIiwiaW5kZXgiOjAsImRlbHRhIjp7InR5cGUiOiJ0ZXh0X2RlbHRhIiwidGV4dCI6ImBgYGpzb25cbntcbiAgXCJuYW1lIn0gICAgICAgfQoK",
-    "ZXZlbnQ6IGNvbnRlbnRfYmxvY2tfZGVsdGEKZGF0YTogeyJ0eXBlIjoiY29udGVudF9ibG9ja19kZWx0YSIsImluZGV4IjowLCJkZWx0YSI6eyJ0eXBlIjoidGV4dF9kZWx0YSIsInRleHQiOiJcIjogXCJBbGljZVwiLFxuICBcImFnZVwiOiAyOCxcbiAgXCJvY2N1cGF0aW9uXCI6IFwiU29mdHdhcmUgRW5naW5lZXJcIlxufVxuYGBgIn0gICAgICB9Cgo=",
-    "ZXZlbnQ6IGNvbnRlbnRfYmxvY2tfc3RvcApkYXRhOiB7InR5cGUiOiJjb250ZW50X2Jsb2NrX3N0b3AiLCJpbmRleCI6MCAgICAgIH0KCg==",
-    "ZXZlbnQ6IG1lc3NhZ2VfZGVsdGEKZGF0YTogeyJ0eXBlIjoibWVzc2FnZV9kZWx0YSIsImRlbHRhIjp7InN0b3BfcmVhc29uIjoiZW5kX3R1cm4iLCJzdG9wX3NlcXVlbmNlIjpudWxsfSwidXNhZ2UiOnsiaW5wdXRfdG9rZW5zIjoxMzEsImNhY2hlX2NyZWF0aW9uX2lucHV0X3Rva2VucyI6MCwiY2FjaGVfcmVhZF9pbnB1dF90b2tlbnMiOjAsIm91dHB1dF90b2tlbnMiOjM2fSAgICAgICAgIH0KCg==",
-    "ZXZlbnQ6IG1lc3NhZ2Vfc3RvcApkYXRhOiB7InR5cGUiOiJtZXNzYWdlX3N0b3AiICAgICAgICAgICAgICB9Cgo="
+    "ZXZlbnQ6IG1lc3NhZ2Vfc3RhcnQKZGF0YTogeyJ0eXBlIjoibWVzc2FnZV9zdGFydCIsIm1lc3NhZ2UiOnsibW9kZWwiOiJjbGF1ZGUtaGFpa3UtNC01LTIwMjUxMDAxIiwiaWQiOiJtc2dfMDFIaWl2eWdCNEN4M3R0RXNha3h3RTlwIiwidHlwZSI6Im1lc3NhZ2UiLCJyb2xlIjoiYXNzaXN0YW50IiwiY29udGVudCI6W10sInN0b3BfcmVhc29uIjpudWxsLCJzdG9wX3NlcXVlbmNlIjpudWxsLCJ1c2FnZSI6eyJpbnB1dF90b2tlbnMiOjE3NSwiY2FjaGVfY3JlYXRpb25faW5wdXRfdG9rZW5zIjowLCJjYWNoZV9yZWFkX2lucHV0X3Rva2VucyI6MCwiY2FjaGVfY3JlYXRpb24iOnsiZXBoZW1lcmFsXzVtX2lucHV0X3Rva2VucyI6MCwiZXBoZW1lcmFsXzFoX2lucHV0X3Rva2VucyI6MH0sIm91dHB1dF90b2tlbnMiOjEsInNlcnZpY2VfdGllciI6InN0YW5kYXJkIiwiaW5mZXJlbmNlX2dlbyI6Im5vdF9hdmFpbGFibGUifX0gICAgICAgfQoKZXZlbnQ6IGNvbnRlbnRfYmxvY2tfc3RhcnQKZGF0YTogeyJ0eXBlIjoiY29udGVudF9ibG9ja19zdGFydCIsImluZGV4IjowLCJjb250ZW50X2Jsb2NrIjp7InR5cGUiOiJ0ZXh0IiwidGV4dCI6IiJ9ICAgICAgfQoK",
+    "ZXZlbnQ6IHBpbmcKZGF0YTogeyJ0eXBlIjogInBpbmcifQoK",
+    "ZXZlbnQ6IGNvbnRlbnRfYmxvY2tfZGVsdGEKZGF0YTogeyJ0eXBlIjoiY29udGVudF9ibG9ja19kZWx0YSIsImluZGV4IjowLCJkZWx0YSI6eyJ0eXBlIjoidGV4dF9kZWx0YSIsInRleHQiOiJ7XCIifSB9Cgo=",
+    "ZXZlbnQ6IGNvbnRlbnRfYmxvY2tfZGVsdGEKZGF0YTogeyJ0eXBlIjoiY29udGVudF9ibG9ja19kZWx0YSIsImluZGV4IjowLCJkZWx0YSI6eyJ0eXBlIjoidGV4dF9kZWx0YSIsInRleHQiOiJhZ2VcIjogMzIsIFwibmFtZVwiOiBcIkFsZXhhbmRyYSBDaGVuXCJ9In0gICAgICB9Cgo=",
+    "ZXZlbnQ6IGNvbnRlbnRfYmxvY2tfc3RvcApkYXRhOiB7InR5cGUiOiJjb250ZW50X2Jsb2NrX3N0b3AiLCJpbmRleCI6MCAgICAgICB9Cgo=",
+    "ZXZlbnQ6IG1lc3NhZ2VfZGVsdGEKZGF0YTogeyJ0eXBlIjoibWVzc2FnZV9kZWx0YSIsImRlbHRhIjp7InN0b3BfcmVhc29uIjoiZW5kX3R1cm4iLCJzdG9wX3NlcXVlbmNlIjpudWxsfSwidXNhZ2UiOnsiaW5wdXRfdG9rZW5zIjoxNzUsImNhY2hlX2NyZWF0aW9uX2lucHV0X3Rva2VucyI6MCwiY2FjaGVfcmVhZF9pbnB1dF90b2tlbnMiOjAsIm91dHB1dF90b2tlbnMiOjE2fSB9Cgo=",
+    "ZXZlbnQ6IG1lc3NhZ2Vfc3RvcApkYXRhOiB7InR5cGUiOiJtZXNzYWdlX3N0b3AiICAgIH0KCg=="
   ],
   "execution": {
     "semantic_protocol": "anthropic_messages",
@@ -14,20 +16,41 @@
     "wire_format": "anthropic_messages_sse_json"
   },
   "model_id": "claude-haiku-4-5-20251001",
-  "prompt": "Return only valid JSON that matches this JSON Schema exactly.\nDo not include markdown fences or explanatory text.\nJSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"age\":{\"description\":\"Person's age in years\",\"minimum\":1,\"type\":\"integer\"},\"name\":{\"description\":\"Person's full name\",\"type\":\"string\"},\"occupation\":{\"description\":\"Person's job or profession\",\"type\":\"string\"}},\"required\":[\"name\",\"age\",\"occupation\"],\"type\":\"object\"}\n\nUser request:\nGenerate a software engineer profile named Alice who is 28 years old.",
+  "prompt": "Generate a software engineer profile",
   "provider": "anthropic",
   "request": {
     "body": {
-      "b64": "eyJtZXNzYWdlcyI6W3sicm9sZSI6InVzZXIiLCJjb250ZW50IjoiUmV0dXJuIG9ubHkgdmFsaWQgSlNPTiB0aGF0IG1hdGNoZXMgdGhpcyBKU09OIFNjaGVtYSBleGFjdGx5LlxuRG8gbm90IGluY2x1ZGUgbWFya2Rvd24gZmVuY2VzIG9yIGV4cGxhbmF0b3J5IHRleHQuXG5KU09OIFNjaGVtYTpcbntcImFkZGl0aW9uYWxQcm9wZXJ0aWVzXCI6ZmFsc2UsXCJwcm9wZXJ0aWVzXCI6e1wiYWdlXCI6e1wiZGVzY3JpcHRpb25cIjpcIlBlcnNvbidzIGFnZSBpbiB5ZWFyc1wiLFwibWluaW11bVwiOjEsXCJ0eXBlXCI6XCJpbnRlZ2VyXCJ9LFwibmFtZVwiOntcImRlc2NyaXB0aW9uXCI6XCJQZXJzb24ncyBmdWxsIG5hbWVcIixcInR5cGVcIjpcInN0cmluZ1wifSxcIm9jY3VwYXRpb25cIjp7XCJkZXNjcmlwdGlvblwiOlwiUGVyc29uJ3Mgam9iIG9yIHByb2Zlc3Npb25cIixcInR5cGVcIjpcInN0cmluZ1wifX0sXCJyZXF1aXJlZFwiOltcIm5hbWVcIixcImFnZVwiLFwib2NjdXBhdGlvblwiXSxcInR5cGVcIjpcIm9iamVjdFwifVxuXG5Vc2VyIHJlcXVlc3Q6XG5HZW5lcmF0ZSBhIHNvZnR3YXJlIGVuZ2luZWVyIHByb2ZpbGUgbmFtZWQgQWxpY2Ugd2hvIGlzIDI4IHllYXJzIG9sZC4ifV0sInN0cmVhbSI6dHJ1ZSwibW9kZWwiOiJjbGF1ZGUtaGFpa3UtNC01LTIwMjUxMDAxIiwibWF4X3Rva2VucyI6MjAwfQ==",
+      "b64": "eyJtZXNzYWdlcyI6W3sicm9sZSI6InVzZXIiLCJjb250ZW50IjoiR2VuZXJhdGUgYSBzb2Z0d2FyZSBlbmdpbmVlciBwcm9maWxlIn1dLCJzdHJlYW0iOnRydWUsIm1vZGVsIjoiY2xhdWRlLWhhaWt1LTQtNS0yMDI1MTAwMSIsIm1heF90b2tlbnMiOjEwMjQsIm91dHB1dF9jb25maWciOnsiZm9ybWF0Ijp7InR5cGUiOiJqc29uX3NjaGVtYSIsInNjaGVtYSI6eyJhZGRpdGlvbmFsUHJvcGVydGllcyI6ZmFsc2UsInByb3BlcnRpZXMiOnsiYWdlIjp7InR5cGUiOiJpbnRlZ2VyIn0sIm5hbWUiOnsidHlwZSI6InN0cmluZyJ9fSwicmVxdWlyZWQiOlsibmFtZSIsImFnZSJdLCJ0eXBlIjoib2JqZWN0In19fX0=",
       "canonical_json": {
-        "max_tokens": 200,
+        "max_tokens": 1024,
         "messages": [
           {
-            "content": "Return only valid JSON that matches this JSON Schema exactly.\nDo not include markdown fences or explanatory text.\nJSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"age\":{\"description\":\"Person's age in years\",\"minimum\":1,\"type\":\"integer\"},\"name\":{\"description\":\"Person's full name\",\"type\":\"string\"},\"occupation\":{\"description\":\"Person's job or profession\",\"type\":\"string\"}},\"required\":[\"name\",\"age\",\"occupation\"],\"type\":\"object\"}\n\nUser request:\nGenerate a software engineer profile named Alice who is 28 years old.",
+            "content": "Generate a software engineer profile",
             "role": "user"
           }
         ],
         "model": "claude-haiku-4-5-20251001",
+        "output_config": {
+          "format": {
+            "schema": {
+              "additionalProperties": false,
+              "properties": {
+                "age": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "age"
+              ],
+              "type": "object"
+            },
+            "type": "json_schema"
+          }
+        },
         "stream": true
       }
     },
@@ -46,31 +69,31 @@
       "anthropic-organization-id": "a71659e7-a922-4ff7-99de-f3ba615face1",
       "anthropic-ratelimit-input-tokens-limit": "1000000",
       "anthropic-ratelimit-input-tokens-remaining": "1000000",
-      "anthropic-ratelimit-input-tokens-reset": "2026-03-24T00:00:45Z",
+      "anthropic-ratelimit-input-tokens-reset": "2026-03-24T18:38:38Z",
       "anthropic-ratelimit-output-tokens-limit": "200000",
       "anthropic-ratelimit-output-tokens-remaining": "200000",
-      "anthropic-ratelimit-output-tokens-reset": "2026-03-24T00:00:45Z",
+      "anthropic-ratelimit-output-tokens-reset": "2026-03-24T18:38:38Z",
       "anthropic-ratelimit-requests-limit": "2000",
       "anthropic-ratelimit-requests-remaining": "1999",
-      "anthropic-ratelimit-requests-reset": "2026-03-24T00:00:45Z",
+      "anthropic-ratelimit-requests-reset": "2026-03-24T18:38:38Z",
       "anthropic-ratelimit-tokens-limit": "1200000",
       "anthropic-ratelimit-tokens-remaining": "1200000",
-      "anthropic-ratelimit-tokens-reset": "2026-03-24T00:00:45Z",
+      "anthropic-ratelimit-tokens-reset": "2026-03-24T18:38:38Z",
       "cache-control": "no-cache",
       "cf-cache-status": "DYNAMIC",
-      "cf-ray": "9e1165bc0adabd06-ORD",
+      "cf-ray": "9e17cb430c175f00-ORD",
       "connection": "keep-alive",
       "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
       "content-type": "text/event-stream; charset=utf-8",
-      "date": "Tue, 24 Mar 2026 00:00:45 GMT",
-      "request-id": "req_011CZLvSanEjUQh6qEHGw6h2",
+      "date": "Tue, 24 Mar 2026 18:38:39 GMT",
+      "request-id": "req_011CZNPgqBD7MbWH2bgMcnbm",
       "server": "cloudflare",
-      "server-timing": "x-originResponse;dur=370",
-      "set-cookie": "_cfuvid=vN3ahlckKKkulTkp8D3BgFXYOyW5nPOgi9SZY7FbSDc-1774310445.4490957-1.0.1.1-zDwndrcMbHvWFaMpRNS0BxPtcK4SfkKAWICJC5fMHA0; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.anthropic.com",
+      "server-timing": "x-originResponse;dur=906",
+      "set-cookie": "_cfuvid=ouhpnNFV5vpgzRtyIuYMmb.y6_gCe__xY7iCVdjegVs-1774377518.5654664-1.0.1.1-30JLwi1BjRm.DRGN0AIMUPArSBiLjFZ.drTyYk2fN9c; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.anthropic.com",
       "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
       "transfer-encoding": "chunked",
       "vary": "Accept-Encoding",
-      "x-envoy-upstream-service-time": "369",
+      "x-envoy-upstream-service-time": "904",
       "x-robots-tag": "none"
     },
     "status": 200

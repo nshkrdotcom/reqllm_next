@@ -56,6 +56,21 @@ defmodule ReqLlmNext.PublicAPI.ObjectGenerationTest do
       assert is_map(StreamResponse.object(resp))
     end
 
+    test "supports websocket object streaming for responses models" do
+      {:ok, resp} =
+        ReqLlmNext.stream_object(
+          "openai:gpt-4o-mini",
+          "Generate a person",
+          @person_schema,
+          fixture: "object_streaming_websocket",
+          transport: :websocket
+        )
+
+      assert %StreamResponse{} = resp
+      assert resp.model.id == "gpt-4o-mini"
+      assert is_map(StreamResponse.object(resp))
+    end
+
     test "returns an error for an invalid model" do
       assert {:error, _} =
                ReqLlmNext.stream_object("openai:nonexistent", "Generate", @person_schema, [])

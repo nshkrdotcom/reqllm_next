@@ -27,6 +27,7 @@ defmodule ReqLlmNext.MixProject do
           "guides/package_thesis.md",
           "guides/extension_architecture.md",
           "guides/anthropic_surface_map.md",
+          "guides/openai_surface_map.md",
           "guides/anthropic_openai_compatibility.md"
         ],
         groups_for_extras: [
@@ -34,6 +35,7 @@ defmodule ReqLlmNext.MixProject do
             "guides/package_thesis.md",
             "guides/extension_architecture.md",
             "guides/anthropic_surface_map.md",
+            "guides/openai_surface_map.md",
             "guides/anthropic_openai_compatibility.md"
           ]
         ]

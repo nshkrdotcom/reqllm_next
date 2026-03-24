@@ -42,7 +42,7 @@ The current built-in authoring stack is:
 
 - `ReqLlmNext.Extensions.Dsl` for Spark sections and entities
 - `ReqLlmNext.Extensions.Definition` for extension-definition modules
-- `ReqLlmNext.Extensions.Definitions.*` for provider or family declaration packs
+- provider and family declaration packs discovered from `lib/req_llm_next/families/**/definition.ex` and `lib/req_llm_next/providers/**/definition.ex`
 - `ReqLlmNext.Extensions.Compiled` for the aggregated built-in manifest
 - `ReqLlmNext.Extensions.ManifestVerifier` for compile-time merged-manifest checks
 
@@ -107,6 +107,7 @@ Extensions may patch only explicit seams:
 - provider-facts extraction
 - surface catalog construction
 - surface preparation
+- session runtime module mapping
 - semantic protocol module mapping
 - wire module mapping
 - transport module mapping

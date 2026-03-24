@@ -32,6 +32,8 @@ defmodule ReqLlmNext.OperationPlanner do
          mode: mode,
          surface: policy.surface,
          provider: profile.provider,
+         session_runtime:
+           session_runtime_for(profile, mode, policy.surface, policy.session_strategy),
          semantic_protocol: policy.surface.semantic_protocol,
          wire_format: policy.surface.wire_format,
          transport: policy.surface.transport,
@@ -54,6 +56,23 @@ defmodule ReqLlmNext.OperationPlanner do
         []
     end
   end
+
+  defp session_runtime_for(profile, mode, surface, %{mode: strategy_mode})
+       when strategy_mode not in [:none, nil] do
+    case Extensions.resolve_compiled(extension_context(profile, mode, surface)) do
+      {:ok, %{seams: %{session_runtime_modules: modules}}} ->
+        if Map.has_key?(modules, surface.semantic_protocol) do
+          surface.semantic_protocol
+        else
+          :none
+        end
+
+      {:error, :no_matching_family} ->
+        :none
+    end
+  end
+
+  defp session_runtime_for(_profile, _mode, _surface, _strategy), do: :none
 
   defp extension_context(profile, mode, surface) do
     %{

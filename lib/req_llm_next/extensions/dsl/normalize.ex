@@ -10,6 +10,7 @@ defmodule ReqLlmNext.Extensions.Dsl.Normalize do
     |> Map.drop([:__spark_metadata__])
     |> keywords_to_maps([
       :surface_preparation_modules,
+      :session_runtime_modules,
       :semantic_protocol_modules,
       :wire_modules,
       :transport_modules,
@@ -64,6 +65,7 @@ defmodule ReqLlmNext.Extensions.Dsl.Normalize do
     |> Map.drop([:__spark_metadata__])
     |> keywords_to_maps([
       :surface_preparation_modules,
+      :session_runtime_modules,
       :semantic_protocol_modules,
       :wire_modules,
       :transport_modules,

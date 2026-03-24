@@ -1,0 +1,133 @@
+{
+  "captured_at": "2026-03-24T18:55:57.571320Z",
+  "chunks": [
+    "ZXZlbnQ6IG1lc3NhZ2Vfc3RhcnQKZGF0YTogeyJ0eXBlIjoibWVzc2FnZV9zdGFydCIsIm1lc3NhZ2UiOnsibW9kZWwiOiJjbGF1ZGUtc29ubmV0LTQtNiIsImlkIjoibXNnXzAxNm5WY1EyODhyTWgyWXAyNTN0RE1qdCIsInR5cGUiOiJtZXNzYWdlIiwicm9sZSI6ImFzc2lzdGFudCIsImNvbnRlbnQiOltdLCJzdG9wX3JlYXNvbiI6bnVsbCwic3RvcF9zZXF1ZW5jZSI6bnVsbCwidXNhZ2UiOnsiaW5wdXRfdG9rZW5zIjo1NzksImNhY2hlX2NyZWF0aW9uX2lucHV0X3Rva2VucyI6MCwiY2FjaGVfcmVhZF9pbnB1dF90b2tlbnMiOjAsImNhY2hlX2NyZWF0aW9uIjp7ImVwaGVtZXJhbF81bV9pbnB1dF90b2tlbnMiOjAsImVwaGVtZXJhbF8xaF9pbnB1dF90b2tlbnMiOjB9LCJvdXRwdXRfdG9rZW5zIjo1LCJzZXJ2aWNlX3RpZXIiOiJzdGFuZGFyZCIsImluZmVyZW5jZV9nZW8iOiJnbG9iYWwifX19Cgo=",
+    "ZXZlbnQ6IGNvbnRlbnRfYmxvY2tfc3RhcnQKZGF0YTogeyJ0eXBlIjoiY29udGVudF9ibG9ja19zdGFydCIsImluZGV4IjowLCJjb250ZW50X2Jsb2NrIjp7ImNpdGF0aW9ucyI6W10sInR5cGUiOiJ0ZXh0IiwidGV4dCI6IiJ9ICAgIH0KCg==",
+    "ZXZlbnQ6IHBpbmcKZGF0YTogeyJ0eXBlIjogInBpbmcifQoKZXZlbnQ6IGNvbnRlbnRfYmxvY2tfZGVsdGEKZGF0YTogeyJ0eXBlIjoiY29udGVudF9ibG9ja19kZWx0YSIsImluZGV4IjowLCJkZWx0YSI6eyJ0eXBlIjoiY2l0YXRpb25zX2RlbHRhIiwiY2l0YXRpb24iOnsidHlwZSI6ImNoYXJfbG9jYXRpb24iLCJjaXRlZF90ZXh0IjoiUXVhcnRlcmx5IHJldmVudWUgaW5jcmVhc2VkIGJ5IDEyIHBlcmNlbnQgeWVhciBvdmVyIHllYXIuIiwiZG9jdW1lbnRfaW5kZXgiOjAsImRvY3VtZW50X3RpdGxlIjoiUXVhcnRlcmx5IFJlcG9ydCIsImZpbGVfaWQiOiJmaWxlXzAxMUNaTlIxUHZLRWhBeHRCb0RUdndaNyIsInN0YXJ0X2NoYXJfaW5kZXgiOjAsImVuZF9jaGFyX2luZGV4Ijo1N319ICAgICAgICAgICAgIH0KCg==",
+    "ZXZlbnQ6IGNvbnRlbnRfYmxvY2tfZGVsdGEKZGF0YTogeyJ0eXBlIjoiY29udGVudF9ibG9ja19kZWx0YSIsImluZGV4IjowLCJkZWx0YSI6eyJ0eXBlIjoidGV4dF9kZWx0YSIsInRleHQiOiJRdWFydGVybHkgcmV2ZW51ZSBpbmNyZWFzZWQgYnkgKioxMiBwZXJjZW50KiogeWVhciBvdmVyIHllYXIuIn0gICB9CgpldmVudDogY29udGVudF9ibG9ja19zdG9wCmRhdGE6IHsidHlwZSI6ImNvbnRlbnRfYmxvY2tfc3RvcCIsImluZGV4IjowfQoK",
+    "ZXZlbnQ6IG1lc3NhZ2VfZGVsdGEKZGF0YTogeyJ0eXBlIjoibWVzc2FnZV9kZWx0YSIsImRlbHRhIjp7InN0b3BfcmVhc29uIjoiZW5kX3R1cm4iLCJzdG9wX3NlcXVlbmNlIjpudWxsfSwidXNhZ2UiOnsiaW5wdXRfdG9rZW5zIjo1NzksImNhY2hlX2NyZWF0aW9uX2lucHV0X3Rva2VucyI6MCwiY2FjaGVfcmVhZF9pbnB1dF90b2tlbnMiOjAsIm91dHB1dF90b2tlbnMiOjMzfSAgICAgICB9CgpldmVudDogbWVzc2FnZV9zdG9wCmRhdGE6IHsidHlwZSI6Im1lc3NhZ2Vfc3RvcCIgICAgICAgICAgICAgICB9Cgo="
+  ],
+  "execution": {
+    "semantic_protocol": "anthropic_messages",
+    "surface_id": "anthropic_messages_text_http_sse",
+    "transport": "http_sse",
+    "wire_format": "anthropic_messages_sse_json"
+  },
+  "model_id": "claude-sonnet-4-6",
+  "prompt": {
+    "messages": [
+      {
+        "name": null,
+        "metadata": {},
+        "role": "user",
+        "content": [
+          {
+            "data": null,
+            "type": "text",
+            "filename": null,
+            "text": "Answer with the exact percentage from the document.",
+            "metadata": {},
+            "url": null,
+            "media_type": null
+          },
+          {
+            "data": "ZmlsZV8wMTFDWk5SMVB2S0VoQXh0Qm9EVHZ3Wjc=",
+            "type": "document",
+            "filename": null,
+            "text": null,
+            "metadata": {
+              "title": "Quarterly Report",
+              "citations": {
+                "enabled": true
+              },
+              "source_type": "file_id"
+            },
+            "url": null,
+            "media_type": null
+          }
+        ],
+        "tool_calls": null,
+        "tool_call_id": null,
+        "reasoning_details": null
+      }
+    ],
+    "tools": []
+  },
+  "provider": "anthropic",
+  "request": {
+    "body": {
+      "b64": "eyJtZXNzYWdlcyI6W3sicm9sZSI6InVzZXIiLCJjb250ZW50IjpbeyJ0eXBlIjoidGV4dCIsInRleHQiOiJBbnN3ZXIgd2l0aCB0aGUgZXhhY3QgcGVyY2VudGFnZSBmcm9tIHRoZSBkb2N1bWVudC4ifSx7InR5cGUiOiJkb2N1bWVudCIsInRpdGxlIjoiUXVhcnRlcmx5IFJlcG9ydCIsInNvdXJjZSI6eyJ0eXBlIjoiZmlsZSIsImZpbGVfaWQiOiJmaWxlXzAxMUNaTlIxUHZLRWhBeHRCb0RUdndaNyJ9LCJjaXRhdGlvbnMiOnsiZW5hYmxlZCI6dHJ1ZX19XX1dLCJzdHJlYW0iOnRydWUsIm1vZGVsIjoiY2xhdWRlLXNvbm5ldC00LTYiLCJtYXhfdG9rZW5zIjoyNTZ9",
+      "canonical_json": {
+        "max_tokens": 256,
+        "messages": [
+          {
+            "content": [
+              {
+                "text": "Answer with the exact percentage from the document.",
+                "type": "text"
+              },
+              {
+                "citations": {
+                  "enabled": true
+                },
+                "source": {
+                  "file_id": "file_011CZNR1PvKEhAxtBoDTvwZ7",
+                  "type": "file"
+                },
+                "title": "Quarterly Report",
+                "type": "document"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "claude-sonnet-4-6",
+        "stream": true
+      }
+    },
+    "headers": {
+      "accept": "text/event-stream",
+      "anthropic-beta": "files-api-2025-04-14",
+      "anthropic-version": "2023-06-01",
+      "content-type": "application/json",
+      "x-api-key": "[REDACTED]"
+    },
+    "method": "POST",
+    "transport": "http_sse",
+    "url": "https://api.anthropic.com:443/v1/messages"
+  },
+  "response": {
+    "headers": {
+      "anthropic-organization-id": "a71659e7-a922-4ff7-99de-f3ba615face1",
+      "anthropic-ratelimit-input-tokens-limit": "800000",
+      "anthropic-ratelimit-input-tokens-remaining": "800000",
+      "anthropic-ratelimit-input-tokens-reset": "2026-03-24T18:55:57Z",
+      "anthropic-ratelimit-output-tokens-limit": "160000",
+      "anthropic-ratelimit-output-tokens-remaining": "160000",
+      "anthropic-ratelimit-output-tokens-reset": "2026-03-24T18:55:57Z",
+      "anthropic-ratelimit-requests-limit": "2000",
+      "anthropic-ratelimit-requests-remaining": "1999",
+      "anthropic-ratelimit-requests-reset": "2026-03-24T18:55:57Z",
+      "anthropic-ratelimit-tokens-limit": "960000",
+      "anthropic-ratelimit-tokens-remaining": "960000",
+      "anthropic-ratelimit-tokens-reset": "2026-03-24T18:55:57Z",
+      "cache-control": "no-cache",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "9e17e4a0fdac620c-ORD",
+      "connection": "keep-alive",
+      "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+      "content-type": "text/event-stream; charset=utf-8",
+      "date": "Tue, 24 Mar 2026 18:55:59 GMT",
+      "request-id": "req_011CZNR1RUqA6fYcQgUUwvLv",
+      "server": "cloudflare",
+      "server-timing": "x-originResponse;dur=1568",
+      "set-cookie": "_cfuvid=hPsEPtLNfU5A6S2ca3qATGn81cAdKZLxddS7A_5qLhM-1774378557.5925658-1.0.1.1-1ad8iwos47Ww0MkwSL55xLkG_R8rb1yMjqxL_PiuuvU; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.anthropic.com",
+      "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+      "transfer-encoding": "chunked",
+      "vary": "Accept-Encoding",
+      "x-envoy-upstream-service-time": "1565",
+      "x-robots-tag": "none"
+    },
+    "status": 200
+  }
+}

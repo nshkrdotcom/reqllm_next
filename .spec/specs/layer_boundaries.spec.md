@@ -12,11 +12,10 @@ summary: Explicit handoff rules for provider, session runtime, transport, wire f
 surface:
   - AGENTS.md
   - lib/req_llm_next/execution_modules.ex
-  - lib/req_llm_next/anthropic/**/*.ex
+  - lib/req_llm_next/families/**/*.ex
+  - lib/req_llm_next/providers/**/*.ex
   - lib/req_llm_next/semantic_protocol.ex
-  - lib/req_llm_next/semantic_protocols/**/*.ex
   - lib/req_llm_next/transports/**/*.ex
-  - lib/req_llm_next/wire/**/*.ex
   - lib/req_llm_next/fixtures.ex
 decisions:
   - reqllm.decision.execution_layers
@@ -34,12 +33,12 @@ decisions:
   stability: evolving
 
 - id: reqllm.layer_boundaries.plan_aware_adapters
-  statement: ReqLlmNext shall treat adapters as explicit layer-scoped patches selected through resolved extension seams and start the 2.0 architecture with plan-aware adapters that operate on `ExecutionPlan` after policy resolution instead of through one omniscient global adapter registry.
+  statement: ReqLlmNext shall treat adapters as explicit layer-scoped patches selected through resolved extension seams after policy resolution so adapter application is constrained by the chosen plan and surface instead of one omniscient global adapter registry.
   priority: must
   stability: evolving
 
 - id: reqllm.layer_boundaries.no_cross_layer_skips
-  statement: No execution layer shall skip across another layer's ownership boundary by choosing transports in semantic protocol code, reinterpreting semantic meaning in wire code, introducing model-specific behavior in provider or transport code, or deriving provider-native request flags in shared executor code after planning.
+  statement: No execution layer shall skip across another layer's ownership boundary by choosing transports in semantic protocol code, reinterpreting semantic meaning in wire code, introducing model-specific behavior in provider or transport code, deriving provider-native request flags in shared executor code after planning, or performing session continuation derivation outside planner-owned session runtime seams.
   priority: must
   stability: evolving
 

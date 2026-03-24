@@ -12,6 +12,7 @@ summary: Live scenario execution, curated provider sweeps, and drift detection b
 surface:
   - guides/package_thesis.md
   - guides/anthropic_surface_map.md
+  - guides/openai_surface_map.md
   - guides/anthropic_openai_compatibility.md
   - lib/req_llm_next/support_matrix.ex
   - lib/req_llm_next/provider_test/comprehensive.ex
@@ -21,7 +22,8 @@ surface:
   - test/coverage/openai_comprehensive_test.exs
   - test/coverage/openai_websocket_coverage_test.exs
   - test/provider_features/anthropic_beta_features_test.exs
-  - test/anthropic/**/*.exs
+  - test/provider_features/anthropic_advanced_messages_test.exs
+  - test/providers/anthropic/**/*.exs
 ```
 
 ## Requirements
@@ -38,7 +40,7 @@ surface:
   stability: evolving
 
 - id: reqllm.model_compat.curated_support_matrix
-  statement: Provider compatibility sweeps shall run against a curated support matrix of representative provider, model, and transport lanes so live verification stays cost-aware and stable while still pressure-testing the execution-plan architecture.
+  statement: Provider compatibility sweeps shall run against a curated support matrix of representative provider, model, and transport lanes so live verification stays cost-aware and stable while still pressure-testing the execution-plan architecture, while provider-native feature probes that do not fit the generic scenario system remain outside the matrix in focused provider-feature coverage.
   priority: should
   stability: evolving
 
@@ -78,20 +80,20 @@ surface:
     - reqllm.model_compat.layer_attribution
 
 - kind: command
-  target: mix test test/coverage/anthropic_comprehensive_test.exs test/coverage/openai_comprehensive_test.exs test/coverage/openai_websocket_coverage_test.exs test/provider_features/anthropic_beta_features_test.exs
+  target: mix test test/coverage/anthropic_comprehensive_test.exs test/coverage/openai_comprehensive_test.exs test/coverage/openai_websocket_coverage_test.exs test/provider_features/anthropic_beta_features_test.exs test/provider_features/anthropic_advanced_messages_test.exs
   execute: true
   covers:
     - reqllm.model_compat.shared_scenarios
     - reqllm.model_compat.curated_support_matrix
 
 - kind: command
-  target: mix test test/anthropic
+  target: mix test test/providers/anthropic
   execute: true
   covers:
     - reqllm.model_compat.provider_native_surfaces
 
 - kind: command
-  target: mix test test/anthropic/message_batches_test.exs
+  target: mix test test/providers/anthropic/message_batches_test.exs
   execute: true
   covers:
     - reqllm.model_compat.provider_native_request_shapes

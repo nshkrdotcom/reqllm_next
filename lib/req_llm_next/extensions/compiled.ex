@@ -5,11 +5,8 @@ defmodule ReqLlmNext.Extensions.Compiled do
 
   alias ReqLlmNext.Extensions.{Definition, RuntimeRegistry}
 
-  @definitions [
-    ReqLlmNext.Extensions.Definitions.OpenAICompatible,
-    ReqLlmNext.Extensions.Definitions.OpenAI,
-    ReqLlmNext.Extensions.Definitions.Anthropic
-  ]
+  @definitions Definition.discover_definition_modules()
+               |> Enum.map(&Code.ensure_compiled!/1)
   @manifest Definition.merge_manifests!(@definitions)
   @runtime_registry RuntimeRegistry.build(@manifest)
 

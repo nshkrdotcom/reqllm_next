@@ -22,7 +22,7 @@ surface:
 
 ```spec-requirements
 - id: reqllm.extension_manifest.plain_runtime_contract
-  statement: ReqLlmNext shall model execution extension behavior as plain runtime data made of providers, families, rules, criteria, seam patches, and manifests so the runtime consumes a stable contract independent of any authoring DSL, with built-in declaration packs merged into one compiled manifest at compile time and expanded into a manifest-backed runtime registry for globally-addressable provider, protocol, wire, and transport seam keys.
+  statement: ReqLlmNext shall model execution extension behavior as plain runtime data made of providers, families, rules, criteria, seam patches, and manifests so the runtime consumes a stable contract independent of any authoring DSL, with built-in declaration packs discovered from provider and family slice homes such as `lib/req_llm_next/families/**/definition.ex` and `lib/req_llm_next/providers/**/definition.ex`, merged into one compiled manifest at compile time, and expanded into a manifest-backed runtime registry for globally-addressable provider, session-runtime, protocol, wire, and transport seam keys.
   priority: must
   stability: evolving
 
@@ -37,7 +37,7 @@ surface:
   stability: evolving
 
 - id: reqllm.extension_manifest.narrow_seams
-  statement: Extension declarations shall only patch explicit seams such as provider registration, provider facts, surface catalog construction, surface preparation, semantic protocol mapping, wire mapping, transport mapping, adapters, and provider-native utility homes, and shared runtime code shall consume those seams instead of branching on provider atoms directly.
+  statement: Extension declarations shall only patch explicit seams such as provider registration, provider facts, surface catalog construction, surface preparation, session-runtime mapping, semantic protocol mapping, wire mapping, transport mapping, adapters, and provider-native utility homes, and shared runtime code shall consume those seams instead of branching on provider atoms directly.
   priority: must
   stability: evolving
 
