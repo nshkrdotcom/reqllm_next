@@ -22,7 +22,7 @@ surface:
 
 ```spec-requirements
 - id: reqllm.extension_manifest.plain_runtime_contract
-  statement: ReqLlmNext shall model execution extension behavior as plain runtime data made of families, rules, criteria, seam patches, and manifests so the runtime consumes a stable contract independent of any authoring DSL.
+  statement: ReqLlmNext shall model execution extension behavior as plain runtime data made of providers, families, rules, criteria, seam patches, and manifests so the runtime consumes a stable contract independent of any authoring DSL.
   priority: must
   stability: evolving
 
@@ -40,6 +40,11 @@ surface:
   statement: Extension declarations shall only patch explicit seams such as provider registration, provider facts, surface catalog construction, surface preparation, semantic protocol mapping, wire mapping, transport mapping, adapters, and provider-native utility homes.
   priority: must
   stability: evolving
+
+- id: reqllm.extension_manifest.spark_authoring_layer
+  statement: ReqLlmNext may use Spark as a compile-time authoring DSL for built-in extension declarations, but that authoring layer shall compile to the plain manifest contract and compiled manifest modules rather than becoming the runtime extension API itself.
+  priority: should
+  stability: evolving
 ```
 
 ## Verification
@@ -52,11 +57,14 @@ surface:
     - reqllm.extension_manifest.family_precedence
     - reqllm.extension_manifest.rule_precedence
     - reqllm.extension_manifest.narrow_seams
+    - reqllm.extension_manifest.spark_authoring_layer
 
 - kind: command
-  target: mix test test/req_llm_next/extensions/manifest_test.exs
+  target: mix test test/req_llm_next/extensions/manifest_test.exs test/req_llm_next/extensions/dsl_test.exs
   execute: true
   covers:
+    - reqllm.extension_manifest.plain_runtime_contract
     - reqllm.extension_manifest.family_precedence
     - reqllm.extension_manifest.rule_precedence
+    - reqllm.extension_manifest.spark_authoring_layer
 ```

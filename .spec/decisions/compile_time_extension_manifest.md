@@ -28,7 +28,13 @@ The runtime contract is plain data:
 3. explicit seam patches define what can change
 4. precedence is deterministic
 
-Spark may be used as an authoring DSL for these declarations, but runtime code must consume the resulting plain manifest data rather than depending directly on Spark internals.
+Spark is the accepted authoring layer for built-in extension declarations, but runtime code must consume the resulting plain manifest data rather than depending directly on Spark internals.
+
+The package therefore has three distinct pieces:
+
+1. plain runtime structs such as `Provider`, `Family`, `Rule`, and `Manifest`
+2. Spark authoring modules such as `ReqLlmNext.Extensions.Dsl` and `ReqLlmNext.Extensions.Definition`
+3. compiled built-in manifest modules such as `ReqLlmNext.Extensions.Compiled`
 
 ## Consequences
 
@@ -42,3 +48,8 @@ Tradeoffs:
 1. introduces a new declaration and manifest layer that must stay well designed
 2. requires migration away from existing imperative provider branching
 3. demands careful seam design so the DSL stays narrow and useful rather than becoming another escape hatch
+
+Guardrails:
+1. Spark declarations may not become the runtime extension API
+2. built-in declarations must still compile down to plain manifest data before execution
+3. contributor-facing extension work should prefer declared families and rules over edits to shared planner or executor branching

@@ -8,7 +8,12 @@ defmodule ReqLlmNext.Extensions.ManifestTest do
     test "picks the highest-priority matching family" do
       manifest =
         Manifest.new!(%{
-          providers: %{openai: ReqLlmNext.Providers.OpenAI},
+          providers: %{
+            openai: %{
+              id: :openai,
+              seams: %{provider_module: ReqLlmNext.Providers.OpenAI}
+            }
+          },
           families: [
             %{
               id: :openai_chat_compatible,

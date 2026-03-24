@@ -47,7 +47,7 @@ surface:
   stability: evolving
 
 - id: reqllm.source_layout.extension_contract_home
-  statement: Compile-time execution extension contracts shall live in a dedicated `lib/req_llm_next/extensions/` home so default execution families and edge-case override rules are defined outside the shared planner and executor code.
+  statement: Compile-time execution extension contracts shall live in a dedicated `lib/req_llm_next/extensions/` home, including the plain runtime structs, Spark DSL authoring modules, compiled manifest modules, and built-in declarations, so default execution families and edge-case override rules are defined outside the shared planner and executor code.
   priority: should
   stability: evolving
 ```

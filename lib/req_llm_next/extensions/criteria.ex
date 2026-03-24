@@ -24,6 +24,7 @@ defmodule ReqLlmNext.Extensions.Criteria do
           )
 
   @type t :: %__MODULE__{
+          __spark_metadata__: map() | nil,
           provider_ids: [atom()],
           family_ids: [atom()],
           model_ids: [String.t()],
@@ -38,7 +39,7 @@ defmodule ReqLlmNext.Extensions.Criteria do
         }
 
   @enforce_keys Zoi.Struct.enforce_keys(@schema)
-  defstruct Zoi.Struct.struct_fields(@schema)
+  defstruct [__spark_metadata__: nil] ++ Zoi.Struct.struct_fields(@schema)
 
   def schema, do: @schema
 

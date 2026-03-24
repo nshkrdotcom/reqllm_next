@@ -38,6 +38,15 @@ layer:
 Spark may be used to author declarations, but the runtime should only consume
 the resulting family and rule data.
 
+The current built-in authoring stack is:
+
+- `ReqLlmNext.Extensions.Dsl` for Spark sections and entities
+- `ReqLlmNext.Extensions.Definition` for extension-definition modules
+- `ReqLlmNext.Extensions.Compiled` for the aggregated built-in manifest
+
+That keeps the runtime dependent on plain data while still giving contributors a
+more structured authoring surface.
+
 ## Families
 
 A family defines the default execution behavior for a class of models.

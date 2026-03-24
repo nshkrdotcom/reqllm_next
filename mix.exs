@@ -25,12 +25,14 @@ defmodule ReqLlmNext.MixProject do
         extras: [
           "README.md",
           "guides/package_thesis.md",
+          "guides/extension_architecture.md",
           "guides/anthropic_surface_map.md",
           "guides/anthropic_openai_compatibility.md"
         ],
         groups_for_extras: [
           Guides: [
             "guides/package_thesis.md",
+            "guides/extension_architecture.md",
             "guides/anthropic_surface_map.md",
             "guides/anthropic_openai_compatibility.md"
           ]
@@ -69,6 +71,7 @@ defmodule ReqLlmNext.MixProject do
       {:server_sent_events, "~> 0.2"},
       {:llm_db, "~> 2026.3"},
       {:zoi, "~> 0.17"},
+      {:spark, "~> 2.6"},
       {:spec_led_ex,
        github: "specleddev/specled_ex",
        ref: "e1ec80a7eecc455885fe5f72d5be4612bf15d07e",

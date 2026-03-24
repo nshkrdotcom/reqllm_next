@@ -20,6 +20,7 @@ defmodule ReqLlmNext.Extensions.Rule do
           )
 
   @type t :: %__MODULE__{
+          __spark_metadata__: map() | nil,
           id: atom(),
           priority: integer(),
           description: String.t() | nil,
@@ -28,7 +29,7 @@ defmodule ReqLlmNext.Extensions.Rule do
         }
 
   @enforce_keys Zoi.Struct.enforce_keys(@schema)
-  defstruct Zoi.Struct.struct_fields(@schema)
+  defstruct [__spark_metadata__: nil] ++ Zoi.Struct.struct_fields(@schema)
 
   def schema, do: @schema
 

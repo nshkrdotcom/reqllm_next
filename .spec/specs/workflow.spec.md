@@ -14,6 +14,7 @@ surface:
   - AGENTS.md
   - .spec/README.md
   - .spec/AGENTS.md
+  - guides/extension_architecture.md
   - guides/package_thesis.md
   - guides/anthropic_surface_map.md
   - guides/anthropic_openai_compatibility.md
@@ -47,6 +48,11 @@ surface:
   statement: Provider expansion work shall keep provider surface-map and compatibility-evaluation guides in sync with code and subject specs so wide provider coverage remains explainable and reviewable.
   priority: should
   stability: evolving
+
+- id: reqllm.workflow.extension_dsl_guidance
+  statement: Contributor workflow shall keep the extension-architecture guide, Spark dependency, and compile-time manifest proof in sync so contributors add edge-case support through declared extension rules instead of editing shared imperative branching directly.
+  priority: should
+  stability: evolving
 ```
 
 ## Verification
@@ -72,6 +78,7 @@ surface:
   target: .spec/specs/workflow.spec.md
   covers:
     - reqllm.workflow.provider_surface_guides
+    - reqllm.workflow.extension_dsl_guidance
 
 - kind: source_file
   target: .spec/AGENTS.md
@@ -96,4 +103,10 @@ surface:
   execute: true
   covers:
     - reqllm.workflow.starter_slice_verification
+
+- kind: command
+  target: mix test test/req_llm_next/extensions/dsl_test.exs
+  execute: true
+  covers:
+    - reqllm.workflow.extension_dsl_guidance
 ```

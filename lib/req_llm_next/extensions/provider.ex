@@ -1,9 +1,9 @@
-defmodule ReqLlmNext.Extensions.Family do
+defmodule ReqLlmNext.Extensions.Provider do
   @moduledoc """
-  Default execution-family declaration consumed by the extension manifest.
+  Provider registration declaration consumed by the extension manifest.
   """
 
-  alias ReqLlmNext.Extensions.{Criteria, Seams}
+  alias ReqLlmNext.Extensions.Seams
 
   @derive Jason.Encoder
 
@@ -11,10 +11,8 @@ defmodule ReqLlmNext.Extensions.Family do
             __MODULE__,
             %{
               id: Zoi.atom(),
-              priority: Zoi.integer() |> Zoi.default(100),
-              default?: Zoi.boolean() |> Zoi.default(false),
+              default_family: Zoi.atom() |> Zoi.nullish() |> Zoi.default(nil),
               description: Zoi.string() |> Zoi.nullish() |> Zoi.default(nil),
-              criteria: Zoi.any(),
               seams: Zoi.any()
             },
             coerce: true
@@ -23,10 +21,8 @@ defmodule ReqLlmNext.Extensions.Family do
   @type t :: %__MODULE__{
           __spark_metadata__: map() | nil,
           id: atom(),
-          priority: integer(),
-          default?: boolean(),
+          default_family: atom() | nil,
           description: String.t() | nil,
-          criteria: Criteria.t(),
           seams: Seams.t()
         }
 
@@ -37,19 +33,15 @@ defmodule ReqLlmNext.Extensions.Family do
 
   @spec new(map()) :: {:ok, t()} | {:error, term()}
   def new(attrs) when is_map(attrs) do
-    attrs =
-      attrs
-      |> normalize_embedded(:criteria, Criteria)
-      |> normalize_embedded(:seams, Seams)
-
+    attrs = normalize_embedded(attrs, :seams, Seams)
     Zoi.parse(@schema, attrs)
   end
 
   @spec new!(map()) :: t()
   def new!(attrs) when is_map(attrs) do
     case new(attrs) do
-      {:ok, family} -> family
-      {:error, reason} -> raise ArgumentError, "Invalid extension family: #{inspect(reason)}"
+      {:ok, provider} -> provider
+      {:error, reason} -> raise ArgumentError, "Invalid extension provider: #{inspect(reason)}"
     end
   end
 

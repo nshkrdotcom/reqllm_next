@@ -3,6 +3,19 @@
     "items": [
       {
         "affects": [
+          "reqllm.extension_manifest",
+          "reqllm.package",
+          "reqllm.source_layout",
+          "reqllm.workflow"
+        ],
+        "date": "2026-03-24",
+        "file": ".spec/decisions/compile_time_extension_manifest.md",
+        "id": "reqllm.decision.compile_time_extension_manifest",
+        "status": "accepted",
+        "title": "Compile-Time Extension Manifest"
+      },
+      {
+        "affects": [
           "reqllm.architecture",
           "reqllm.package"
         ],
@@ -161,7 +174,7 @@
         "id": "reqllm.architecture.model_input_boundary",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext runtime APIs shall accept model inputs only as `LLMDB` `model_spec` strings or `%LLMDB.Model{}` values, with handcrafted `LLMDB.Model` structs supported as a local-iteration boundary hook.",
+        "statement": "ReqLlmNext runtime APIs shall accept model inputs only as `LLMDB` `model_spec` strings or `%LLMDB.Model{}` values, with handcrafted `LLMDB.Model` structs supported as a local-iteration boundary hook, and the top-level public API contract lane shall load the compiled facade before export assertions so architecture-boundary verification stays about the actual runtime module rather than code-loading order.",
         "subject_id": "reqllm.architecture"
       },
       {
@@ -317,6 +330,46 @@
         "subject_id": "reqllm.execution_surfaces"
       },
       {
+        "file": ".spec/specs/extension_manifest.spec.md",
+        "id": "reqllm.extension_manifest.family_precedence",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "Default execution families shall resolve deterministically from declarative criteria using explicit precedence so the happy path is stable and inspectable.",
+        "subject_id": "reqllm.extension_manifest"
+      },
+      {
+        "file": ".spec/specs/extension_manifest.spec.md",
+        "id": "reqllm.extension_manifest.narrow_seams",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "Extension declarations shall only patch explicit seams such as provider registration, provider facts, surface catalog construction, surface preparation, semantic protocol mapping, wire mapping, transport mapping, adapters, and provider-native utility homes.",
+        "subject_id": "reqllm.extension_manifest"
+      },
+      {
+        "file": ".spec/specs/extension_manifest.spec.md",
+        "id": "reqllm.extension_manifest.plain_runtime_contract",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "ReqLlmNext shall model execution extension behavior as plain runtime data made of providers, families, rules, criteria, seam patches, and manifests so the runtime consumes a stable contract independent of any authoring DSL.",
+        "subject_id": "reqllm.extension_manifest"
+      },
+      {
+        "file": ".spec/specs/extension_manifest.spec.md",
+        "id": "reqllm.extension_manifest.rule_precedence",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "Opt-in override rules shall apply in deterministic order from broad to narrow so later, more specific patches can refine the family default without reintroducing omniscient central branching.",
+        "subject_id": "reqllm.extension_manifest"
+      },
+      {
+        "file": ".spec/specs/extension_manifest.spec.md",
+        "id": "reqllm.extension_manifest.spark_authoring_layer",
+        "priority": "should",
+        "stability": "evolving",
+        "statement": "ReqLlmNext may use Spark as a compile-time authoring DSL for built-in extension declarations, but that authoring layer shall compile to the plain manifest contract and compiled manifest modules rather than becoming the runtime extension API itself.",
+        "subject_id": "reqllm.extension_manifest"
+      },
+      {
         "file": ".spec/specs/layer_boundaries.spec.md",
         "id": "reqllm.layer_boundaries.no_cross_layer_skips",
         "priority": "must",
@@ -417,7 +470,7 @@
         "id": "reqllm.model_input.fail_fast",
         "priority": "must",
         "stability": "evolving",
-        "statement": "The model boundary shall fail fast on tuples, ad hoc maps, unsupported types, or invalid model metadata and shall not let raw unvalidated model input continue into execution, while leaving later provider-native helper validation and surface-specific request validation to the planning boundary rather than reintroducing raw model checks downstream.",
+        "statement": "The model boundary shall fail fast on tuples, ad hoc maps, unsupported types, or invalid model metadata and shall not let raw unvalidated model input continue into execution, while leaving later provider-native helper validation and surface-specific request validation to the planning boundary rather than reintroducing raw model checks downstream, and the public contract lane shall load the top-level facade before export assertions so model-boundary contract coverage is checking the real compiled API surface.",
         "subject_id": "reqllm.model_input"
       },
       {
@@ -482,6 +535,14 @@
         "priority": "should",
         "stability": "evolving",
         "statement": "When ReqLlmNext buffers a streamed response into the canonical `Response` shape, it shall preserve terminal metadata such as finish reason and provider-facing response identifiers emitted by the canonical stream.",
+        "subject_id": "reqllm.package"
+      },
+      {
+        "file": ".spec/specs/package.spec.md",
+        "id": "reqllm.package.compile_time_extensions",
+        "priority": "should",
+        "stability": "evolving",
+        "statement": "ReqLlmNext shall move provider and model edge-case support toward a compile-time extension manifest with provider registrations, default execution families, narrow opt-in override rules, and Spark-authored built-in declarations that compile down to plain manifest data so common paths stay simple while edge cases remain explicit.",
         "subject_id": "reqllm.package"
       },
       {
@@ -617,7 +678,7 @@
         "id": "reqllm.public_api.hard_surface",
         "priority": "must",
         "stability": "evolving",
-        "statement": "`ReqLlmNext` shall expose the hard package boundary at the top-level facade with `generate_text/3`, `generate_text!/3`, `stream_text/3`, `stream_object/4`, `generate_object/4`, `generate_object!/4`, `embed/3`, `embed!/3`, `model/1`, `provider/1`, `context/1`, `tool/1`, `json_schema/2`, `cosine_similarity/2`, `embedding_models/0`, `put_key/2`, and `get_key/1`.",
+        "statement": "`ReqLlmNext` shall expose the hard package boundary at the top-level facade with `generate_text/3`, `generate_text!/3`, `stream_text/3`, `stream_object/4`, `generate_object/4`, `generate_object!/4`, `embed/3`, `embed!/3`, `model/1`, `provider/1`, `context/1`, `tool/1`, `json_schema/2`, `cosine_similarity/2`, `embedding_models/0`, `put_key/2`, and `get_key/1`, and the contract test lane shall load the facade module before asserting exported functions so the boundary check reflects the compiled public module rather than code-loading timing.",
         "subject_id": "reqllm.public_api"
       },
       {
@@ -698,6 +759,14 @@
         "priority": "must",
         "stability": "evolving",
         "statement": "ReqLlmNext shall keep model-boundary concerns, provider-scoped fact extraction, profile construction, mode normalization, policy resolution, surface-owned request preparation, semantic protocol normalization, wire envelopes, transport mechanics, response materialization, fixture replay, and session state in distinct source locations that match the architecture.",
+        "subject_id": "reqllm.source_layout"
+      },
+      {
+        "file": ".spec/specs/source_layout.spec.md",
+        "id": "reqllm.source_layout.extension_contract_home",
+        "priority": "should",
+        "stability": "evolving",
+        "statement": "Compile-time execution extension contracts shall live in a dedicated `lib/req_llm_next/extensions/` home, including the plain runtime structs, Spark DSL authoring modules, compiled manifest modules, and built-in declarations, so default execution families and edge-case override rules are defined outside the shared planner and executor code.",
         "subject_id": "reqllm.source_layout"
       },
       {
@@ -826,6 +895,14 @@
         "priority": "must",
         "stability": "evolving",
         "statement": "Contributor and agent workflows shall start by loading Beadwork context so durable work state survives session boundaries.",
+        "subject_id": "reqllm.workflow"
+      },
+      {
+        "file": ".spec/specs/workflow.spec.md",
+        "id": "reqllm.workflow.extension_dsl_guidance",
+        "priority": "should",
+        "stability": "evolving",
+        "statement": "Contributor workflow shall keep the extension-architecture guide, Spark dependency, and compile-time manifest proof in sync so contributors add edge-case support through declared extension rules instead of editing shared imperative branching directly.",
         "subject_id": "reqllm.workflow"
       },
       {
@@ -1043,6 +1120,27 @@
           "verification_minimum_strength": null
         },
         "title": "Execution Surfaces"
+      },
+      {
+        "file": ".spec/specs/extension_manifest.spec.md",
+        "id": "reqllm.extension_manifest",
+        "meta": {
+          "decisions": null,
+          "id": "reqllm.extension_manifest",
+          "kind": "architecture",
+          "status": "active",
+          "summary": "Declarative family and rule data that preserve a default happy path while allowing narrow opt-in execution overrides.",
+          "surface": [
+            ".spec/decisions/compile_time_extension_manifest.md",
+            ".spec/specs/extension_manifest.spec.md",
+            "guides/extension_architecture.md",
+            "lib/req_llm_next/extensions.ex",
+            "lib/req_llm_next/extensions/**/*.ex",
+            "test/req_llm_next/extensions/**/*.exs"
+          ],
+          "verification_minimum_strength": null
+        },
+        "title": "Extension Manifest"
       },
       {
         "file": ".spec/specs/layer_boundaries.spec.md",
@@ -1399,6 +1497,7 @@
             "AGENTS.md",
             ".spec/README.md",
             ".spec/AGENTS.md",
+            "guides/extension_architecture.md",
             "guides/package_thesis.md",
             "guides/anthropic_surface_map.md",
             "guides/anthropic_openai_compatibility.md",
@@ -1563,6 +1662,32 @@
         "kind": "command",
         "subject_id": "reqllm.execution_surfaces",
         "target": "mix test test/operation_planner_test.exs"
+      },
+      {
+        "covers": [
+          "reqllm.extension_manifest.plain_runtime_contract",
+          "reqllm.extension_manifest.family_precedence",
+          "reqllm.extension_manifest.rule_precedence",
+          "reqllm.extension_manifest.narrow_seams",
+          "reqllm.extension_manifest.spark_authoring_layer"
+        ],
+        "file": ".spec/specs/extension_manifest.spec.md",
+        "kind": "source_file",
+        "subject_id": "reqllm.extension_manifest",
+        "target": ".spec/specs/extension_manifest.spec.md"
+      },
+      {
+        "covers": [
+          "reqllm.extension_manifest.plain_runtime_contract",
+          "reqllm.extension_manifest.family_precedence",
+          "reqllm.extension_manifest.rule_precedence",
+          "reqllm.extension_manifest.spark_authoring_layer"
+        ],
+        "execute": true,
+        "file": ".spec/specs/extension_manifest.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.extension_manifest",
+        "target": "mix test test/req_llm_next/extensions/manifest_test.exs test/req_llm_next/extensions/dsl_test.exs"
       },
       {
         "covers": [
@@ -1858,6 +1983,16 @@
       },
       {
         "covers": [
+          "reqllm.package.compile_time_extensions"
+        ],
+        "execute": true,
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/req_llm_next/extensions/manifest_test.exs test/req_llm_next/extensions/dsl_test.exs"
+      },
+      {
+        "covers": [
           "reqllm.policy_rules.five_scopes",
           "reqllm.policy_rules.match_patch",
           "reqllm.policy_rules.capability_safe",
@@ -1952,7 +2087,8 @@
           "reqllm.source_layout.public_contract_home",
           "reqllm.source_layout.layer_scoped_quirks",
           "reqllm.source_layout.compat_outside_runtime",
-          "reqllm.source_layout.provider_utilities"
+          "reqllm.source_layout.provider_utilities",
+          "reqllm.source_layout.extension_contract_home"
         ],
         "file": ".spec/specs/source_layout.spec.md",
         "kind": "source_file",
@@ -2033,7 +2169,8 @@
       },
       {
         "covers": [
-          "reqllm.workflow.provider_surface_guides"
+          "reqllm.workflow.provider_surface_guides",
+          "reqllm.workflow.extension_dsl_guidance"
         ],
         "file": ".spec/specs/workflow.spec.md",
         "kind": "source_file",
@@ -2079,6 +2216,16 @@
         "kind": "command",
         "subject_id": "reqllm.workflow",
         "target": "mix test.starter_slice"
+      },
+      {
+        "covers": [
+          "reqllm.workflow.extension_dsl_guidance"
+        ],
+        "execute": true,
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.workflow",
+        "target": "mix test test/req_llm_next/extensions/dsl_test.exs"
       },
       {
         "covers": [
@@ -2132,13 +2279,13 @@
   "specification_version": "1.0",
   "summary": {
     "decision_parse_errors": 0,
-    "decisions": 11,
+    "decisions": 12,
     "exceptions": 0,
     "findings": 0,
-    "requirements": 95,
+    "requirements": 103,
     "scenarios": 0,
-    "subjects": 23,
-    "verifications": 67
+    "subjects": 24,
+    "verifications": 71
   },
   "verification": {
     "claims": [
@@ -2547,6 +2694,105 @@
         "strength": "executed",
         "subject_id": "reqllm.execution_surfaces",
         "target": "mix test test/operation_planner_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.extension_manifest.family_precedence",
+        "file": ".spec/specs/extension_manifest.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.extension_manifest",
+        "target": ".spec/specs/extension_manifest.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.extension_manifest.narrow_seams",
+        "file": ".spec/specs/extension_manifest.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.extension_manifest",
+        "target": ".spec/specs/extension_manifest.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.extension_manifest.plain_runtime_contract",
+        "file": ".spec/specs/extension_manifest.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.extension_manifest",
+        "target": ".spec/specs/extension_manifest.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.extension_manifest.rule_precedence",
+        "file": ".spec/specs/extension_manifest.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.extension_manifest",
+        "target": ".spec/specs/extension_manifest.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.extension_manifest.spark_authoring_layer",
+        "file": ".spec/specs/extension_manifest.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.extension_manifest",
+        "target": ".spec/specs/extension_manifest.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.extension_manifest.family_precedence",
+        "file": ".spec/specs/extension_manifest.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.extension_manifest",
+        "target": "mix test test/req_llm_next/extensions/manifest_test.exs test/req_llm_next/extensions/dsl_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.extension_manifest.plain_runtime_contract",
+        "file": ".spec/specs/extension_manifest.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.extension_manifest",
+        "target": "mix test test/req_llm_next/extensions/manifest_test.exs test/req_llm_next/extensions/dsl_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.extension_manifest.rule_precedence",
+        "file": ".spec/specs/extension_manifest.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.extension_manifest",
+        "target": "mix test test/req_llm_next/extensions/manifest_test.exs test/req_llm_next/extensions/dsl_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.extension_manifest.spark_authoring_layer",
+        "file": ".spec/specs/extension_manifest.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.extension_manifest",
+        "target": "mix test test/req_llm_next/extensions/manifest_test.exs test/req_llm_next/extensions/dsl_test.exs",
         "verification_index": 1
       },
       {
@@ -3155,6 +3401,17 @@
         "verification_index": 12
       },
       {
+        "cover_id": "reqllm.package.compile_time_extensions",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/req_llm_next/extensions/manifest_test.exs test/req_llm_next/extensions/dsl_test.exs",
+        "verification_index": 13
+      },
+      {
         "cover_id": "reqllm.policy_rules.allowed_patch_domains",
         "file": ".spec/specs/policy_rules.spec.md",
         "kind": "source_file",
@@ -3430,6 +3687,17 @@
         "verification_index": 0
       },
       {
+        "cover_id": "reqllm.source_layout.extension_contract_home",
+        "file": ".spec/specs/source_layout.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.source_layout",
+        "target": ".spec/specs/source_layout.spec.md",
+        "verification_index": 0
+      },
+      {
         "cover_id": "reqllm.source_layout.layer_scoped_quirks",
         "file": ".spec/specs/source_layout.spec.md",
         "kind": "source_file",
@@ -3628,6 +3896,17 @@
         "verification_index": 2
       },
       {
+        "cover_id": "reqllm.workflow.extension_dsl_guidance",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.workflow",
+        "target": ".spec/specs/workflow.spec.md",
+        "verification_index": 3
+      },
+      {
         "cover_id": "reqllm.workflow.provider_surface_guides",
         "file": ".spec/specs/workflow.spec.md",
         "kind": "source_file",
@@ -3692,6 +3971,17 @@
         "subject_id": "reqllm.workflow",
         "target": "mix test.starter_slice",
         "verification_index": 7
+      },
+      {
+        "cover_id": "reqllm.workflow.extension_dsl_guidance",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.workflow",
+        "target": "mix test test/req_llm_next/extensions/dsl_test.exs",
+        "verification_index": 8
       },
       {
         "cover_id": "spec.workspace.readme_present",
@@ -3775,13 +4065,13 @@
     "default_minimum_strength": "claimed",
     "strength_summary": {
       "claimed": 2,
-      "executed": 55,
-      "linked": 91
+      "executed": 61,
+      "linked": 98
     },
     "threshold_failures": 0
   },
   "workspace": {
-    "decision_count": 11,
-    "spec_count": 23
+    "decision_count": 12,
+    "spec_count": 24
   }
 }

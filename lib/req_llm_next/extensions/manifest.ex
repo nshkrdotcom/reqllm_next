@@ -3,7 +3,7 @@ defmodule ReqLlmNext.Extensions.Manifest do
   Deterministic manifest of providers, default execution families, and override rules.
   """
 
-  alias ReqLlmNext.Extensions.{Criteria, Family, Rule}
+  alias ReqLlmNext.Extensions.{Criteria, Family, Provider, Rule}
 
   @derive Jason.Encoder
 
@@ -18,7 +18,7 @@ defmodule ReqLlmNext.Extensions.Manifest do
           )
 
   @type t :: %__MODULE__{
-          providers: %{optional(atom()) => module()},
+          providers: %{optional(atom()) => Provider.t()},
           families: [Family.t()],
           rules: [Rule.t()]
         }
@@ -31,7 +31,7 @@ defmodule ReqLlmNext.Extensions.Manifest do
   @spec new(map()) :: {:ok, t()} | {:error, term()}
   def new(attrs) when is_map(attrs) do
     attrs = %{
-      providers: Map.get(attrs, :providers, %{}),
+      providers: normalize_providers(Map.get(attrs, :providers, %{})),
       families: normalize_entities(Map.get(attrs, :families, []), Family),
       rules: normalize_entities(Map.get(attrs, :rules, []), Rule)
     }
@@ -77,6 +77,29 @@ defmodule ReqLlmNext.Extensions.Manifest do
     Enum.map(items, fn
       %^module{} = item -> item
       item when is_map(item) -> module.new!(item)
+    end)
+  end
+
+  defp normalize_providers(items) when is_map(items) do
+    Enum.into(items, %{}, fn {id, provider} ->
+      provider =
+        case provider do
+          %Provider{} = provider -> provider
+          provider when is_map(provider) -> Provider.new!(Map.put_new(provider, :id, id))
+        end
+
+      {id, provider}
+    end)
+  end
+
+  defp normalize_providers(items) when is_list(items) do
+    Enum.into(items, %{}, fn
+      %Provider{id: id} = provider ->
+        {id, provider}
+
+      provider when is_map(provider) ->
+        provider = Provider.new!(provider)
+        {provider.id, provider}
     end)
   end
 end

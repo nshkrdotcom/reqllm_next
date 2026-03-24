@@ -22,6 +22,7 @@ defmodule ReqLlmNext.Extensions.Seams do
           )
 
   @type t :: %__MODULE__{
+          __spark_metadata__: map() | nil,
           provider_module: module() | nil,
           provider_facts_module: module() | nil,
           surface_catalog_module: module() | nil,
@@ -34,7 +35,7 @@ defmodule ReqLlmNext.Extensions.Seams do
         }
 
   @enforce_keys Zoi.Struct.enforce_keys(@schema)
-  defstruct Zoi.Struct.struct_fields(@schema)
+  defstruct [__spark_metadata__: nil] ++ Zoi.Struct.struct_fields(@schema)
 
   def schema, do: @schema
 

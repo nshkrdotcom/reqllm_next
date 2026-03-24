@@ -27,7 +27,8 @@ defmodule ReqLlmNext.Extensions do
   def provider_module(%Manifest{} = manifest, provider) when is_atom(provider) do
     case Map.get(manifest.providers, provider) do
       nil -> {:error, {:unknown_provider, provider}}
-      module -> {:ok, module}
+      %{seams: %{provider_module: module}} when not is_nil(module) -> {:ok, module}
+      _provider -> {:error, {:provider_module_not_configured, provider}}
     end
   end
 
@@ -40,5 +41,10 @@ defmodule ReqLlmNext.Extensions do
   @spec matching_rules(Manifest.t(), context()) :: [ReqLlmNext.Extensions.Rule.t()]
   def matching_rules(%Manifest{} = manifest, context) when is_map(context) do
     Manifest.matching_rules(manifest, context)
+  end
+
+  @spec compiled_manifest() :: Manifest.t()
+  def compiled_manifest do
+    ReqLlmNext.Extensions.Compiled.manifest()
   end
 end
