@@ -127,10 +127,12 @@ defmodule ReqLlmNext.ModelProfile do
       },
       structured_outputs: %{
         supported: ModelHelpers.chat?(model),
-        native: ModelHelpers.json_schema?(model),
+        native: native_structured_outputs?(model),
         strategy: object_strategy(model)
       },
-      reasoning: %{supported: ModelHelpers.reasoning_enabled?(model)}
+      reasoning: %{supported: ModelHelpers.reasoning_enabled?(model)},
+      citations: %{supported: ModelHelpers.anthropic_citations?(model)},
+      context_management: %{supported: ModelHelpers.anthropic_context_management?(model)}
     }
   end
 
@@ -270,6 +272,7 @@ defmodule ReqLlmNext.ModelProfile do
       streaming: ModelHelpers.streaming_text?(model),
       tools: ModelHelpers.tools_enabled?(model),
       reasoning: ModelHelpers.reasoning_enabled?(model),
+      citations: ModelHelpers.anthropic_citations?(model),
       structured_output: false
     }
   end
@@ -279,15 +282,20 @@ defmodule ReqLlmNext.ModelProfile do
       streaming: ModelHelpers.streaming_text?(model),
       tools: ModelHelpers.tools_enabled?(model),
       reasoning: ModelHelpers.reasoning_enabled?(model),
+      citations: ModelHelpers.anthropic_citations?(model),
       structured_output: object_strategy(model)
     }
   end
 
   defp object_strategy(model) do
     cond do
-      ModelHelpers.json_schema?(model) -> :native_json_schema
+      native_structured_outputs?(model) -> :native_json_schema
       ModelHelpers.chat?(model) -> :prompt_and_parse
       true -> false
     end
+  end
+
+  defp native_structured_outputs?(model) do
+    ModelHelpers.json_schema?(model) or ModelHelpers.anthropic_structured_outputs?(model)
   end
 end

@@ -7,6 +7,8 @@ defmodule ReqLlmNext.Context.ContentPart do
   - `:image_url` - Image from URL
   - `:image` - Image from binary data
   - `:file` - File attachment
+  - `:document` - Document content or document reference
+  - `:search_result` - Search result content with provider metadata
   - `:thinking` - Chain-of-thought thinking content
 
   ## See also
@@ -17,7 +19,7 @@ defmodule ReqLlmNext.Context.ContentPart do
   @schema Zoi.struct(
             __MODULE__,
             %{
-              type: Zoi.enum([:text, :image_url, :image, :file, :thinking]),
+              type: Zoi.enum([:text, :image_url, :image, :file, :document, :search_result, :thinking]),
               text: Zoi.string() |> Zoi.nullish(),
               url: Zoi.string() |> Zoi.nullish(),
               data: Zoi.any() |> Zoi.nullish(),
@@ -102,7 +104,46 @@ defmodule ReqLlmNext.Context.ContentPart do
   def file(data, filename, media_type \\ "application/octet-stream"),
     do: %__MODULE__{type: :file, data: data, filename: filename, media_type: media_type}
 
+  @spec document_text(String.t(), map()) :: t()
+  def document_text(text, metadata \\ %{}) when is_binary(text) and is_map(metadata) do
+    %__MODULE__{type: :document, data: text, media_type: "text/plain", metadata: metadata}
+  end
+
+  @spec document_binary(binary(), String.t(), map()) :: t()
+  def document_binary(data, media_type \\ "application/pdf", metadata \\ %{})
+      when is_binary(data) and is_binary(media_type) and is_map(metadata) do
+    %__MODULE__{type: :document, data: data, media_type: media_type, metadata: metadata}
+  end
+
+  @spec document_url(String.t(), String.t(), map()) :: t()
+  def document_url(url, media_type \\ "application/pdf", metadata \\ %{})
+      when is_binary(url) and is_binary(media_type) and is_map(metadata) do
+    %__MODULE__{type: :document, url: url, media_type: media_type, metadata: metadata}
+  end
+
+  @spec document_file_id(String.t(), map()) :: t()
+  def document_file_id(file_id, metadata \\ %{}) when is_binary(file_id) and is_map(metadata) do
+    %__MODULE__{
+      type: :document,
+      data: file_id,
+      metadata: Map.put(metadata, :source_type, :file_id)
+    }
+  end
+
+  @spec search_result(String.t(), String.t(), String.t(), map()) :: t()
+  def search_result(title, url, text, metadata \\ %{})
+      when is_binary(title) and is_binary(url) and is_binary(text) and is_map(metadata) do
+    %__MODULE__{
+      type: :search_result,
+      text: text,
+      url: url,
+      metadata: Map.put(metadata, :title, title)
+    }
+  end
+
   defimpl Inspect do
+    import Kernel, except: [inspect: 2]
+
     def inspect(%{type: type} = part, opts) do
       content_desc =
         case type do
@@ -111,6 +152,8 @@ defmodule ReqLlmNext.Context.ContentPart do
           :image_url -> "url: #{part.url}"
           :image -> "#{part.media_type} (#{byte_size(part.data)} bytes)"
           :file -> "#{part.media_type} (#{byte_size(part.data || <<>>)} bytes)"
+          :document -> inspect_document(part, opts)
+          :search_result -> inspect_search_result(part, opts)
         end
 
       Inspect.Algebra.concat([
@@ -127,6 +170,22 @@ defmodule ReqLlmNext.Context.ContentPart do
     defp inspect_text(text, _opts) do
       truncated = String.slice(text, 0, 30)
       if String.length(text) > 30, do: "\"#{truncated}...\"", else: "\"#{truncated}\""
+    end
+
+    defp inspect_document(%{data: data, media_type: media_type}, opts) when is_binary(data) do
+      case data do
+        "file_" <> _rest -> "file_id: #{inspect(data, opts)}"
+        _ -> "#{media_type} (#{byte_size(data)} bytes)"
+      end
+    end
+
+    defp inspect_document(%{url: url}, _opts) when is_binary(url), do: "url: #{url}"
+    defp inspect_document(%{data: data}, opts), do: Kernel.inspect(data, opts)
+
+    defp inspect_search_result(%{metadata: metadata, url: url, text: text}, _opts) do
+      title = Map.get(metadata || %{}, :title) || Map.get(metadata || %{}, "title") || "result"
+      preview = String.slice(text || "", 0, 20)
+      "#{title} #{url} \"#{preview}\""
     end
   end
 

@@ -20,7 +20,7 @@ decisions:
 
 ```spec-requirements
 - id: reqllm.execution_mode.normalized_shape
-  statement: ReqLlmNext shall normalize mode-affecting request intent into a provider-agnostic `ExecutionMode` that captures operation, streaming, tools, structured output, session preference, latency class, reasoning, conversation shape, and input modalities.
+  statement: ReqLlmNext shall normalize mode-affecting request intent into a provider-agnostic `ExecutionMode` that captures operation, streaming, tools, structured output, session preference, latency class, reasoning, conversation shape, and input modalities, including richer modalities such as document input when present in canonical context parts.
   priority: must
   stability: evolving
 

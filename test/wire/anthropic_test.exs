@@ -73,6 +73,21 @@ defmodule ReqLlmNext.Wire.AnthropicTest do
       assert Enum.count(String.split(beta_value, ","), &(&1 == "context-1m-2025-08-07")) == 1
     end
 
+    test "includes beta headers for files, MCP, and code execution surfaces" do
+      headers =
+        Anthropic.headers(
+          anthropic_files_api: true,
+          mcp_servers: [ReqLlmNext.Anthropic.mcp_server("https://mcp.example.com")],
+          tools: [ReqLlmNext.Anthropic.code_execution_tool()]
+        )
+
+      assert {"anthropic-beta", beta_value} = List.keyfind(headers, "anthropic-beta", 0)
+      beta_flags = String.split(beta_value, ",")
+      assert "files-api-2025-04-14" in beta_flags
+      assert "mcp-client-2025-04-04" in beta_flags
+      assert "code-execution-2025-08-25" in beta_flags
+    end
+
     test "does not include beta header when no beta features enabled" do
       headers = Anthropic.headers([])
 
@@ -380,6 +395,87 @@ defmodule ReqLlmNext.Wire.AnthropicTest do
                type: "image",
                source: %{type: "base64", media_type: "image/png", data: "/wAA"}
              }
+    end
+
+    test "encodes native structured outputs for Anthropic object plans" do
+      model =
+        TestModels.anthropic(%{
+          extra: %{capabilities: %{structured_outputs: %{supported: true}}}
+        })
+
+      body =
+        Anthropic.encode_body(
+          model,
+          "Generate JSON",
+          operation: :object,
+          compiled_schema: %{schema: [name: [type: :string]]},
+          _structured_output_strategy: :native_json_schema
+        )
+
+      assert body.output_config.format.type == "json_schema"
+      assert body.output_config.format.schema["type"] == "object"
+      assert body.output_config.format.schema["properties"]["name"]["type"] == "string"
+    end
+
+    test "encodes document file references with citations" do
+      model = TestModels.anthropic()
+
+      context =
+        Context.new([
+          Context.with_document(
+            :user,
+            "Summarize this document",
+            ReqLlmNext.Anthropic.document_file_id("file_123", %{
+              title: "Manual",
+              citations: %{enabled: true}
+            })
+          )
+        ])
+
+      body = Anthropic.encode_body(model, context, [])
+
+      [message] = body.messages
+      [_, document_part] = message.content
+
+      assert document_part.type == "document"
+      assert document_part.source == %{type: "file", file_id: "file_123"}
+      assert document_part.title == "Manual"
+      assert document_part.citations == %{enabled: true}
+    end
+
+    test "encodes container uploads for code execution flows" do
+      model = TestModels.anthropic()
+
+      context =
+        Context.new([
+          Context.user([
+            ReqLlmNext.Context.ContentPart.text("Analyze this file"),
+            ReqLlmNext.Anthropic.container_upload("file_456", filename: "data.csv", content_type: "text/csv")
+          ])
+        ])
+
+      body = Anthropic.encode_body(model, context, [])
+
+      [message] = body.messages
+      [_, upload_part] = message.content
+
+      assert upload_part == %{type: "container_upload", file_id: "file_456"}
+    end
+
+    test "passes through context management and MCP servers" do
+      model = TestModels.anthropic()
+      mcp_server = ReqLlmNext.Anthropic.mcp_server("https://mcp.example.com", name: "remote_tools")
+
+      body =
+        Anthropic.encode_body(
+          model,
+          "Hello",
+          context_management: %{compact: true},
+          mcp_servers: [mcp_server]
+        )
+
+      assert body.context_management == %{compact: true}
+      assert body.mcp_servers == [mcp_server]
     end
   end
 

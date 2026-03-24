@@ -38,6 +38,11 @@ defmodule ReqLlmNext.Wire.Anthropic do
   @beta_thinking "interleaved-thinking-2025-05-14"
   @beta_prompt_caching "prompt-caching-2024-07-31"
   @beta_context_1m "context-1m-2025-08-07"
+  @beta_files_api "files-api-2025-04-14"
+  @beta_code_execution "code-execution-2025-08-25"
+  @beta_mcp_client "mcp-client-2025-04-04"
+  @beta_computer_use "computer-use-2025-01-24"
+  @beta_token_efficient_tools "token-efficient-tools-2025-02-19"
 
   @reasoning_budget_low 1024
   @reasoning_budget_medium 2048
@@ -70,6 +75,11 @@ defmodule ReqLlmNext.Wire.Anthropic do
     flags = if has_thinking?(opts), do: [@beta_thinking | flags], else: flags
     flags = if has_prompt_caching?(opts), do: [@beta_prompt_caching | flags], else: flags
     flags = if has_context_1m?(opts), do: [@beta_context_1m | flags], else: flags
+    flags = if has_files_api?(opts), do: [@beta_files_api | flags], else: flags
+    flags = if has_code_execution_tools?(opts), do: [@beta_code_execution | flags], else: flags
+    flags = if has_mcp_connectors?(opts), do: [@beta_mcp_client | flags], else: flags
+    flags = if has_computer_use_tools?(opts), do: [@beta_computer_use | flags], else: flags
+    flags = if has_token_efficient_tools?(opts), do: [@beta_token_efficient_tools | flags], else: flags
     flags = custom_beta_flags(opts) ++ flags
 
     flags
@@ -89,6 +99,32 @@ defmodule ReqLlmNext.Wire.Anthropic do
   defp has_context_1m?(opts) do
     Keyword.get(opts, :anthropic_context_1m, false) == true
   end
+
+  defp has_files_api?(opts) do
+    Keyword.get(opts, :anthropic_files_api, false) == true
+  end
+
+  defp has_code_execution_tools?(opts) do
+    Enum.any?(Keyword.get(opts, :tools, []), &tool_type?(&1, "code_execution"))
+  end
+
+  defp has_mcp_connectors?(opts) do
+    mcp_servers = Keyword.get(opts, :mcp_servers, [])
+    mcp_servers != [] or Enum.any?(Keyword.get(opts, :tools, []), &tool_type?(&1, "mcp"))
+  end
+
+  defp has_computer_use_tools?(opts) do
+    Enum.any?(Keyword.get(opts, :tools, []), fn tool ->
+      tool_type?(tool, "computer") or tool_type?(tool, "text_editor") or tool_type?(tool, "bash")
+    end)
+  end
+
+  defp has_token_efficient_tools?(opts) do
+    Keyword.get(opts, :anthropic_token_efficient_tools, false) == true
+  end
+
+  defp tool_type?(%{type: type}, prefix) when is_binary(type), do: String.starts_with?(type, prefix)
+  defp tool_type?(_, _prefix), do: false
 
   defp custom_beta_flags(opts) do
     case Keyword.get(opts, :anthropic_beta_headers, []) do
@@ -137,8 +173,12 @@ defmodule ReqLlmNext.Wire.Anthropic do
     |> maybe_add_system(system_prompt, opts)
     |> maybe_add_temperature(opts)
     |> maybe_add_thinking(opts)
+    |> maybe_add_output_config(opts)
     |> maybe_add_tools(opts)
     |> maybe_add_tool_choice(opts)
+    |> maybe_add_mcp_servers(opts)
+    |> maybe_add_context_management(opts)
+    |> maybe_add_container(opts)
   end
 
   defp maybe_add_system(body, nil, _opts), do: body
@@ -201,6 +241,49 @@ defmodule ReqLlmNext.Wire.Anthropic do
 
       true ->
         body
+    end
+  end
+
+  defp maybe_add_output_config(body, opts) do
+    case {
+           Keyword.get(opts, :operation),
+           Keyword.get(opts, :compiled_schema),
+           Keyword.get(opts, :_structured_output_strategy)
+         } do
+      {:object, %{schema: schema}, :native_json_schema} when not is_nil(schema) ->
+        Map.put(body, :output_config, %{
+          format: %{
+            type: "json_schema",
+            schema: ReqLlmNext.Schema.to_json(schema)
+          }
+        })
+
+      _ ->
+        body
+    end
+  end
+
+  defp maybe_add_mcp_servers(body, opts) do
+    case Keyword.get(opts, :mcp_servers) do
+      servers when is_list(servers) and servers != [] -> Map.put(body, :mcp_servers, servers)
+      _ -> body
+    end
+  end
+
+  defp maybe_add_context_management(body, opts) do
+    case Keyword.get(opts, :context_management) do
+      context_management when is_map(context_management) and map_size(context_management) > 0 ->
+        Map.put(body, :context_management, context_management)
+
+      _ ->
+        body
+    end
+  end
+
+  defp maybe_add_container(body, opts) do
+    case Keyword.get(opts, :container) do
+      container when is_map(container) and map_size(container) > 0 -> Map.put(body, :container, container)
+      _ -> body
     end
   end
 
@@ -296,6 +379,42 @@ defmodule ReqLlmNext.Wire.Anthropic do
     end
   end
 
+  defp encode_content_part(%ContentPart{type: :document} = part) do
+    part
+    |> encode_document_part()
+    |> maybe_add_document_title(part)
+    |> maybe_add_document_context(part)
+    |> maybe_add_document_citations(part)
+  end
+
+  defp encode_content_part(%ContentPart{type: :file} = part) do
+    case anthropic_file_type(part) do
+      :container_upload ->
+        %{type: "container_upload", file_id: part.data}
+
+      _ ->
+        part
+        |> coerce_file_to_document()
+        |> encode_content_part()
+    end
+  end
+
+  defp encode_content_part(%ContentPart{type: :search_result} = part) do
+    metadata = part.metadata || %{}
+    title = Map.get(metadata, :title) || Map.get(metadata, "title")
+    encrypted_index = Map.get(metadata, :encrypted_index) || Map.get(metadata, "encrypted_index")
+
+    %{
+      type: "search_result",
+      title: title,
+      url: part.url,
+      encrypted_index: encrypted_index,
+      content: [%{type: "text", text: part.text || ""}]
+    }
+    |> Enum.reject(fn {_key, value} -> is_nil(value) end)
+    |> Enum.into(%{})
+  end
+
   @impl ReqLlmNext.Wire.Streaming
   def options_schema do
     [
@@ -351,4 +470,90 @@ defmodule ReqLlmNext.Wire.Anthropic do
 
   defp maybe_add(body, _key, nil), do: body
   defp maybe_add(body, key, value), do: Map.put(body, key, value)
+
+  defp encode_document_part(%ContentPart{data: data, url: url, media_type: media_type} = part) do
+    %{
+      type: "document",
+      source: document_source(part, data, url, media_type || "application/pdf")
+    }
+  end
+
+  defp document_source(%ContentPart{metadata: metadata}, file_id, _url, media_type)
+       when is_binary(file_id) do
+    source_type = Map.get(metadata || %{}, :source_type) || Map.get(metadata || %{}, "source_type")
+
+    case source_type do
+      :file_id -> %{type: "file", file_id: file_id}
+      "file_id" -> %{type: "file", file_id: file_id}
+      _ -> document_source_from_data(file_id, media_type)
+    end
+  end
+
+  defp document_source(%ContentPart{}, _data, url, media_type) when is_binary(url) do
+    %{type: "url", url: url, media_type: media_type}
+  end
+
+  defp document_source(%ContentPart{data: data}, _data, _url, media_type) when is_binary(data) do
+    %{type: "base64", media_type: media_type, data: Base.encode64(data)}
+  end
+
+  defp document_source(%ContentPart{data: data}, _data, _url, _media_type) when is_list(data) do
+    %{type: "content", content: Enum.map(data, &encode_document_content_block/1)}
+  end
+
+  defp document_source(_part, _data, _url, media_type) do
+    %{type: "content", content: [%{type: "text", text: "", media_type: media_type}]}
+  end
+
+  defp document_source_from_data("file_" <> _rest = file_id, _media_type),
+    do: %{type: "file", file_id: file_id}
+
+  defp document_source_from_data(text, "text/plain"), do: %{type: "text", text: text}
+
+  defp document_source_from_data(data, media_type) do
+    %{type: "base64", media_type: media_type, data: Base.encode64(data)}
+  end
+
+  defp encode_document_content_block(%ContentPart{type: :text, text: text}), do: %{type: "text", text: text}
+  defp encode_document_content_block(%ContentPart{type: :search_result} = part), do: encode_content_part(part)
+  defp encode_document_content_block(%{type: :text, text: text}), do: %{type: "text", text: text}
+  defp encode_document_content_block(%{type: :search_result} = part), do: encode_content_part(ContentPart.new!(part))
+  defp encode_document_content_block(part), do: encode_content_part(part)
+
+  defp maybe_add_document_title(block, %ContentPart{metadata: metadata}) do
+    case Map.get(metadata || %{}, :title) || Map.get(metadata || %{}, "title") do
+      title when is_binary(title) and title != "" -> Map.put(block, :title, title)
+      _ -> block
+    end
+  end
+
+  defp maybe_add_document_context(block, %ContentPart{metadata: metadata}) do
+    case Map.get(metadata || %{}, :context) || Map.get(metadata || %{}, "context") do
+      context when is_binary(context) and context != "" -> Map.put(block, :context, context)
+      _ -> block
+    end
+  end
+
+  defp maybe_add_document_citations(block, %ContentPart{metadata: metadata}) do
+    case Map.get(metadata || %{}, :citations) || Map.get(metadata || %{}, "citations") do
+      true -> Map.put(block, :citations, %{enabled: true})
+      %{enabled: _enabled} = citations -> Map.put(block, :citations, citations)
+      _ -> block
+    end
+  end
+
+  defp anthropic_file_type(%ContentPart{metadata: metadata}) do
+    Map.get(metadata || %{}, :anthropic_type) || Map.get(metadata || %{}, "anthropic_type")
+  end
+
+  defp coerce_file_to_document(%ContentPart{} = part) do
+    %ContentPart{
+      type: :document,
+      data: part.data,
+      url: part.url,
+      media_type: part.media_type,
+      filename: part.filename,
+      metadata: part.metadata
+    }
+  end
 end

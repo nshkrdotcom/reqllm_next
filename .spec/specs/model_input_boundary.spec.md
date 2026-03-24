@@ -12,6 +12,7 @@ summary: Narrow public model boundary for `model_spec` strings and `%LLMDB.Model
 surface:
   - README.md
   - AGENTS.md
+  - guides/package_thesis.md
   - lib/req_llm_next.ex
   - lib/req_llm_next/model_resolver.ex
   - test/public_api/contract_test.exs

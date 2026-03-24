@@ -13,6 +13,7 @@ surface:
   - AGENTS.md
   - .spec/specs/source_layout.spec.md
   - lib/req_llm_next/**/*.ex
+  - lib/req_llm_next/anthropic/**/*.ex
   - test/support/**/*.ex
   - test/**/*.exs
 ```
@@ -39,6 +40,11 @@ surface:
   statement: Compat-only expectations, issue drafting, and drift analysis shall live in compat tooling rather than inside provider, planner, protocol, wire, transport, or session runtime modules.
   priority: must
   stability: evolving
+
+- id: reqllm.source_layout.provider_utilities
+  statement: Provider-specific non-canonical endpoints shall live in explicit provider-scoped utility modules rather than expanding the top-level package facade or collapsing utility flows into provider, wire, or transport modules.
+  priority: should
+  stability: evolving
 ```
 
 ## Verification
@@ -51,4 +57,5 @@ surface:
     - reqllm.source_layout.public_contract_home
     - reqllm.source_layout.layer_scoped_quirks
     - reqllm.source_layout.compat_outside_runtime
+    - reqllm.source_layout.provider_utilities
 ```

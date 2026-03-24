@@ -25,12 +25,14 @@ defmodule ReqLlmNext.MixProject do
         extras: [
           "README.md",
           "guides/package_thesis.md",
-          "guides/anthropic_surface_map.md"
+          "guides/anthropic_surface_map.md",
+          "guides/anthropic_openai_compatibility.md"
         ],
         groups_for_extras: [
           Guides: [
             "guides/package_thesis.md",
-            "guides/anthropic_surface_map.md"
+            "guides/anthropic_surface_map.md",
+            "guides/anthropic_openai_compatibility.md"
           ]
         ]
       ]

@@ -30,7 +30,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.operation_planner.assembly_scope
-  statement: The planner boundary shall own mode normalization, rule evaluation, surface selection, parameter normalization, explicit transport preference handling, fallback planning, surface-specific parameter validation, session planning, and adapter selection.
+  statement: The planner boundary shall own mode normalization, rule evaluation, surface selection, parameter normalization, explicit transport preference handling, fallback planning, surface-specific parameter validation, session planning, and adapter selection, including provider-native structured-output strategies when those are declared in `ModelProfile`.
   priority: must
   stability: evolving
 

@@ -12,6 +12,7 @@ summary: Provider API-family meaning, payload mapping, and canonical chunk decod
 surface:
   - .spec/specs/semantic_protocol.spec.md
   - .spec/specs/layer_boundaries.spec.md
+  - lib/req_llm_next/semantic_protocols/anthropic_messages.ex
 decisions:
   - reqllm.decision.execution_layers
 ```
@@ -33,6 +34,11 @@ decisions:
   statement: Semantic protocol shall normalize family-specific events into the canonical ReqLlmNext chunk and terminal-metadata shapes used by the rest of the runtime and compat tooling.
   priority: must
   stability: evolving
+
+- id: reqllm.semantic_protocol.provider_rich_events
+  statement: Semantic protocol shall preserve rich provider-family semantics such as Anthropic citations, stop reasons, response identifiers, and server-tool result blocks by mapping them into canonical content or metadata rather than dropping them silently at the wire boundary.
+  priority: should
+  stability: evolving
 ```
 
 ## Verification
@@ -44,4 +50,5 @@ decisions:
     - reqllm.semantic_protocol.family_meaning
     - reqllm.semantic_protocol.transport_separation
     - reqllm.semantic_protocol.canonical_chunks
+    - reqllm.semantic_protocol.provider_rich_events
 ```

@@ -9,6 +9,7 @@ status: active
 summary: Hard package boundary for the top-level ReqLlmNext API, preserving the v1-style text, object, streaming, embedding, and helper surface while internals evolve.
 surface:
   - lib/req_llm_next.ex
+  - lib/req_llm_next/anthropic.ex
   - test/public_api/**/*.exs
 ```
 
@@ -26,7 +27,7 @@ surface:
   stability: evolving
 
 - id: reqllm.public_api.thin_facade
-  statement: The top-level `ReqLlmNext` module shall remain a thin compatibility facade over the internal planning and execution pipeline rather than accumulating provider, protocol, wire, transport, or fixture-specific branching logic.
+  statement: The top-level `ReqLlmNext` module shall remain a thin compatibility facade over the internal planning and execution pipeline rather than accumulating provider, protocol, wire, transport, fixture-specific, or provider-utility branching logic.
   priority: must
   stability: evolving
 ```

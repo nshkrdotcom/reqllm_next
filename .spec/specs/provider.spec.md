@@ -14,6 +14,7 @@ surface:
   - .spec/specs/layer_boundaries.spec.md
 decisions:
   - reqllm.decision.execution_layers
+  - reqllm.decision.provider_specific_endpoint_utilities
 ```
 
 ## Requirements
@@ -33,6 +34,11 @@ decisions:
   statement: Provider shall not choose model-specific behavior, encode request payloads, decode provider events, or manage continuation state.
   priority: must
   stability: evolving
+
+- id: reqllm.provider.utility_roots
+  statement: Provider-specific utility endpoints may reuse provider auth and root configuration, but those endpoints shall remain outside the canonical cross-provider facade and outside wire or semantic-protocol ownership.
+  priority: should
+  stability: evolving
 ```
 
 ## Verification
@@ -44,4 +50,5 @@ decisions:
     - reqllm.provider.auth_and_roots
     - reqllm.provider.route_ownership
     - reqllm.provider.no_model_behavior
+    - reqllm.provider.utility_roots
 ```

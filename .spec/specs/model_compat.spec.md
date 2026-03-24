@@ -12,6 +12,7 @@ summary: Live scenario execution, anomaly classification, and drift detection bu
 surface:
   - guides/package_thesis.md
   - guides/anthropic_surface_map.md
+  - guides/anthropic_openai_compatibility.md
   - lib/req_llm_next/support_matrix.ex
   - lib/req_llm_next/provider_test/comprehensive.ex
   - lib/mix/tasks/model_compat.ex
@@ -20,6 +21,7 @@ surface:
   - test/coverage/openai_comprehensive_test.exs
   - test/coverage/openai_websocket_coverage_test.exs
   - test/provider_features/anthropic_beta_features_test.exs
+  - test/anthropic/**/*.exs
 ```
 
 ## Requirements
@@ -44,6 +46,11 @@ surface:
   statement: Compat results shall classify anomalies by architectural layer and preserve structured evidence that can be used for follow-up work and issue drafting.
   priority: must
   stability: evolving
+
+- id: reqllm.model_compat.provider_native_surfaces
+  statement: Provider coverage work may include provider-native utility surfaces and evaluation guides when those artifacts clarify how non-canonical provider endpoints fit the architecture without broadening the main public API contract.
+  priority: should
+  stability: evolving
 ```
 
 ## Verification
@@ -56,6 +63,7 @@ surface:
     - reqllm.model_compat.shared_scenarios
     - reqllm.model_compat.curated_support_matrix
     - reqllm.model_compat.layer_attribution
+    - reqllm.model_compat.provider_native_surfaces
 
 - kind: command
   target: mix test test/mix/tasks/model_compat_test.exs
@@ -70,4 +78,10 @@ surface:
   covers:
     - reqllm.model_compat.shared_scenarios
     - reqllm.model_compat.curated_support_matrix
+
+- kind: command
+  target: mix test test/anthropic
+  execute: true
+  covers:
+    - reqllm.model_compat.provider_native_surfaces
 ```

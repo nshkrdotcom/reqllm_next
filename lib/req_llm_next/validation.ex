@@ -8,6 +8,7 @@ defmodule ReqLlmNext.Validation do
   alias ReqLlmNext.Context
   alias ReqLlmNext.Context.ContentPart
   alias ReqLlmNext.Error
+  alias ReqLlmNext.ModelHelpers
 
   @type operation :: :text | :object | :embed
 
@@ -67,15 +68,25 @@ defmodule ReqLlmNext.Validation do
   defp validate_modalities(model, context) do
     input_modalities = get_input_modalities(model)
     has_images = context_has_images?(context)
+    has_documents = context_has_documents?(context)
 
-    if has_images and :image not in input_modalities do
-      {:error,
-       Error.Invalid.Capability.exception(
-         message: "Model #{model.id} does not support image inputs",
-         missing: [:vision]
-       )}
-    else
-      :ok
+    cond do
+      has_images and :image not in input_modalities ->
+        {:error,
+         Error.Invalid.Capability.exception(
+           message: "Model #{model.id} does not support image inputs",
+           missing: [:vision]
+         )}
+
+      has_documents and not ModelHelpers.supports_document_input?(model) ->
+        {:error,
+         Error.Invalid.Capability.exception(
+           message: "Model #{model.id} does not support document inputs",
+           missing: [:documents]
+         )}
+
+      true ->
+        :ok
     end
   end
 
@@ -166,4 +177,15 @@ defmodule ReqLlmNext.Validation do
   end
 
   defp context_has_images?(_), do: false
+
+  defp context_has_documents?(%Context{messages: messages}) do
+    Enum.any?(messages, fn msg ->
+      Enum.any?(msg.content || [], fn
+        %ContentPart{type: type} -> type in [:file, :document]
+        _ -> false
+      end)
+    end)
+  end
+
+  defp context_has_documents?(_), do: false
 end

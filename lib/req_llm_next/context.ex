@@ -333,6 +333,16 @@ defmodule ReqLlmNext.Context do
     }
   end
 
+  @doc "Build a message with text and a document for the given role."
+  @spec with_document(atom(), String.t(), ContentPart.t(), map()) :: Message.t()
+  def with_document(role, text_content, %ContentPart{} = document_part, meta \\ %{}) do
+    %Message{
+      role: role,
+      content: [ContentPart.text(text_content), document_part],
+      metadata: meta
+    }
+  end
+
   @doc "Build a message from role and content parts (metadata optional)."
   @spec build(atom(), [ContentPart.t()], map()) :: Message.t()
   def build(role, content, meta \\ %{}) when is_list(content) do

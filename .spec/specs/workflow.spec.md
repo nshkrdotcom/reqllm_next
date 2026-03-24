@@ -16,6 +16,7 @@ surface:
   - .spec/AGENTS.md
   - guides/package_thesis.md
   - guides/anthropic_surface_map.md
+  - guides/anthropic_openai_compatibility.md
   - mix.exs
 ```
 
@@ -41,6 +42,11 @@ surface:
   statement: Contributor workflow shall provide named verification entry points for the current starter-model slices and curated provider support-matrix lanes so replay-backed checks, live fixture refreshes, websocket coverage, and provider-feature probes use explicit shared paths.
   priority: should
   stability: evolving
+
+- id: reqllm.workflow.provider_surface_guides
+  statement: Provider expansion work shall keep provider surface-map and compatibility-evaluation guides in sync with code and subject specs so wide provider coverage remains explainable and reviewable.
+  priority: should
+  stability: evolving
 ```
 
 ## Verification
@@ -61,6 +67,11 @@ surface:
   target: .spec/README.md
   covers:
     - reqllm.workflow.specled_loop
+
+- kind: source_file
+  target: .spec/specs/workflow.spec.md
+  covers:
+    - reqllm.workflow.provider_surface_guides
 
 - kind: source_file
   target: .spec/AGENTS.md

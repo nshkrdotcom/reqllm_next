@@ -22,7 +22,7 @@ decisions:
 
 ```spec-requirements
 - id: reqllm.model_profile.descriptive_facts
-  statement: ReqLlmNext shall normalize resolved model metadata into a request-independent `ModelProfile` that describes operations, features, modalities, limits, parameter defaults, constraints metadata, and session capabilities without choosing concrete request behavior.
+  statement: ReqLlmNext shall normalize resolved model metadata into a request-independent `ModelProfile` that describes operations, features, modalities, limits, parameter defaults, constraints metadata, and session capabilities without choosing concrete request behavior, including provider-native descriptive facts such as Anthropic structured outputs, citations, and context-management support.
   priority: must
   stability: evolving
 

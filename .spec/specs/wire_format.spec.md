@@ -12,6 +12,7 @@ summary: Transport-facing request envelopes, routes, headers, and frame decoding
 surface:
   - .spec/specs/wire_format.spec.md
   - .spec/specs/layer_boundaries.spec.md
+  - lib/req_llm_next/wire/anthropic.ex
 decisions:
   - reqllm.decision.execution_layers
 ```
@@ -33,6 +34,11 @@ decisions:
   statement: Wire format shall decode inbound transport frames into provider-family event terms for semantic protocol without skipping directly to canonical user-facing results.
   priority: must
   stability: evolving
+
+- id: reqllm.wire_format.provider_feature_envelopes
+  statement: Wire format may own provider-family feature envelopes such as Anthropic beta headers, native structured-output payloads, document references, context-management fields, and provider-native tool definitions when those details belong to the request shape of an existing execution surface.
+  priority: should
+  stability: evolving
 ```
 
 ## Verification
@@ -44,4 +50,5 @@ decisions:
     - reqllm.wire_format.envelope_ownership
     - reqllm.wire_format.transport_separation
     - reqllm.wire_format.frame_decode
+    - reqllm.wire_format.provider_feature_envelopes
 ```

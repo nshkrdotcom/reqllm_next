@@ -25,7 +25,7 @@ defmodule ReqLlmNext.OperationPlannerTest do
       assert plan.parameter_values == %{}
     end
 
-    test "supports object mode through prompt-and-parse surfaces" do
+    test "supports object mode through native structured-output surfaces" do
       {:ok, model} = LLMDB.model("anthropic:claude-haiku-4-5")
 
       assert {:ok, plan} =
@@ -38,7 +38,7 @@ defmodule ReqLlmNext.OperationPlannerTest do
 
       assert plan.mode.structured_output? == true
       assert plan.surface.id == :anthropic_messages_object_http_sse
-      assert plan.surface.features.structured_output == :prompt_and_parse
+      assert plan.surface.features.structured_output == :native_json_schema
     end
   end
 

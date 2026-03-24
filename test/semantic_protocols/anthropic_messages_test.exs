@@ -17,7 +17,7 @@ defmodule ReqLlmNext.SemanticProtocols.AnthropicMessagesTest do
              ) == [{:usage, %{input_tokens: 0, output_tokens: 10, total_tokens: 10}}]
     end
 
-    test "normalizes text deltas and ignores non-semantic events" do
+    test "normalizes text deltas and response metadata" do
       assert AnthropicMessages.decode_event(
                %{"type" => "content_block_delta", "delta" => %{"text" => "Hello"}},
                nil
@@ -34,7 +34,7 @@ defmodule ReqLlmNext.SemanticProtocols.AnthropicMessagesTest do
       assert AnthropicMessages.decode_event(
                %{"type" => "message_start", "message" => %{"id" => "msg_123"}},
                nil
-             ) == []
+             ) == [{:meta, %{response_id: "msg_123"}}]
 
       assert AnthropicMessages.decode_event(
                %{"type" => "content_block_start", "content_block" => %{"type" => "text"}},
@@ -109,6 +109,33 @@ defmodule ReqLlmNext.SemanticProtocols.AnthropicMessagesTest do
                },
                nil
              ) == [{:tool_call_delta, %{index: 0, partial_json: "{\"location\""}}]
+    end
+
+    test "normalizes citation-bearing text blocks and stop reasons" do
+      assert AnthropicMessages.decode_event(
+               %{
+                 "type" => "content_block_start",
+                 "content_block" => %{
+                   "type" => "text",
+                   "text" => "Cited text",
+                   "citations" => [%{"type" => "char_location", "cited_text" => "Cited text"}]
+                 }
+               },
+               nil
+             ) == [
+               {:content_part,
+                ReqLlmNext.Context.ContentPart.text("Cited text", %{
+                  citations: [%{"type" => "char_location", "cited_text" => "Cited text"}]
+                })}
+             ]
+
+      assert AnthropicMessages.decode_event(
+               %{
+                 "type" => "message_delta",
+                 "delta" => %{"stop_reason" => "pause_turn"}
+               },
+               nil
+             ) == [{:meta, %{finish_reason: :stop, anthropic_stop_reason: "pause_turn"}}]
     end
   end
 

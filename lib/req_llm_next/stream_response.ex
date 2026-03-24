@@ -47,7 +47,12 @@ defmodule ReqLlmNext.StreamResponse do
   @spec text(t()) :: String.t()
   def text(%__MODULE__{stream: stream}) do
     stream
-    |> Enum.filter(&is_binary/1)
+    |> Enum.map(fn
+      text when is_binary(text) -> text
+      {:content_part, %ReqLlmNext.Context.ContentPart{type: :text, text: text}} -> text
+      _ -> nil
+    end)
+    |> Enum.reject(&is_nil/1)
     |> Enum.join("")
   end
 
@@ -68,6 +73,7 @@ defmodule ReqLlmNext.StreamResponse do
     |> Enum.map_join("", fn
       {:thinking, text} -> text
       {:thinking_start, _} -> ""
+      {:content_part, %ReqLlmNext.Context.ContentPart{type: :thinking, text: text}} -> text
     end)
   end
 

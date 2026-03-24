@@ -61,48 +61,49 @@ ReqLlmNext currently supports a real Anthropic Messages lane through the v2 plan
 2. streaming SSE decoding
 3. tool-use round trips with client tools
 4. image input
-5. prompt-and-parse structured output
+5. Anthropic-native structured outputs through `output_config.format`
 6. reasoning or thinking mode
 7. prompt caching headers and normalized usage handling
 8. 1M-context beta-header injection
-9. curated live and replay verification for Haiku 4.5, Sonnet 4.6, and Opus 4.6
+9. document blocks, `file_id` document references, and container-upload content blocks
+10. token counting utility support
+11. message batches utility support
+12. provider-native tool helpers for web search, code execution, MCP connectors, and computer use
+13. curated live and replay verification for Haiku 4.5, Sonnet 4.6, and Opus 4.6
 
 Current implementation homes:
 
 1. [anthropic.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/wire/anthropic.ex)
 2. [anthropic_messages.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/semantic_protocols/anthropic_messages.ex)
-3. [support_matrix.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/support_matrix.ex)
-4. [anthropic_comprehensive_test.exs](/Users/mhostetler/Source/ReqLLM/reqllm_next/test/coverage/anthropic_comprehensive_test.exs)
-5. [anthropic_beta_features_test.exs](/Users/mhostetler/Source/ReqLLM/reqllm_next/test/provider_features/anthropic_beta_features_test.exs)
+3. [anthropic.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/anthropic.ex)
+4. [client.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/anthropic/client.ex)
+5. [files.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/anthropic/files.ex)
+6. [token_count.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/anthropic/token_count.ex)
+7. [message_batches.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/anthropic/message_batches.ex)
+8. [tools.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/anthropic/tools.ex)
+9. [support_matrix.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/support_matrix.ex)
+10. [anthropic_comprehensive_test.exs](/Users/mhostetler/Source/ReqLLM/reqllm_next/test/coverage/anthropic_comprehensive_test.exs)
+11. [anthropic_beta_features_test.exs](/Users/mhostetler/Source/ReqLLM/reqllm_next/test/provider_features/anthropic_beta_features_test.exs)
 
 ### Partial
 
 These areas exist in some form but are not yet first-class Anthropic surfaces:
 
-1. Structured output:
-   ReqLlmNext can generate objects for Anthropic models, but today that uses prompt-and-parse rather than Anthropic-native structured outputs.
-2. PDF support:
-   the package recognizes PDF capability and can carry binary file parts in the canonical context model, but it does not yet implement Anthropic file upload or `file_id`-based document flows.
-3. Thinking and stop handling:
-   reasoning text and basic usage are normalized, but richer Anthropic event shapes like `pause_turn`, refusal-style completions, citations, and compaction-related flows are not yet fully surfaced as first-class canonical behavior.
+1. Citations and search-result normalization:
+   request-side citation enablement and search-result content parts are supported, but the canonical response model still treats many richer citation shapes as provider metadata rather than a fully generalized cross-provider content system.
+2. Context editing and compaction:
+   ReqLlmNext now forwards `context_management` controls and preserves richer stop metadata, but there is not yet a full session-runtime story around automatic compaction loops or pause-turn continuation.
+3. Provider-native tools:
+   web search, code execution, MCP, and computer-use tool definitions now have first-class helper constructors, but only the common request-side shapes are pressure-tested so far rather than every live tool lifecycle.
 
 ## Missing Surface Areas
 
 These Anthropic areas are not yet first-class ReqLlmNext support:
 
-1. native structured outputs
-2. citations and search-result output blocks
-3. Files API
-4. `file_id` document references in Messages requests
-5. token counting endpoint
-6. message batches
-7. web search server tool
-8. code execution server tool
-9. context editing and compaction controls
-10. richer stop handling such as `pause_turn`
-11. MCP connector
-12. computer use
-13. OpenAI-compat Anthropic lane
+1. exhaustive live coverage for every provider-native tool lifecycle
+2. persistent pause-turn and compaction session handling
+3. richer refusal and citation normalization into the canonical response model
+4. OpenAI-compat Anthropic lane as a deliberate secondary evaluation surface
 
 ## Ownership Map
 
@@ -131,14 +132,9 @@ The intended ownership split is:
 
 The current recommended order for wide Anthropic work is:
 
-1. native structured outputs and citations
-2. Files API and document flows
-3. token counting
-4. message batches
-5. server tools
-6. context editing and richer stop handling
-7. MCP connector
-8. computer use
-9. OpenAI compatibility evaluation
+1. complete the Anthropic Messages lane first
+2. add provider-specific utility surfaces for non-message endpoints
+3. pressure-test representative live lanes before broadening model count
+4. evaluate the OpenAI compatibility layer separately from the native Anthropic lane
 
-That order keeps the main Messages lane improving first, while deferring the most specialized or potentially separate surfaces until the core Anthropic execution stack is stronger.
+That order keeps the main Messages lane improving first, while confining provider-specific extras to explicit homes instead of leaking them into the canonical package surface.

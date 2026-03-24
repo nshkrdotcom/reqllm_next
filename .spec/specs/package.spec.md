@@ -46,6 +46,11 @@ surface:
   statement: ReqLlmNext shall support local development and replay or live verification by loading a local `.env` file without overriding shell-provided environment variables, so API keys can be supplied for tests and compatibility runs without being committed.
   priority: should
   stability: evolving
+
+- id: reqllm.package.provider_specific_utilities
+  statement: ReqLlmNext shall keep the top-level cross-provider facade narrow while exposing explicit provider-scoped utility modules for non-canonical provider endpoints such as Anthropic token counting, files, batches, and provider-native tool helpers.
+  priority: should
+  stability: evolving
 ```
 
 ## Verification
@@ -123,4 +128,10 @@ surface:
   execute: true
   covers:
     - reqllm.package.local_env_loading
+
+- kind: command
+  target: mix test test/anthropic
+  execute: true
+  covers:
+    - reqllm.package.provider_specific_utilities
 ```

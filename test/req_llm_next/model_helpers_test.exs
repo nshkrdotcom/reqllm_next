@@ -348,9 +348,29 @@ defmodule ReqLlmNext.ModelHelpersTest do
       assert helpers == Enum.sort(helpers)
     end
 
-    test "contains all 12 capability checks" do
+    test "contains all current capability helpers" do
       helpers = ModelHelpers.list_helpers()
-      assert length(helpers) == 12
+
+      assert helpers == [
+               :anthropic_citations?,
+               :anthropic_code_execution?,
+               :anthropic_context_management?,
+               :anthropic_message_batches?,
+               :anthropic_structured_outputs?,
+               :chat?,
+               :embeddings?,
+               :json_native?,
+               :json_schema?,
+               :json_strict?,
+               :reasoning_enabled?,
+               :streaming_text?,
+               :streaming_tool_calls?,
+               :supports_document_input?,
+               :tools_enabled?,
+               :tools_parallel?,
+               :tools_streaming?,
+               :tools_strict?
+             ]
     end
   end
 end

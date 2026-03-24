@@ -194,7 +194,11 @@ defmodule ReqLlmNext.Response do
   def text_stream(%__MODULE__{stream: nil}), do: []
 
   def text_stream(%__MODULE__{stream: stream}) do
-    Stream.filter(stream, &is_binary/1)
+    Stream.flat_map(stream, fn
+      text when is_binary(text) -> [text]
+      {:content_part, %ContentPart{type: :text, text: text}} when is_binary(text) -> [text]
+      _ -> []
+    end)
   end
 
   @doc """
@@ -243,16 +247,14 @@ defmodule ReqLlmNext.Response do
       {:error, error} ->
         {:error, error}
 
-      {:ok, {text_parts, tool_calls, usage, meta}} ->
-        text = Enum.join(text_parts, "")
-
+      {:ok, {content_parts, tool_calls, usage, meta}} ->
         message =
-          if text != "" or tool_calls != [] do
+          if content_parts != [] or tool_calls != [] do
             tool_calls_normalized = if tool_calls == [], do: nil, else: tool_calls
 
             %Message{
               role: :assistant,
-              content: [ContentPart.text(text)],
+              content: content_parts,
               tool_calls: tool_calls_normalized
             }
           else
@@ -295,26 +297,32 @@ defmodule ReqLlmNext.Response do
 
           {:halt, {:error, error}}
 
-        text, {:ok, {texts, tool_acc, usage, meta}} when is_binary(text) ->
-          {:cont, {:ok, {[text | texts], tool_acc, usage, meta}}}
+        text, {:ok, {parts, tool_acc, usage, meta}} when is_binary(text) ->
+          {:cont, {:ok, {[ContentPart.text(text) | parts], tool_acc, usage, meta}}}
 
-        {:usage, usage_map}, {:ok, {texts, tool_acc, _usage, meta}} ->
-          {:cont, {:ok, {texts, tool_acc, usage_map, meta}}}
+        {:thinking, text}, {:ok, {parts, tool_acc, usage, meta}} when is_binary(text) ->
+          {:cont, {:ok, {[ContentPart.thinking(text) | parts], tool_acc, usage, meta}}}
 
-        {:tool_call_delta, %{index: index} = delta}, {:ok, {texts, tool_acc, usage, meta}} ->
+        {:content_part, %ContentPart{} = part}, {:ok, {parts, tool_acc, usage, meta}} ->
+          {:cont, {:ok, {[part | parts], tool_acc, usage, meta}}}
+
+        {:usage, usage_map}, {:ok, {parts, tool_acc, _usage, meta}} ->
+          {:cont, {:ok, {parts, tool_acc, usage_map, meta}}}
+
+        {:tool_call_delta, %{index: index} = delta}, {:ok, {parts, tool_acc, usage, meta}} ->
           updated =
             Map.update(tool_acc, index, init_tool_call(delta), &merge_tool_call(&1, delta))
 
-          {:cont, {:ok, {texts, updated, usage, meta}}}
+          {:cont, {:ok, {parts, updated, usage, meta}}}
 
-        {:tool_call_start, %{index: index} = start}, {:ok, {texts, tool_acc, usage, meta}} ->
+        {:tool_call_start, %{index: index} = start}, {:ok, {parts, tool_acc, usage, meta}} ->
           updated =
             Map.update(tool_acc, index, init_tool_call_from_start(start), &merge_start(&1, start))
 
-          {:cont, {:ok, {texts, updated, usage, meta}}}
+          {:cont, {:ok, {parts, updated, usage, meta}}}
 
-        {:meta, meta_chunk}, {:ok, {texts, tool_acc, usage, meta}} when is_map(meta_chunk) ->
-          {:cont, {:ok, {texts, tool_acc, usage, Map.merge(meta, meta_chunk)}}}
+        {:meta, meta_chunk}, {:ok, {parts, tool_acc, usage, meta}} when is_map(meta_chunk) ->
+          {:cont, {:ok, {parts, tool_acc, usage, Map.merge(meta, meta_chunk)}}}
 
         _other, acc ->
           {:cont, acc}
@@ -324,14 +332,14 @@ defmodule ReqLlmNext.Response do
       {:error, _} = error ->
         error
 
-      {:ok, {texts, tool_acc, usage, meta}} ->
+      {:ok, {parts, tool_acc, usage, meta}} ->
         tool_calls =
           tool_acc
           |> Map.values()
           |> Enum.sort_by(& &1.index)
           |> Enum.map(&finalize_tool_call/1)
 
-        {:ok, {Enum.reverse(texts), tool_calls, usage, meta}}
+        {:ok, {Enum.reverse(parts), tool_calls, usage, meta}}
     end
   end
 

@@ -78,7 +78,7 @@ defmodule ReqLlmNext.PublicAPI.ObjectGenerationTest do
       assert is_integer(resp.object["age"])
     end
 
-    test "supports prompt-and-parse object generation for Anthropic models" do
+    test "supports object generation for Anthropic models" do
       {:ok, resp} =
         ReqLlmNext.generate_object(
           "anthropic:claude-haiku-4-5",

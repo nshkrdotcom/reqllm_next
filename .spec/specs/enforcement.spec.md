@@ -13,6 +13,7 @@ surface:
   - .spec/specs/enforcement.spec.md
   - lib/req_llm_next/model_resolver.ex
   - lib/req_llm_next/model_profile.ex
+  - lib/req_llm_next/operation_planner.ex
 ```
 
 ## Requirements

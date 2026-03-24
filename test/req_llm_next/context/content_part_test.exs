@@ -159,6 +159,35 @@ defmodule ReqLlmNext.Context.ContentPartTest do
     end
   end
 
+  describe "document helpers" do
+    test "creates document text content parts" do
+      part = ContentPart.document_text("Document body", %{title: "Doc"})
+
+      assert part.type == :document
+      assert part.data == "Document body"
+      assert part.media_type == "text/plain"
+      assert part.metadata == %{title: "Doc"}
+    end
+
+    test "creates document file references" do
+      part = ContentPart.document_file_id("file_123", %{citations: %{enabled: true}})
+
+      assert part.type == :document
+      assert part.data == "file_123"
+      assert part.metadata.source_type == :file_id
+      assert part.metadata.citations == %{enabled: true}
+    end
+
+    test "creates search result content parts" do
+      part = ContentPart.search_result("Example", "https://example.com", "Body")
+
+      assert part.type == :search_result
+      assert part.text == "Body"
+      assert part.url == "https://example.com"
+      assert part.metadata.title == "Example"
+    end
+  end
+
   describe "new/1" do
     test "creates content part from map" do
       {:ok, part} = ContentPart.new(%{type: :text, text: "Hello"})
@@ -216,6 +245,8 @@ defmodule ReqLlmNext.Context.ContentPartTest do
       assert ContentPart.valid?(ContentPart.image_url("http://example.com/img.png"))
       assert ContentPart.valid?(ContentPart.image(<<1, 2, 3>>))
       assert ContentPart.valid?(ContentPart.file(<<1, 2, 3>>, "file.bin"))
+      assert ContentPart.valid?(ContentPart.document_text("Document"))
+      assert ContentPart.valid?(ContentPart.search_result("Example", "https://example.com", "Body"))
     end
 
     test "returns false for invalid structures" do

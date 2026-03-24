@@ -64,9 +64,9 @@ The longer explanation lives in [`guides/package_thesis.md`](./guides/package_th
 Start with:
 
 1. [`guides/package_thesis.md`](./guides/package_thesis.md) for the package thesis
-2. [`.spec/README.md`](/Users/mhostetler/Source/ReqLLM/reqllm_next/.spec/README.md) for the canonical Spec Led workspace
-3. [`.spec/specs/architecture.spec.md`](/Users/mhostetler/Source/ReqLLM/reqllm_next/.spec/specs/architecture.spec.md) for the runtime architecture contract
-4. [`.spec/specs/package.spec.md`](/Users/mhostetler/Source/ReqLLM/reqllm_next/.spec/specs/package.spec.md) for the package runtime and verification contract
+2. `.spec/README.md` for the canonical Spec Led workspace
+3. `.spec/specs/architecture.spec.md` for the runtime architecture contract
+4. `.spec/specs/package.spec.md` for the package runtime and verification contract
 
 ## Contributor Workflow
 

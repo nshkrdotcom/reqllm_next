@@ -14,7 +14,9 @@ surface:
   - AGENTS.md
   - .spec/README.md
   - guides/package_thesis.md
+  - guides/anthropic_openai_compatibility.md
   - lib/req_llm_next.ex
+  - lib/req_llm_next/anthropic.ex
   - lib/req_llm_next/execution_mode.ex
   - lib/req_llm_next/execution_plan.ex
   - lib/req_llm_next/execution_surface.ex
@@ -55,6 +57,11 @@ decisions:
   statement: ReqLlmNext architecture shall separate semantic protocol, wire format, transport, provider, and session-runtime concerns so request meaning, wire envelopes, persistent execution state, and byte movement can evolve independently.
   priority: must
   stability: evolving
+
+- id: reqllm.architecture.provider_specific_utilities
+  statement: ReqLlmNext architecture may expose provider-scoped utility modules for non-canonical provider endpoints, but those utilities shall remain outside the top-level cross-provider facade and outside the core execution-plan layer stack.
+  priority: should
+  stability: evolving
 ```
 
 ## Verification
@@ -86,4 +93,9 @@ decisions:
   execute: true
   covers:
     - reqllm.architecture.model_input_boundary
+
+- kind: source_file
+  target: .spec/specs/architecture.spec.md
+  covers:
+    - reqllm.architecture.provider_specific_utilities
 ```

@@ -29,7 +29,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.execution_plan.surface_and_fallbacks
-  statement: `ExecutionPlan` shall record exactly one chosen primary execution surface plus any fallback surfaces, normalized parameter values, timeout policy, session strategy, and adapter references for the request attempt.
+  statement: `ExecutionPlan` shall record exactly one chosen primary execution surface plus any fallback surfaces, normalized parameter values, timeout policy, session strategy, and adapter references for the request attempt, including provider-native request fields that are valid for the selected surface.
   priority: must
   stability: evolving
 

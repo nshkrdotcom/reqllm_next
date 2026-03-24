@@ -145,6 +145,8 @@ defmodule ReqLlmNext.ExecutionMode do
         :image_url -> MapSet.put(acc, :image)
         :pdf -> MapSet.put(acc, :pdf)
         :audio -> MapSet.put(acc, :audio)
+        :document -> MapSet.put(acc, :document)
+        :file -> MapSet.put(acc, :document)
         _ -> acc
       end
     end)

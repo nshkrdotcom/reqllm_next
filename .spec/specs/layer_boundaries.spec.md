@@ -12,6 +12,7 @@ summary: Explicit handoff rules for provider, session runtime, transport, wire f
 surface:
   - AGENTS.md
   - lib/req_llm_next/execution_modules.ex
+  - lib/req_llm_next/anthropic/**/*.ex
   - lib/req_llm_next/semantic_protocol.ex
   - lib/req_llm_next/semantic_protocols/**/*.ex
   - lib/req_llm_next/transports/**/*.ex
@@ -45,6 +46,11 @@ decisions:
   statement: Fixture replay shall prefer the recorded or inferable surface from the fixture request itself over today's planned surface so replay keeps exercising the execution stack that originally produced the captured artifact.
   priority: must
   stability: evolving
+
+- id: reqllm.layer_boundaries.provider_utilities_outside_stack
+  statement: Provider-specific utility modules for non-canonical endpoints shall sit outside the core execution-plan layer stack and may reuse provider auth or endpoint roots without becoming alternate semantic-protocol or wire layers for the main public API.
+  priority: should
+  stability: evolving
 ```
 
 ## Verification
@@ -57,6 +63,7 @@ decisions:
     - reqllm.layer_boundaries.plan_aware_adapters
     - reqllm.layer_boundaries.no_cross_layer_skips
     - reqllm.layer_boundaries.replay_uses_recorded_stack
+    - reqllm.layer_boundaries.provider_utilities_outside_stack
 
 - kind: source_file
   target: AGENTS.md
