@@ -129,7 +129,7 @@
         "id": "reqllm.architecture.facts_mode_policy_plan",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext architecture shall normalize model facts into `ModelProfile`, request intent into `ExecutionMode`, resolve ordered policy rules, and materialize a single `ExecutionPlan` before downstream execution.",
+        "statement": "ReqLlmNext architecture shall normalize model facts into `ModelProfile`, request intent into `ExecutionMode`, resolve ordered policy rules, and materialize a single `ExecutionPlan` before downstream execution, including honoring explicit transport preference when a matching surface exists and validating surface-specific parameter compatibility before wire encoding.",
         "subject_id": "reqllm.architecture"
       },
       {
@@ -145,7 +145,7 @@
         "id": "reqllm.diagnostics.compat_consumed",
         "priority": "must",
         "stability": "evolving",
-        "statement": "Runtime layers may emit diagnostics, but compat analyzers and issue-drafting tooling shall consume them outside the execution layers rather than patching runtime behavior in place.",
+        "statement": "Runtime layers may emit diagnostics, but curated support-matrix compat runs, anomaly analyzers, and issue-drafting tooling shall consume them outside the execution layers rather than patching runtime behavior in place.",
         "subject_id": "reqllm.diagnostics"
       },
       {
@@ -177,7 +177,7 @@
         "id": "reqllm.enforcement.runtime_hard_fail",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall use runtime hard-fail validation for invalid model metadata, unsupported profile combinations, unknown keys, invalid enums, and unsafe source combinations rather than best-effort fallback behavior.",
+        "statement": "ReqLlmNext shall use runtime hard-fail validation for invalid model metadata, unsupported profile combinations, unsupported surface-parameter combinations, unknown keys, invalid enums, and unsafe source combinations rather than best-effort fallback behavior.",
         "subject_id": "reqllm.enforcement"
       },
       {
@@ -193,7 +193,7 @@
         "id": "reqllm.execution_mode.mode_hints_before_policy",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall resolve mode hints into `ExecutionMode` before policy rules choose surfaces, defaults, timeouts, or fallbacks.",
+        "statement": "ReqLlmNext shall resolve mode hints into `ExecutionMode` before policy rules choose surfaces, defaults, timeouts, or fallbacks, including preserving explicit transport preference so policy can apply it consistently across text and structured-output requests.",
         "subject_id": "reqllm.execution_mode"
       },
       {
@@ -233,7 +233,7 @@
         "id": "reqllm.execution_plan.planner_owns_assembly",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall keep plan assembly in the planner boundary, including mode normalization, rule evaluation, surface selection, parameter normalization, session planning, and adapter selection.",
+        "statement": "ReqLlmNext shall keep plan assembly in the planner boundary, including mode normalization, rule evaluation, surface selection, parameter normalization, surface-specific parameter validation, session planning, and adapter selection.",
         "subject_id": "reqllm.execution_plan"
       },
       {
@@ -273,7 +273,7 @@
         "id": "reqllm.execution_surfaces.surface_selection",
         "priority": "must",
         "stability": "evolving",
-        "statement": "The planner shall choose exactly one primary `ExecutionSurface` for an `ExecutionPlan` and may only choose fallback surfaces already declared in `ModelProfile`.",
+        "statement": "The planner shall choose exactly one primary `ExecutionSurface` for an `ExecutionPlan`, may only choose fallback surfaces already declared in `ModelProfile`, and shall not ignore an explicit transport preference when a matching surface exists for the active mode.",
         "subject_id": "reqllm.execution_surfaces"
       },
       {
@@ -302,11 +302,27 @@
       },
       {
         "file": ".spec/specs/layer_boundaries.spec.md",
+        "id": "reqllm.layer_boundaries.replay_uses_recorded_stack",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "Fixture replay shall prefer the recorded or inferable surface from the fixture request itself over today's planned surface so replay keeps exercising the execution stack that originally produced the captured artifact.",
+        "subject_id": "reqllm.layer_boundaries"
+      },
+      {
+        "file": ".spec/specs/layer_boundaries.spec.md",
         "id": "reqllm.layer_boundaries.separated_io",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall keep provider, session runtime, transport, wire format, and semantic protocol responsibilities separated so no layer skips across another layer's ownership boundary and each resolved plan binds one deterministic layer stack.",
+        "statement": "ReqLlmNext shall keep provider, session runtime, transport, wire format, and semantic protocol responsibilities separated so no layer skips across another layer's ownership boundary and each resolved plan binds one deterministic layer stack including explicit provider, protocol, wire, and transport modules.",
         "subject_id": "reqllm.layer_boundaries"
+      },
+      {
+        "file": ".spec/specs/model_compat.spec.md",
+        "id": "reqllm.model_compat.curated_support_matrix",
+        "priority": "should",
+        "stability": "evolving",
+        "statement": "Provider compatibility sweeps shall run against a curated support matrix of representative provider, model, and transport lanes so live verification stays cost-aware and stable while still pressure-testing the execution-plan architecture.",
+        "subject_id": "reqllm.model_compat"
       },
       {
         "file": ".spec/specs/model_compat.spec.md",
@@ -345,7 +361,7 @@
         "id": "reqllm.model_input.fail_fast",
         "priority": "must",
         "stability": "evolving",
-        "statement": "The model boundary shall fail fast on tuples, ad hoc maps, unsupported types, or invalid model metadata and shall not let raw unvalidated model input continue into execution.",
+        "statement": "The model boundary shall fail fast on tuples, ad hoc maps, unsupported types, or invalid model metadata and shall not let raw unvalidated model input continue into execution, while leaving later surface-specific validation to the planning boundary rather than reintroducing raw model checks downstream.",
         "subject_id": "reqllm.model_input"
       },
       {
@@ -369,7 +385,7 @@
         "id": "reqllm.model_profile.execution_surfaces_declared",
         "priority": "must",
         "stability": "evolving",
-        "statement": "`ModelProfile` shall declare explicit named `ExecutionSurface` entries for supported endpoint styles instead of implying support from independent protocol, wire-format, and transport lists.",
+        "statement": "`ModelProfile` shall declare explicit named `ExecutionSurface` entries for supported endpoint styles instead of implying support from independent protocol, wire-format, and transport lists, including multiple transport variants for one semantic family when the provider truly supports them.",
         "subject_id": "reqllm.model_profile"
       },
       {
@@ -385,7 +401,7 @@
         "id": "reqllm.operation_planner.assembly_scope",
         "priority": "must",
         "stability": "evolving",
-        "statement": "The planner boundary shall own mode normalization, rule evaluation, surface selection, parameter normalization, fallback planning, session planning, and adapter selection.",
+        "statement": "The planner boundary shall own mode normalization, rule evaluation, surface selection, parameter normalization, explicit transport preference handling, fallback planning, surface-specific parameter validation, session planning, and adapter selection.",
         "subject_id": "reqllm.operation_planner"
       },
       {
@@ -406,10 +422,18 @@
       },
       {
         "file": ".spec/specs/package.spec.md",
+        "id": "reqllm.package.buffered_stream_metadata",
+        "priority": "should",
+        "stability": "evolving",
+        "statement": "When ReqLlmNext buffers a streamed response into the canonical `Response` shape, it shall preserve terminal metadata such as finish reason and provider-facing response identifiers emitted by the canonical stream.",
+        "subject_id": "reqllm.package"
+      },
+      {
+        "file": ".spec/specs/package.spec.md",
         "id": "reqllm.package.execution_planning",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall route supported requests through a deterministic planning path that normalizes model facts into `ModelProfile`, request intent into `ExecutionMode`, selects explicit `ExecutionSurface` support, and materializes an `ExecutionPlan` before executing provider and wire bridges.",
+        "statement": "ReqLlmNext shall route supported requests through a deterministic planning path that normalizes model facts into `ModelProfile`, request intent into `ExecutionMode`, selects explicit `ExecutionSurface` support, validates surface-specific parameter compatibility, materializes an `ExecutionPlan`, and resolves an execution stack of provider, semantic protocol, wire, and transport modules before runtime execution.",
         "subject_id": "reqllm.package"
       },
       {
@@ -417,7 +441,7 @@
         "id": "reqllm.package.fixture_replay",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall verify package behavior with deterministic automated tests that exercise provider scenarios and replay recorded fixtures by default.",
+        "statement": "ReqLlmNext shall verify package behavior with deterministic automated tests that exercise provider scenarios and replay recorded fixtures by default, preserving the recorded execution surface when fixtures were captured against an older but still valid endpoint shape.",
         "subject_id": "reqllm.package"
       },
       {
@@ -433,7 +457,7 @@
         "id": "reqllm.package.model_slice_verification",
         "priority": "should",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall be able to lock supported scenario sets to explicit starter-model slices with fixture-backed tests so provider-specific support stays visible as the planning path evolves.",
+        "statement": "ReqLlmNext shall be able to lock supported scenario sets to explicit starter-model slices and curated provider support-matrix lanes, including alternative transport lanes where relevant, so provider-specific support stays visible as the planning path evolves without exploding into a one-file-per-model matrix.",
         "subject_id": "reqllm.package"
       },
       {
@@ -473,7 +497,7 @@
         "id": "reqllm.policy_rules.match_patch",
         "priority": "must",
         "stability": "evolving",
-        "statement": "Policy rules shall use a declarative match-and-patch model to choose preferred surfaces, fallback surfaces, timeout classes, session defaults, stable parameter defaults, and plan adapter references.",
+        "statement": "Policy rules shall use a declarative match-and-patch model to choose preferred surfaces, fallback surfaces, timeout classes, session defaults, stable parameter defaults, and plan adapter references, with explicit transport preference remaining authoritative when matching surfaces are available.",
         "subject_id": "reqllm.policy_rules"
       },
       {
@@ -499,6 +523,30 @@
         "stability": "evolving",
         "statement": "Provider shall own endpoint roots only, while wire format owns relative routes and event targets so URL ownership remains unambiguous.",
         "subject_id": "reqllm.provider"
+      },
+      {
+        "file": ".spec/specs/public_api.spec.md",
+        "id": "reqllm.public_api.canonical_shapes",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "Top-level generation and embedding entrypoints shall accept the canonical public model inputs of `LLMDB` `model_spec` strings or `%LLMDB.Model{}` values, return canonical `Response` or `StreamResponse` values from non-bang forms, and raise from bang forms.",
+        "subject_id": "reqllm.public_api"
+      },
+      {
+        "file": ".spec/specs/public_api.spec.md",
+        "id": "reqllm.public_api.hard_surface",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "`ReqLlmNext` shall expose the hard package boundary at the top-level facade with `generate_text/3`, `generate_text!/3`, `stream_text/3`, `stream_object/4`, `generate_object/4`, `generate_object!/4`, `embed/3`, `embed!/3`, `model/1`, `provider/1`, `context/1`, `tool/1`, `json_schema/2`, `cosine_similarity/2`, `embedding_models/0`, `put_key/2`, and `get_key/1`.",
+        "subject_id": "reqllm.public_api"
+      },
+      {
+        "file": ".spec/specs/public_api.spec.md",
+        "id": "reqllm.public_api.thin_facade",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "The top-level `ReqLlmNext` module shall remain a thin compatibility facade over the internal planning and execution pipeline rather than accumulating provider, protocol, wire, transport, or fixture-specific branching logic.",
+        "subject_id": "reqllm.public_api"
       },
       {
         "file": ".spec/specs/semantic_protocol.spec.md",
@@ -561,7 +609,7 @@
         "id": "reqllm.source_layout.concern_homes",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall keep model-boundary concerns, profile construction, mode normalization, policy resolution, plan assembly, protocol logic, wire envelopes, transport mechanics, and session state in distinct source locations that match the architecture.",
+        "statement": "ReqLlmNext shall keep model-boundary concerns, profile construction, mode normalization, policy resolution, semantic protocol normalization, wire envelopes, transport mechanics, response materialization, fixture replay, and session state in distinct source locations that match the architecture.",
         "subject_id": "reqllm.source_layout"
       },
       {
@@ -573,11 +621,19 @@
         "subject_id": "reqllm.source_layout"
       },
       {
+        "file": ".spec/specs/source_layout.spec.md",
+        "id": "reqllm.source_layout.public_contract_home",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "Top-level package-boundary tests for `ReqLlmNext` shall live in a dedicated `test/public_api/` home so the canonical facade contract remains distinct from executor, protocol, wire, transport, and scenario tests.",
+        "subject_id": "reqllm.source_layout"
+      },
+      {
         "file": ".spec/specs/telemetry.spec.md",
         "id": "reqllm.telemetry.canonical_measurements",
         "priority": "must",
         "stability": "evolving",
-        "statement": "Telemetry metadata and measurements shall remain stable across transports and operations so application code and compat tooling do not need provider-specific parsing to interpret usage, reasoning, or request summaries.",
+        "statement": "Telemetry metadata and measurements shall remain stable across transports, operations, and curated provider support-matrix lanes so application code and compat tooling do not need provider-specific parsing to interpret usage, reasoning, or request summaries.",
         "subject_id": "reqllm.telemetry"
       },
       {
@@ -609,7 +665,7 @@
         "id": "reqllm.transport.fixture_replay_parity",
         "priority": "should",
         "stability": "evolving",
-        "statement": "Transport-aware fixture replay shall preserve transport shape by replaying raw SSE chunks for HTTP streaming and raw frame payloads for WebSocket streaming through the same wire-decoding boundary used by runtime execution.",
+        "statement": "Transport-aware fixture replay shall preserve transport shape by replaying raw SSE chunks for HTTP streaming and raw frame payloads for WebSocket streaming through the same wire-decoding and semantic-protocol boundaries used by runtime execution, preferring the recorded fixture surface when it differs from the current plan.",
         "subject_id": "reqllm.transport"
       },
       {
@@ -617,7 +673,7 @@
         "id": "reqllm.transport.semantic_separation",
         "priority": "must",
         "stability": "evolving",
-        "statement": "Transport shall not inspect model names, reinterpret semantic payload meaning, or decode provider-family events into canonical chunks.",
+        "statement": "Transport shall not inspect model names, reinterpret semantic payload meaning, decode provider-family events into canonical chunks, or silently override planner-selected surface behavior.",
         "subject_id": "reqllm.transport"
       },
       {
@@ -681,7 +737,7 @@
         "id": "reqllm.workflow.starter_slice_verification",
         "priority": "should",
         "stability": "evolving",
-        "statement": "Contributor workflow shall provide a named verification entry point for the current starter-model slice so replay-backed checks and live fixture refreshes use the same scenario and coverage path.",
+        "statement": "Contributor workflow shall provide named verification entry points for the current starter-model slices and curated provider support-matrix lanes so replay-backed checks, live fixture refreshes, websocket coverage, and provider-feature probes use explicit shared paths.",
         "subject_id": "reqllm.workflow"
       },
       {
@@ -767,9 +823,10 @@
             "lib/req_llm_next/operation_planner.ex",
             "lib/req_llm_next/policy_rules.ex",
             "lib/req_llm_next/execution_modules.ex",
+            ".spec/specs/public_api.spec.md",
+            "test/public_api/**/*.exs",
             "test/model_resolver_test.exs",
-            "test/operation_planner_test.exs",
-            "test/req_llm_next_test.exs"
+            "test/operation_planner_test.exs"
           ],
           "verification_minimum_strength": null
         },
@@ -878,15 +935,21 @@
         "meta": {
           "decisions": [
             "reqllm.decision.execution_layers",
-            "reqllm.decision.layer_scoped_plan_aware_adapters"
+            "reqllm.decision.layer_scoped_plan_aware_adapters",
+            "reqllm.decision.execution_plan_bridge"
           ],
           "id": "reqllm.layer_boundaries",
           "kind": "layer_boundaries",
           "status": "active",
-          "summary": "Explicit handoff rules for provider, session runtime, transport, wire format, semantic protocol, and plan adapters, with one deterministic layer stack per resolved plan.",
+          "summary": "Explicit handoff rules for provider, session runtime, transport, wire format, semantic protocol, and plan adapters, with one deterministic layer stack per resolved plan and replay path.",
           "surface": [
             "AGENTS.md",
-            "lib/req_llm_next/execution_modules.ex"
+            "lib/req_llm_next/execution_modules.ex",
+            "lib/req_llm_next/semantic_protocol.ex",
+            "lib/req_llm_next/semantic_protocols/**/*.ex",
+            "lib/req_llm_next/transports/**/*.ex",
+            "lib/req_llm_next/wire/**/*.ex",
+            "lib/req_llm_next/fixtures.ex"
           ],
           "verification_minimum_strength": null
         },
@@ -903,10 +966,14 @@
           "summary": "Live scenario execution, anomaly classification, and drift detection built on the same runtime architecture as normal execution.",
           "surface": [
             "guides/package_thesis.md",
+            "lib/req_llm_next/support_matrix.ex",
+            "lib/req_llm_next/provider_test/comprehensive.ex",
             "lib/mix/tasks/model_compat.ex",
             "test/mix/tasks/model_compat_test.exs",
             "test/coverage/anthropic_comprehensive_test.exs",
-            "test/coverage/openai_comprehensive_test.exs"
+            "test/coverage/openai_comprehensive_test.exs",
+            "test/coverage/openai_websocket_coverage_test.exs",
+            "test/provider_features/anthropic_beta_features_test.exs"
           ],
           "verification_minimum_strength": null
         },
@@ -928,8 +995,9 @@
             "AGENTS.md",
             "lib/req_llm_next.ex",
             "lib/req_llm_next/model_resolver.ex",
-            "test/model_resolver_test.exs",
-            "test/req_llm_next_test.exs"
+            "test/public_api/contract_test.exs",
+            "test/public_api/text_generation_test.exs",
+            "test/model_resolver_test.exs"
           ],
           "verification_minimum_strength": null
         },
@@ -991,6 +1059,7 @@
           "summary": "Metadata-driven LLM client runtime and test contract.",
           "surface": [
             "lib/**/*.ex",
+            "test/support/**/*.ex",
             "test/**/*.exs",
             "test/fixtures/**/*.json"
           ],
@@ -1038,6 +1107,23 @@
         "title": "Provider"
       },
       {
+        "file": ".spec/specs/public_api.spec.md",
+        "id": "reqllm.public_api",
+        "meta": {
+          "decisions": null,
+          "id": "reqllm.public_api",
+          "kind": "api",
+          "status": "active",
+          "summary": "Hard package boundary for the top-level ReqLlmNext API, preserving the v1-style text, object, streaming, embedding, and helper surface while internals evolve.",
+          "surface": [
+            "lib/req_llm_next.ex",
+            "test/public_api/**/*.exs"
+          ],
+          "verification_minimum_strength": null
+        },
+        "title": "Public API Contract"
+      },
+      {
         "file": ".spec/specs/semantic_protocol.spec.md",
         "id": "reqllm.semantic_protocol",
         "meta": {
@@ -1083,11 +1169,12 @@
           "id": "reqllm.source_layout",
           "kind": "source_layout",
           "status": "active",
-          "summary": "Source ownership rules that keep model quirks, planning logic, and compat tooling in distinct homes.",
+          "summary": "Source ownership rules that keep model quirks, planning logic, semantic protocol logic, and compat tooling in distinct homes.",
           "surface": [
             "AGENTS.md",
             ".spec/specs/source_layout.spec.md",
             "lib/req_llm_next/**/*.ex",
+            "test/support/**/*.ex",
             "test/**/*.exs"
           ],
           "verification_minimum_strength": null
@@ -1233,7 +1320,7 @@
         "file": ".spec/specs/architecture.spec.md",
         "kind": "command",
         "subject_id": "reqllm.architecture",
-        "target": "mix test test/model_resolver_test.exs test/req_llm_next_test.exs"
+        "target": "mix test test/model_resolver_test.exs test/public_api"
       },
       {
         "covers": [
@@ -1341,7 +1428,8 @@
         "covers": [
           "reqllm.layer_boundaries.separated_io",
           "reqllm.layer_boundaries.plan_aware_adapters",
-          "reqllm.layer_boundaries.no_cross_layer_skips"
+          "reqllm.layer_boundaries.no_cross_layer_skips",
+          "reqllm.layer_boundaries.replay_uses_recorded_stack"
         ],
         "file": ".spec/specs/layer_boundaries.spec.md",
         "kind": "source_file",
@@ -1359,8 +1447,20 @@
       },
       {
         "covers": [
+          "reqllm.layer_boundaries.separated_io",
+          "reqllm.layer_boundaries.replay_uses_recorded_stack"
+        ],
+        "execute": true,
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "mix test test/executor/stream_state_test.exs test/fixtures_test.exs test/operation_planner_test.exs"
+      },
+      {
+        "covers": [
           "reqllm.model_compat.real_runtime",
           "reqllm.model_compat.shared_scenarios",
+          "reqllm.model_compat.curated_support_matrix",
           "reqllm.model_compat.layer_attribution"
         ],
         "file": ".spec/specs/model_compat.spec.md",
@@ -1378,6 +1478,17 @@
         "kind": "command",
         "subject_id": "reqllm.model_compat",
         "target": "mix test test/mix/tasks/model_compat_test.exs"
+      },
+      {
+        "covers": [
+          "reqllm.model_compat.shared_scenarios",
+          "reqllm.model_compat.curated_support_matrix"
+        ],
+        "execute": true,
+        "file": ".spec/specs/model_compat.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.model_compat",
+        "target": "mix test test/coverage/anthropic_comprehensive_test.exs test/coverage/openai_comprehensive_test.exs test/coverage/openai_websocket_coverage_test.exs test/provider_features/anthropic_beta_features_test.exs"
       },
       {
         "covers": [
@@ -1400,7 +1511,7 @@
         "file": ".spec/specs/model_input_boundary.spec.md",
         "kind": "command",
         "subject_id": "reqllm.model_input",
-        "target": "mix test test/model_resolver_test.exs test/req_llm_next_test.exs"
+        "target": "mix test test/model_resolver_test.exs test/public_api/contract_test.exs test/public_api/text_generation_test.exs"
       },
       {
         "covers": [
@@ -1450,13 +1561,24 @@
         "covers": [
           "reqllm.package.multi_provider_api",
           "reqllm.package.fixture_replay",
-          "reqllm.package.execution_planning"
+          "reqllm.package.execution_planning",
+          "reqllm.package.buffered_stream_metadata"
         ],
         "execute": true,
         "file": ".spec/specs/package.spec.md",
         "kind": "command",
         "subject_id": "reqllm.package",
         "target": "mix test"
+      },
+      {
+        "covers": [
+          "reqllm.package.multi_provider_api"
+        ],
+        "execute": true,
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/public_api"
       },
       {
         "covers": [
@@ -1497,6 +1619,50 @@
         "kind": "command",
         "subject_id": "reqllm.package",
         "target": "mix test.starter_slice"
+      },
+      {
+        "covers": [
+          "reqllm.package.fixture_replay",
+          "reqllm.package.model_slice_verification"
+        ],
+        "execute": true,
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/coverage/anthropic_comprehensive_test.exs"
+      },
+      {
+        "covers": [
+          "reqllm.package.fixture_replay",
+          "reqllm.package.model_slice_verification"
+        ],
+        "execute": true,
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/coverage/openai_comprehensive_test.exs"
+      },
+      {
+        "covers": [
+          "reqllm.package.fixture_replay",
+          "reqllm.package.model_slice_verification"
+        ],
+        "execute": true,
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/coverage/openai_websocket_coverage_test.exs"
+      },
+      {
+        "covers": [
+          "reqllm.package.fixture_replay",
+          "reqllm.package.model_slice_verification"
+        ],
+        "execute": true,
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/provider_features/anthropic_beta_features_test.exs"
       },
       {
         "covers": [
@@ -1544,6 +1710,28 @@
       },
       {
         "covers": [
+          "reqllm.public_api.hard_surface",
+          "reqllm.public_api.canonical_shapes",
+          "reqllm.public_api.thin_facade"
+        ],
+        "file": ".spec/specs/public_api.spec.md",
+        "kind": "source_file",
+        "subject_id": "reqllm.public_api",
+        "target": ".spec/specs/public_api.spec.md"
+      },
+      {
+        "covers": [
+          "reqllm.public_api.hard_surface",
+          "reqllm.public_api.canonical_shapes"
+        ],
+        "execute": true,
+        "file": ".spec/specs/public_api.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.public_api",
+        "target": "mix test test/public_api"
+      },
+      {
+        "covers": [
           "reqllm.semantic_protocol.family_meaning",
           "reqllm.semantic_protocol.transport_separation",
           "reqllm.semantic_protocol.canonical_chunks"
@@ -1567,6 +1755,7 @@
       {
         "covers": [
           "reqllm.source_layout.concern_homes",
+          "reqllm.source_layout.public_contract_home",
           "reqllm.source_layout.layer_scoped_quirks",
           "reqllm.source_layout.compat_outside_runtime"
         ],
@@ -1741,10 +1930,10 @@
     "decisions": 9,
     "exceptions": 0,
     "findings": 0,
-    "requirements": 77,
+    "requirements": 84,
     "scenarios": 0,
-    "subjects": 22,
-    "verifications": 51
+    "subjects": 23,
+    "verifications": 60
   },
   "verification": {
     "claims": [
@@ -1855,7 +2044,7 @@
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.architecture",
-        "target": "mix test test/model_resolver_test.exs test/req_llm_next_test.exs",
+        "target": "mix test test/model_resolver_test.exs test/public_api",
         "verification_index": 3
       },
       {
@@ -2167,6 +2356,17 @@
         "verification_index": 0
       },
       {
+        "cover_id": "reqllm.layer_boundaries.replay_uses_recorded_stack",
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": ".spec/specs/layer_boundaries.spec.md",
+        "verification_index": 0
+      },
+      {
         "cover_id": "reqllm.layer_boundaries.separated_io",
         "file": ".spec/specs/layer_boundaries.spec.md",
         "kind": "source_file",
@@ -2187,6 +2387,39 @@
         "subject_id": "reqllm.layer_boundaries",
         "target": "AGENTS.md",
         "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.layer_boundaries.replay_uses_recorded_stack",
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "mix test test/executor/stream_state_test.exs test/fixtures_test.exs test/operation_planner_test.exs",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.layer_boundaries.separated_io",
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "mix test test/executor/stream_state_test.exs test/fixtures_test.exs test/operation_planner_test.exs",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.model_compat.curated_support_matrix",
+        "file": ".spec/specs/model_compat.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.model_compat",
+        "target": ".spec/specs/model_compat.spec.md",
+        "verification_index": 0
       },
       {
         "cover_id": "reqllm.model_compat.layer_attribution",
@@ -2244,6 +2477,28 @@
         "verification_index": 1
       },
       {
+        "cover_id": "reqllm.model_compat.curated_support_matrix",
+        "file": ".spec/specs/model_compat.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.model_compat",
+        "target": "mix test test/coverage/anthropic_comprehensive_test.exs test/coverage/openai_comprehensive_test.exs test/coverage/openai_websocket_coverage_test.exs test/provider_features/anthropic_beta_features_test.exs",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.model_compat.shared_scenarios",
+        "file": ".spec/specs/model_compat.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.model_compat",
+        "target": "mix test test/coverage/anthropic_comprehensive_test.exs test/coverage/openai_comprehensive_test.exs test/coverage/openai_websocket_coverage_test.exs test/provider_features/anthropic_beta_features_test.exs",
+        "verification_index": 2
+      },
+      {
         "cover_id": "reqllm.model_input.accepted_forms",
         "file": ".spec/specs/model_input_boundary.spec.md",
         "kind": "source_file",
@@ -2284,7 +2539,7 @@
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.model_input",
-        "target": "mix test test/model_resolver_test.exs test/req_llm_next_test.exs",
+        "target": "mix test test/model_resolver_test.exs test/public_api/contract_test.exs test/public_api/text_generation_test.exs",
         "verification_index": 1
       },
       {
@@ -2295,7 +2550,7 @@
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.model_input",
-        "target": "mix test test/model_resolver_test.exs test/req_llm_next_test.exs",
+        "target": "mix test test/model_resolver_test.exs test/public_api/contract_test.exs test/public_api/text_generation_test.exs",
         "verification_index": 1
       },
       {
@@ -2306,7 +2561,7 @@
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.model_input",
-        "target": "mix test test/model_resolver_test.exs test/req_llm_next_test.exs",
+        "target": "mix test test/model_resolver_test.exs test/public_api/contract_test.exs test/public_api/text_generation_test.exs",
         "verification_index": 1
       },
       {
@@ -2420,6 +2675,17 @@
         "verification_index": 1
       },
       {
+        "cover_id": "reqllm.package.buffered_stream_metadata",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test",
+        "verification_index": 0
+      },
+      {
         "cover_id": "reqllm.package.execution_planning",
         "file": ".spec/specs/package.spec.md",
         "kind": "command",
@@ -2453,6 +2719,17 @@
         "verification_index": 0
       },
       {
+        "cover_id": "reqllm.package.multi_provider_api",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/public_api",
+        "verification_index": 1
+      },
+      {
         "cover_id": "reqllm.package.execution_planning",
         "file": ".spec/specs/package.spec.md",
         "kind": "command",
@@ -2461,17 +2738,6 @@
         "strength": "executed",
         "subject_id": "reqllm.package",
         "target": "mix test test/operation_planner_test.exs",
-        "verification_index": 1
-      },
-      {
-        "cover_id": "reqllm.package.model_slice_verification",
-        "file": ".spec/specs/package.spec.md",
-        "kind": "command",
-        "meets_minimum": true,
-        "required_strength": "claimed",
-        "strength": "executed",
-        "subject_id": "reqllm.package",
-        "target": "mix test test/model_slices/anthropic_haiku_4_5_test.exs",
         "verification_index": 2
       },
       {
@@ -2482,7 +2748,7 @@
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.package",
-        "target": "mix test test/model_slices/openai_gpt_4o_mini_test.exs",
+        "target": "mix test test/model_slices/anthropic_haiku_4_5_test.exs",
         "verification_index": 3
       },
       {
@@ -2493,8 +2759,107 @@
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.package",
-        "target": "mix test.starter_slice",
+        "target": "mix test test/model_slices/openai_gpt_4o_mini_test.exs",
         "verification_index": 4
+      },
+      {
+        "cover_id": "reqllm.package.model_slice_verification",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test.starter_slice",
+        "verification_index": 5
+      },
+      {
+        "cover_id": "reqllm.package.fixture_replay",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/coverage/anthropic_comprehensive_test.exs",
+        "verification_index": 6
+      },
+      {
+        "cover_id": "reqllm.package.model_slice_verification",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/coverage/anthropic_comprehensive_test.exs",
+        "verification_index": 6
+      },
+      {
+        "cover_id": "reqllm.package.fixture_replay",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/coverage/openai_comprehensive_test.exs",
+        "verification_index": 7
+      },
+      {
+        "cover_id": "reqllm.package.model_slice_verification",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/coverage/openai_comprehensive_test.exs",
+        "verification_index": 7
+      },
+      {
+        "cover_id": "reqllm.package.fixture_replay",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/coverage/openai_websocket_coverage_test.exs",
+        "verification_index": 8
+      },
+      {
+        "cover_id": "reqllm.package.model_slice_verification",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/coverage/openai_websocket_coverage_test.exs",
+        "verification_index": 8
+      },
+      {
+        "cover_id": "reqllm.package.fixture_replay",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/provider_features/anthropic_beta_features_test.exs",
+        "verification_index": 9
+      },
+      {
+        "cover_id": "reqllm.package.model_slice_verification",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/provider_features/anthropic_beta_features_test.exs",
+        "verification_index": 9
       },
       {
         "cover_id": "reqllm.package.local_env_loading",
@@ -2505,7 +2870,7 @@
         "strength": "executed",
         "subject_id": "reqllm.package",
         "target": "mix test test/env_test.exs",
-        "verification_index": 5
+        "verification_index": 10
       },
       {
         "cover_id": "reqllm.policy_rules.allowed_patch_domains",
@@ -2607,6 +2972,61 @@
         "verification_index": 0
       },
       {
+        "cover_id": "reqllm.public_api.canonical_shapes",
+        "file": ".spec/specs/public_api.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.public_api",
+        "target": ".spec/specs/public_api.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.public_api.hard_surface",
+        "file": ".spec/specs/public_api.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.public_api",
+        "target": ".spec/specs/public_api.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.public_api.thin_facade",
+        "file": ".spec/specs/public_api.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.public_api",
+        "target": ".spec/specs/public_api.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.public_api.canonical_shapes",
+        "file": ".spec/specs/public_api.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.public_api",
+        "target": "mix test test/public_api",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.public_api.hard_surface",
+        "file": ".spec/specs/public_api.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.public_api",
+        "target": "mix test test/public_api",
+        "verification_index": 1
+      },
+      {
         "cover_id": "reqllm.semantic_protocol.canonical_chunks",
         "file": ".spec/specs/semantic_protocol.spec.md",
         "kind": "source_file",
@@ -2696,6 +3116,17 @@
       },
       {
         "cover_id": "reqllm.source_layout.layer_scoped_quirks",
+        "file": ".spec/specs/source_layout.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.source_layout",
+        "target": ".spec/specs/source_layout.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.source_layout.public_contract_home",
         "file": ".spec/specs/source_layout.spec.md",
         "kind": "source_file",
         "meets_minimum": true,
@@ -2996,13 +3427,13 @@
     "default_minimum_strength": "claimed",
     "strength_summary": {
       "claimed": 2,
-      "executed": 34,
-      "linked": 77
+      "executed": 50,
+      "linked": 83
     },
     "threshold_failures": 0
   },
   "workspace": {
     "decision_count": 9,
-    "spec_count": 22
+    "spec_count": 23
   }
 }

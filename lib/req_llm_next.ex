@@ -139,9 +139,29 @@ defmodule ReqLlmNext do
 
   """
   @spec generate_text(model_spec(), String.t() | Context.t(), keyword()) ::
-          {:ok, %{text: String.t(), model: LLMDB.Model.t()}} | {:error, term()}
+          {:ok, Response.t()} | {:error, term()}
   def generate_text(model_spec, prompt, opts \\ []) do
     Executor.generate_text(model_spec, prompt, opts)
+  end
+
+  @doc """
+  Generate text from a model, raising on error.
+
+  This is the convenience form of `generate_text/3` and preserves the
+  high-level ReqLLM-style API shape as a hard package boundary.
+
+  ## Examples
+
+      response = ReqLlmNext.generate_text!("openai:gpt-4o-mini", "Tell me a joke")
+      ReqLlmNext.Response.text(response)
+
+  """
+  @spec generate_text!(model_spec(), String.t() | Context.t(), keyword()) :: Response.t()
+  def generate_text!(model_spec, prompt, opts \\ []) do
+    case generate_text(model_spec, prompt, opts) do
+      {:ok, response} -> response
+      {:error, error} -> raise error
+    end
   end
 
   @doc """

@@ -53,6 +53,26 @@ defmodule ReqLlmNext.Wire.AnthropicTest do
       assert "prompt-caching-2024-07-31" in String.split(beta_value, ",")
     end
 
+    test "includes the 1m context beta flag when requested" do
+      headers = Anthropic.headers(anthropic_context_1m: true)
+
+      assert {"anthropic-beta", beta_value} = List.keyfind(headers, "anthropic-beta", 0)
+      assert "context-1m-2025-08-07" in String.split(beta_value, ",")
+    end
+
+    test "accepts custom Anthropic beta headers" do
+      headers =
+        Anthropic.headers(
+          anthropic_context_1m: true,
+          anthropic_beta_headers: ["structured-outputs-2025-11-13", "context-1m-2025-08-07"]
+        )
+
+      assert {"anthropic-beta", beta_value} = List.keyfind(headers, "anthropic-beta", 0)
+      assert "context-1m-2025-08-07" in String.split(beta_value, ",")
+      assert "structured-outputs-2025-11-13" in String.split(beta_value, ",")
+      assert Enum.count(String.split(beta_value, ","), &(&1 == "context-1m-2025-08-07")) == 1
+    end
+
     test "does not include beta header when no beta features enabled" do
       headers = Anthropic.headers([])
 
@@ -379,179 +399,31 @@ defmodule ReqLlmNext.Wire.AnthropicTest do
     end
   end
 
+  describe "decode_wire_event/1" do
+    test "decodes JSON payloads into raw event maps" do
+      assert Anthropic.decode_wire_event(%{
+               data: ~s({"type":"content_block_delta","delta":{"text":"Hello"}})
+             }) == [%{"type" => "content_block_delta", "delta" => %{"text" => "Hello"}}]
+    end
+
+    test "passes through pre-decoded maps" do
+      payload = %{"type" => "ping"}
+      assert Anthropic.decode_wire_event(%{data: payload}) == [payload]
+    end
+
+    test "returns decode errors for invalid JSON" do
+      assert [{:decode_error, _}] = Anthropic.decode_wire_event(%{data: "not valid json"})
+    end
+
+    test "returns empty list for unknown payload shapes" do
+      assert Anthropic.decode_wire_event(%{something: "else"}) == []
+    end
+  end
+
   describe "decode_sse_event/2" do
-    test "returns [nil] for message_stop event" do
-      event = %{data: ~s({"type":"message_stop"}), event: nil, id: nil}
+    test "delegates wire payloads through semantic normalization" do
+      event = %{data: ~s({"type":"message_stop"})}
       assert Anthropic.decode_sse_event(event, nil) == [nil]
-    end
-
-    test "extracts text from content_block_delta" do
-      event = %{
-        data: ~s({"type":"content_block_delta","delta":{"text":"Hello"}}),
-        event: nil,
-        id: nil
-      }
-
-      assert Anthropic.decode_sse_event(event, nil) == ["Hello"]
-    end
-
-    test "extracts text from content_block_delta with type text_delta" do
-      event = %{
-        data: ~s({"type":"content_block_delta","delta":{"type":"text_delta","text":"World"}}),
-        event: nil,
-        id: nil
-      }
-
-      assert Anthropic.decode_sse_event(event, nil) == ["World"]
-    end
-
-    test "returns empty list for message_start event" do
-      event = %{
-        data: ~s({"type":"message_start","message":{"id":"msg_123"}}),
-        event: nil,
-        id: nil
-      }
-
-      assert Anthropic.decode_sse_event(event, nil) == []
-    end
-
-    test "returns empty list for content_block_start event (text type)" do
-      event = %{
-        data: ~s({"type":"content_block_start","content_block":{"type":"text"}}),
-        event: nil,
-        id: nil
-      }
-
-      assert Anthropic.decode_sse_event(event, nil) == []
-    end
-
-    test "returns empty list for content_block_stop event" do
-      event = %{
-        data: ~s({"type":"content_block_stop"}),
-        event: nil,
-        id: nil
-      }
-
-      assert Anthropic.decode_sse_event(event, nil) == []
-    end
-
-    test "returns usage tuple for message_delta event with usage" do
-      event = %{
-        data: ~s({"type":"message_delta","usage":{"output_tokens":10}}),
-        event: nil,
-        id: nil
-      }
-
-      result = Anthropic.decode_sse_event(event, nil)
-      assert [{:usage, usage}] = result
-      assert usage.output_tokens == 10
-    end
-
-    test "returns empty list for ping event" do
-      event = %{data: ~s({"type":"ping"}), event: nil, id: nil}
-      assert Anthropic.decode_sse_event(event, nil) == []
-    end
-
-    test "returns error event for invalid JSON" do
-      event = %{data: "not valid json", event: nil, id: nil}
-      result = Anthropic.decode_sse_event(event, nil)
-      assert [{:error, %{type: "decode_error", message: message}}] = result
-      assert message =~ "Failed to decode SSE event"
-    end
-
-    test "decodes API error event" do
-      event = %{
-        data:
-          ~s({"type":"error","error":{"type":"rate_limit_error","message":"Too many requests"}}),
-        event: nil,
-        id: nil
-      }
-
-      result = Anthropic.decode_sse_event(event, nil)
-      assert [{:error, %{type: "rate_limit_error", message: "Too many requests"}}] = result
-    end
-
-    test "decodes thinking_start event" do
-      event = %{
-        data: ~s({"type":"content_block_start","content_block":{"type":"thinking"}}),
-        event: nil,
-        id: nil
-      }
-
-      result = Anthropic.decode_sse_event(event, nil)
-      assert [{:thinking_start, nil}] = result
-    end
-
-    test "decodes thinking_start event with initial text" do
-      event = %{
-        data:
-          ~s({"type":"content_block_start","content_block":{"type":"thinking","thinking":"Let me think..."}}),
-        event: nil,
-        id: nil
-      }
-
-      result = Anthropic.decode_sse_event(event, nil)
-      assert [{:thinking_start, nil}, {:thinking, "Let me think..."}] = result
-    end
-
-    test "decodes thinking_start event with text field" do
-      event = %{
-        data:
-          ~s({"type":"content_block_start","content_block":{"type":"thinking","text":"Initial thought"}}),
-        event: nil,
-        id: nil
-      }
-
-      result = Anthropic.decode_sse_event(event, nil)
-      assert [{:thinking_start, nil}, {:thinking, "Initial thought"}] = result
-    end
-
-    test "decodes thinking_delta event with thinking field" do
-      event = %{
-        data:
-          ~s({"type":"content_block_delta","delta":{"type":"thinking_delta","thinking":"more thoughts"}}),
-        event: nil,
-        id: nil
-      }
-
-      result = Anthropic.decode_sse_event(event, nil)
-      assert [{:thinking, "more thoughts"}] = result
-    end
-
-    test "decodes thinking_delta event with text field" do
-      event = %{
-        data:
-          ~s({"type":"content_block_delta","delta":{"type":"thinking_delta","text":"alternative format"}}),
-        event: nil,
-        id: nil
-      }
-
-      result = Anthropic.decode_sse_event(event, nil)
-      assert [{:thinking, "alternative format"}] = result
-    end
-
-    test "decodes tool_use content_block_start" do
-      event = %{
-        data:
-          ~s({"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_123","name":"get_weather"}}),
-        event: nil,
-        id: nil
-      }
-
-      result = Anthropic.decode_sse_event(event, nil)
-      assert [{:tool_call_start, %{index: 0, id: "toolu_123", name: "get_weather"}}] = result
-    end
-
-    test "decodes input_json_delta for tool arguments" do
-      event = %{
-        data:
-          ~s({"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"{\\"location\\""}}),
-        event: nil,
-        id: nil
-      }
-
-      result = Anthropic.decode_sse_event(event, nil)
-      assert [{:tool_call_delta, %{index: 0, partial_json: "{\"location\""}}] = result
     end
   end
 end

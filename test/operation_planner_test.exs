@@ -77,6 +77,23 @@ defmodule ReqLlmNext.OperationPlannerTest do
       assert plan.surface.features.structured_output == :native_json_schema
     end
 
+    test "honors explicit websocket transport selection for structured object plans" do
+      {:ok, model} = LLMDB.model("openai:gpt-4o-mini")
+
+      assert {:ok, plan} =
+               OperationPlanner.plan(
+                 model,
+                 :object,
+                 "Return JSON",
+                 compiled_schema: %{schema: %{}},
+                 transport: :websocket
+               )
+
+      assert plan.surface.id == :openai_responses_object_websocket
+      assert plan.wire_format == :openai_responses_ws_json
+      assert plan.transport == :websocket
+    end
+
     test "supports explicit websocket transport selection for responses models" do
       {:ok, model} = LLMDB.model("openai:gpt-4o-mini")
 
@@ -93,6 +110,22 @@ defmodule ReqLlmNext.OperationPlannerTest do
       assert plan.wire_format == :openai_responses_ws_json
       assert plan.transport == :websocket
       assert plan.surface.fallback_ids == [:openai_responses_text_http_sse]
+      refute ReqLlmNext.Adapters.OpenAI.GPT4oMini in plan.plan_adapters
+    end
+
+    test "rejects temperature on the websocket responses surface" do
+      {:ok, model} = LLMDB.model("openai:gpt-4o-mini")
+
+      assert {:error, %ReqLlmNext.Error.Invalid.Parameter{} = error} =
+               OperationPlanner.plan(
+                 model,
+                 :text,
+                 "Hello",
+                 transport: :websocket,
+                 temperature: 0.7
+               )
+
+      assert Exception.message(error) =~ "temperature is not supported"
     end
   end
 
@@ -101,10 +134,16 @@ defmodule ReqLlmNext.OperationPlannerTest do
       {:ok, model} = LLMDB.model("openai:gpt-4o-mini")
       {:ok, plan} = OperationPlanner.plan(model, :text, "Hello")
 
-      assert %{provider_mod: provider_mod, wire_mod: wire_mod, transport_mod: transport_mod} =
+      assert %{
+               provider_mod: provider_mod,
+               protocol_mod: protocol_mod,
+               wire_mod: wire_mod,
+               transport_mod: transport_mod
+             } =
                ExecutionModules.resolve(plan)
 
       assert provider_mod == ReqLlmNext.Providers.OpenAI
+      assert protocol_mod == ReqLlmNext.SemanticProtocols.OpenAIResponses
       assert wire_mod == ReqLlmNext.Wire.OpenAIResponses
       assert transport_mod == ReqLlmNext.Transports.HTTPStream
     end
@@ -113,10 +152,16 @@ defmodule ReqLlmNext.OperationPlannerTest do
       {:ok, model} = LLMDB.model("openai:gpt-4o-mini")
       {:ok, plan} = OperationPlanner.plan(model, :text, "Hello", transport: :websocket)
 
-      assert %{provider_mod: provider_mod, wire_mod: wire_mod, transport_mod: transport_mod} =
+      assert %{
+               provider_mod: provider_mod,
+               protocol_mod: protocol_mod,
+               wire_mod: wire_mod,
+               transport_mod: transport_mod
+             } =
                ExecutionModules.resolve(plan)
 
       assert provider_mod == ReqLlmNext.Providers.OpenAI
+      assert protocol_mod == ReqLlmNext.SemanticProtocols.OpenAIResponses
       assert wire_mod == ReqLlmNext.Wire.OpenAIResponses
       assert transport_mod == ReqLlmNext.Transports.OpenAIResponsesWebSocket
     end
@@ -125,10 +170,16 @@ defmodule ReqLlmNext.OperationPlannerTest do
       {:ok, model} = LLMDB.model("anthropic:claude-haiku-4-5")
       {:ok, plan} = OperationPlanner.plan(model, :text, "Hello")
 
-      assert %{provider_mod: provider_mod, wire_mod: wire_mod, transport_mod: transport_mod} =
+      assert %{
+               provider_mod: provider_mod,
+               protocol_mod: protocol_mod,
+               wire_mod: wire_mod,
+               transport_mod: transport_mod
+             } =
                ExecutionModules.resolve(plan)
 
       assert provider_mod == ReqLlmNext.Providers.Anthropic
+      assert protocol_mod == ReqLlmNext.SemanticProtocols.AnthropicMessages
       assert wire_mod == ReqLlmNext.Wire.Anthropic
       assert transport_mod == ReqLlmNext.Transports.HTTPStream
     end

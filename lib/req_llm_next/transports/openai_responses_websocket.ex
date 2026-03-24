@@ -9,12 +9,13 @@ defmodule ReqLlmNext.Transports.OpenAIResponsesWebSocket do
   @spec stream(
           module(),
           module(),
+          module(),
           LLMDB.Model.t(),
           String.t() | ReqLlmNext.Context.t(),
           keyword()
         ) ::
           {:ok, Enumerable.t()} | {:error, term()}
-  def stream(provider_mod, wire_mod, model, prompt, opts) do
+  def stream(provider_mod, protocol_mod, wire_mod, model, prompt, opts) do
     timeout = Keyword.get(opts, :receive_timeout, @default_stream_timeout)
 
     with {:ok, request_info, payload, auth_headers, ws_path} <-
@@ -29,7 +30,7 @@ defmodule ReqLlmNext.Transports.OpenAIResponsesWebSocket do
               conn: conn,
               ref: ref,
               websocket: websocket,
-              stream_state: StreamState.new(recorder, wire_mod),
+              stream_state: StreamState.new(recorder, model, wire_mod, protocol_mod),
               receive_timeout: timeout,
               done?: false
             }
@@ -64,7 +65,13 @@ defmodule ReqLlmNext.Transports.OpenAIResponsesWebSocket do
   defp maybe_start_recorder(model, prompt, request_info, opts) do
     case {Fixtures.mode(), Keyword.get(opts, :fixture)} do
       {:record, fixture_name} when is_binary(fixture_name) ->
-        Fixtures.start_recorder(model, fixture_name, prompt, request_info)
+        Fixtures.start_recorder(
+          model,
+          fixture_name,
+          prompt,
+          request_info,
+          execution_metadata(opts)
+        )
 
       _ ->
         nil
@@ -230,4 +237,13 @@ defmodule ReqLlmNext.Transports.OpenAIResponsesWebSocket do
 
   defp default_port("https"), do: 443
   defp default_port("http"), do: 80
+
+  defp execution_metadata(opts) do
+    %{
+      surface_id: Keyword.get(opts, :_execution_surface_id),
+      semantic_protocol: Keyword.get(opts, :_execution_semantic_protocol),
+      wire_format: Keyword.get(opts, :_execution_wire_format),
+      transport: Keyword.get(opts, :_execution_transport)
+    }
+  end
 end

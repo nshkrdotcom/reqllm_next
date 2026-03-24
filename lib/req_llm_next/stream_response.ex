@@ -90,9 +90,7 @@ defmodule ReqLlmNext.StreamResponse do
   """
   @spec object(t()) :: map() | nil
   def object(%__MODULE__{} = resp) do
-    json = text(resp)
-
-    case Jason.decode(json) do
+    case ReqLlmNext.ObjectDecoder.decode(text(resp)) do
       {:ok, object} -> object
       {:error, _} -> nil
     end

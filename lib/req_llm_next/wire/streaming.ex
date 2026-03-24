@@ -2,9 +2,8 @@ defmodule ReqLlmNext.Wire.Streaming do
   @moduledoc """
   Behaviour for streaming wire protocols.
 
-  Wire protocols handle encoding requests and decoding SSE events.
-  They are pure transformations - HTTP configuration (base URLs, auth)
-  comes from Provider modules.
+  Wire protocols own request encoding plus provider-family payload framing.
+  Canonical response normalization belongs to semantic protocol modules.
   """
 
   @type sse_event :: %{data: String.t(), event: String.t() | nil, id: String.t() | nil}
@@ -20,10 +19,9 @@ defmodule ReqLlmNext.Wire.Streaming do
   @callback encode_body(LLMDB.Model.t(), String.t(), keyword()) :: map()
 
   @doc """
-  Decodes an SSE event into text chunks.
-  Returns [nil] for terminal events, [] for non-content events.
+  Decodes one framed transport payload into provider-family events.
   """
-  @callback decode_sse_event(sse_event(), LLMDB.Model.t()) :: [String.t() | nil]
+  @callback decode_wire_event(sse_event() | %{data: map()} | %{data: binary()}) :: [term()]
 
   @doc """
   Returns the options schema for this wire protocol.

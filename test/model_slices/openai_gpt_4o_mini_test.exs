@@ -8,6 +8,7 @@ defmodule ReqLlmNext.ModelSlices.OpenAIGPT4oMiniTest do
     :usage,
     :token_limit,
     :multi_turn,
+    :object_streaming,
     :tool_multi,
     :tool_round_trip,
     :tool_none,

@@ -36,8 +36,8 @@ defmodule ReqLlmNext.Scenarios.ToolRoundTrip do
       "Use the add tool to compute 2 + 3. After the tool result arrives, respond with 'sum=<value>'."
 
     step1_opts =
-      Keyword.merge(opts,
-        fixture: fixture_name(id(), "1"),
+      run_opts(opts,
+        fixture: fixture_for_run(id(), opts, "1"),
         max_tokens: 500,
         tools: tools,
         tool_choice: %{type: "tool", name: "add"}
@@ -53,7 +53,7 @@ defmodule ReqLlmNext.Scenarios.ToolRoundTrip do
 
       ctx2 = ReqLlmNext.Context.execute_and_append_tools(ctx_with_assistant, tool_calls, tools)
 
-      step2_opts = Keyword.merge(opts, fixture: fixture_name(id(), "2"), max_tokens: 500)
+      step2_opts = run_opts(opts, fixture: fixture_for_run(id(), opts, "2"), max_tokens: 500)
 
       case ReqLlmNext.stream_text(model_spec, ctx2, step2_opts) do
         {:ok, resp2} ->

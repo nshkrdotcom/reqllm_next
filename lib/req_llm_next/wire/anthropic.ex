@@ -31,12 +31,13 @@ defmodule ReqLlmNext.Wire.Anthropic do
   @behaviour ReqLlmNext.Wire.Streaming
 
   alias ReqLlmNext.Context.ContentPart
-  alias ReqLlmNext.Response.Usage
+  alias ReqLlmNext.SemanticProtocols.AnthropicMessages, as: AnthropicMessagesProtocol
   alias ReqLlmNext.{Tool, ToolCall}
 
   @anthropic_version "2023-06-01"
   @beta_thinking "interleaved-thinking-2025-05-14"
   @beta_prompt_caching "prompt-caching-2024-07-31"
+  @beta_context_1m "context-1m-2025-08-07"
 
   @reasoning_budget_low 1024
   @reasoning_budget_medium 2048
@@ -68,7 +69,13 @@ defmodule ReqLlmNext.Wire.Anthropic do
     flags = []
     flags = if has_thinking?(opts), do: [@beta_thinking | flags], else: flags
     flags = if has_prompt_caching?(opts), do: [@beta_prompt_caching | flags], else: flags
-    Enum.join(flags, ",")
+    flags = if has_context_1m?(opts), do: [@beta_context_1m | flags], else: flags
+    flags = custom_beta_flags(opts) ++ flags
+
+    flags
+    |> Enum.reverse()
+    |> Enum.uniq()
+    |> Enum.join(",")
   end
 
   defp has_thinking?(opts) do
@@ -77,6 +84,18 @@ defmodule ReqLlmNext.Wire.Anthropic do
 
   defp has_prompt_caching?(opts) do
     Keyword.get(opts, :anthropic_prompt_cache, false) == true
+  end
+
+  defp has_context_1m?(opts) do
+    Keyword.get(opts, :anthropic_context_1m, false) == true
+  end
+
+  defp custom_beta_flags(opts) do
+    case Keyword.get(opts, :anthropic_beta_headers, []) do
+      flags when is_binary(flags) -> [flags]
+      flags when is_list(flags) -> Enum.filter(flags, &is_binary/1)
+      _ -> []
+    end
   end
 
   @doc """
@@ -307,84 +326,27 @@ defmodule ReqLlmNext.Wire.Anthropic do
   end
 
   @impl ReqLlmNext.Wire.Streaming
-  def decode_sse_event(%{data: data}, model) do
+  def decode_wire_event(%{data: data}) when is_binary(data) do
     case Jason.decode(data) do
-      {:ok, %{"type" => "error", "error" => error}} ->
-        message = error["message"] || "Unknown API error"
-        error_type = error["type"] || "api_error"
-        [{:error, %{message: message, type: error_type}}]
+      {:ok, decoded} when is_map(decoded) ->
+        [decoded]
 
-      {:ok, %{"type" => "message_stop"}} ->
-        [nil]
-
-      {:ok, %{"type" => "message_delta", "usage" => usage}} when is_map(usage) ->
-        [{:usage, Usage.normalize(usage, model)}]
-
-      {:ok,
-       %{"type" => "content_block_delta", "delta" => %{"type" => "text_delta", "text" => text}}} ->
-        [text]
-
-      {:ok,
-       %{
-         "type" => "content_block_delta",
-         "delta" => %{"type" => "thinking_delta", "thinking" => text}
-       }} ->
-        [{:thinking, text}]
-
-      {:ok,
-       %{
-         "type" => "content_block_delta",
-         "delta" => %{"type" => "thinking_delta", "text" => text}
-       }} ->
-        [{:thinking, text}]
-
-      {:ok, %{"type" => "content_block_delta", "delta" => %{"text" => text}}} ->
-        [text]
-
-      {:ok,
-       %{
-         "type" => "content_block_start",
-         "content_block" => %{"type" => "thinking"} = block
-       }} ->
-        text = block["thinking"] || block["text"] || ""
-        chunks = if text != "", do: [{:thinking, text}], else: []
-        [{:thinking_start, nil} | chunks]
-
-      {:ok,
-       %{
-         "type" => "content_block_start",
-         "index" => index,
-         "content_block" => %{"type" => "tool_use"} = block
-       }} ->
-        [
-          {:tool_call_start,
-           %{
-             index: index,
-             id: block["id"],
-             name: block["name"]
-           }}
-        ]
-
-      {:ok,
-       %{
-         "type" => "content_block_delta",
-         "index" => index,
-         "delta" => %{"type" => "input_json_delta", "partial_json" => json}
-       }} ->
-        [{:tool_call_delta, %{index: index, partial_json: json}}]
-
-      {:ok, _} ->
+      {:ok, _decoded} ->
         []
 
       {:error, decode_error} ->
-        [
-          {:error,
-           %{
-             message: "Failed to decode SSE event: #{inspect(decode_error)}",
-             type: "decode_error"
-           }}
-        ]
+        [{:decode_error, decode_error}]
     end
+  end
+
+  def decode_wire_event(%{data: data}) when is_map(data), do: [data]
+  def decode_wire_event(_event), do: []
+
+  @spec decode_sse_event(map(), LLMDB.Model.t() | nil) :: [term()]
+  def decode_sse_event(event, model) do
+    event
+    |> decode_wire_event()
+    |> Enum.flat_map(&AnthropicMessagesProtocol.decode_event(&1, model))
   end
 
   defp maybe_add(body, _key, nil), do: body

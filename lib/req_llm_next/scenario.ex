@@ -115,6 +115,31 @@ defmodule ReqLlmNext.Scenario do
     end
   end
 
+  @doc """
+  Resolve the fixture name for a scenario run.
+
+  If `opts[:fixture]` is provided, it wins. Otherwise a `:fixture_suffix` is
+  appended to the deterministic scenario fixture name.
+  """
+  @spec fixture_for_run(atom(), keyword(), nil | String.t() | atom()) :: String.t()
+  def fixture_for_run(scenario_id, opts, step \\ nil)
+      when is_atom(scenario_id) and is_list(opts) do
+    case Keyword.get(opts, :fixture) do
+      fixture when is_binary(fixture) ->
+        fixture
+
+      _ ->
+        base = fixture_name(scenario_id, step)
+
+        case Keyword.get(opts, :fixture_suffix) do
+          suffix when is_binary(suffix) and suffix != "" -> "#{base}_#{suffix}"
+          nil -> base
+          suffix when is_atom(suffix) -> "#{base}_#{Atom.to_string(suffix)}"
+          _ -> base
+        end
+    end
+  end
+
   @doc "Build a successful result"
   @spec ok([step_result()]) :: result()
   def ok(steps \\ []), do: %{status: :ok, steps: steps, error: nil}
@@ -126,6 +151,15 @@ defmodule ReqLlmNext.Scenario do
   @doc "Build a skipped result"
   @spec skipped(term()) :: result()
   def skipped(reason \\ :not_applicable), do: %{status: :skipped, steps: [], error: reason}
+
+  @doc """
+  Merge scenario defaults with caller-provided opts, allowing callers to override
+  scenario defaults such as token budgets and provider-specific knobs.
+  """
+  @spec run_opts(keyword(), keyword()) :: keyword()
+  def run_opts(opts, defaults) when is_list(opts) and is_list(defaults) do
+    Keyword.merge(defaults, opts)
+  end
 
   @doc "Build a step result map"
   @spec step(String.t(), :ok | :error, keyword()) :: step_result()
@@ -155,6 +189,9 @@ defmodule ReqLlmNext.Scenario do
         only: [
           fixture_name: 1,
           fixture_name: 2,
+          fixture_for_run: 2,
+          fixture_for_run: 3,
+          run_opts: 2,
           ok: 0,
           ok: 1,
           error: 1,

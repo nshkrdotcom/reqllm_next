@@ -24,7 +24,7 @@ defmodule ReqLlmNext.Scenarios.Embedding do
       "Completely different text about cats and dogs playing in the park."
     ]
 
-    fixture_opts = Keyword.merge(opts, fixture: fixture_name(id()))
+    fixture_opts = run_opts(opts, fixture: fixture_for_run(id(), opts))
 
     case ReqLlmNext.embed(model_spec, texts, fixture_opts) do
       {:ok, embeddings} when is_list(embeddings) and length(embeddings) == 3 ->

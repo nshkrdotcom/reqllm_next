@@ -11,7 +11,7 @@ defmodule ReqLlmNext.Fixtures do
   - Format matches req_llm: request/response metadata + b64-encoded raw SSE chunks
   """
 
-  alias ReqLlmNext.Wire.Resolver
+  alias ReqLlmNext.{ExecutionModules, Wire.Resolver}
 
   @root Path.expand("../../test/fixtures", __DIR__)
 
@@ -59,8 +59,8 @@ defmodule ReqLlmNext.Fixtures do
         case File.read(fixture_path) do
           {:ok, contents} ->
             fixture = Jason.decode!(contents)
-            wire_mod = replay_wire_module(fixture, model)
-            stream = build_replay_stream(fixture, wire_mod, model)
+            runtime = replay_runtime(fixture, model, opts)
+            stream = build_replay_stream(fixture, runtime, model)
             {:ok, stream}
 
           {:error, _} ->
@@ -75,17 +75,17 @@ defmodule ReqLlmNext.Fixtures do
     end
   end
 
-  defp build_replay_stream(%{"chunks" => chunks} = fixture, wire_mod, model) do
+  defp build_replay_stream(%{"chunks" => chunks} = fixture, runtime, model) do
     case request_transport(fixture) do
       "websocket" ->
-        build_websocket_replay_stream(chunks, wire_mod, model)
+        build_websocket_replay_stream(chunks, runtime, model)
 
       _ ->
-        build_sse_replay_stream(chunks, wire_mod, model)
+        build_sse_replay_stream(chunks, runtime, model)
     end
   end
 
-  defp build_sse_replay_stream(chunks, wire_mod, model) do
+  defp build_sse_replay_stream(chunks, %{wire_mod: wire_mod, protocol_mod: protocol_mod}, model) do
     Stream.resource(
       fn -> {chunks, ""} end,
       fn
@@ -99,7 +99,8 @@ defmodule ReqLlmNext.Fixtures do
 
           text_chunks =
             events
-            |> Enum.flat_map(&wire_mod.decode_sse_event(&1, model))
+            |> Enum.flat_map(&wire_mod.decode_wire_event/1)
+            |> Enum.flat_map(&protocol_mod.decode_event(&1, model))
             |> Enum.reject(&is_nil/1)
 
           {text_chunks, {rest, remaining}}
@@ -108,7 +109,11 @@ defmodule ReqLlmNext.Fixtures do
     )
   end
 
-  defp build_websocket_replay_stream(chunks, wire_mod, model) do
+  defp build_websocket_replay_stream(
+         chunks,
+         %{wire_mod: wire_mod, protocol_mod: protocol_mod},
+         model
+       ) do
     Stream.resource(
       fn -> chunks end,
       fn
@@ -120,7 +125,8 @@ defmodule ReqLlmNext.Fixtures do
 
           text_chunks =
             %{data: raw_data}
-            |> wire_mod.decode_sse_event(model)
+            |> wire_mod.decode_wire_event()
+            |> Enum.flat_map(&protocol_mod.decode_event(&1, model))
             |> Enum.reject(&is_nil/1)
 
           {text_chunks, rest}
@@ -129,26 +135,75 @@ defmodule ReqLlmNext.Fixtures do
     )
   end
 
-  defp replay_wire_module(%{"request" => %{"url" => url}}, model) when is_binary(url) do
-    cond do
-      String.contains?(url, "/v1/chat/completions") -> ReqLlmNext.Wire.OpenAIChat
-      String.contains?(url, "/v1/responses") -> ReqLlmNext.Wire.OpenAIResponses
-      String.contains?(url, "/v1/messages") -> ReqLlmNext.Wire.Anthropic
-      true -> Resolver.wire_module!(model)
+  defp replay_runtime(fixture, model, opts) do
+    fixture_runtime(fixture) || runtime_from_request(fixture, model) || runtime_from_opts(opts)
+  end
+
+  defp fixture_runtime(%{"execution" => execution}) when is_map(execution) do
+    with {:ok, semantic_protocol} <- fetch_existing_atom(execution, "semantic_protocol"),
+         {:ok, wire_format} <- fetch_existing_atom(execution, "wire_format") do
+      %{
+        protocol_mod: ExecutionModules.protocol_module!(semantic_protocol),
+        wire_mod: ExecutionModules.wire_module!(wire_format)
+      }
+    else
+      _ -> nil
     end
   end
 
-  defp replay_wire_module(_fixture, model), do: Resolver.wire_module!(model)
+  defp fixture_runtime(_fixture), do: nil
+
+  defp runtime_from_opts(opts) do
+    with semantic_protocol when is_atom(semantic_protocol) and not is_nil(semantic_protocol) <-
+           Keyword.get(opts, :_execution_semantic_protocol),
+         wire_format when is_atom(wire_format) and not is_nil(wire_format) <-
+           Keyword.get(opts, :_execution_wire_format) do
+      %{
+        protocol_mod: ExecutionModules.protocol_module!(semantic_protocol),
+        wire_mod: ExecutionModules.wire_module!(wire_format)
+      }
+    else
+      _ -> nil
+    end
+  end
+
+  defp runtime_from_request(%{"request" => %{"url" => url}}, model) when is_binary(url) do
+    cond do
+      String.contains?(url, "/v1/chat/completions") ->
+        %{
+          protocol_mod: ExecutionModules.protocol_module!(:openai_chat),
+          wire_mod: ReqLlmNext.Wire.OpenAIChat
+        }
+
+      String.contains?(url, "/v1/responses") ->
+        %{
+          protocol_mod: ExecutionModules.protocol_module!(:openai_responses),
+          wire_mod: ReqLlmNext.Wire.OpenAIResponses
+        }
+
+      String.contains?(url, "/v1/messages") ->
+        %{
+          protocol_mod: ExecutionModules.protocol_module!(:anthropic_messages),
+          wire_mod: ReqLlmNext.Wire.Anthropic
+        }
+
+      true ->
+        runtime_from_model(model)
+    end
+  end
+
+  defp runtime_from_request(_fixture, model), do: runtime_from_model(model)
 
   @doc """
   Create a recorder struct to capture Finch stream data.
   """
-  def start_recorder(model, fixture_name, prompt, request) do
+  def start_recorder(model, fixture_name, prompt, request, execution \\ %{}) do
     %{
       model: model,
       fixture_name: fixture_name,
       prompt: prompt,
       request: extract_request_info(request),
+      execution: normalize_execution_metadata(execution),
       status: nil,
       headers: %{},
       chunks: [],
@@ -288,6 +343,7 @@ defmodule ReqLlmNext.Fixtures do
       "prompt" => recorder.prompt,
       "captured_at" => recorder.captured_at,
       "request" => recorder.request,
+      "execution" => Map.get(recorder, :execution, %{}),
       "response" => %{
         "status" => recorder.status,
         "headers" => recorder.headers
@@ -303,4 +359,51 @@ defmodule ReqLlmNext.Fixtures do
     do: transport
 
   defp request_transport(_fixture), do: "http_sse"
+
+  defp runtime_from_model(model) do
+    %{
+      protocol_mod: ExecutionModules.protocol_module!(semantic_protocol_for_model(model)),
+      wire_mod: Resolver.wire_module!(model)
+    }
+  end
+
+  defp semantic_protocol_for_model(%LLMDB.Model{} = model) do
+    cond do
+      model.provider == :anthropic -> :anthropic_messages
+      Resolver.responses_api?(model) -> :openai_responses
+      true -> :openai_chat
+    end
+  end
+
+  defp normalize_execution_metadata(execution) when is_map(execution) do
+    execution
+    |> Enum.reject(fn {_key, value} -> is_nil(value) end)
+    |> Enum.map(fn {key, value} ->
+      normalized =
+        case value do
+          atom when is_atom(atom) -> Atom.to_string(atom)
+          other -> other
+        end
+
+      {Atom.to_string(key), normalized}
+    end)
+    |> Map.new()
+  end
+
+  defp fetch_existing_atom(map, key) do
+    case Map.get(map, key) do
+      value when is_binary(value) ->
+        try do
+          {:ok, String.to_existing_atom(value)}
+        rescue
+          ArgumentError -> :error
+        end
+
+      value when is_atom(value) ->
+        {:ok, value}
+
+      _ ->
+        :error
+    end
+  end
 end

@@ -17,7 +17,7 @@ defmodule ReqLlmNext.Scenarios.TokenLimit do
 
   @impl true
   def run(model_spec, _model, opts) do
-    fixture_opts = Keyword.merge(opts, fixture: fixture_name(id()), max_tokens: 50)
+    fixture_opts = run_opts(opts, fixture: fixture_for_run(id(), opts), max_tokens: 50)
 
     case ReqLlmNext.generate_text(
            model_spec,

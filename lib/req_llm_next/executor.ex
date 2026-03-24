@@ -19,6 +19,8 @@ defmodule ReqLlmNext.Executor do
     Error,
     Fixtures,
     ModelResolver,
+    ObjectDecoder,
+    ObjectPrompt,
     OperationPlanner,
     Response,
     Schema,
@@ -66,7 +68,12 @@ defmodule ReqLlmNext.Executor do
              |> Keyword.put(:_model_spec, inspect_model_spec(model_spec))
            ),
          runtime_opts <- runtime_opts(plan, model),
-         %{provider_mod: provider_mod, wire_mod: wire_mod, transport_mod: transport_mod} <-
+         %{
+           provider_mod: provider_mod,
+           protocol_mod: protocol_mod,
+           wire_mod: wire_mod,
+           transport_mod: transport_mod
+         } <-
            ExecutionModules.resolve(plan) do
       case Fixtures.maybe_replay_stream(model, prompt, runtime_opts) do
         {:ok, replay_stream} ->
@@ -74,7 +81,14 @@ defmodule ReqLlmNext.Executor do
 
         :no_fixture ->
           with {:ok, stream} <-
-                 transport_mod.stream(provider_mod, wire_mod, model, prompt, runtime_opts) do
+                 transport_mod.stream(
+                   provider_mod,
+                   protocol_mod,
+                   wire_mod,
+                   model,
+                   prompt,
+                   runtime_opts
+                 ) do
             {:ok, %StreamResponse{stream: stream, model: model}}
           end
       end
@@ -93,16 +107,29 @@ defmodule ReqLlmNext.Executor do
            |> Keyword.put(:_stream?, true)
            |> Keyword.put(:_model_spec, inspect_model_spec(model_spec)),
          {:ok, plan} <- OperationPlanner.plan(model, :object, prompt, planning_opts),
+         {:ok, execution_prompt} <- object_prompt(prompt, plan, compiled_schema),
          runtime_opts <- runtime_opts(plan, model),
-         %{provider_mod: provider_mod, wire_mod: wire_mod, transport_mod: transport_mod} <-
+         %{
+           provider_mod: provider_mod,
+           protocol_mod: protocol_mod,
+           wire_mod: wire_mod,
+           transport_mod: transport_mod
+         } <-
            ExecutionModules.resolve(plan) do
-      case Fixtures.maybe_replay_stream(model, prompt, runtime_opts) do
+      case Fixtures.maybe_replay_stream(model, execution_prompt, runtime_opts) do
         {:ok, replay_stream} ->
           {:ok, %StreamResponse{stream: replay_stream, model: model}}
 
         :no_fixture ->
           with {:ok, stream} <-
-                 transport_mod.stream(provider_mod, wire_mod, model, prompt, runtime_opts) do
+                 transport_mod.stream(
+                   provider_mod,
+                   protocol_mod,
+                   wire_mod,
+                   model,
+                   execution_prompt,
+                   runtime_opts
+                 ) do
             {:ok, %StreamResponse{stream: stream, model: model}}
           end
       end
@@ -119,7 +146,7 @@ defmodule ReqLlmNext.Executor do
       json_text = StreamResponse.text(stream_resp)
       model = stream_resp.model
 
-      case Jason.decode(json_text) do
+      case ObjectDecoder.decode(json_text) do
         {:ok, object} ->
           case Schema.validate(object, compiled_schema) do
             {:ok, validated_object} ->
@@ -191,6 +218,23 @@ defmodule ReqLlmNext.Executor do
     |> Enum.into([])
     |> Keyword.drop([:transport])
     |> then(&AdapterPipeline.apply_modules(plan.plan_adapters, model, &1))
+    |> Keyword.merge(
+      _execution_surface_id: plan.surface.id,
+      _execution_semantic_protocol: plan.semantic_protocol,
+      _execution_wire_format: plan.wire_format,
+      _execution_transport: plan.transport,
+      _structured_output_strategy: plan.surface.features.structured_output
+    )
+  end
+
+  defp object_prompt(prompt, plan, compiled_schema) do
+    case plan.surface.features.structured_output do
+      :prompt_and_parse ->
+        {:ok, ObjectPrompt.for_prompt_and_parse(prompt, compiled_schema)}
+
+      _ ->
+        {:ok, prompt}
+    end
   end
 
   defp inspect_model_spec(model_spec) when is_binary(model_spec), do: model_spec

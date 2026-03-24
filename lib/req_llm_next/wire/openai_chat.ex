@@ -8,8 +8,8 @@ defmodule ReqLlmNext.Wire.OpenAIChat do
 
   @behaviour ReqLlmNext.Wire.Streaming
 
-  alias ReqLlmNext.Response.Usage
   alias ReqLlmNext.Context.ContentPart
+  alias ReqLlmNext.SemanticProtocols.OpenAIChat, as: OpenAIChatProtocol
   alias ReqLlmNext.{Tool, ToolCall}
 
   @impl ReqLlmNext.Wire.Streaming
@@ -88,8 +88,12 @@ defmodule ReqLlmNext.Wire.OpenAIChat do
     do: %{type: "image_url", image_url: %{url: url}}
 
   defp maybe_add_response_format(body, opts) do
-    case {Keyword.get(opts, :operation), Keyword.get(opts, :compiled_schema)} do
-      {:object, %{schema: schema}} when not is_nil(schema) ->
+    case {
+           Keyword.get(opts, :operation),
+           Keyword.get(opts, :compiled_schema),
+           Keyword.get(opts, :_structured_output_strategy)
+         } do
+      {:object, %{schema: schema}, :native_json_schema} when not is_nil(schema) ->
         json_schema = ReqLlmNext.Schema.to_json(schema)
 
         Map.put(body, :response_format, %{
@@ -142,58 +146,30 @@ defmodule ReqLlmNext.Wire.OpenAIChat do
   end
 
   @impl ReqLlmNext.Wire.Streaming
-  def decode_sse_event(%{data: "[DONE]"}, _model), do: [nil]
+  def decode_wire_event(%{data: "[DONE]"}), do: [:done]
 
-  def decode_sse_event(%{data: data}, model) do
+  def decode_wire_event(%{data: data}) when is_binary(data) do
     case Jason.decode(data) do
-      {:ok, %{"error" => error}} ->
-        message = error["message"] || "Unknown API error"
-        error_type = error["type"] || "api_error"
-        [{:error, %{message: message, type: error_type, code: error["code"]}}]
+      {:ok, decoded} when is_map(decoded) ->
+        [decoded]
 
-      {:ok, %{"choices" => [%{"delta" => delta} | _]} = payload} ->
-        content = decode_delta(delta)
-        usage = maybe_extract_usage(payload, model)
-        content ++ usage
-
-      {:ok, %{"usage" => usage} = _payload} when is_map(usage) ->
-        [{:usage, Usage.normalize(usage, model)}]
-
-      {:ok, _} ->
+      {:ok, _decoded} ->
         []
 
       {:error, decode_error} ->
-        [
-          {:error,
-           %{
-             message: "Failed to decode SSE event: #{inspect(decode_error)}",
-             type: "decode_error"
-           }}
-        ]
+        [{:decode_error, decode_error}]
     end
   end
 
-  defp maybe_extract_usage(%{"usage" => usage}, model) when is_map(usage) do
-    [{:usage, Usage.normalize(usage, model)}]
+  def decode_wire_event(%{data: data}) when is_map(data), do: [data]
+  def decode_wire_event(_event), do: []
+
+  @spec decode_sse_event(map(), LLMDB.Model.t() | nil) :: [term()]
+  def decode_sse_event(event, model) do
+    event
+    |> decode_wire_event()
+    |> Enum.flat_map(&OpenAIChatProtocol.decode_event(&1, model))
   end
-
-  defp maybe_extract_usage(_payload, _model), do: []
-
-  defp decode_delta(%{"content" => content}) when is_binary(content), do: [content]
-
-  defp decode_delta(%{"tool_calls" => tool_calls}) when is_list(tool_calls) do
-    Enum.map(tool_calls, fn tc ->
-      {:tool_call_delta,
-       %{
-         index: tc["index"],
-         id: tc["id"],
-         type: tc["type"],
-         function: tc["function"]
-       }}
-    end)
-  end
-
-  defp decode_delta(_), do: []
 
   defp maybe_add(body, _key, nil), do: body
   defp maybe_add(body, key, value), do: Map.put(body, key, value)

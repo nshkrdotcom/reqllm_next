@@ -30,7 +30,7 @@ defmodule ReqLlmNext.Scenarios.ImageInput do
         ])
       ])
 
-    fixture_opts = Keyword.merge(opts, fixture: fixture_name(id()), max_tokens: 100)
+    fixture_opts = run_opts(opts, fixture: fixture_for_run(id(), opts), max_tokens: 100)
 
     case ReqLlmNext.generate_text(model_spec, context, fixture_opts) do
       {:ok, response} ->

@@ -23,9 +23,10 @@ surface:
   - lib/req_llm_next/operation_planner.ex
   - lib/req_llm_next/policy_rules.ex
   - lib/req_llm_next/execution_modules.ex
+  - .spec/specs/public_api.spec.md
+  - test/public_api/**/*.exs
   - test/model_resolver_test.exs
   - test/operation_planner_test.exs
-  - test/req_llm_next_test.exs
 decisions:
   - reqllm.decision.model_input_boundary
   - reqllm.decision.execution_layers
@@ -46,7 +47,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.architecture.facts_mode_policy_plan
-  statement: ReqLlmNext architecture shall normalize model facts into `ModelProfile`, request intent into `ExecutionMode`, resolve ordered policy rules, and materialize a single `ExecutionPlan` before downstream execution.
+  statement: ReqLlmNext architecture shall normalize model facts into `ModelProfile`, request intent into `ExecutionMode`, resolve ordered policy rules, and materialize a single `ExecutionPlan` before downstream execution, including honoring explicit transport preference when a matching surface exists and validating surface-specific parameter compatibility before wire encoding.
   priority: must
   stability: evolving
 
@@ -81,7 +82,7 @@ decisions:
     - reqllm.architecture.execution_layers
 
 - kind: command
-  target: mix test test/model_resolver_test.exs test/req_llm_next_test.exs
+  target: mix test test/model_resolver_test.exs test/public_api
   execute: true
   covers:
     - reqllm.architecture.model_input_boundary

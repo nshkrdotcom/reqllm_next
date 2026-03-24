@@ -4,14 +4,17 @@ defmodule ReqLlmNext.ModelSlices.AnthropicHaiku45Test do
   @model_spec "anthropic:claude-haiku-4-5"
   @expected_scenarios [
     :basic,
+    :streaming,
     :usage,
     :token_limit,
     :multi_turn,
+    :object_streaming,
     :tool_multi,
     :tool_round_trip,
     :tool_none,
     :reasoning,
-    :image_input
+    :image_input,
+    :prompt_caching
   ]
 
   test "starter scenario set stays explicit for claude-haiku-4-5" do

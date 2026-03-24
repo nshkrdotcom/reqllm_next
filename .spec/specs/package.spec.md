@@ -9,6 +9,7 @@ status: active
 summary: Metadata-driven LLM client runtime and test contract.
 surface:
   - lib/**/*.ex
+  - test/support/**/*.ex
   - test/**/*.exs
   - test/fixtures/**/*.json
 ```
@@ -22,17 +23,22 @@ surface:
   stability: evolving
 
 - id: reqllm.package.fixture_replay
-  statement: ReqLlmNext shall verify package behavior with deterministic automated tests that exercise provider scenarios and replay recorded fixtures by default.
+  statement: ReqLlmNext shall verify package behavior with deterministic automated tests that exercise provider scenarios and replay recorded fixtures by default, preserving the recorded execution surface when fixtures were captured against an older but still valid endpoint shape.
   priority: must
   stability: evolving
 
 - id: reqllm.package.execution_planning
-  statement: ReqLlmNext shall route supported requests through a deterministic planning path that normalizes model facts into `ModelProfile`, request intent into `ExecutionMode`, selects explicit `ExecutionSurface` support, and materializes an `ExecutionPlan` before executing provider and wire bridges.
+  statement: ReqLlmNext shall route supported requests through a deterministic planning path that normalizes model facts into `ModelProfile`, request intent into `ExecutionMode`, selects explicit `ExecutionSurface` support, validates surface-specific parameter compatibility, materializes an `ExecutionPlan`, and resolves an execution stack of provider, semantic protocol, wire, and transport modules before runtime execution.
   priority: must
   stability: evolving
 
+- id: reqllm.package.buffered_stream_metadata
+  statement: When ReqLlmNext buffers a streamed response into the canonical `Response` shape, it shall preserve terminal metadata such as finish reason and provider-facing response identifiers emitted by the canonical stream.
+  priority: should
+  stability: evolving
+
 - id: reqllm.package.model_slice_verification
-  statement: ReqLlmNext shall be able to lock supported scenario sets to explicit starter-model slices with fixture-backed tests so provider-specific support stays visible as the planning path evolves.
+  statement: ReqLlmNext shall be able to lock supported scenario sets to explicit starter-model slices and curated provider support-matrix lanes, including alternative transport lanes where relevant, so provider-specific support stays visible as the planning path evolves without exploding into a one-file-per-model matrix.
   priority: should
   stability: evolving
 
@@ -52,6 +58,13 @@ surface:
     - reqllm.package.multi_provider_api
     - reqllm.package.fixture_replay
     - reqllm.package.execution_planning
+    - reqllm.package.buffered_stream_metadata
+
+- kind: command
+  target: mix test test/public_api
+  execute: true
+  covers:
+    - reqllm.package.multi_provider_api
 
 - kind: command
   target: mix test test/operation_planner_test.exs
@@ -75,6 +88,34 @@ surface:
   target: mix test.starter_slice
   execute: true
   covers:
+    - reqllm.package.model_slice_verification
+
+- kind: command
+  target: mix test test/coverage/anthropic_comprehensive_test.exs
+  execute: true
+  covers:
+    - reqllm.package.fixture_replay
+    - reqllm.package.model_slice_verification
+
+- kind: command
+  target: mix test test/coverage/openai_comprehensive_test.exs
+  execute: true
+  covers:
+    - reqllm.package.fixture_replay
+    - reqllm.package.model_slice_verification
+
+- kind: command
+  target: mix test test/coverage/openai_websocket_coverage_test.exs
+  execute: true
+  covers:
+    - reqllm.package.fixture_replay
+    - reqllm.package.model_slice_verification
+
+- kind: command
+  target: mix test test/provider_features/anthropic_beta_features_test.exs
+  execute: true
+  covers:
+    - reqllm.package.fixture_replay
     - reqllm.package.model_slice_verification
 
 - kind: command

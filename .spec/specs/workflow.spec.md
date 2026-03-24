@@ -37,7 +37,7 @@ surface:
   stability: evolving
 
 - id: reqllm.workflow.starter_slice_verification
-  statement: Contributor workflow shall provide a named verification entry point for the current starter-model slice so replay-backed checks and live fixture refreshes use the same scenario and coverage path.
+  statement: Contributor workflow shall provide named verification entry points for the current starter-model slices and curated provider support-matrix lanes so replay-backed checks, live fixture refreshes, websocket coverage, and provider-feature probes use explicit shared paths.
   priority: should
   stability: evolving
 ```

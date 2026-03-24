@@ -195,13 +195,18 @@ defmodule ReqLlmNext.ModelHelpersTest do
   end
 
   describe "supports_object_generation?/1" do
-    test "returns true when model supports json schema" do
+    test "returns true when model supports native json schema" do
       model = TestModels.openai()
       assert ModelHelpers.supports_object_generation?(model)
     end
 
-    test "returns false when model does not support json schema" do
+    test "returns true for prompt-and-parse chat models" do
       model = TestModels.anthropic()
+      assert ModelHelpers.supports_object_generation?(model)
+    end
+
+    test "returns false for non-chat models" do
+      model = TestModels.openai_embedding()
       refute ModelHelpers.supports_object_generation?(model)
     end
 
@@ -213,28 +218,38 @@ defmodule ReqLlmNext.ModelHelpersTest do
   end
 
   describe "supports_streaming_object_generation?/1" do
-    test "returns true when model supports object generation and streaming" do
+    test "returns true when model supports object generation and streaming text" do
       model = TestModels.openai()
       assert ModelHelpers.supports_streaming_object_generation?(model)
     end
 
-    test "returns false when model does not support json schema" do
+    test "returns true for prompt-and-parse chat models" do
       model = TestModels.anthropic()
-      refute ModelHelpers.supports_streaming_object_generation?(model)
+      assert ModelHelpers.supports_streaming_object_generation?(model)
     end
 
-    test "returns false when streaming tool calls is explicitly false" do
+    test "returns false when streaming text is explicitly false" do
       model =
         TestModels.openai(%{
-          capabilities: %{json: %{schema: true}, streaming: %{tool_calls: false}}
+          capabilities: %{
+            chat: true,
+            json: %{schema: true},
+            streaming: %{text: false, tool_calls: false}
+          }
         })
 
       refute ModelHelpers.supports_streaming_object_generation?(model)
     end
 
-    test "returns true when streaming tool calls is nil (not set)" do
+    test "returns true when streaming text is enabled on a prompt-and-parse model" do
       model =
-        TestModels.openai(%{capabilities: %{json: %{schema: true}, streaming: %{text: true}}})
+        TestModels.openai(%{
+          capabilities: %{
+            chat: true,
+            json: %{schema: false},
+            streaming: %{text: true}
+          }
+        })
 
       assert ModelHelpers.supports_streaming_object_generation?(model)
     end

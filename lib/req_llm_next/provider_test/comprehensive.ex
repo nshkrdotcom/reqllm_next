@@ -19,29 +19,18 @@ defmodule ReqLlmNext.ProviderTest.Comprehensive do
   """
 
   @doc """
-  Returns list of models for a provider.
+  Returns curated coverage entries for a provider.
   """
-  def models_for_provider(:openai) do
-    [
-      "openai:gpt-4o-mini",
-      "openai:gpt-4o"
-    ]
+  def entries_for_provider(provider, group \\ :coverage) do
+    ReqLlmNext.SupportMatrix.entries(provider, group)
   end
-
-  def models_for_provider(:anthropic) do
-    [
-      "anthropic:claude-sonnet-4-20250514",
-      "anthropic:claude-haiku-4-5-20251001"
-    ]
-  end
-
-  def models_for_provider(_), do: []
 
   defmacro __using__(opts) do
     provider = Keyword.fetch!(opts, :provider)
-    models = Keyword.get(opts, :models)
+    entries = Keyword.get(opts, :entries)
+    group = Keyword.get(opts, :group, :coverage)
 
-    quote bind_quoted: [provider: provider, models: models] do
+    quote bind_quoted: [provider: provider, entries: entries, group: group] do
       use ExUnit.Case, async: false
 
       import ExUnit.Case
@@ -51,33 +40,42 @@ defmodule ReqLlmNext.ProviderTest.Comprehensive do
       @moduletag timeout: 300_000
 
       @provider provider
-      @models models || ReqLlmNext.ProviderTest.Comprehensive.models_for_provider(provider)
+      @entries entries || ReqLlmNext.ProviderTest.Comprehensive.entries_for_provider(provider, group)
 
       setup_all do
         LLMDB.load(allow: :all, custom: %{})
         :ok
       end
 
-      for model_spec <- @models do
-        @model_spec model_spec
+      for entry <- @entries do
+        @entry entry
+        @model_spec entry.spec
+        @scenario_ids entry.scenarios
+        @run_opts entry.opts
 
-        describe "#{model_spec}" do
-          @describetag model: model_spec |> String.split(":", parts: 2) |> List.last()
+        describe "#{entry.spec}" do
+          @describetag model: entry.spec |> String.split(":", parts: 2) |> List.last()
+          @describetag lane: entry.lane
+          @describetag group: entry.group
 
-          {:ok, model} = LLMDB.model(model_spec)
-          scenarios = ReqLlmNext.Scenarios.for_model(model)
+          {:ok, model} = LLMDB.model(entry.spec)
+
+          scenarios =
+            model
+            |> ReqLlmNext.Scenarios.for_model()
+            |> Enum.filter(&(&1.id() in entry.scenarios))
 
           for scenario_mod <- scenarios do
             @scenario_mod scenario_mod
             @tag scenario: scenario_mod.id()
 
             test scenario_mod.name() do
-              {:ok, model} = LLMDB.model(unquote(model_spec))
-              result = unquote(scenario_mod).run(unquote(model_spec), model, [])
+              {:ok, model} = LLMDB.model(unquote(entry.spec))
+              result = unquote(scenario_mod).run(unquote(entry.spec), model, unquote(entry.opts))
 
               assert result.status == :ok,
                      """
-                     Scenario :#{unquote(scenario_mod).id()} failed for #{unquote(model_spec)}
+                     Scenario :#{unquote(scenario_mod).id()} failed for #{unquote(entry.spec)}
 
                      Error: #{inspect(result.error)}
 

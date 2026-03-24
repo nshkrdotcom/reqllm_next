@@ -17,7 +17,7 @@ defmodule ReqLlmNext.Scenarios.Usage do
 
   @impl true
   def run(model_spec, _model, opts) do
-    fixture_opts = Keyword.merge(opts, fixture: fixture_name(id()), max_tokens: 20)
+    fixture_opts = run_opts(opts, fixture: fixture_for_run(id(), opts), max_tokens: 20)
 
     case ReqLlmNext.stream_text(model_spec, "Hi there!", fixture_opts) do
       {:ok, stream_resp} ->

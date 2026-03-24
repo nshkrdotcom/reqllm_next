@@ -90,7 +90,7 @@ defmodule ReqLlmNext.FixturesTest do
     end
   end
 
-  describe "start_recorder/4" do
+  describe "start_recorder/5" do
     test "creates recorder struct" do
       model = TestModels.openai(%{id: "gpt-4o-mini"})
       finch_request = Finch.build(:post, "https://api.openai.com/v1/chat/completions", [], "{}")
@@ -106,6 +106,7 @@ defmodule ReqLlmNext.FixturesTest do
       assert recorder.chunks == []
       assert is_binary(recorder.captured_at)
       assert is_map(recorder.request)
+      assert recorder.execution == %{}
     end
 
     test "extracts request info with redacted auth" do
@@ -142,13 +143,23 @@ defmodule ReqLlmNext.FixturesTest do
         }
       }
 
-      recorder = Fixtures.start_recorder(model, "websocket", "Hello!", request)
+      recorder =
+        Fixtures.start_recorder(model, "websocket", "Hello!", request, %{
+          surface_id: :openai_responses_text_websocket,
+          semantic_protocol: :openai_responses,
+          wire_format: :openai_responses_ws_json,
+          transport: :websocket
+        })
 
       assert recorder.request["method"] == "WEBSOCKET"
       assert recorder.request["transport"] == "websocket"
       assert recorder.request["url"] == "wss://api.openai.com/v1/responses"
       assert recorder.request["headers"]["authorization"] == "[REDACTED]"
       assert recorder.request["headers"]["openai-beta"] == "responses=v1"
+      assert recorder.execution["surface_id"] == "openai_responses_text_websocket"
+      assert recorder.execution["semantic_protocol"] == "openai_responses"
+      assert recorder.execution["wire_format"] == "openai_responses_ws_json"
+      assert recorder.execution["transport"] == "websocket"
 
       assert (recorder.request["body"]["canonical_json"]["type"] ||
                 recorder.request["body"]["canonical_json"][:type]) == "response.create"
@@ -192,6 +203,7 @@ defmodule ReqLlmNext.FixturesTest do
         prompt: "Test prompt",
         captured_at: DateTime.utc_now() |> DateTime.to_iso8601(),
         request: %{"method" => "POST", "url" => "https://example.com"},
+        execution: %{},
         status: 200,
         headers: %{"content-type" => "text/event-stream"},
         chunks: [Base.encode64(~s(data: {"choices":[{"delta":{"content":"Hi"}}]}\n\n))]
@@ -225,6 +237,12 @@ defmodule ReqLlmNext.FixturesTest do
             "b64" => Base.encode64(~s({"type":"response.create","model":"ws-test-model"}))
           }
         },
+        execution: %{
+          "surface_id" => "openai_responses_text_websocket",
+          "semantic_protocol" => "openai_responses",
+          "wire_format" => "openai_responses_ws_json",
+          "transport" => "websocket"
+        },
         status: 101,
         headers: %{"upgrade" => "websocket"},
         chunks: [
@@ -249,6 +267,10 @@ defmodule ReqLlmNext.FixturesTest do
                {:meta, %{terminal?: true, response_id: "resp_123", finish_reason: :stop}} -> true
                _ -> false
              end)
+
+      fixture = fixture_path |> File.read!() |> Jason.decode!()
+      assert fixture["execution"]["wire_format"] == "openai_responses_ws_json"
+      assert fixture["execution"]["semantic_protocol"] == "openai_responses"
 
       File.rm!(fixture_path)
       File.rmdir(Path.dirname(fixture_path))

@@ -25,7 +25,7 @@ defmodule ReqLlmNext.Scenarios.ObjectStreaming do
       occupation: [type: :string, doc: "Person's job or profession"]
     ]
 
-    fixture_opts = Keyword.merge(opts, fixture: fixture_name(id()), max_tokens: 200)
+    fixture_opts = run_opts(opts, fixture: fixture_for_run(id(), opts), max_tokens: 200)
 
     case ReqLlmNext.stream_object(
            model_spec,

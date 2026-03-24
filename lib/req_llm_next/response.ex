@@ -243,7 +243,7 @@ defmodule ReqLlmNext.Response do
       {:error, error} ->
         {:error, error}
 
-      {:ok, {text_parts, tool_calls, usage}} ->
+      {:ok, {text_parts, tool_calls, usage, meta}} ->
         text = Enum.join(text_parts, "")
 
         message =
@@ -273,7 +273,10 @@ defmodule ReqLlmNext.Response do
              stream: nil,
              message: message,
              context: updated_context,
-             usage: usage || response.usage
+             usage: usage || response.usage,
+             finish_reason: meta[:finish_reason] || response.finish_reason,
+             provider_meta:
+               Map.merge(response.provider_meta || %{}, provider_meta_from_meta(meta))
          }}
     end
   rescue
@@ -282,7 +285,7 @@ defmodule ReqLlmNext.Response do
 
   defp collect_stream(stream) do
     result =
-      Enum.reduce_while(stream, {:ok, {[], %{}, nil}}, fn
+      Enum.reduce_while(stream, {:ok, {[], %{}, nil, %{}}}, fn
         {:error, error_info}, {:ok, _acc} ->
           error =
             ReqLlmNext.Error.API.Stream.exception(
@@ -292,23 +295,26 @@ defmodule ReqLlmNext.Response do
 
           {:halt, {:error, error}}
 
-        text, {:ok, {texts, tool_acc, usage}} when is_binary(text) ->
-          {:cont, {:ok, {[text | texts], tool_acc, usage}}}
+        text, {:ok, {texts, tool_acc, usage, meta}} when is_binary(text) ->
+          {:cont, {:ok, {[text | texts], tool_acc, usage, meta}}}
 
-        {:usage, usage_map}, {:ok, {texts, tool_acc, _usage}} ->
-          {:cont, {:ok, {texts, tool_acc, usage_map}}}
+        {:usage, usage_map}, {:ok, {texts, tool_acc, _usage, meta}} ->
+          {:cont, {:ok, {texts, tool_acc, usage_map, meta}}}
 
-        {:tool_call_delta, %{index: index} = delta}, {:ok, {texts, tool_acc, usage}} ->
+        {:tool_call_delta, %{index: index} = delta}, {:ok, {texts, tool_acc, usage, meta}} ->
           updated =
             Map.update(tool_acc, index, init_tool_call(delta), &merge_tool_call(&1, delta))
 
-          {:cont, {:ok, {texts, updated, usage}}}
+          {:cont, {:ok, {texts, updated, usage, meta}}}
 
-        {:tool_call_start, %{index: index} = start}, {:ok, {texts, tool_acc, usage}} ->
+        {:tool_call_start, %{index: index} = start}, {:ok, {texts, tool_acc, usage, meta}} ->
           updated =
             Map.update(tool_acc, index, init_tool_call_from_start(start), &merge_start(&1, start))
 
-          {:cont, {:ok, {texts, updated, usage}}}
+          {:cont, {:ok, {texts, updated, usage, meta}}}
+
+        {:meta, meta_chunk}, {:ok, {texts, tool_acc, usage, meta}} when is_map(meta_chunk) ->
+          {:cont, {:ok, {texts, tool_acc, usage, Map.merge(meta, meta_chunk)}}}
 
         _other, acc ->
           {:cont, acc}
@@ -318,15 +324,21 @@ defmodule ReqLlmNext.Response do
       {:error, _} = error ->
         error
 
-      {:ok, {texts, tool_acc, usage}} ->
+      {:ok, {texts, tool_acc, usage, meta}} ->
         tool_calls =
           tool_acc
           |> Map.values()
           |> Enum.sort_by(& &1.index)
           |> Enum.map(&finalize_tool_call/1)
 
-        {:ok, {Enum.reverse(texts), tool_calls, usage}}
+        {:ok, {Enum.reverse(texts), tool_calls, usage, meta}}
     end
+  end
+
+  defp provider_meta_from_meta(meta) when is_map(meta) do
+    meta
+    |> Map.drop([:terminal?, :finish_reason])
+    |> Enum.into(%{})
   end
 
   defp init_tool_call(%{id: id, function: function} = delta) when not is_nil(id) do

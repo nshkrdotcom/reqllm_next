@@ -28,7 +28,7 @@ defmodule ReqLlmNext.Scenarios.Reasoning do
     What is the total amount they spend together?
     """
 
-    fixture_opts = Keyword.merge(opts, fixture: fixture_name(id()), max_tokens: 1000)
+    fixture_opts = run_opts(opts, fixture: fixture_for_run(id(), opts), max_tokens: 1000)
 
     case ReqLlmNext.generate_text(model_spec, prompt, fixture_opts) do
       {:ok, response} ->

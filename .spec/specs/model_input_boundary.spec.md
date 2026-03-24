@@ -14,8 +14,9 @@ surface:
   - AGENTS.md
   - lib/req_llm_next.ex
   - lib/req_llm_next/model_resolver.ex
+  - test/public_api/contract_test.exs
+  - test/public_api/text_generation_test.exs
   - test/model_resolver_test.exs
-  - test/req_llm_next_test.exs
 decisions:
   - reqllm.decision.model_input_boundary
 ```
@@ -34,7 +35,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.model_input.fail_fast
-  statement: The model boundary shall fail fast on tuples, ad hoc maps, unsupported types, or invalid model metadata and shall not let raw unvalidated model input continue into execution.
+  statement: The model boundary shall fail fast on tuples, ad hoc maps, unsupported types, or invalid model metadata and shall not let raw unvalidated model input continue into execution, while leaving later surface-specific validation to the planning boundary rather than reintroducing raw model checks downstream.
   priority: must
   stability: evolving
 ```
@@ -50,7 +51,7 @@ decisions:
     - reqllm.model_input.fail_fast
 
 - kind: command
-  target: mix test test/model_resolver_test.exs test/req_llm_next_test.exs
+  target: mix test test/model_resolver_test.exs test/public_api/contract_test.exs test/public_api/text_generation_test.exs
   execute: true
   covers:
     - reqllm.model_input.accepted_forms

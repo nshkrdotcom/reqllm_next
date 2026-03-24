@@ -25,7 +25,7 @@ defmodule ReqLlmNext.Scenarios.Streaming do
         ReqLlmNext.Context.user("Say hello in one short sentence.")
       ])
 
-    fixture_opts = Keyword.merge(opts, fixture: fixture_name(id()), max_tokens: 100)
+    fixture_opts = run_opts(opts, fixture: fixture_for_run(id(), opts), max_tokens: 100)
 
     case ReqLlmNext.stream_text(model_spec, context, fixture_opts) do
       {:ok, stream_resp} ->

@@ -25,7 +25,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.execution_mode.mode_hints_before_policy
-  statement: ReqLlmNext shall resolve mode hints into `ExecutionMode` before policy rules choose surfaces, defaults, timeouts, or fallbacks.
+  statement: ReqLlmNext shall resolve mode hints into `ExecutionMode` before policy rules choose surfaces, defaults, timeouts, or fallbacks, including preserving explicit transport preference so policy can apply it consistently across text and structured-output requests.
   priority: must
   stability: evolving
 

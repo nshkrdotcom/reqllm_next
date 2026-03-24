@@ -27,7 +27,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.model_profile.execution_surfaces_declared
-  statement: `ModelProfile` shall declare explicit named `ExecutionSurface` entries for supported endpoint styles instead of implying support from independent protocol, wire-format, and transport lists.
+  statement: `ModelProfile` shall declare explicit named `ExecutionSurface` entries for supported endpoint styles instead of implying support from independent protocol, wire-format, and transport lists, including multiple transport variants for one semantic family when the provider truly supports them.
   priority: must
   stability: evolving
 

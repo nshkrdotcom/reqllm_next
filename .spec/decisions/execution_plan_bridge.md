@@ -28,14 +28,21 @@ The runtime must:
 4. materialize an `ExecutionPlan`
 5. drive the existing provider and wire modules from that plan
 
-The existing provider and wire modules remain transitional execution backends during this stage. They are no longer allowed to choose request behavior independently.
+The existing provider, semantic protocol, wire, and transport modules remain transitional execution backends during this stage. They are no longer allowed to choose request behavior independently.
 
 ## Consequences
 
 The planner becomes the single place where request behavior is selected, which lets starter model slices be implemented against the new architecture without waiting for a full transport and protocol refactor.
 
+That includes two practical rules in the bridge stage:
+
+1. explicit transport preference must be resolved in planning rather than bypassed later by surface-order accidents
+2. surface-specific parameter incompatibilities must fail or normalize in the planning boundary rather than being silently patched in wire code
+
 Future refactors can split provider, wire format, semantic protocol, and transport behind the planning boundary while keeping the public API, fixtures, and scenarios stable.
 
 This also gives fixtures and compatibility tests a stable plan-level object to verify against as the lower execution layers continue to evolve.
+
+During the bridge stage, replay must still honor the execution surface captured in a fixture even when current planning for that model would choose a newer surface, so old-but-valid fixtures continue to exercise the behavior they were recorded against.
 
 The contributor workflow can expose starter-model verification as a named command because the deterministic planning bridge keeps those slice tests anchored to explicit execution surfaces instead of implicit legacy resolver behavior.

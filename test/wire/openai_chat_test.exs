@@ -239,7 +239,8 @@ defmodule ReqLlmNext.Wire.OpenAIChatTest do
       body =
         OpenAIChat.encode_body(model, "Hello",
           operation: :object,
-          compiled_schema: compiled_schema
+          compiled_schema: compiled_schema,
+          _structured_output_strategy: :native_json_schema
         )
 
       assert Map.has_key?(body, :response_format)
@@ -252,6 +253,19 @@ defmodule ReqLlmNext.Wire.OpenAIChatTest do
     test "omits response_format for non-object operations" do
       model = TestModels.openai()
       body = OpenAIChat.encode_body(model, "Hello", operation: :text)
+
+      refute Map.has_key?(body, :response_format)
+    end
+
+    test "omits response_format for prompt-and-parse object plans" do
+      model = TestModels.openai()
+
+      body =
+        OpenAIChat.encode_body(model, "Hello",
+          operation: :object,
+          compiled_schema: %{schema: [name: [type: :string]]},
+          _structured_output_strategy: :prompt_and_parse
+        )
 
       refute Map.has_key?(body, :response_format)
     end
@@ -269,198 +283,35 @@ defmodule ReqLlmNext.Wire.OpenAIChatTest do
     end
   end
 
+  describe "decode_wire_event/1" do
+    test "returns :done for [DONE] events" do
+      assert OpenAIChat.decode_wire_event(%{data: "[DONE]"}) == [:done]
+    end
+
+    test "decodes JSON payloads into raw event maps" do
+      assert OpenAIChat.decode_wire_event(%{
+               data: ~s({"choices":[{"delta":{"content":"Hello"}}]})
+             }) == [%{"choices" => [%{"delta" => %{"content" => "Hello"}}]}]
+    end
+
+    test "passes through decoded maps" do
+      payload = %{"usage" => %{"prompt_tokens" => 10}}
+      assert OpenAIChat.decode_wire_event(%{data: payload}) == [payload]
+    end
+
+    test "returns decode errors for invalid JSON" do
+      assert [{:decode_error, _}] = OpenAIChat.decode_wire_event(%{data: "not valid json"})
+    end
+
+    test "returns empty list for unknown payload shapes" do
+      assert OpenAIChat.decode_wire_event(%{something: "else"}) == []
+    end
+  end
+
   describe "decode_sse_event/2" do
-    test "returns [nil] for [DONE] event" do
-      event = %{data: "[DONE]", event: nil, id: nil}
-      assert OpenAIChat.decode_sse_event(event, nil) == [nil]
-    end
-
-    test "extracts content from delta" do
-      event = %{
-        data: ~s({"choices":[{"delta":{"content":"Hello"}}]}),
-        event: nil,
-        id: nil
-      }
-
+    test "delegates wire payloads through semantic normalization" do
+      event = %{data: ~s({"choices":[{"delta":{"content":"Hello"}}]})}
       assert OpenAIChat.decode_sse_event(event, nil) == ["Hello"]
-    end
-
-    test "returns empty list for delta without content" do
-      event = %{
-        data: ~s({"choices":[{"delta":{"role":"assistant"}}]}),
-        event: nil,
-        id: nil
-      }
-
-      assert OpenAIChat.decode_sse_event(event, nil) == []
-    end
-
-    test "returns empty list for empty choices" do
-      event = %{
-        data: ~s({"choices":[]}),
-        event: nil,
-        id: nil
-      }
-
-      assert OpenAIChat.decode_sse_event(event, nil) == []
-    end
-
-    test "returns usage tuple for usage-only event" do
-      event = %{
-        data: ~s({"choices":[],"usage":{"prompt_tokens":10,"completion_tokens":5}}),
-        event: nil,
-        id: nil
-      }
-
-      result = OpenAIChat.decode_sse_event(event, nil)
-      assert [{:usage, usage}] = result
-      assert usage.input_tokens == 10
-      assert usage.output_tokens == 5
-    end
-
-    test "returns error event for invalid JSON" do
-      event = %{data: "not valid json", event: nil, id: nil}
-      result = OpenAIChat.decode_sse_event(event, nil)
-      assert [{:error, %{type: "decode_error", message: message}}] = result
-      assert message =~ "Failed to decode SSE event"
-    end
-
-    test "handles multiple choices (uses first)" do
-      event = %{
-        data: ~s({"choices":[{"delta":{"content":"First"}},{"delta":{"content":"Second"}}]}),
-        event: nil,
-        id: nil
-      }
-
-      assert OpenAIChat.decode_sse_event(event, nil) == ["First"]
-    end
-
-    test "decodes tool_calls delta" do
-      event = %{
-        data:
-          ~s({"choices":[{"delta":{"tool_calls":[{"index":0,"id":"call_123","type":"function","function":{"name":"get_weather","arguments":""}}]}}]}),
-        event: nil,
-        id: nil
-      }
-
-      result = OpenAIChat.decode_sse_event(event, nil)
-      assert [{:tool_call_delta, delta}] = result
-      assert delta.index == 0
-      assert delta.id == "call_123"
-      assert delta.type == "function"
-      assert delta.function["name"] == "get_weather"
-    end
-
-    test "decodes tool_calls delta with arguments fragment" do
-      event = %{
-        data:
-          ~s({"choices":[{"delta":{"tool_calls":[{"index":0,"function":{"arguments":"{\\"loc"}}]}}]}),
-        event: nil,
-        id: nil
-      }
-
-      result = OpenAIChat.decode_sse_event(event, nil)
-      assert [{:tool_call_delta, delta}] = result
-      assert delta.index == 0
-      assert delta.function["arguments"] == ~s({"loc)
-    end
-
-    test "decodes multiple tool_calls in single delta" do
-      event = %{
-        data:
-          ~s({"choices":[{"delta":{"tool_calls":[{"index":0,"id":"call_1","type":"function","function":{"name":"tool1"}},{"index":1,"id":"call_2","type":"function","function":{"name":"tool2"}}]}}]}),
-        event: nil,
-        id: nil
-      }
-
-      result = OpenAIChat.decode_sse_event(event, nil)
-      assert [{:tool_call_delta, delta1}, {:tool_call_delta, delta2}] = result
-      assert delta1.index == 0
-      assert delta1.id == "call_1"
-      assert delta2.index == 1
-      assert delta2.id == "call_2"
-    end
-
-    test "decodes API error event" do
-      event = %{
-        data:
-          ~s({"error":{"message":"Rate limit exceeded","type":"rate_limit_error","code":"rate_limit"}}),
-        event: nil,
-        id: nil
-      }
-
-      result = OpenAIChat.decode_sse_event(event, nil)
-      assert [{:error, error}] = result
-      assert error.message == "Rate limit exceeded"
-      assert error.type == "rate_limit_error"
-      assert error.code == "rate_limit"
-    end
-
-    test "decodes API error with missing fields" do
-      event = %{
-        data: ~s({"error":{"message":"Something went wrong"}}),
-        event: nil,
-        id: nil
-      }
-
-      result = OpenAIChat.decode_sse_event(event, nil)
-      assert [{:error, error}] = result
-      assert error.message == "Something went wrong"
-      assert error.type == "api_error"
-      assert error.code == nil
-    end
-
-    test "decodes API error with no message" do
-      event = %{
-        data: ~s({"error":{}}),
-        event: nil,
-        id: nil
-      }
-
-      result = OpenAIChat.decode_sse_event(event, nil)
-      assert [{:error, error}] = result
-      assert error.message == "Unknown API error"
-    end
-
-    test "extracts usage from content event" do
-      model = TestModels.openai()
-
-      event = %{
-        data:
-          ~s({"choices":[{"delta":{"content":"Hi"}}],"usage":{"prompt_tokens":10,"completion_tokens":5}}),
-        event: nil,
-        id: nil
-      }
-
-      result = OpenAIChat.decode_sse_event(event, model)
-      assert ["Hi", {:usage, usage}] = result
-      assert usage.input_tokens == 10
-      assert usage.output_tokens == 5
-    end
-
-    test "extracts standalone usage event" do
-      model = TestModels.openai()
-
-      event = %{
-        data: ~s({"usage":{"prompt_tokens":100,"completion_tokens":50,"total_tokens":150}}),
-        event: nil,
-        id: nil
-      }
-
-      result = OpenAIChat.decode_sse_event(event, model)
-      assert [{:usage, usage}] = result
-      assert usage.input_tokens == 100
-      assert usage.output_tokens == 50
-    end
-
-    test "returns empty list for unknown payload" do
-      event = %{
-        data: ~s({"id":"chatcmpl-123","object":"chat.completion.chunk"}),
-        event: nil,
-        id: nil
-      }
-
-      assert OpenAIChat.decode_sse_event(event, nil) == []
     end
   end
 end

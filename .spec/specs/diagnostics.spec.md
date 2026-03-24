@@ -28,7 +28,7 @@ surface:
   stability: evolving
 
 - id: reqllm.diagnostics.compat_consumed
-  statement: Runtime layers may emit diagnostics, but compat analyzers and issue-drafting tooling shall consume them outside the execution layers rather than patching runtime behavior in place.
+  statement: Runtime layers may emit diagnostics, but curated support-matrix compat runs, anomaly analyzers, and issue-drafting tooling shall consume them outside the execution layers rather than patching runtime behavior in place.
   priority: must
   stability: evolving
 ```
@@ -42,4 +42,5 @@ surface:
     - reqllm.diagnostics.observational
     - reqllm.diagnostics.layer_attributed
     - reqllm.diagnostics.compat_consumed
+
 ```

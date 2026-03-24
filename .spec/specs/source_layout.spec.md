@@ -2,17 +2,18 @@
 
 Current-truth source-ownership contract for ReqLlmNext.
 
-<!-- covers: reqllm.source_layout.concern_homes reqllm.source_layout.layer_scoped_quirks reqllm.source_layout.compat_outside_runtime -->
+<!-- covers: reqllm.source_layout.concern_homes reqllm.source_layout.public_contract_home reqllm.source_layout.layer_scoped_quirks reqllm.source_layout.compat_outside_runtime -->
 
 ```spec-meta
 id: reqllm.source_layout
 kind: source_layout
 status: active
-summary: Source ownership rules that keep model quirks, planning logic, and compat tooling in distinct homes.
+summary: Source ownership rules that keep model quirks, planning logic, semantic protocol logic, and compat tooling in distinct homes.
 surface:
   - AGENTS.md
   - .spec/specs/source_layout.spec.md
   - lib/req_llm_next/**/*.ex
+  - test/support/**/*.ex
   - test/**/*.exs
 ```
 
@@ -20,7 +21,12 @@ surface:
 
 ```spec-requirements
 - id: reqllm.source_layout.concern_homes
-  statement: ReqLlmNext shall keep model-boundary concerns, profile construction, mode normalization, policy resolution, plan assembly, protocol logic, wire envelopes, transport mechanics, and session state in distinct source locations that match the architecture.
+  statement: ReqLlmNext shall keep model-boundary concerns, profile construction, mode normalization, policy resolution, semantic protocol normalization, wire envelopes, transport mechanics, response materialization, fixture replay, and session state in distinct source locations that match the architecture.
+  priority: must
+  stability: evolving
+
+- id: reqllm.source_layout.public_contract_home
+  statement: Top-level package-boundary tests for `ReqLlmNext` shall live in a dedicated `test/public_api/` home so the canonical facade contract remains distinct from executor, protocol, wire, transport, and scenario tests.
   priority: must
   stability: evolving
 
@@ -42,6 +48,7 @@ surface:
   target: .spec/specs/source_layout.spec.md
   covers:
     - reqllm.source_layout.concern_homes
+    - reqllm.source_layout.public_contract_home
     - reqllm.source_layout.layer_scoped_quirks
     - reqllm.source_layout.compat_outside_runtime
 ```

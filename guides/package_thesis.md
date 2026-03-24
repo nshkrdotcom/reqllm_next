@@ -166,6 +166,18 @@ That means the project should be able to:
 
 This is more advanced than ordinary ExUnit regression testing because it exercises the real layered runtime against real provider APIs.
 
+Those live runs should stay curated.
+
+The package now uses a support-matrix approach for representative provider lanes:
+
+1. baseline models
+2. high-context models
+3. reasoning-focused models
+4. alternative transport lanes such as OpenAI Responses over WebSocket
+5. provider feature probes such as Anthropic beta headers
+
+That keeps live verification pressure high without turning compatibility into an expensive, stale hand-maintained matrix over every catalog entry.
+
 ### 6. Diagnostics And Telemetry
 
 Compat work only stays useful if failures are attributable.

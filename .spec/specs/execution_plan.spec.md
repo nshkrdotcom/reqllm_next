@@ -39,7 +39,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.execution_plan.planner_owns_assembly
-  statement: ReqLlmNext shall keep plan assembly in the planner boundary, including mode normalization, rule evaluation, surface selection, parameter normalization, session planning, and adapter selection.
+  statement: ReqLlmNext shall keep plan assembly in the planner boundary, including mode normalization, rule evaluation, surface selection, parameter normalization, surface-specific parameter validation, session planning, and adapter selection.
   priority: must
   stability: evolving
 

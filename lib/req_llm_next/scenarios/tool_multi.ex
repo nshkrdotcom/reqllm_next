@@ -45,7 +45,7 @@ defmodule ReqLlmNext.Scenarios.ToolMulti do
     ]
 
     fixture_opts =
-      Keyword.merge(opts, fixture: "multi_tool", max_tokens: 500, tools: tools)
+      run_opts(opts, fixture: fixture_for_run(:multi_tool, opts), max_tokens: 500, tools: tools)
 
     case ReqLlmNext.stream_text(
            model_spec,

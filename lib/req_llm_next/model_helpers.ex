@@ -31,8 +31,6 @@ defmodule ReqLlmNext.ModelHelpers do
     {:tools_strict?, [:tools, :strict]},
     {:tools_parallel?, [:tools, :parallel]},
     {:tools_streaming?, [:tools, :streaming]},
-    {:streaming_text?, [:streaming, :text]},
-    {:streaming_tool_calls?, [:streaming, :tool_calls]},
     {:chat?, [:chat]},
     {:embeddings?, [:embeddings]}
   ]
@@ -53,15 +51,45 @@ defmodule ReqLlmNext.ModelHelpers do
   end
 
   @doc """
-  Check if model supports object generation via JSON schema mode.
+  Check if model supports streaming text responses.
 
-  Returns true if model has JSON schema support (json.schema == true).
-  This is the only reliable indicator from LLMDB that a model supports
-  structured output via response_format json_schema.
+  Chat models are treated as text-streaming capable unless metadata explicitly
+  disables text streaming.
+  """
+  @spec streaming_text?(LLMDB.Model.t()) :: boolean()
+  def streaming_text?(%LLMDB.Model{} = model) do
+    case get_in(model.capabilities, [:streaming, :text]) do
+      false -> false
+      true -> true
+      nil -> chat?(model)
+    end
+  end
+
+  def streaming_text?(_), do: false
+
+  @doc """
+  Check if model supports streaming tool call payloads.
+  """
+  @spec streaming_tool_calls?(LLMDB.Model.t()) :: boolean()
+  def streaming_tool_calls?(%LLMDB.Model{} = model) do
+    case get_in(model.capabilities, [:streaming, :tool_calls]) do
+      false -> false
+      true -> true
+      nil -> tools_enabled?(model)
+    end
+  end
+
+  def streaming_tool_calls?(_), do: false
+
+  @doc """
+  Check if model supports object generation through the top-level API.
+
+  Chat-capable models support `generate_object/4`, either through native JSON
+  schema features or through prompt-and-parse fallback.
   """
   @spec supports_object_generation?(LLMDB.Model.t()) :: boolean()
   def supports_object_generation?(%LLMDB.Model{} = model) do
-    json_schema?(model)
+    chat?(model)
   end
 
   def supports_object_generation?(_), do: false
@@ -69,12 +97,11 @@ defmodule ReqLlmNext.ModelHelpers do
   @doc """
   Check if model supports streaming object generation.
 
-  Requires object generation support AND streaming tool calls not disabled.
+  Requires object generation support plus streaming text output.
   """
   @spec supports_streaming_object_generation?(LLMDB.Model.t()) :: boolean()
   def supports_streaming_object_generation?(%LLMDB.Model{} = model) do
-    supports_object_generation?(model) and
-      get_in(model.capabilities, [:streaming, :tool_calls]) != false
+    supports_object_generation?(model) and streaming_text?(model)
   end
 
   def supports_streaming_object_generation?(_), do: false
@@ -116,6 +143,7 @@ defmodule ReqLlmNext.ModelHelpers do
   def list_helpers do
     @capability_checks
     |> Enum.map(fn {name, _path} -> name end)
+    |> Kernel.++([:streaming_text?, :streaming_tool_calls?])
     |> Enum.sort()
   end
 end

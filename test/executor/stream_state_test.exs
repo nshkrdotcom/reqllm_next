@@ -4,15 +4,22 @@ defmodule ReqLlmNext.Executor.StreamStateTest do
   alias ReqLlmNext.Executor.StreamState
 
   defmodule FakeWire do
-    def decode_sse_event(%{data: "[DONE]"}, _model), do: [nil]
-    def decode_sse_event(%{data: data}, _model), do: [data]
+    def decode_wire_event(%{data: "[DONE]"}), do: [:done]
+    def decode_wire_event(%{data: data}), do: [%{"text" => data}]
   end
 
-  describe "new/2" do
+  defmodule FakeProtocol do
+    def decode_event(:done, _model), do: [nil]
+    def decode_event(%{"text" => text}, _model), do: [text]
+  end
+
+  describe "new/4" do
     test "creates initial state with empty buffer" do
-      state = StreamState.new(nil, FakeWire)
+      state = StreamState.new(nil, nil, FakeWire, FakeProtocol)
 
       assert state.buffer == ""
+      assert state.model == nil
+      assert state.protocol_mod == FakeProtocol
       assert state.recorder == nil
       assert state.wire_mod == FakeWire
       assert state.error == nil
@@ -20,7 +27,7 @@ defmodule ReqLlmNext.Executor.StreamStateTest do
 
     test "accepts recorder" do
       recorder = %{some: :data}
-      state = StreamState.new(recorder, FakeWire)
+      state = StreamState.new(recorder, nil, FakeWire, FakeProtocol)
 
       assert state.recorder == recorder
     end
@@ -28,7 +35,7 @@ defmodule ReqLlmNext.Executor.StreamStateTest do
 
   describe "handle_message/2 with :status" do
     test "status 200 continues with empty chunks" do
-      state = StreamState.new(nil, FakeWire)
+      state = StreamState.new(nil, nil, FakeWire, FakeProtocol)
 
       {:cont, chunks, new_state} = StreamState.handle_message({:status, 200}, state)
 
@@ -37,7 +44,7 @@ defmodule ReqLlmNext.Executor.StreamStateTest do
     end
 
     test "non-200 status halts with http_error" do
-      state = StreamState.new(nil, FakeWire)
+      state = StreamState.new(nil, nil, FakeWire, FakeProtocol)
 
       {:halt, new_state} = StreamState.handle_message({:status, 500}, state)
 
@@ -45,7 +52,7 @@ defmodule ReqLlmNext.Executor.StreamStateTest do
     end
 
     test "404 status halts with http_error" do
-      state = StreamState.new(nil, FakeWire)
+      state = StreamState.new(nil, nil, FakeWire, FakeProtocol)
 
       {:halt, new_state} = StreamState.handle_message({:status, 404}, state)
 
@@ -55,7 +62,7 @@ defmodule ReqLlmNext.Executor.StreamStateTest do
 
   describe "handle_message/2 with :headers" do
     test "headers continue with empty chunks" do
-      state = StreamState.new(nil, FakeWire)
+      state = StreamState.new(nil, nil, FakeWire, FakeProtocol)
       headers = [{"content-type", "text/event-stream"}]
 
       {:cont, chunks, new_state} = StreamState.handle_message({:headers, headers}, state)
@@ -67,7 +74,7 @@ defmodule ReqLlmNext.Executor.StreamStateTest do
 
   describe "handle_message/2 with :data" do
     test "complete SSE event returns decoded chunks" do
-      state = StreamState.new(nil, FakeWire)
+      state = StreamState.new(nil, nil, FakeWire, FakeProtocol)
       data = "data: hello\n\n"
 
       {:cont, chunks, new_state} = StreamState.handle_message({:data, data}, state)
@@ -77,7 +84,7 @@ defmodule ReqLlmNext.Executor.StreamStateTest do
     end
 
     test "multiple events in one data message" do
-      state = StreamState.new(nil, FakeWire)
+      state = StreamState.new(nil, nil, FakeWire, FakeProtocol)
       data = "data: foo\n\ndata: bar\n\n"
 
       {:cont, chunks, new_state} = StreamState.handle_message({:data, data}, state)
@@ -87,7 +94,7 @@ defmodule ReqLlmNext.Executor.StreamStateTest do
     end
 
     test "partial SSE event is buffered" do
-      state = StreamState.new(nil, FakeWire)
+      state = StreamState.new(nil, nil, FakeWire, FakeProtocol)
       data = "data: incomplete"
 
       {:cont, chunks, new_state} = StreamState.handle_message({:data, data}, state)
@@ -97,7 +104,7 @@ defmodule ReqLlmNext.Executor.StreamStateTest do
     end
 
     test "buffered data completes on next message" do
-      state = StreamState.new(nil, FakeWire)
+      state = StreamState.new(nil, nil, FakeWire, FakeProtocol)
 
       {:cont, [], state} = StreamState.handle_message({:data, "data: hel"}, state)
       {:cont, chunks, state} = StreamState.handle_message({:data, "lo\n\n"}, state)
@@ -107,7 +114,7 @@ defmodule ReqLlmNext.Executor.StreamStateTest do
     end
 
     test "filters nil values from decoded events" do
-      state = StreamState.new(nil, FakeWire)
+      state = StreamState.new(nil, nil, FakeWire, FakeProtocol)
       data = "data: [DONE]\n\n"
 
       {:cont, chunks, _state} = StreamState.handle_message({:data, data}, state)
@@ -118,7 +125,7 @@ defmodule ReqLlmNext.Executor.StreamStateTest do
 
   describe "handle_message/2 with :done" do
     test "done halts without error" do
-      state = StreamState.new(nil, FakeWire)
+      state = StreamState.new(nil, nil, FakeWire, FakeProtocol)
 
       {:halt, final_state} = StreamState.handle_message(:done, state)
 
@@ -128,7 +135,7 @@ defmodule ReqLlmNext.Executor.StreamStateTest do
 
   describe "handle_timeout/1" do
     test "sets timeout error" do
-      state = StreamState.new(nil, FakeWire)
+      state = StreamState.new(nil, nil, FakeWire, FakeProtocol)
 
       new_state = StreamState.handle_timeout(state)
 
@@ -138,7 +145,7 @@ defmodule ReqLlmNext.Executor.StreamStateTest do
 
   describe "full stream lifecycle" do
     test "status -> headers -> data -> done" do
-      state = StreamState.new(nil, FakeWire)
+      state = StreamState.new(nil, nil, FakeWire, FakeProtocol)
 
       {:cont, [], state} = StreamState.handle_message({:status, 200}, state)
       {:cont, [], state} = StreamState.handle_message({:headers, []}, state)
@@ -150,7 +157,7 @@ defmodule ReqLlmNext.Executor.StreamStateTest do
     end
 
     test "error status short-circuits stream" do
-      state = StreamState.new(nil, FakeWire)
+      state = StreamState.new(nil, nil, FakeWire, FakeProtocol)
 
       {:halt, final_state} = StreamState.handle_message({:status, 401}, state)
 

@@ -348,6 +348,31 @@ defmodule ReqLlmNext.ResponseTest do
       assert length(joined.context.messages) == 2
       assert Enum.at(joined.context.messages, 1).role == :assistant
     end
+
+    test "propagates finish_reason and provider metadata from stream meta" do
+      usage = %{input_tokens: 10, output_tokens: 5, total_tokens: 15}
+
+      stream = [
+        "Hello",
+        {:usage, usage},
+        {:meta, %{terminal?: true, finish_reason: :stop, response_id: "resp_123"}},
+        nil
+      ]
+
+      context = Context.new([Context.user("Hi")])
+
+      response =
+        build_response(%{
+          stream?: true,
+          stream: stream,
+          context: context
+        })
+
+      assert {:ok, joined} = Response.join_stream(response)
+      assert joined.finish_reason == :stop
+      assert joined.provider_meta[:response_id] == "resp_123"
+      assert joined.usage == usage
+    end
   end
 
   describe "object/1" do

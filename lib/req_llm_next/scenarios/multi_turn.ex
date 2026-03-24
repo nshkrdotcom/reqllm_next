@@ -18,7 +18,7 @@ defmodule ReqLlmNext.Scenarios.MultiTurn do
 
   @impl true
   def run(model_spec, _model, opts) do
-    turn1_opts = Keyword.merge(opts, fixture: fixture_name(id(), "1"), max_tokens: 50)
+    turn1_opts = run_opts(opts, fixture: fixture_for_run(id(), opts, "1"), max_tokens: 50)
 
     turn1_prompt =
       "My favorite number is 42. Just reply with 'OK' to confirm you understood."
@@ -47,7 +47,7 @@ defmodule ReqLlmNext.Scenarios.MultiTurn do
         ReqLlmNext.Context.user("What is my favorite number? Reply with just the number.")
       )
 
-    turn2_opts = Keyword.merge(opts, fixture: fixture_name(id(), "2"), max_tokens: 50)
+    turn2_opts = run_opts(opts, fixture: fixture_for_run(id(), opts, "2"), max_tokens: 50)
 
     case ReqLlmNext.generate_text(model_spec, context, turn2_opts) do
       {:ok, response2} ->

@@ -3,10 +3,12 @@ defmodule ReqLlmNext.Executor.StreamState do
 
   alias ReqLlmNext.Fixtures
 
-  defstruct [:buffer, :recorder, :wire_mod, :error]
+  defstruct [:buffer, :model, :protocol_mod, :recorder, :wire_mod, :error]
 
   @type t :: %__MODULE__{
           buffer: binary(),
+          model: LLMDB.Model.t() | nil,
+          protocol_mod: module(),
           recorder: map() | nil,
           wire_mod: module(),
           error: term() | nil
@@ -23,9 +25,16 @@ defmodule ReqLlmNext.Executor.StreamState do
           {:cont, [String.t()], t()}
           | {:halt, t()}
 
-  @spec new(map() | nil, module()) :: t()
-  def new(recorder, wire_mod) do
-    %__MODULE__{buffer: "", recorder: recorder, wire_mod: wire_mod, error: nil}
+  @spec new(map() | nil, LLMDB.Model.t() | nil, module(), module()) :: t()
+  def new(recorder, model, wire_mod, protocol_mod) do
+    %__MODULE__{
+      buffer: "",
+      model: model,
+      protocol_mod: protocol_mod,
+      recorder: recorder,
+      wire_mod: wire_mod,
+      error: nil
+    }
   end
 
   @spec handle_message(msg(), t()) :: result()
@@ -48,11 +57,7 @@ defmodule ReqLlmNext.Executor.StreamState do
     new_recorder = Fixtures.record_chunk(state.recorder, data)
     new_buffer = state.buffer <> data
     {events, remaining} = ServerSentEvents.parse(new_buffer)
-
-    chunks =
-      events
-      |> Enum.flat_map(&state.wire_mod.decode_sse_event(&1, nil))
-      |> Enum.reject(&is_nil/1)
+    chunks = decode_events(events, state)
 
     new_state = %{state | buffer: remaining, recorder: new_recorder}
 
@@ -61,11 +66,7 @@ defmodule ReqLlmNext.Executor.StreamState do
 
   def handle_message({:frame, data}, %__MODULE__{} = state) do
     new_recorder = Fixtures.record_chunk(state.recorder, data)
-
-    chunks =
-      state.wire_mod
-      |> apply(:decode_sse_event, [%{data: data}, nil])
-      |> Enum.reject(&is_nil/1)
+    chunks = decode_events([%{data: data}], state)
 
     {:cont, chunks, %{state | recorder: new_recorder}}
   end
@@ -79,5 +80,12 @@ defmodule ReqLlmNext.Executor.StreamState do
   def handle_timeout(%__MODULE__{} = state) do
     Fixtures.save_fixture(state.recorder)
     %{state | error: :timeout}
+  end
+
+  defp decode_events(events, state) do
+    events
+    |> Enum.flat_map(fn event -> state.wire_mod.decode_wire_event(event) end)
+    |> Enum.flat_map(&state.protocol_mod.decode_event(&1, state.model))
+    |> Enum.reject(&is_nil/1)
   end
 end

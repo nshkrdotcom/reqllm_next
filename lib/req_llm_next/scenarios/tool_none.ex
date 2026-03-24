@@ -30,7 +30,7 @@ defmodule ReqLlmNext.Scenarios.ToolNone do
     ]
 
     fixture_opts =
-      Keyword.merge(opts, fixture: "no_tool", max_tokens: 500, tools: tools)
+      run_opts(opts, fixture: fixture_for_run(:no_tool, opts), max_tokens: 500, tools: tools)
 
     case ReqLlmNext.stream_text(
            model_spec,

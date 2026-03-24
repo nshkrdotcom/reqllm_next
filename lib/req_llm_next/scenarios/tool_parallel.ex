@@ -46,7 +46,7 @@ defmodule ReqLlmNext.Scenarios.ToolParallel do
     """
 
     fixture_opts =
-      Keyword.merge(opts, fixture: fixture_name(id()), max_tokens: 500, tools: tools)
+      run_opts(opts, fixture: fixture_for_run(id(), opts), max_tokens: 500, tools: tools)
 
     case ReqLlmNext.stream_text(model_spec, prompt, fixture_opts) do
       {:ok, stream_resp} ->

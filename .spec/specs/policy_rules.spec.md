@@ -26,7 +26,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.policy_rules.match_patch
-  statement: Policy rules shall use a declarative match-and-patch model to choose preferred surfaces, fallback surfaces, timeout classes, session defaults, stable parameter defaults, and plan adapter references.
+  statement: Policy rules shall use a declarative match-and-patch model to choose preferred surfaces, fallback surfaces, timeout classes, session defaults, stable parameter defaults, and plan adapter references, with explicit transport preference remaining authoritative when matching surfaces are available.
   priority: must
   stability: evolving
 

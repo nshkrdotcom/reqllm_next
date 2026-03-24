@@ -30,12 +30,12 @@ decisions:
   stability: evolving
 
 - id: reqllm.transport.semantic_separation
-  statement: Transport shall not inspect model names, reinterpret semantic payload meaning, or decode provider-family events into canonical chunks.
+  statement: Transport shall not inspect model names, reinterpret semantic payload meaning, decode provider-family events into canonical chunks, or silently override planner-selected surface behavior.
   priority: must
   stability: evolving
 
 - id: reqllm.transport.fixture_replay_parity
-  statement: Transport-aware fixture replay shall preserve transport shape by replaying raw SSE chunks for HTTP streaming and raw frame payloads for WebSocket streaming through the same wire-decoding boundary used by runtime execution.
+  statement: Transport-aware fixture replay shall preserve transport shape by replaying raw SSE chunks for HTTP streaming and raw frame payloads for WebSocket streaming through the same wire-decoding and semantic-protocol boundaries used by runtime execution, preferring the recorded fixture surface when it differs from the current plan.
   priority: should
   stability: evolving
 ```

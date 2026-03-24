@@ -43,7 +43,8 @@ defmodule ReqLlmNext.Scenarios do
     ReqLlmNext.Scenarios.ToolParallel,
     ReqLlmNext.Scenarios.Embedding,
     ReqLlmNext.Scenarios.Reasoning,
-    ReqLlmNext.Scenarios.ImageInput
+    ReqLlmNext.Scenarios.ImageInput,
+    ReqLlmNext.Scenarios.PromptCaching
   ]
 
   @doc """

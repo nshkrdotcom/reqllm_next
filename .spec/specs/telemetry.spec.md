@@ -23,7 +23,7 @@ surface:
   stability: evolving
 
 - id: reqllm.telemetry.canonical_measurements
-  statement: Telemetry metadata and measurements shall remain stable across transports and operations so application code and compat tooling do not need provider-specific parsing to interpret usage, reasoning, or request summaries.
+  statement: Telemetry metadata and measurements shall remain stable across transports, operations, and curated provider support-matrix lanes so application code and compat tooling do not need provider-specific parsing to interpret usage, reasoning, or request summaries.
   priority: must
   stability: evolving
 
@@ -42,4 +42,5 @@ surface:
     - reqllm.telemetry.request_lifecycle
     - reqllm.telemetry.canonical_measurements
     - reqllm.telemetry.sanitized_payloads
+
 ```

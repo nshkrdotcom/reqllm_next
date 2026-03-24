@@ -41,12 +41,6 @@ defmodule ReqLlmNext.PolicyRules do
     end
   end
 
-  defp prefer_surface(surfaces, %ReqLlmNext.ExecutionMode{structured_output?: true}) do
-    Enum.find(surfaces, hd(surfaces), fn surface ->
-      Map.get(surface.features, :structured_output) not in [false, nil]
-    end)
-  end
-
   defp prefer_surface(surfaces, %ReqLlmNext.ExecutionMode{transport: transport} = mode)
        when transport in [:http_sse, :websocket] do
     surfaces
@@ -55,6 +49,12 @@ defmodule ReqLlmNext.PolicyRules do
       [] -> prefer_surface(surfaces, %{mode | transport: :default})
       matching -> prefer_surface(matching, %{mode | transport: :default})
     end
+  end
+
+  defp prefer_surface(surfaces, %ReqLlmNext.ExecutionMode{structured_output?: true}) do
+    Enum.find(surfaces, hd(surfaces), fn surface ->
+      Map.get(surface.features, :structured_output) not in [false, nil]
+    end)
   end
 
   defp prefer_surface(surfaces, _mode), do: hd(surfaces)
