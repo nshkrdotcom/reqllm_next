@@ -115,7 +115,7 @@ defmodule ReqLlmNext.StreamResponseTest do
       assert StreamResponse.usage(resp) == nil
     end
 
-    test "returns first usage tuple found" do
+    test "returns the last usage tuple found" do
       stream = [
         {:usage, %{first: true}},
         {:usage, %{second: true}}
@@ -123,7 +123,7 @@ defmodule ReqLlmNext.StreamResponseTest do
 
       resp = %StreamResponse{stream: stream, model: mock_model()}
 
-      assert StreamResponse.usage(resp) == %{first: true}
+      assert StreamResponse.usage(resp) == %{second: true}
     end
 
     test "handles empty stream" do

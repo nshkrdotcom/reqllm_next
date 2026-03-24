@@ -47,7 +47,7 @@
         "file": ".spec/decisions/execution_plan_bridge.md",
         "id": "reqllm.decision.execution_plan_bridge",
         "status": "accepted",
-        "title": "Introduce a Deterministic Planning Bridge Before Rewriting Execution Layers"
+        "title": "Introduce a Deterministic Planning Spine Before Rewriting Execution Layers"
       },
       {
         "affects": [
@@ -166,7 +166,7 @@
         "id": "reqllm.architecture.facts_mode_policy_plan",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext architecture shall normalize model facts into `ModelProfile`, request intent into `ExecutionMode`, resolve ordered policy rules, run surface-owned request preparation, and materialize a single `ExecutionPlan` before downstream execution, including manifest-backed provider-scoped descriptive fact extraction, family-owned surface catalog resolution through declared seams, seam-driven adapter and runtime-module selection, honoring explicit transport preference when a matching surface exists, and validating surface-specific parameter compatibility before wire encoding.",
+        "statement": "ReqLlmNext architecture shall normalize model facts into `ModelProfile`, request intent into `ExecutionMode`, resolve compatibility-aware surface policy, run surface-owned request preparation, and materialize a single `ExecutionPlan` before downstream execution, including manifest-backed provider-scoped descriptive fact extraction, family-owned surface catalog resolution through declared seams, manifest-backed runtime-module lookup, honoring explicit transport and session intent when a matching surface exists, validating surface-specific parameter compatibility before wire encoding, and routing both streaming and non-streaming HTTP execution through explicit transport modules.",
         "subject_id": "reqllm.architecture"
       },
       {
@@ -238,7 +238,7 @@
         "id": "reqllm.execution_mode.mode_hints_before_policy",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall resolve mode hints into `ExecutionMode` before policy rules choose surfaces, defaults, timeouts, or fallbacks, including preserving explicit transport preference so policy can apply it consistently across text and structured-output requests.",
+        "statement": "ReqLlmNext shall resolve mode hints into `ExecutionMode` before policy rules choose surfaces, defaults, timeouts, or fallbacks, including preserving explicit transport, session, reasoning, and structured-output intent so policy can apply compatibility checks consistently across text, object, and embedding requests.",
         "subject_id": "reqllm.execution_mode"
       },
       {
@@ -262,7 +262,7 @@
         "id": "reqllm.execution_plan.deterministic_stack",
         "priority": "must",
         "stability": "evolving",
-        "statement": "`ExecutionPlan` shall deterministically resolve one implementation stack of provider, session runtime mode, semantic protocol, wire format, transport, and ordered plan adapters for a given profile, mode, and policy input, with the runtime-module stack and adapter set read from the resolved extension seams instead of rediscovered by provider branching.",
+        "statement": "`ExecutionPlan` shall deterministically resolve one implementation stack of provider, session runtime mode, semantic protocol, wire format, transport, and ordered plan adapters for a given profile, mode, and policy input, with provider, protocol, wire, and transport modules read from resolved extension seams and the compiled runtime registry instead of rediscovered by provider branching.",
         "subject_id": "reqllm.execution_plan"
       },
       {
@@ -318,7 +318,7 @@
         "id": "reqllm.execution_surfaces.surface_selection",
         "priority": "must",
         "stability": "evolving",
-        "statement": "The planner shall choose exactly one primary `ExecutionSurface` for an `ExecutionPlan`, may only choose fallback surfaces already declared in `ModelProfile`, and shall not ignore an explicit transport preference when a matching surface exists for the active mode.",
+        "statement": "The planner shall choose exactly one primary `ExecutionSurface` for an `ExecutionPlan`, may only choose fallback surfaces already declared in `ModelProfile`, and shall apply explicit compatibility checks for transport, structured output, tools, reasoning, streaming, and session semantics before selecting the highest-ranked matching surface for the active mode.",
         "subject_id": "reqllm.execution_surfaces"
       },
       {
@@ -358,7 +358,7 @@
         "id": "reqllm.extension_manifest.plain_runtime_contract",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall model execution extension behavior as plain runtime data made of providers, families, rules, criteria, seam patches, and manifests so the runtime consumes a stable contract independent of any authoring DSL, with built-in declaration packs merged into one compiled manifest at compile time.",
+        "statement": "ReqLlmNext shall model execution extension behavior as plain runtime data made of providers, families, rules, criteria, seam patches, and manifests so the runtime consumes a stable contract independent of any authoring DSL, with built-in declaration packs merged into one compiled manifest at compile time and expanded into a manifest-backed runtime registry for globally-addressable provider, protocol, wire, and transport seam keys.",
         "subject_id": "reqllm.extension_manifest"
       },
       {
@@ -414,7 +414,7 @@
         "id": "reqllm.layer_boundaries.separated_io",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall keep provider, session runtime, transport, wire format, and semantic protocol responsibilities separated so no layer skips across another layer's ownership boundary and each resolved plan binds one deterministic layer stack including explicit provider, protocol, wire, and transport modules resolved from manifest-declared seams rather than central runtime registries.",
+        "statement": "ReqLlmNext shall keep provider, session runtime, transport, wire format, and semantic protocol responsibilities separated so no layer skips across another layer's ownership boundary and each resolved plan binds one deterministic layer stack including explicit provider, protocol, wire, and transport modules resolved from manifest-declared seams and the compiled runtime registry.",
         "subject_id": "reqllm.layer_boundaries"
       },
       {
@@ -494,7 +494,7 @@
         "id": "reqllm.model_profile.descriptive_facts",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall normalize resolved model metadata into a request-independent `ModelProfile` that describes operations, features, modalities, limits, parameter defaults, constraints metadata, and session capabilities without choosing concrete request behavior, including manifest-backed provider-scoped descriptive fact extraction for normalized features such as Anthropic structured outputs, citations, context management, and additional document input, plus the resolved extension family id selected by declarative criteria and provider or global fallback rules that owns surface-catalog construction.",
+        "statement": "ReqLlmNext shall normalize resolved model metadata into a request-independent `ModelProfile` that describes operations, features, modalities, limits, parameter defaults, constraints metadata, and session capabilities without choosing concrete request behavior, including manifest-backed provider-scoped descriptive fact extraction for normalized features such as Anthropic structured outputs, citations, context management, and additional document input, plus the resolved extension family id selected by declarative criteria and provider or global fallback rules that owns surface-catalog construction and must declare the catalog module that builds the model's execution surfaces.",
         "subject_id": "reqllm.model_profile"
       },
       {
@@ -518,7 +518,7 @@
         "id": "reqllm.operation_planner.assembly_scope",
         "priority": "must",
         "stability": "evolving",
-        "statement": "The planner boundary shall own mode normalization, rule evaluation, surface selection, parameter normalization, explicit transport preference handling, fallback planning, surface-specific parameter validation, provider-native helper acceptance or rejection, surface-owned request preparation, session planning, and adapter selection, including resolving surface-preparation and adapter seams from the compiled extension manifest rather than from global imperative registries.",
+        "statement": "The planner boundary shall own mode normalization, rule evaluation, compatibility-aware surface selection, parameter normalization, explicit transport and session preference handling, fallback planning, surface-specific parameter validation, provider-native helper acceptance or rejection, surface-owned request preparation, session planning, and adapter selection, including resolving surface-preparation and adapter seams from the compiled extension manifest rather than from global imperative registries.",
         "subject_id": "reqllm.operation_planner"
       },
       {
@@ -542,7 +542,7 @@
         "id": "reqllm.package.buffered_stream_metadata",
         "priority": "should",
         "stability": "evolving",
-        "statement": "When ReqLlmNext buffers a streamed response into the canonical `Response` shape, it shall preserve terminal metadata such as finish reason and provider-facing response identifiers emitted by the canonical stream.",
+        "statement": "When ReqLlmNext buffers a streamed response into the canonical `Response` shape, it shall preserve terminal metadata such as finish reason and provider-facing response identifiers emitted by the canonical stream, and the same shared stream materialization path shall drive helper extraction for streamed text, thinking, usage, and tool calls so normalization stays consistent across buffered and streaming consumers.",
         "subject_id": "reqllm.package"
       },
       {
@@ -558,7 +558,7 @@
         "id": "reqllm.package.execution_planning",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall route supported requests through a deterministic planning path that normalizes model facts into `ModelProfile`, request intent into `ExecutionMode`, selects explicit `ExecutionSurface` support, validates surface-specific parameter compatibility, materializes an `ExecutionPlan`, and resolves an execution stack of provider, semantic protocol, wire, and transport modules before runtime execution, with provider facts and surface catalog construction driven from the compiled extension manifest rather than central provider branching.",
+        "statement": "ReqLlmNext shall route supported requests through a deterministic planning path that normalizes model facts into `ModelProfile`, request intent into `ExecutionMode`, selects explicit `ExecutionSurface` support through compatibility-aware policy, validates surface-specific parameter compatibility, materializes an `ExecutionPlan`, and resolves an execution stack of provider, semantic protocol, wire, and transport modules before runtime execution, with provider facts, runtime-module lookup, and surface catalog construction driven from the compiled extension manifest rather than central provider branching.",
         "subject_id": "reqllm.package"
       },
       {
@@ -614,7 +614,7 @@
         "id": "reqllm.policy_rules.allowed_patch_domains",
         "priority": "must",
         "stability": "evolving",
-        "statement": "Policy rules may patch preferred and fallback surfaces, timeout classes, session defaults, stable parameter defaults for the active mode, and plan-adapter references, but they shall not patch model identity, provider identity, unsupported operations, raw payloads, provider-native helper validation, or provider-specific utility endpoint behavior.",
+        "statement": "Policy resolution may choose preferred and fallback surfaces, timeout classes, session defaults, stable parameter defaults for the active mode, and plan-adapter references, but it shall not patch model identity, provider identity, unsupported operations, raw payloads, provider-native helper validation, or provider-specific utility endpoint behavior.",
         "subject_id": "reqllm.policy_rules"
       },
       {
@@ -638,7 +638,7 @@
         "id": "reqllm.policy_rules.match_patch",
         "priority": "must",
         "stability": "evolving",
-        "statement": "Policy rules shall use a declarative match-and-patch model to choose preferred surfaces, fallback surfaces, timeout classes, session defaults, stable parameter defaults, and plan adapter references, with explicit transport preference remaining authoritative when matching surfaces are available and any adapter references ultimately resolved through compiled extension seams.",
+        "statement": "Policy resolution shall choose preferred and fallback surfaces, timeout classes, session defaults, and plan adapter references from `ExecutionMode` plus declared `ExecutionSurface` capabilities, with explicit compatibility checks for transport, streaming, structured output, tools, reasoning, and session semantics before ranking matching surfaces, and any adapter references ultimately resolved through compiled extension seams.",
         "subject_id": "reqllm.policy_rules"
       },
       {
@@ -766,7 +766,7 @@
         "id": "reqllm.source_layout.concern_homes",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall keep model-boundary concerns, provider-scoped fact extraction, manifest-backed provider registration, family-owned surface catalog modules, profile construction, mode normalization, policy resolution, surface-owned request preparation, semantic protocol normalization, wire envelopes, transport mechanics, response materialization, fixture replay, and session state in distinct source locations that match the architecture.",
+        "statement": "ReqLlmNext shall keep model-boundary concerns, provider-scoped fact extraction, manifest-backed provider registration, family-owned surface catalog modules, profile construction, mode normalization, policy resolution, surface-owned request preparation, semantic protocol normalization, wire envelopes, transport mechanics, shared response stream materialization, fixture replay, and session state in distinct source locations that match the architecture.",
         "subject_id": "reqllm.source_layout"
       },
       {
@@ -774,7 +774,7 @@
         "id": "reqllm.source_layout.extension_contract_home",
         "priority": "should",
         "stability": "evolving",
-        "statement": "Compile-time execution extension contracts shall live in a dedicated `lib/req_llm_next/extensions/` home, including the plain runtime structs, Spark DSL authoring modules, inheritance expansion, manifest verifiers, compiled manifest modules, and provider or family definition packs under `extensions/definitions/`, so default execution families and edge-case override rules are defined outside the shared planner and executor code.",
+        "statement": "Compile-time execution extension contracts shall live in a dedicated `lib/req_llm_next/extensions/` home, including the plain runtime structs, Spark DSL authoring modules, inheritance expansion, manifest verifiers, compiled manifest modules, runtime registries, and provider or family definition packs under `extensions/definitions/`, so default execution families and edge-case override rules are defined outside the shared planner and executor code.",
         "subject_id": "reqllm.source_layout"
       },
       {
@@ -1005,7 +1005,7 @@
           "id": "reqllm.architecture",
           "kind": "architecture",
           "status": "active",
-          "summary": "Current-truth runtime boundary and layer-separation contract for model input and execution flow, including handcrafted `LLMDB.Model` support at the boundary, the deterministic planning bridge, the thin top-level facade, and the separated execution stack.",
+          "summary": "Current-truth runtime boundary and layer-separation contract for model input and execution flow, including handcrafted `LLMDB.Model` support at the boundary, a fully plan-driven execution spine, the thin top-level facade, and the separated execution stack.",
           "surface": [
             "README.md",
             "AGENTS.md",

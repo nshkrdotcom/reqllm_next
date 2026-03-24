@@ -1,14 +1,14 @@
 defmodule ReqLlmNext.Wire.Resolver do
   @moduledoc """
-  Transitional metadata helper for legacy provider and wire lookups.
+  Compatibility metadata resolver built on the current execution architecture.
 
-  New planning code should use `ModelProfile`, `ExecutionSurface`, and
-  `ExecutionModules` instead. This module remains as a compatibility helper for
-  existing tests, fixtures, and adapter logic that still need catalog-level
-  metadata questions such as Responses API detection.
+  New runtime code should plan through `ModelProfile`, `ExecutionSurface`, and
+  `ExecutionModules`. This module exists for compatibility-oriented callers and
+  tests that still need lightweight catalog questions without re-implementing
+  provider or wire selection logic.
   """
 
-  alias ReqLlmNext.{Error, Providers, Wire}
+  alias ReqLlmNext.{Error, ExecutionModules, Extensions, ModelProfile}
   alias ReqLlmNext.ModelProfile.ProviderFacts.OpenAI, as: OpenAIFacts
 
   @type resolution :: %{
@@ -20,10 +20,9 @@ defmodule ReqLlmNext.Wire.Resolver do
 
   @spec resolve!(LLMDB.Model.t()) :: resolution()
   def resolve!(%LLMDB.Model{} = model) do
-    %{
-      provider_mod: provider_module!(model),
-      wire_mod: wire_module!(model)
-    }
+    operation = default_operation!(model)
+
+    resolve_for_operation!(model, operation)
   end
 
   @doc """
@@ -37,54 +36,90 @@ defmodule ReqLlmNext.Wire.Resolver do
   end
 
   @spec resolve!(LLMDB.Model.t(), operation()) :: resolution()
-  def resolve!(%LLMDB.Model{} = model, :embed) do
-    case model.provider do
-      :openai ->
-        %{provider_mod: Providers.OpenAI, wire_mod: Wire.OpenAIEmbeddings}
-
-      other ->
-        raise Error.Invalid.Capability.exception(
-                message: "Provider #{other} does not support embeddings"
-              )
-    end
-  end
-
-  def resolve!(%LLMDB.Model{} = model, _operation) do
-    resolve!(model)
-  end
+  def resolve!(%LLMDB.Model{} = model, operation), do: resolve_for_operation!(model, operation)
 
   @spec provider_module!(LLMDB.Model.t()) :: module()
-  def provider_module!(%LLMDB.Model{provider: provider}) do
-    Providers.get!(provider)
+  def provider_module!(%LLMDB.Model{} = model) do
+    %{
+      provider_mod: provider_mod
+    } = resolve!(model)
+
+    provider_mod
   end
 
   @spec wire_module!(LLMDB.Model.t()) :: module()
   def wire_module!(%LLMDB.Model{} = model) do
-    protocol = get_wire_protocol(model) || default_wire_for_provider(model.provider)
-
-    case protocol do
-      :openai_chat -> Wire.OpenAIChat
-      :openai_responses -> Wire.OpenAIResponses
-      :anthropic -> Wire.Anthropic
-      other -> raise "Unknown wire protocol: #{inspect(other)}"
-    end
+    operation = default_operation!(model)
+    wire_module_for_operation!(model, operation)
   end
 
   @deprecated "Use wire_module!/1 instead"
   def streaming_module!(model), do: wire_module!(model)
 
-  defp get_wire_protocol(%LLMDB.Model{} = model) do
-    case get_in(model, [Access.key(:extra, %{}), :wire, :protocol]) do
-      nil -> nil
-      protocol when is_binary(protocol) -> String.to_existing_atom(protocol)
-      protocol when is_atom(protocol) -> protocol
+  defp resolve_for_operation!(%LLMDB.Model{} = model, operation) do
+    with {:ok, wire_mod} <- wire_resolution(model, operation),
+         {:ok, profile} <- ModelProfile.from_model(model),
+         {:ok, provider_mod} <-
+           Extensions.provider_module(Extensions.compiled_manifest(), profile.provider) do
+      %{
+        provider_mod: provider_mod,
+        wire_mod: wire_mod
+      }
+    else
+      [] ->
+        raise unsupported_operation_error(model, operation)
+
+      {:error, {:unknown_provider, provider}} ->
+        raise ArgumentError, "Unable to resolve provider module for #{inspect(provider)}"
+
+      {:error, {:provider_module_not_configured, provider}} ->
+        raise ArgumentError, "Provider #{inspect(provider)} does not declare a provider module"
+
+      {:error, reason} ->
+        raise ArgumentError, "Unable to resolve model profile: #{inspect(reason)}"
     end
   end
 
-  defp default_wire_for_provider(:openai), do: :openai_chat
-  defp default_wire_for_provider(:anthropic), do: :anthropic
-  defp default_wire_for_provider(:groq), do: :openai_chat
-  defp default_wire_for_provider(:openrouter), do: :openai_chat
-  defp default_wire_for_provider(:xai), do: :openai_chat
-  defp default_wire_for_provider(_), do: :openai_chat
+  defp wire_module_for_operation!(%LLMDB.Model{} = model, operation) do
+    case wire_resolution(model, operation) do
+      {:ok, wire_mod} ->
+        wire_mod
+
+      [] ->
+        raise unsupported_operation_error(model, operation)
+
+      {:error, reason} ->
+        raise ArgumentError, "Unable to resolve model profile: #{inspect(reason)}"
+    end
+  end
+
+  defp wire_resolution(%LLMDB.Model{} = model, operation) do
+    with {:ok, profile} <- ModelProfile.from_model(model),
+         [%{wire_format: wire_format} | _] <- ModelProfile.surfaces_for(profile, operation) do
+      {:ok, ExecutionModules.wire_module!(wire_format)}
+    end
+  end
+
+  defp default_operation!(%LLMDB.Model{} = model) do
+    case ModelProfile.from_model(model) do
+      {:ok, profile} ->
+        cond do
+          ModelProfile.supports_operation?(profile, :text) -> :text
+          ModelProfile.supports_operation?(profile, :object) -> :object
+          ModelProfile.supports_operation?(profile, :embed) -> :embed
+          true -> :text
+        end
+
+      {:error, reason} ->
+        raise ArgumentError, "Unable to resolve model profile: #{inspect(reason)}"
+    end
+  end
+
+  defp unsupported_operation_error(model, :embed) do
+    Error.Invalid.Capability.exception(message: "Model #{model.id} does not support embeddings")
+  end
+
+  defp unsupported_operation_error(model, operation) do
+    Error.Invalid.Capability.exception(message: "Model #{model.id} does not support #{operation}")
+  end
 end

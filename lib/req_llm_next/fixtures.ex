@@ -11,7 +11,7 @@ defmodule ReqLlmNext.Fixtures do
   - Format matches req_llm: request/response metadata + b64-encoded raw SSE chunks
   """
 
-  alias ReqLlmNext.{ExecutionModules, ModelProfile, Wire.Resolver}
+  alias ReqLlmNext.{ExecutionModules, ModelProfile}
 
   @root Path.expand("../../test/fixtures", __DIR__)
 
@@ -370,19 +370,7 @@ defmodule ReqLlmNext.Fixtures do
         wire_mod: ExecutionModules.wire_module!(wire_format)
       }
     else
-      _ ->
-        %{
-          protocol_mod: ExecutionModules.protocol_module!(semantic_protocol_for_model(model)),
-          wire_mod: Resolver.wire_module!(model)
-        }
-    end
-  end
-
-  defp semantic_protocol_for_model(%LLMDB.Model{} = model) do
-    cond do
-      model.provider == :anthropic -> :anthropic_messages
-      Resolver.responses_api?(model) -> :openai_responses
-      true -> :openai_chat
+      _ -> raise "Unable to determine replay runtime from model profile for #{inspect(model.id)}"
     end
   end
 

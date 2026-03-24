@@ -28,12 +28,12 @@ surface:
   stability: evolving
 
 - id: reqllm.package.execution_planning
-  statement: ReqLlmNext shall route supported requests through a deterministic planning path that normalizes model facts into `ModelProfile`, request intent into `ExecutionMode`, selects explicit `ExecutionSurface` support, validates surface-specific parameter compatibility, materializes an `ExecutionPlan`, and resolves an execution stack of provider, semantic protocol, wire, and transport modules before runtime execution, with provider facts and surface catalog construction driven from the compiled extension manifest rather than central provider branching.
+  statement: ReqLlmNext shall route supported requests through a deterministic planning path that normalizes model facts into `ModelProfile`, request intent into `ExecutionMode`, selects explicit `ExecutionSurface` support through compatibility-aware policy, validates surface-specific parameter compatibility, materializes an `ExecutionPlan`, and resolves an execution stack of provider, semantic protocol, wire, and transport modules before runtime execution, with provider facts, runtime-module lookup, and surface catalog construction driven from the compiled extension manifest rather than central provider branching.
   priority: must
   stability: evolving
 
 - id: reqllm.package.buffered_stream_metadata
-  statement: When ReqLlmNext buffers a streamed response into the canonical `Response` shape, it shall preserve terminal metadata such as finish reason and provider-facing response identifiers emitted by the canonical stream.
+  statement: When ReqLlmNext buffers a streamed response into the canonical `Response` shape, it shall preserve terminal metadata such as finish reason and provider-facing response identifiers emitted by the canonical stream, and the same shared stream materialization path shall drive helper extraction for streamed text, thinking, usage, and tool calls so normalization stays consistent across buffered and streaming consumers.
   priority: should
   stability: evolving
 

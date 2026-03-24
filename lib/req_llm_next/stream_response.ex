@@ -12,7 +12,7 @@ defmodule ReqLlmNext.StreamResponse do
   - `nil` (stream termination)
   """
 
-  alias ReqLlmNext.ToolCall
+  alias ReqLlmNext.Response.Materializer
 
   defstruct [:stream, :model, :cancel_fn, :metadata_ref]
 
@@ -46,14 +46,10 @@ defmodule ReqLlmNext.StreamResponse do
   """
   @spec text(t()) :: String.t()
   def text(%__MODULE__{stream: stream}) do
-    stream
-    |> Enum.map(fn
-      text when is_binary(text) -> text
-      {:content_part, %ReqLlmNext.Context.ContentPart{type: :text, text: text}} -> text
-      _ -> nil
-    end)
-    |> Enum.reject(&is_nil/1)
-    |> Enum.join("")
+    case Materializer.collect(stream) do
+      {:ok, materialized} -> Materializer.text(materialized)
+      {:error, _error} -> ""
+    end
   end
 
   @doc """
@@ -64,17 +60,10 @@ defmodule ReqLlmNext.StreamResponse do
   """
   @spec thinking(t()) :: String.t()
   def thinking(%__MODULE__{stream: stream}) do
-    stream
-    |> Enum.filter(fn
-      {:thinking, _} -> true
-      {:thinking_start, _} -> true
-      _ -> false
-    end)
-    |> Enum.map_join("", fn
-      {:thinking, text} -> text
-      {:thinking_start, _} -> ""
-      {:content_part, %ReqLlmNext.Context.ContentPart{type: :thinking, text: text}} -> text
-    end)
+    case Materializer.collect(stream) do
+      {:ok, materialized} -> Materializer.thinking(materialized)
+      {:error, _error} -> ""
+    end
   end
 
   @doc """
@@ -82,11 +71,10 @@ defmodule ReqLlmNext.StreamResponse do
   """
   @spec usage(t()) :: map() | nil
   def usage(%__MODULE__{stream: stream}) do
-    stream
-    |> Enum.find_value(fn
-      {:usage, usage} -> usage
-      _ -> nil
-    end)
+    case Materializer.collect(stream) do
+      {:ok, materialized} -> Materializer.usage(materialized)
+      {:error, _error} -> nil
+    end
   end
 
   @doc """
@@ -108,78 +96,11 @@ defmodule ReqLlmNext.StreamResponse do
   Tool calls are streamed as deltas that need to be assembled into complete
   ToolCall structs.
   """
-  @spec tool_calls(t()) :: [ToolCall.t()]
+  @spec tool_calls(t()) :: [ReqLlmNext.ToolCall.t()]
   def tool_calls(%__MODULE__{stream: stream}) do
-    stream
-    |> Enum.reduce(%{}, &accumulate_tool_call/2)
-    |> Map.values()
-    |> Enum.sort_by(& &1.index)
-    |> Enum.map(&finalize_tool_call/1)
-  end
-
-  defp accumulate_tool_call({:tool_call_delta, %{index: index} = delta}, acc) do
-    Map.update(acc, index, init_tool_call_acc(delta), &merge_tool_call_delta(&1, delta))
-  end
-
-  defp accumulate_tool_call({:tool_call_start, %{index: index} = start}, acc) do
-    Map.update(acc, index, init_tool_call_from_start(start), &merge_tool_call_start(&1, start))
-  end
-
-  defp accumulate_tool_call(_other, acc), do: acc
-
-  defp init_tool_call_acc(%{id: id, function: function} = delta) when not is_nil(id) do
-    %{
-      index: delta.index,
-      id: id,
-      type: delta[:type] || "function",
-      name: function["name"],
-      arguments: function["arguments"] || ""
-    }
-  end
-
-  defp init_tool_call_acc(delta) do
-    %{
-      index: delta.index,
-      id: nil,
-      type: delta[:type],
-      name: nil,
-      arguments: delta[:function]["arguments"] || ""
-    }
-  end
-
-  defp init_tool_call_from_start(%{index: index, id: id, name: name}) do
-    %{
-      index: index,
-      id: id,
-      type: "function",
-      name: name,
-      arguments: ""
-    }
-  end
-
-  defp merge_tool_call_delta(acc, %{function: function}) when is_map(function) do
-    %{
-      acc
-      | name: acc.name || function["name"],
-        arguments: acc.arguments <> (function["arguments"] || "")
-    }
-  end
-
-  defp merge_tool_call_delta(acc, %{partial_json: json}) when is_binary(json) do
-    %{acc | arguments: acc.arguments <> json}
-  end
-
-  defp merge_tool_call_delta(acc, %{id: id}) when not is_nil(id) do
-    %{acc | id: id}
-  end
-
-  defp merge_tool_call_delta(acc, _delta), do: acc
-
-  defp merge_tool_call_start(acc, %{id: id, name: name}) do
-    %{acc | id: id || acc.id, name: name || acc.name}
-  end
-
-  defp finalize_tool_call(%{id: id, name: name, arguments: args}) do
-    ToolCall.new(id, name, args)
+    case Materializer.collect(stream) do
+      {:ok, materialized} -> Materializer.tool_calls(materialized)
+      {:error, _error} -> []
+    end
   end
 end

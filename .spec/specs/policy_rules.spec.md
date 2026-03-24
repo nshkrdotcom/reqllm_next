@@ -26,7 +26,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.policy_rules.match_patch
-  statement: Policy rules shall use a declarative match-and-patch model to choose preferred surfaces, fallback surfaces, timeout classes, session defaults, stable parameter defaults, and plan adapter references, with explicit transport preference remaining authoritative when matching surfaces are available and any adapter references ultimately resolved through compiled extension seams.
+  statement: Policy resolution shall choose preferred and fallback surfaces, timeout classes, session defaults, and plan adapter references from `ExecutionMode` plus declared `ExecutionSurface` capabilities, with explicit compatibility checks for transport, streaming, structured output, tools, reasoning, and session semantics before ranking matching surfaces, and any adapter references ultimately resolved through compiled extension seams.
   priority: must
   stability: evolving
 
@@ -36,7 +36,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.policy_rules.allowed_patch_domains
-  statement: Policy rules may patch preferred and fallback surfaces, timeout classes, session defaults, stable parameter defaults for the active mode, and plan-adapter references, but they shall not patch model identity, provider identity, unsupported operations, raw payloads, provider-native helper validation, or provider-specific utility endpoint behavior.
+  statement: Policy resolution may choose preferred and fallback surfaces, timeout classes, session defaults, stable parameter defaults for the active mode, and plan-adapter references, but it shall not patch model identity, provider identity, unsupported operations, raw payloads, provider-native helper validation, or provider-specific utility endpoint behavior.
   priority: must
   stability: evolving
 ```

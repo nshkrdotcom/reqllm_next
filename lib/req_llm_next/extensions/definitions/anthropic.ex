@@ -46,7 +46,12 @@ defmodule ReqLlmNext.Extensions.Definitions.Anthropic do
         )
 
         wire_modules(anthropic_messages_sse_json: ReqLlmNext.Wire.Anthropic)
-        transport_modules(http: nil, http_sse: ReqLlmNext.Transports.HTTPStream)
+
+        transport_modules(
+          http: ReqLlmNext.Transports.HTTPRequest,
+          http_sse: ReqLlmNext.Transports.HTTPStream
+        )
+
         adapter_modules([ReqLlmNext.Adapters.Anthropic.Thinking])
       end
     end

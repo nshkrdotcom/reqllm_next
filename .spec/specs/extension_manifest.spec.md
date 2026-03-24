@@ -22,7 +22,7 @@ surface:
 
 ```spec-requirements
 - id: reqllm.extension_manifest.plain_runtime_contract
-  statement: ReqLlmNext shall model execution extension behavior as plain runtime data made of providers, families, rules, criteria, seam patches, and manifests so the runtime consumes a stable contract independent of any authoring DSL, with built-in declaration packs merged into one compiled manifest at compile time.
+  statement: ReqLlmNext shall model execution extension behavior as plain runtime data made of providers, families, rules, criteria, seam patches, and manifests so the runtime consumes a stable contract independent of any authoring DSL, with built-in declaration packs merged into one compiled manifest at compile time and expanded into a manifest-backed runtime registry for globally-addressable provider, protocol, wire, and transport seam keys.
   priority: must
   stability: evolving
 

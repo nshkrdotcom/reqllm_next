@@ -8,7 +8,7 @@ Current-truth boundary and execution-layer contract for ReqLlmNext 2.0.
 id: reqllm.architecture
 kind: architecture
 status: active
-summary: Current-truth runtime boundary and layer-separation contract for model input and execution flow, including handcrafted `LLMDB.Model` support at the boundary, the deterministic planning bridge, the thin top-level facade, and the separated execution stack.
+summary: Current-truth runtime boundary and layer-separation contract for model input and execution flow, including handcrafted `LLMDB.Model` support at the boundary, a fully plan-driven execution spine, the thin top-level facade, and the separated execution stack.
 surface:
   - README.md
   - AGENTS.md
@@ -49,7 +49,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.architecture.facts_mode_policy_plan
-  statement: ReqLlmNext architecture shall normalize model facts into `ModelProfile`, request intent into `ExecutionMode`, resolve ordered policy rules, run surface-owned request preparation, and materialize a single `ExecutionPlan` before downstream execution, including manifest-backed provider-scoped descriptive fact extraction, family-owned surface catalog resolution through declared seams, seam-driven adapter and runtime-module selection, honoring explicit transport preference when a matching surface exists, and validating surface-specific parameter compatibility before wire encoding.
+  statement: ReqLlmNext architecture shall normalize model facts into `ModelProfile`, request intent into `ExecutionMode`, resolve compatibility-aware surface policy, run surface-owned request preparation, and materialize a single `ExecutionPlan` before downstream execution, including manifest-backed provider-scoped descriptive fact extraction, family-owned surface catalog resolution through declared seams, manifest-backed runtime-module lookup, honoring explicit transport and session intent when a matching surface exists, validating surface-specific parameter compatibility before wire encoding, and routing both streaming and non-streaming HTTP execution through explicit transport modules.
   priority: must
   stability: evolving
 

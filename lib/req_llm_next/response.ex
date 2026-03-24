@@ -22,6 +22,7 @@ defmodule ReqLlmNext.Response do
 
   alias ReqLlmNext.Context
   alias ReqLlmNext.Context.{ContentPart, Message}
+  alias ReqLlmNext.Response.Materializer
 
   @derive {Jason.Encoder, except: [:stream]}
 
@@ -242,167 +243,16 @@ defmodule ReqLlmNext.Response do
   def join_stream(%__MODULE__{stream?: false} = response), do: {:ok, response}
   def join_stream(%__MODULE__{stream: nil} = response), do: {:ok, response}
 
-  def join_stream(%__MODULE__{stream: stream, context: context} = response) do
-    case collect_stream(stream) do
+  def join_stream(%__MODULE__{stream: stream} = response) do
+    case Materializer.collect(stream) do
       {:error, error} ->
         {:error, error}
 
-      {:ok, {content_parts, tool_calls, usage, meta}} ->
-        message =
-          if content_parts != [] or tool_calls != [] do
-            tool_calls_normalized = if tool_calls == [], do: nil, else: tool_calls
-
-            %Message{
-              role: :assistant,
-              content: content_parts,
-              tool_calls: tool_calls_normalized
-            }
-          else
-            nil
-          end
-
-        updated_context =
-          if message do
-            Context.append(context, message)
-          else
-            context
-          end
-
-        {:ok,
-         %{
-           response
-           | stream?: false,
-             stream: nil,
-             message: message,
-             context: updated_context,
-             usage: usage || response.usage,
-             finish_reason: meta[:finish_reason] || response.finish_reason,
-             provider_meta:
-               Map.merge(response.provider_meta || %{}, provider_meta_from_meta(meta))
-         }}
+      {:ok, materialized} ->
+        {:ok, Materializer.response(response, materialized)}
     end
   rescue
     e -> {:error, e}
-  end
-
-  defp collect_stream(stream) do
-    result =
-      Enum.reduce_while(stream, {:ok, {[], %{}, nil, %{}}}, fn
-        {:error, error_info}, {:ok, _acc} ->
-          error =
-            ReqLlmNext.Error.API.Stream.exception(
-              reason: error_info.message,
-              cause: error_info
-            )
-
-          {:halt, {:error, error}}
-
-        text, {:ok, {parts, tool_acc, usage, meta}} when is_binary(text) ->
-          {:cont, {:ok, {[ContentPart.text(text) | parts], tool_acc, usage, meta}}}
-
-        {:thinking, text}, {:ok, {parts, tool_acc, usage, meta}} when is_binary(text) ->
-          {:cont, {:ok, {[ContentPart.thinking(text) | parts], tool_acc, usage, meta}}}
-
-        {:content_part, %ContentPart{} = part}, {:ok, {parts, tool_acc, usage, meta}} ->
-          {:cont, {:ok, {[part | parts], tool_acc, usage, meta}}}
-
-        {:usage, usage_map}, {:ok, {parts, tool_acc, _usage, meta}} ->
-          {:cont, {:ok, {parts, tool_acc, usage_map, meta}}}
-
-        {:tool_call_delta, %{index: index} = delta}, {:ok, {parts, tool_acc, usage, meta}} ->
-          updated =
-            Map.update(tool_acc, index, init_tool_call(delta), &merge_tool_call(&1, delta))
-
-          {:cont, {:ok, {parts, updated, usage, meta}}}
-
-        {:tool_call_start, %{index: index} = start}, {:ok, {parts, tool_acc, usage, meta}} ->
-          updated =
-            Map.update(tool_acc, index, init_tool_call_from_start(start), &merge_start(&1, start))
-
-          {:cont, {:ok, {parts, updated, usage, meta}}}
-
-        {:meta, meta_chunk}, {:ok, {parts, tool_acc, usage, meta}} when is_map(meta_chunk) ->
-          {:cont, {:ok, {parts, tool_acc, usage, Map.merge(meta, meta_chunk)}}}
-
-        _other, acc ->
-          {:cont, acc}
-      end)
-
-    case result do
-      {:error, _} = error ->
-        error
-
-      {:ok, {parts, tool_acc, usage, meta}} ->
-        tool_calls =
-          tool_acc
-          |> Map.values()
-          |> Enum.sort_by(& &1.index)
-          |> Enum.map(&finalize_tool_call/1)
-
-        {:ok, {Enum.reverse(parts), tool_calls, usage, meta}}
-    end
-  end
-
-  defp provider_meta_from_meta(meta) when is_map(meta) do
-    meta
-    |> Map.drop([:terminal?, :finish_reason])
-    |> Enum.into(%{})
-  end
-
-  defp init_tool_call(%{id: id, function: function} = delta) when not is_nil(id) do
-    %{
-      index: delta.index,
-      id: id,
-      type: delta[:type] || "function",
-      name: function["name"],
-      arguments: function["arguments"] || ""
-    }
-  end
-
-  defp init_tool_call(delta) do
-    %{
-      index: delta.index,
-      id: nil,
-      type: delta[:type],
-      name: nil,
-      arguments: delta[:function]["arguments"] || ""
-    }
-  end
-
-  defp init_tool_call_from_start(%{index: index, id: id, name: name}) do
-    %{
-      index: index,
-      id: id,
-      type: "function",
-      name: name,
-      arguments: ""
-    }
-  end
-
-  defp merge_tool_call(acc, %{function: function}) when is_map(function) do
-    %{
-      acc
-      | name: acc.name || function["name"],
-        arguments: acc.arguments <> (function["arguments"] || "")
-    }
-  end
-
-  defp merge_tool_call(acc, %{partial_json: json}) when is_binary(json) do
-    %{acc | arguments: acc.arguments <> json}
-  end
-
-  defp merge_tool_call(acc, %{id: id}) when not is_nil(id) do
-    %{acc | id: id}
-  end
-
-  defp merge_tool_call(acc, _delta), do: acc
-
-  defp merge_start(acc, %{id: id, name: name}) do
-    %{acc | id: id || acc.id, name: name || acc.name}
-  end
-
-  defp finalize_tool_call(%{id: id, name: name, arguments: args}) do
-    ReqLlmNext.ToolCall.new(id, name, args)
   end
 
   @doc """

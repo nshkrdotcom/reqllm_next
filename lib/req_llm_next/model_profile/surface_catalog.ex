@@ -13,8 +13,6 @@ defmodule ReqLlmNext.ModelProfile.SurfaceCatalog do
           session_capabilities: map()
         }
 
-  @fallback_module ReqLlmNext.ModelProfile.SurfaceCatalog.OpenAICompatible
-
   @spec build(LLMDB.Model.t(), map()) :: catalog()
   def build(%LLMDB.Model{} = model, provider_facts) do
     context = %{provider: model.provider, model_id: model.id, facts: provider_facts}
@@ -26,12 +24,12 @@ defmodule ReqLlmNext.ModelProfile.SurfaceCatalog do
         |> Map.put(:family, family.id)
 
       {:ok, %{family: family}} ->
-        @fallback_module.build(model, provider_facts)
-        |> Map.put(:family, family.id)
+        raise ArgumentError,
+              "family #{inspect(family.id)} does not declare a surface catalog module"
 
       {:error, :no_matching_family} ->
-        @fallback_module.build(model, provider_facts)
-        |> Map.put(:family, nil)
+        raise ArgumentError,
+              "no execution family matched #{inspect(model.provider)}:#{inspect(model.id)}"
     end
   end
 end

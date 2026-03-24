@@ -31,7 +31,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.execution_surfaces.surface_selection
-  statement: The planner shall choose exactly one primary `ExecutionSurface` for an `ExecutionPlan`, may only choose fallback surfaces already declared in `ModelProfile`, and shall not ignore an explicit transport preference when a matching surface exists for the active mode.
+  statement: The planner shall choose exactly one primary `ExecutionSurface` for an `ExecutionPlan`, may only choose fallback surfaces already declared in `ModelProfile`, and shall apply explicit compatibility checks for transport, structured output, tools, reasoning, streaming, and session semantics before selecting the highest-ranked matching surface for the active mode.
   priority: must
   stability: evolving
 

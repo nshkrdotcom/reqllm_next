@@ -3,7 +3,7 @@ defmodule ReqLlmNext.ExecutionModules do
   Resolves the runtime modules for a planned execution stack.
   """
 
-  alias ReqLlmNext.{ExecutionPlan, Extensions, Providers, SemanticProtocols, Transports, Wire}
+  alias ReqLlmNext.{ExecutionPlan, Extensions}
 
   @type resolution :: %{
           provider_mod: module(),
@@ -17,57 +17,72 @@ defmodule ReqLlmNext.ExecutionModules do
     {:ok, %{seams: seams}} = Extensions.resolve_compiled(extension_context(plan))
 
     %{
-      provider_mod: Providers.get!(plan.provider),
+      provider_mod: provider_module_from_seams!(seams, plan.provider),
       protocol_mod: protocol_module_from_seams!(seams, plan.semantic_protocol),
       wire_mod: wire_module_from_seams!(seams, plan.wire_format),
-      transport_mod: transport_module_from_seams!(seams, plan.transport)
+      transport_mod: transport_module_from_seams!(seams, plan.transport, plan.wire_format)
     }
   end
 
   @spec protocol_module!(atom()) :: module() | nil
-  def protocol_module!(:anthropic_messages), do: SemanticProtocols.AnthropicMessages
-  def protocol_module!(:openai_chat), do: SemanticProtocols.OpenAIChat
-  def protocol_module!(:openai_responses), do: SemanticProtocols.OpenAIResponses
-  def protocol_module!(:openai_embeddings), do: nil
-  def protocol_module!(other), do: raise("Unknown semantic protocol: #{inspect(other)}")
+  def protocol_module!(semantic_protocol) when is_atom(semantic_protocol) do
+    case Map.fetch(
+           Extensions.Compiled.runtime_registry().semantic_protocol_modules,
+           semantic_protocol
+         ) do
+      {:ok, module} -> module
+      :error -> raise("Unknown semantic protocol: #{inspect(semantic_protocol)}")
+    end
+  end
 
   @spec wire_module!(atom()) :: module()
-  def wire_module!(:anthropic_messages_sse_json), do: Wire.Anthropic
-  def wire_module!(:openai_chat_sse_json), do: Wire.OpenAIChat
-  def wire_module!(:openai_responses_sse_json), do: Wire.OpenAIResponses
-  def wire_module!(:openai_responses_ws_json), do: Wire.OpenAIResponses
-  def wire_module!(:openai_embeddings_json), do: Wire.OpenAIEmbeddings
-  def wire_module!(other), do: raise("Unknown wire format: #{inspect(other)}")
+  def wire_module!(wire_format) when is_atom(wire_format) do
+    case Map.fetch(Extensions.Compiled.runtime_registry().wire_modules, wire_format) do
+      {:ok, module} -> module
+      :error -> raise("Unknown wire format: #{inspect(wire_format)}")
+    end
+  end
 
   @spec transport_module!(atom(), atom()) :: module() | nil
-  def transport_module!(:http, _wire_format), do: nil
-  def transport_module!(:http_sse, _wire_format), do: Transports.HTTPStream
+  def transport_module!(transport, wire_format)
+      when is_atom(transport) and is_atom(wire_format) do
+    case Map.fetch(Extensions.Compiled.runtime_registry().transport_modules, transport) do
+      {:ok, module} ->
+        module
 
-  def transport_module!(:websocket, :openai_responses_ws_json),
-    do: Transports.OpenAIResponsesWebSocket
+      :error ->
+        raise("Unknown transport/wire format combination: #{inspect({transport, wire_format})}")
+    end
+  end
 
-  def transport_module!(transport, wire_format) do
-    raise("Unknown transport/wire format combination: #{inspect({transport, wire_format})}")
+  defp provider_module_from_seams!(%{provider_module: module}, _provider) when not is_nil(module),
+    do: module
+
+  defp provider_module_from_seams!(_seams, provider) do
+    case Map.fetch(Extensions.Compiled.runtime_registry().provider_modules, provider) do
+      {:ok, module} -> module
+      :error -> raise("Unknown provider seam: #{inspect(provider)}")
+    end
   end
 
   defp protocol_module_from_seams!(%{semantic_protocol_modules: modules}, semantic_protocol) do
     case Map.fetch(modules, semantic_protocol) do
       {:ok, module} -> module
-      :error -> raise("Unknown semantic protocol seam: #{inspect(semantic_protocol)}")
+      :error -> protocol_module!(semantic_protocol)
     end
   end
 
   defp wire_module_from_seams!(%{wire_modules: modules}, wire_format) do
     case Map.fetch(modules, wire_format) do
       {:ok, module} -> module
-      :error -> raise("Unknown wire format seam: #{inspect(wire_format)}")
+      :error -> wire_module!(wire_format)
     end
   end
 
-  defp transport_module_from_seams!(%{transport_modules: modules}, transport) do
+  defp transport_module_from_seams!(%{transport_modules: modules}, transport, wire_format) do
     case Map.fetch(modules, transport) do
       {:ok, module} -> module
-      :error -> raise("Unknown transport seam: #{inspect(transport)}")
+      :error -> transport_module!(transport, wire_format)
     end
   end
 

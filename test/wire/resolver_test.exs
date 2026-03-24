@@ -37,7 +37,7 @@ defmodule ReqLlmNext.Wire.ResolverTest do
     test "raises for unknown provider" do
       model = TestModels.minimal(%{provider: :unknown_provider})
 
-      assert_raise RuntimeError, ~r/Provider error/, fn ->
+      assert_raise ArgumentError, ~r/provider module/, fn ->
         Resolver.provider_module!(model)
       end
     end
@@ -72,24 +72,6 @@ defmodule ReqLlmNext.Wire.ResolverTest do
     test "defaults to OpenAIChat for unknown provider" do
       model = TestModels.minimal(%{provider: :some_other})
       assert Resolver.wire_module!(model) == OpenAIChat
-    end
-
-    test "uses explicit wire protocol when specified as atom" do
-      model = TestModels.openai(%{extra: %{wire: %{protocol: :anthropic}}})
-      assert Resolver.wire_module!(model) == Anthropic
-    end
-
-    test "uses explicit wire protocol when specified as string" do
-      model = TestModels.openai(%{extra: %{wire: %{protocol: "openai_chat"}}})
-      assert Resolver.wire_module!(model) == OpenAIChat
-    end
-
-    test "raises for unknown explicit wire protocol" do
-      model = TestModels.openai(%{extra: %{wire: %{protocol: :unknown_protocol}}})
-
-      assert_raise RuntimeError, ~r/Unknown wire protocol/, fn ->
-        Resolver.wire_module!(model)
-      end
     end
   end
 

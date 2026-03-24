@@ -22,7 +22,7 @@ surface:
 
 ```spec-requirements
 - id: reqllm.source_layout.concern_homes
-  statement: ReqLlmNext shall keep model-boundary concerns, provider-scoped fact extraction, manifest-backed provider registration, family-owned surface catalog modules, profile construction, mode normalization, policy resolution, surface-owned request preparation, semantic protocol normalization, wire envelopes, transport mechanics, response materialization, fixture replay, and session state in distinct source locations that match the architecture.
+  statement: ReqLlmNext shall keep model-boundary concerns, provider-scoped fact extraction, manifest-backed provider registration, family-owned surface catalog modules, profile construction, mode normalization, policy resolution, surface-owned request preparation, semantic protocol normalization, wire envelopes, transport mechanics, shared response stream materialization, fixture replay, and session state in distinct source locations that match the architecture.
   priority: must
   stability: evolving
 
@@ -47,7 +47,7 @@ surface:
   stability: evolving
 
 - id: reqllm.source_layout.extension_contract_home
-  statement: Compile-time execution extension contracts shall live in a dedicated `lib/req_llm_next/extensions/` home, including the plain runtime structs, Spark DSL authoring modules, inheritance expansion, manifest verifiers, compiled manifest modules, and provider or family definition packs under `extensions/definitions/`, so default execution families and edge-case override rules are defined outside the shared planner and executor code.
+  statement: Compile-time execution extension contracts shall live in a dedicated `lib/req_llm_next/extensions/` home, including the plain runtime structs, Spark DSL authoring modules, inheritance expansion, manifest verifiers, compiled manifest modules, runtime registries, and provider or family definition packs under `extensions/definitions/`, so default execution families and edge-case override rules are defined outside the shared planner and executor code.
   priority: should
   stability: evolving
 ```

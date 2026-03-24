@@ -206,9 +206,13 @@ defmodule ReqLlmNext.Executor do
              opts |> Keyword.put(:_model_spec, inspect_model_spec(model_spec))
            ),
          runtime_opts <- runtime_opts(plan, model),
-         %{provider_mod: provider_mod, wire_mod: wire_mod} <- ExecutionModules.resolve(plan),
+         %{
+           provider_mod: provider_mod,
+           wire_mod: wire_mod,
+           transport_mod: transport_mod
+         } <- ExecutionModules.resolve(plan),
          {:ok, raw_response} <-
-           execute_embedding_request(provider_mod, wire_mod, model, input, runtime_opts) do
+           transport_mod.request(provider_mod, wire_mod, model, input, runtime_opts) do
       wire_mod.extract_embeddings(raw_response, input)
     end
   end
@@ -265,57 +269,5 @@ defmodule ReqLlmNext.Executor do
   defp validate_embedding_input(_) do
     {:error,
      Error.Invalid.Parameter.exception(parameter: "input: must be string or list of strings")}
-  end
-
-  defp execute_embedding_request(provider_mod, wire_mod, model, input, opts) do
-    api_key = provider_mod.get_api_key(opts)
-    base_url = Keyword.get(opts, :base_url, provider_mod.base_url())
-    url = base_url <> wire_mod.path()
-
-    wire_headers = get_wire_headers(wire_mod, opts)
-
-    headers =
-      provider_mod.auth_headers(api_key) ++
-        wire_headers
-
-    body =
-      wire_mod.encode_body(model, input, opts)
-      |> Jason.encode!()
-
-    request = Finch.build(:post, url, headers, body)
-
-    case Finch.request(request, ReqLlmNext.Finch) do
-      {:ok, %Finch.Response{status: status, body: response_body}} when status in 200..299 ->
-        case Jason.decode(response_body) do
-          {:ok, decoded} ->
-            {:ok, decoded}
-
-          {:error, jason_error} ->
-            {:error,
-             Error.API.JsonParse.exception(
-               message: "Failed to parse embedding response: #{Exception.message(jason_error)}",
-               raw_json: response_body
-             )}
-        end
-
-      {:ok, %Finch.Response{status: status, body: response_body}} ->
-        {:error,
-         Error.API.Request.exception(
-           reason: "Embedding request failed",
-           status: status,
-           response_body: response_body
-         )}
-
-      {:error, reason} ->
-        {:error, Error.API.Request.exception(reason: "HTTP request failed: #{inspect(reason)}")}
-    end
-  end
-
-  defp get_wire_headers(wire_mod, opts) do
-    if function_exported?(wire_mod, :headers, 1) do
-      wire_mod.headers(opts)
-    else
-      [{"Content-Type", "application/json"}]
-    end
   end
 end

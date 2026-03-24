@@ -164,6 +164,36 @@ defmodule ReqLlmNext.OperationPlannerTest do
       assert plan.plan_adapters == []
     end
 
+    test "prefers persistent-session surfaces when session mode is preferred" do
+      {:ok, model} = LLMDB.model("openai:gpt-4o-mini")
+
+      assert {:ok, plan} =
+               OperationPlanner.plan(
+                 model,
+                 :text,
+                 "Hello",
+                 session: :preferred
+               )
+
+      assert plan.surface.id == :openai_responses_text_websocket
+      assert plan.transport == :websocket
+    end
+
+    test "requires persistent-session surfaces when session mode is required" do
+      {:ok, model} = LLMDB.model("openai:gpt-4o-mini")
+
+      assert {:ok, plan} =
+               OperationPlanner.plan(
+                 model,
+                 :text,
+                 "Hello",
+                 session: :required
+               )
+
+      assert plan.surface.id == :openai_responses_text_websocket
+      assert plan.transport == :websocket
+    end
+
     test "rejects temperature on the websocket responses surface" do
       {:ok, model} = LLMDB.model("openai:gpt-4o-mini")
 
@@ -245,7 +275,7 @@ defmodule ReqLlmNext.OperationPlannerTest do
   end
 
   describe "ExecutionModules.resolve/1" do
-    test "maps openai responses plans to the current bridge modules" do
+    test "maps openai responses plans to the declared runtime modules" do
       {:ok, model} = LLMDB.model("openai:gpt-4o-mini")
       {:ok, plan} = OperationPlanner.plan(model, :text, "Hello")
 
@@ -281,7 +311,7 @@ defmodule ReqLlmNext.OperationPlannerTest do
       assert transport_mod == ReqLlmNext.Transports.OpenAIResponsesWebSocket
     end
 
-    test "maps anthropic plans to the current bridge modules" do
+    test "maps anthropic plans to the declared runtime modules" do
       {:ok, model} = LLMDB.model("anthropic:claude-haiku-4-5")
       {:ok, plan} = OperationPlanner.plan(model, :text, "Hello")
 
@@ -297,6 +327,23 @@ defmodule ReqLlmNext.OperationPlannerTest do
       assert protocol_mod == ReqLlmNext.SemanticProtocols.AnthropicMessages
       assert wire_mod == ReqLlmNext.Wire.Anthropic
       assert transport_mod == ReqLlmNext.Transports.HTTPStream
+    end
+
+    test "maps embedding plans to the explicit HTTP request transport" do
+      model = TestModels.openai_embedding()
+      {:ok, plan} = OperationPlanner.plan(model, :embed, "hello")
+
+      assert %{
+               provider_mod: provider_mod,
+               protocol_mod: protocol_mod,
+               wire_mod: wire_mod,
+               transport_mod: transport_mod
+             } = ExecutionModules.resolve(plan)
+
+      assert provider_mod == ReqLlmNext.Providers.OpenAI
+      assert protocol_mod == nil
+      assert wire_mod == ReqLlmNext.Wire.OpenAIEmbeddings
+      assert transport_mod == ReqLlmNext.Transports.HTTPRequest
     end
   end
 end

@@ -28,7 +28,10 @@ defmodule ReqLlmNext.Extensions.Definitions.OpenAICompatible do
           openai_embeddings_json: ReqLlmNext.Wire.OpenAIEmbeddings
         )
 
-        transport_modules(http: nil, http_sse: ReqLlmNext.Transports.HTTPStream)
+        transport_modules(
+          http: ReqLlmNext.Transports.HTTPRequest,
+          http_sse: ReqLlmNext.Transports.HTTPStream
+        )
       end
     end
   end
