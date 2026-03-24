@@ -28,12 +28,12 @@ decisions:
 
 ```spec-requirements
 - id: reqllm.layer_boundaries.separated_io
-  statement: ReqLlmNext shall keep provider, session runtime, transport, wire format, and semantic protocol responsibilities separated so no layer skips across another layer's ownership boundary and each resolved plan binds one deterministic layer stack including explicit provider, protocol, wire, and transport modules.
+  statement: ReqLlmNext shall keep provider, session runtime, transport, wire format, and semantic protocol responsibilities separated so no layer skips across another layer's ownership boundary and each resolved plan binds one deterministic layer stack including explicit provider, protocol, wire, and transport modules resolved from manifest-declared seams rather than central runtime registries.
   priority: must
   stability: evolving
 
 - id: reqllm.layer_boundaries.plan_aware_adapters
-  statement: ReqLlmNext shall treat adapters as explicit layer-scoped patches and start the 2.0 architecture with plan-aware adapters that operate on `ExecutionPlan` after policy resolution.
+  statement: ReqLlmNext shall treat adapters as explicit layer-scoped patches selected through resolved extension seams and start the 2.0 architecture with plan-aware adapters that operate on `ExecutionPlan` after policy resolution instead of through one omniscient global adapter registry.
   priority: must
   stability: evolving
 

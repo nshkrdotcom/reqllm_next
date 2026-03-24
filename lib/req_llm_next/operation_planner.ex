@@ -8,6 +8,7 @@ defmodule ReqLlmNext.OperationPlanner do
   alias ReqLlmNext.{
     ExecutionMode,
     ExecutionPlan,
+    Extensions,
     ModelProfile,
     PolicyRules,
     SurfacePreparation,
@@ -39,10 +40,33 @@ defmodule ReqLlmNext.OperationPlanner do
          timeout_ms: policy.timeout_ms,
          session_strategy: policy.session_strategy,
          fallback_surfaces: policy.fallback_surfaces,
-         plan_adapters: plan_adapters_for(model, policy.surface)
+         plan_adapters: plan_adapters_for(model, profile, mode, policy.surface)
        })}
     end
   end
 
-  defp plan_adapters_for(model, _surface), do: AdapterPipeline.adapters_for(model)
+  defp plan_adapters_for(model, profile, mode, surface) do
+    case Extensions.resolve_compiled(extension_context(profile, mode, surface)) do
+      {:ok, %{seams: %{adapter_modules: adapter_modules}}} ->
+        AdapterPipeline.adapters_for(model, adapter_modules)
+
+      {:error, :no_matching_family} ->
+        []
+    end
+  end
+
+  defp extension_context(profile, mode, surface) do
+    %{
+      provider: profile.provider,
+      family: profile.family,
+      model_id: profile.model_id,
+      operation: mode.operation,
+      transport: surface.transport,
+      semantic_protocol: surface.semantic_protocol,
+      stream?: mode.stream?,
+      tools?: mode.tools?,
+      structured?: mode.structured_output?,
+      features: profile.features
+    }
+  end
 end

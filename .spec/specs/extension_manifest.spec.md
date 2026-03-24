@@ -22,7 +22,7 @@ surface:
 
 ```spec-requirements
 - id: reqllm.extension_manifest.plain_runtime_contract
-  statement: ReqLlmNext shall model execution extension behavior as plain runtime data made of providers, families, rules, criteria, seam patches, and manifests so the runtime consumes a stable contract independent of any authoring DSL.
+  statement: ReqLlmNext shall model execution extension behavior as plain runtime data made of providers, families, rules, criteria, seam patches, and manifests so the runtime consumes a stable contract independent of any authoring DSL, with built-in declaration packs merged into one compiled manifest at compile time.
   priority: must
   stability: evolving
 
@@ -44,6 +44,11 @@ surface:
 - id: reqllm.extension_manifest.spark_authoring_layer
   statement: ReqLlmNext may use Spark as a compile-time authoring DSL for built-in extension declarations, but that authoring layer shall compile to the plain manifest contract and compiled manifest modules rather than becoming the runtime extension API itself.
   priority: should
+  stability: evolving
+
+- id: reqllm.extension_manifest.compile_time_verification
+  statement: ReqLlmNext shall verify merged extension manifests at compile time for duplicate ids, missing default-family references, missing global defaults, invalid family references in rules, illegal seam ownership, and missing seam modules so the declaration layer enforces architectural boundaries instead of merely describing them.
+  priority: must
   stability: evolving
 ```
 
@@ -67,4 +72,10 @@ surface:
     - reqllm.extension_manifest.family_precedence
     - reqllm.extension_manifest.rule_precedence
     - reqllm.extension_manifest.spark_authoring_layer
+
+- kind: command
+  target: mix test test/req_llm_next/extensions/manifest_verifier_test.exs
+  execute: true
+  covers:
+    - reqllm.extension_manifest.compile_time_verification
 ```

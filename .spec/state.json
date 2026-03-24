@@ -166,7 +166,7 @@
         "id": "reqllm.architecture.facts_mode_policy_plan",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext architecture shall normalize model facts into `ModelProfile`, request intent into `ExecutionMode`, resolve ordered policy rules, run surface-owned request preparation, and materialize a single `ExecutionPlan` before downstream execution, including manifest-backed provider-scoped descriptive fact extraction, family-owned surface catalog resolution through declared seams, honoring explicit transport preference when a matching surface exists, and validating surface-specific parameter compatibility before wire encoding.",
+        "statement": "ReqLlmNext architecture shall normalize model facts into `ModelProfile`, request intent into `ExecutionMode`, resolve ordered policy rules, run surface-owned request preparation, and materialize a single `ExecutionPlan` before downstream execution, including manifest-backed provider-scoped descriptive fact extraction, family-owned surface catalog resolution through declared seams, seam-driven adapter and runtime-module selection, honoring explicit transport preference when a matching surface exists, and validating surface-specific parameter compatibility before wire encoding.",
         "subject_id": "reqllm.architecture"
       },
       {
@@ -222,7 +222,7 @@
         "id": "reqllm.enforcement.runtime_hard_fail",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall use runtime hard-fail validation for invalid model metadata, unsupported profile combinations, unsupported surface-parameter combinations, wrong-provider provider-native helper inputs, raw tool maps on non-owning surfaces, unknown keys, invalid enums, and unsafe source combinations rather than best-effort fallback behavior, while allowing only explicit manifest-declared provider-default and global-default family fallbacks.",
+        "statement": "ReqLlmNext shall use runtime hard-fail validation for invalid model metadata, unsupported profile combinations, unsupported surface-parameter combinations, wrong-provider provider-native helper inputs, raw tool maps on non-owning surfaces, unknown keys, invalid enums, and unsafe source combinations rather than best-effort fallback behavior, while allowing only explicit manifest-declared provider-default and global-default family fallbacks and hard-failing compile-time extension manifests that violate duplicate-id, missing-reference, seam-ownership, or seam-module guarantees.",
         "subject_id": "reqllm.enforcement"
       },
       {
@@ -254,7 +254,7 @@
         "id": "reqllm.execution_mode.provider_agnostic",
         "priority": "must",
         "stability": "evolving",
-        "statement": "`ExecutionMode` shall remain provider-agnostic and shall not contain chosen surfaces, chosen protocols, encoded payloads, raw tool definitions, or provider-native helper maps.",
+        "statement": "`ExecutionMode` shall remain provider-agnostic and shall not contain chosen surfaces, chosen protocols, encoded payloads, raw tool definitions, or provider-native helper maps, even though extension criteria and policy may later match on its normalized flags.",
         "subject_id": "reqllm.execution_mode"
       },
       {
@@ -262,7 +262,7 @@
         "id": "reqllm.execution_plan.deterministic_stack",
         "priority": "must",
         "stability": "evolving",
-        "statement": "`ExecutionPlan` shall deterministically resolve one implementation stack of provider, session runtime mode, semantic protocol, wire format, transport, and ordered plan adapters for a given profile, mode, and policy input.",
+        "statement": "`ExecutionPlan` shall deterministically resolve one implementation stack of provider, session runtime mode, semantic protocol, wire format, transport, and ordered plan adapters for a given profile, mode, and policy input, with the runtime-module stack and adapter set read from the resolved extension seams instead of rediscovered by provider branching.",
         "subject_id": "reqllm.execution_plan"
       },
       {
@@ -302,7 +302,7 @@
         "id": "reqllm.execution_surfaces.non_cartesian",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall not infer endpoint support from a cartesian product of independent protocol, wire-format, and transport lists and shall instead resolve only declared execution surfaces through family-owned surface catalog modules selected by the compiled extension manifest.",
+        "statement": "ReqLlmNext shall not infer endpoint support from a cartesian product of independent protocol, wire-format, and transport lists and shall instead resolve only declared execution surfaces through family-owned surface catalog modules selected by the compiled extension manifest and defined in explicit provider or family definition packs.",
         "subject_id": "reqllm.execution_surfaces"
       },
       {
@@ -331,6 +331,14 @@
       },
       {
         "file": ".spec/specs/extension_manifest.spec.md",
+        "id": "reqllm.extension_manifest.compile_time_verification",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "ReqLlmNext shall verify merged extension manifests at compile time for duplicate ids, missing default-family references, missing global defaults, invalid family references in rules, illegal seam ownership, and missing seam modules so the declaration layer enforces architectural boundaries instead of merely describing them.",
+        "subject_id": "reqllm.extension_manifest"
+      },
+      {
+        "file": ".spec/specs/extension_manifest.spec.md",
         "id": "reqllm.extension_manifest.family_precedence",
         "priority": "must",
         "stability": "evolving",
@@ -350,7 +358,7 @@
         "id": "reqllm.extension_manifest.plain_runtime_contract",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall model execution extension behavior as plain runtime data made of providers, families, rules, criteria, seam patches, and manifests so the runtime consumes a stable contract independent of any authoring DSL.",
+        "statement": "ReqLlmNext shall model execution extension behavior as plain runtime data made of providers, families, rules, criteria, seam patches, and manifests so the runtime consumes a stable contract independent of any authoring DSL, with built-in declaration packs merged into one compiled manifest at compile time.",
         "subject_id": "reqllm.extension_manifest"
       },
       {
@@ -382,7 +390,7 @@
         "id": "reqllm.layer_boundaries.plan_aware_adapters",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall treat adapters as explicit layer-scoped patches and start the 2.0 architecture with plan-aware adapters that operate on `ExecutionPlan` after policy resolution.",
+        "statement": "ReqLlmNext shall treat adapters as explicit layer-scoped patches selected through resolved extension seams and start the 2.0 architecture with plan-aware adapters that operate on `ExecutionPlan` after policy resolution instead of through one omniscient global adapter registry.",
         "subject_id": "reqllm.layer_boundaries"
       },
       {
@@ -406,7 +414,7 @@
         "id": "reqllm.layer_boundaries.separated_io",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall keep provider, session runtime, transport, wire format, and semantic protocol responsibilities separated so no layer skips across another layer's ownership boundary and each resolved plan binds one deterministic layer stack including explicit provider, protocol, wire, and transport modules.",
+        "statement": "ReqLlmNext shall keep provider, session runtime, transport, wire format, and semantic protocol responsibilities separated so no layer skips across another layer's ownership boundary and each resolved plan binds one deterministic layer stack including explicit provider, protocol, wire, and transport modules resolved from manifest-declared seams rather than central runtime registries.",
         "subject_id": "reqllm.layer_boundaries"
       },
       {
@@ -486,7 +494,7 @@
         "id": "reqllm.model_profile.descriptive_facts",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall normalize resolved model metadata into a request-independent `ModelProfile` that describes operations, features, modalities, limits, parameter defaults, constraints metadata, and session capabilities without choosing concrete request behavior, including manifest-backed provider-scoped descriptive fact extraction for normalized features such as Anthropic structured outputs, citations, context management, and additional document input, plus the resolved extension family id that owns surface-catalog construction.",
+        "statement": "ReqLlmNext shall normalize resolved model metadata into a request-independent `ModelProfile` that describes operations, features, modalities, limits, parameter defaults, constraints metadata, and session capabilities without choosing concrete request behavior, including manifest-backed provider-scoped descriptive fact extraction for normalized features such as Anthropic structured outputs, citations, context management, and additional document input, plus the resolved extension family id selected by declarative criteria and provider or global fallback rules that owns surface-catalog construction.",
         "subject_id": "reqllm.model_profile"
       },
       {
@@ -510,7 +518,7 @@
         "id": "reqllm.operation_planner.assembly_scope",
         "priority": "must",
         "stability": "evolving",
-        "statement": "The planner boundary shall own mode normalization, rule evaluation, surface selection, parameter normalization, explicit transport preference handling, fallback planning, surface-specific parameter validation, provider-native helper acceptance or rejection, surface-owned request preparation, session planning, and adapter selection, including provider-native structured-output strategies when those are declared in `ModelProfile`.",
+        "statement": "The planner boundary shall own mode normalization, rule evaluation, surface selection, parameter normalization, explicit transport preference handling, fallback planning, surface-specific parameter validation, provider-native helper acceptance or rejection, surface-owned request preparation, session planning, and adapter selection, including resolving surface-preparation and adapter seams from the compiled extension manifest rather than from global imperative registries.",
         "subject_id": "reqllm.operation_planner"
       },
       {
@@ -542,7 +550,7 @@
         "id": "reqllm.package.compile_time_extensions",
         "priority": "should",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall move provider and model edge-case support toward a compile-time extension manifest with provider registrations, explicit provider default families, global fallback families, narrow opt-in override rules, manifest-backed provider facts and surface catalogs, and Spark-authored built-in declarations that compile down to plain manifest data so common paths stay simple while edge cases remain explicit.",
+        "statement": "ReqLlmNext shall move provider and model edge-case support toward a compile-time extension manifest with provider registrations, explicit provider default families, global fallback families, narrow opt-in override rules, manifest-backed provider facts and surface catalogs, definition-pack-based built-in declarations, and compile-time manifest verification so common paths stay simple while edge cases remain explicit.",
         "subject_id": "reqllm.package"
       },
       {
@@ -630,7 +638,7 @@
         "id": "reqllm.policy_rules.match_patch",
         "priority": "must",
         "stability": "evolving",
-        "statement": "Policy rules shall use a declarative match-and-patch model to choose preferred surfaces, fallback surfaces, timeout classes, session defaults, stable parameter defaults, and plan adapter references, with explicit transport preference remaining authoritative when matching surfaces are available.",
+        "statement": "Policy rules shall use a declarative match-and-patch model to choose preferred surfaces, fallback surfaces, timeout classes, session defaults, stable parameter defaults, and plan adapter references, with explicit transport preference remaining authoritative when matching surfaces are available and any adapter references ultimately resolved through compiled extension seams.",
         "subject_id": "reqllm.policy_rules"
       },
       {
@@ -766,7 +774,7 @@
         "id": "reqllm.source_layout.extension_contract_home",
         "priority": "should",
         "stability": "evolving",
-        "statement": "Compile-time execution extension contracts shall live in a dedicated `lib/req_llm_next/extensions/` home, including the plain runtime structs, Spark DSL authoring modules, compiled manifest modules, and built-in declarations, so default execution families and edge-case override rules are defined outside the shared planner and executor code.",
+        "statement": "Compile-time execution extension contracts shall live in a dedicated `lib/req_llm_next/extensions/` home, including the plain runtime structs, Spark DSL authoring modules, manifest verifiers, compiled manifest modules, and provider or family definition packs under `extensions/definitions/`, so default execution families and edge-case override rules are defined outside the shared planner and executor code.",
         "subject_id": "reqllm.source_layout"
       },
       {
@@ -902,7 +910,7 @@
         "id": "reqllm.workflow.extension_dsl_guidance",
         "priority": "should",
         "stability": "evolving",
-        "statement": "Contributor workflow shall keep the extension-architecture guide, Spark dependency, compile-time manifest proof, and manifest-backed provider fallback behavior in sync so contributors add edge-case support through declared extension rules instead of editing shared imperative branching directly.",
+        "statement": "Contributor workflow shall keep the extension-architecture guide, Spark dependency, compile-time manifest proof, definition-pack layout, and manifest-backed provider fallback and verification behavior in sync so contributors add edge-case support through declared extension rules instead of editing shared imperative branching directly.",
         "subject_id": "reqllm.workflow"
       },
       {
@@ -1691,6 +1699,16 @@
       },
       {
         "covers": [
+          "reqllm.extension_manifest.compile_time_verification"
+        ],
+        "execute": true,
+        "file": ".spec/specs/extension_manifest.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.extension_manifest",
+        "target": "mix test test/req_llm_next/extensions/manifest_verifier_test.exs"
+      },
+      {
+        "covers": [
           "reqllm.layer_boundaries.separated_io",
           "reqllm.layer_boundaries.plan_aware_adapters",
           "reqllm.layer_boundaries.no_cross_layer_skips",
@@ -2000,7 +2018,7 @@
         "file": ".spec/specs/package.spec.md",
         "kind": "command",
         "subject_id": "reqllm.package",
-        "target": "mix test test/req_llm_next/extensions/manifest_test.exs test/req_llm_next/extensions/dsl_test.exs"
+        "target": "mix test test/req_llm_next/extensions/manifest_test.exs test/req_llm_next/extensions/dsl_test.exs test/req_llm_next/extensions/manifest_verifier_test.exs"
       },
       {
         "covers": [
@@ -2293,10 +2311,10 @@
     "decisions": 12,
     "exceptions": 0,
     "findings": 0,
-    "requirements": 103,
+    "requirements": 104,
     "scenarios": 0,
     "subjects": 24,
-    "verifications": 72
+    "verifications": 73
   },
   "verification": {
     "claims": [
@@ -2805,6 +2823,17 @@
         "subject_id": "reqllm.extension_manifest",
         "target": "mix test test/req_llm_next/extensions/manifest_test.exs test/req_llm_next/extensions/dsl_test.exs",
         "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.extension_manifest.compile_time_verification",
+        "file": ".spec/specs/extension_manifest.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.extension_manifest",
+        "target": "mix test test/req_llm_next/extensions/manifest_verifier_test.exs",
+        "verification_index": 2
       },
       {
         "cover_id": "reqllm.layer_boundaries.no_cross_layer_skips",
@@ -3441,7 +3470,7 @@
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.package",
-        "target": "mix test test/req_llm_next/extensions/manifest_test.exs test/req_llm_next/extensions/dsl_test.exs",
+        "target": "mix test test/req_llm_next/extensions/manifest_test.exs test/req_llm_next/extensions/dsl_test.exs test/req_llm_next/extensions/manifest_verifier_test.exs",
         "verification_index": 14
       },
       {
@@ -4098,7 +4127,7 @@
     "default_minimum_strength": "claimed",
     "strength_summary": {
       "claimed": 2,
-      "executed": 63,
+      "executed": 64,
       "linked": 98
     },
     "threshold_failures": 0

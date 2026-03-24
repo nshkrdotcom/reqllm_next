@@ -44,6 +44,19 @@ defmodule ReqLlmNext.Extensions do
     Manifest.provider(manifest, provider_id)
   end
 
+  @spec utility_module(Manifest.t(), context(), atom()) ::
+          {:ok, module()} | {:error, term()}
+  def utility_module(%Manifest{} = manifest, context, key)
+      when is_map(context) and is_atom(key) do
+    with {:ok, %{seams: %{utility_modules: utility_modules}}} <- resolve(manifest, context),
+         {:ok, module} <- Map.fetch(utility_modules, key) do
+      {:ok, module}
+    else
+      :error -> {:error, {:unknown_utility_module, key}}
+      {:error, :no_matching_family} = error -> error
+    end
+  end
+
   @spec matching_rules(Manifest.t(), context()) :: [ReqLlmNext.Extensions.Rule.t()]
   def matching_rules(%Manifest{} = manifest, context) when is_map(context) do
     Manifest.matching_rules(manifest, context)
@@ -104,5 +117,10 @@ defmodule ReqLlmNext.Extensions do
           | {:error, :no_matching_family}
   def resolve_compiled(context) when is_map(context) do
     resolve(compiled_manifest(), context)
+  end
+
+  @spec utility_module(context(), atom()) :: {:ok, module()} | {:error, term()}
+  def utility_module(context, key) when is_map(context) and is_atom(key) do
+    utility_module(compiled_manifest(), context, key)
   end
 end

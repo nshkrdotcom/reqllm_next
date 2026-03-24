@@ -50,7 +50,7 @@ surface:
   stability: evolving
 
 - id: reqllm.workflow.extension_dsl_guidance
-  statement: Contributor workflow shall keep the extension-architecture guide, Spark dependency, compile-time manifest proof, and manifest-backed provider fallback behavior in sync so contributors add edge-case support through declared extension rules instead of editing shared imperative branching directly.
+  statement: Contributor workflow shall keep the extension-architecture guide, Spark dependency, compile-time manifest proof, definition-pack layout, and manifest-backed provider fallback and verification behavior in sync so contributors add edge-case support through declared extension rules instead of editing shared imperative branching directly.
   priority: should
   stability: evolving
 ```

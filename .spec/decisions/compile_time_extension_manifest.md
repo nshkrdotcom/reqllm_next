@@ -36,9 +36,13 @@ The package therefore has three distinct pieces:
 2. Spark authoring modules such as `ReqLlmNext.Extensions.Dsl` and `ReqLlmNext.Extensions.Definition`
 3. compiled built-in manifest modules such as `ReqLlmNext.Extensions.Compiled`
 
+Built-in declarations should live in small provider or family definition packs rather than one monolithic built-ins file so OpenAI-compatible defaults, provider-specific families, and narrow model or mode overrides stay obvious to contributors.
+
 Family resolution must prefer declarative criteria matches first, then provider-registered default families, and finally explicit global default families.
 
 Shared profile construction must consume provider-facts and surface-catalog seams from the compiled manifest rather than branching on provider atoms in generic code.
+
+Compile-time verification must reject duplicate ids, missing default-family references, missing global defaults, illegal seam ownership, and missing seam modules before the compiled manifest becomes runtime truth.
 
 ## Consequences
 

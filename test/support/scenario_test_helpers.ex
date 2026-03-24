@@ -1,4 +1,6 @@
 defmodule ReqLlmNext.ScenarioTestHelpers do
+  @moduledoc false
+
   import ExUnit.Assertions
 
   alias ReqLlmNext.ToolCall

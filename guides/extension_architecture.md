@@ -42,10 +42,19 @@ The current built-in authoring stack is:
 
 - `ReqLlmNext.Extensions.Dsl` for Spark sections and entities
 - `ReqLlmNext.Extensions.Definition` for extension-definition modules
+- `ReqLlmNext.Extensions.Definitions.*` for provider or family declaration packs
 - `ReqLlmNext.Extensions.Compiled` for the aggregated built-in manifest
+- `ReqLlmNext.Extensions.ManifestVerifier` for compile-time merged-manifest checks
 
 That keeps the runtime dependent on plain data while still giving contributors a
 more structured authoring surface.
+
+The intended contributor shape is:
+
+1. reuse an existing default family when possible
+2. add a small provider or family definition pack when needed
+3. add narrow rules for real edge cases
+4. let compile-time manifest verification catch duplicates, bad references, and illegal seam ownership
 
 ## Families
 

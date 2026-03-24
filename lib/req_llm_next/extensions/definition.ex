@@ -8,6 +8,7 @@ defmodule ReqLlmNext.Extensions.Definition do
     default_extensions: [extensions: [ReqLlmNext.Extensions.Dsl]]
 
   alias ReqLlmNext.Extensions.Manifest
+  alias ReqLlmNext.Extensions.ManifestVerifier
 
   @spec manifest(module()) :: Manifest.t()
   def manifest(module) when is_atom(module) do
@@ -31,8 +32,10 @@ defmodule ReqLlmNext.Extensions.Definition do
 
   @spec merge_manifests!([module()]) :: Manifest.t()
   def merge_manifests!(modules) when is_list(modules) do
-    modules
-    |> Enum.map(&manifest/1)
+    manifests = Enum.map(modules, &manifest/1)
+    ManifestVerifier.verify_merge!(manifests)
+
+    manifests
     |> Enum.reduce(Manifest.new!(%{}), fn manifest, acc ->
       Manifest.new!(%{
         providers: Map.merge(acc.providers, manifest.providers),
@@ -40,5 +43,6 @@ defmodule ReqLlmNext.Extensions.Definition do
         rules: acc.rules ++ manifest.rules
       })
     end)
+    |> ManifestVerifier.verify!()
   end
 end

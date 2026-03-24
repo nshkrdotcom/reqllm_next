@@ -15,7 +15,7 @@ defmodule ReqLlmNext.ModelProfileTest do
     {:ok, model} = LLMDB.model("openai:gpt-4o-mini")
     {:ok, profile} = ModelProfile.from_model(model)
 
-    assert profile.family == :openai_chat_compatible
+    assert profile.family == :openai_responses_compatible
 
     assert [%{id: :openai_responses_text_http_sse}, %{id: :openai_responses_text_websocket}] =
              ModelProfile.surfaces_for(profile, :text)

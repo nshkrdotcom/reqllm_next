@@ -49,7 +49,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.architecture.facts_mode_policy_plan
-  statement: ReqLlmNext architecture shall normalize model facts into `ModelProfile`, request intent into `ExecutionMode`, resolve ordered policy rules, run surface-owned request preparation, and materialize a single `ExecutionPlan` before downstream execution, including manifest-backed provider-scoped descriptive fact extraction, family-owned surface catalog resolution through declared seams, honoring explicit transport preference when a matching surface exists, and validating surface-specific parameter compatibility before wire encoding.
+  statement: ReqLlmNext architecture shall normalize model facts into `ModelProfile`, request intent into `ExecutionMode`, resolve ordered policy rules, run surface-owned request preparation, and materialize a single `ExecutionPlan` before downstream execution, including manifest-backed provider-scoped descriptive fact extraction, family-owned surface catalog resolution through declared seams, seam-driven adapter and runtime-module selection, honoring explicit transport preference when a matching surface exists, and validating surface-specific parameter compatibility before wire encoding.
   priority: must
   stability: evolving
 

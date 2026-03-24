@@ -244,7 +244,7 @@ defmodule ReqLlmNext.ExecutorTest do
     end
 
     test "returns error for invalid input type (integer)" do
-      result = Executor.embed("openai:text-embedding-3-small", 12345, [])
+      result = Executor.embed("openai:text-embedding-3-small", 12_345, [])
 
       assert {:error,
               %Error.Invalid.Parameter{parameter: "input: must be string or list of strings"}} =

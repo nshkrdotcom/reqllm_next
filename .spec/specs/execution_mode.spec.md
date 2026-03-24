@@ -30,7 +30,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.execution_mode.provider_agnostic
-  statement: `ExecutionMode` shall remain provider-agnostic and shall not contain chosen surfaces, chosen protocols, encoded payloads, raw tool definitions, or provider-native helper maps.
+  statement: `ExecutionMode` shall remain provider-agnostic and shall not contain chosen surfaces, chosen protocols, encoded payloads, raw tool definitions, or provider-native helper maps, even though extension criteria and policy may later match on its normalized flags.
   priority: must
   stability: evolving
 ```

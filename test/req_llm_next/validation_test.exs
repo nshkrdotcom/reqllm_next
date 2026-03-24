@@ -383,7 +383,7 @@ defmodule ReqLlmNext.ValidationTest do
         TestModels.openai(%{
           capabilities: %{
             chat: true,
-            reasoning: %{enabled: true, token_budget: 25000},
+            reasoning: %{enabled: true, token_budget: 25_000},
             embeddings: false,
             streaming: %{text: true},
             tools: %{enabled: true}

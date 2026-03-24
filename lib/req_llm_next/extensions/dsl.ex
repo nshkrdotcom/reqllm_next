@@ -6,6 +6,7 @@ defmodule ReqLlmNext.Extensions.Dsl do
   alias ReqLlmNext.Extensions.{Criteria, Family, Provider, Rule, Seams}
   alias ReqLlmNext.Extensions.Dsl.Normalize
   alias ReqLlmNext.Extensions.Dsl.Transformers.PersistDefinitionManifest
+  alias ReqLlmNext.Extensions.Dsl.Verifiers.VerifySeamModules
 
   @criteria %Spark.Dsl.Entity{
     name: :criteria,
@@ -104,5 +105,6 @@ defmodule ReqLlmNext.Extensions.Dsl do
   use Spark.Dsl.Extension,
     sections: [@providers, @families, @rules],
     transformers: [PersistDefinitionManifest],
+    verifiers: [VerifySeamModules],
     module_prefix: ReqLlmNext.Extensions.Dsl.Generated
 end

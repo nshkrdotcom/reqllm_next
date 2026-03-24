@@ -5,7 +5,11 @@ defmodule ReqLlmNext.Extensions.Compiled do
 
   alias ReqLlmNext.Extensions.Definition
 
-  @definitions [ReqLlmNext.Extensions.Builtins]
+  @definitions [
+    ReqLlmNext.Extensions.Definitions.OpenAICompatible,
+    ReqLlmNext.Extensions.Definitions.OpenAI,
+    ReqLlmNext.Extensions.Definitions.Anthropic
+  ]
   @manifest Definition.merge_manifests!(@definitions)
 
   @spec definitions() :: [module()]

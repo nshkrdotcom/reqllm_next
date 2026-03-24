@@ -57,11 +57,17 @@ defmodule ReqLlmNext.Extensions.Manifest do
 
   @spec resolve_family(t(), map()) :: {:ok, Family.t()} | {:error, :no_matching_family}
   def resolve_family(%__MODULE__{} = manifest, context) when is_map(context) do
-    manifest.families
-    |> matching_family_candidates(context)
-    |> case do
-      [{family, _index} | _rest] -> {:ok, family}
-      [] -> fallback_family(manifest, context)
+    case Map.get(context, :family) do
+      family_id when is_atom(family_id) and not is_nil(family_id) ->
+        family_by_id(manifest, family_id)
+
+      _other ->
+        manifest.families
+        |> matching_family_candidates(context)
+        |> case do
+          [{family, _index} | _rest] -> {:ok, family}
+          [] -> fallback_family(manifest, context)
+        end
     end
   end
 

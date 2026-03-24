@@ -8,12 +8,12 @@ defmodule ReqLlmNext.SurfacePreparation do
     Error,
     ExecutionMode,
     ExecutionSurface,
+    Extensions,
     ModelProfile,
     Tool
   }
 
   alias ReqLlmNext.Anthropic.Tools, as: AnthropicTools
-  alias ReqLlmNext.SurfacePreparation.{AnthropicMessages, OpenAIResponses}
 
   @meta_opts [:_stream?, :_model_spec]
 
@@ -46,27 +46,18 @@ defmodule ReqLlmNext.SurfacePreparation do
     end
   end
 
-  defp prepare_surface(
-         _profile,
-         _mode,
-         %{semantic_protocol: :anthropic_messages} = surface,
-         prompt,
-         opts
-       ) do
-    AnthropicMessages.prepare(surface, prompt, opts)
-  end
+  defp prepare_surface(profile, mode, surface, prompt, opts) do
+    case Extensions.resolve_compiled(extension_context(profile, mode, surface)) do
+      {:ok, %{seams: %{surface_preparation_modules: modules}}} ->
+        case Map.get(modules, surface.semantic_protocol) do
+          nil -> {:ok, opts}
+          module -> module.prepare(surface, prompt, opts)
+        end
 
-  defp prepare_surface(
-         _profile,
-         _mode,
-         %{semantic_protocol: :openai_responses} = surface,
-         prompt,
-         opts
-       ) do
-    OpenAIResponses.prepare(surface, prompt, opts)
+      {:error, :no_matching_family} ->
+        {:ok, opts}
+    end
   end
-
-  defp prepare_surface(_profile, _mode, _surface, _prompt, opts), do: {:ok, opts}
 
   defp validate_tool_inputs(surface, opts) do
     tools = Keyword.get(opts, :tools, [])
@@ -130,4 +121,19 @@ defmodule ReqLlmNext.SurfacePreparation do
   end
 
   defp validate_surface_parameters(_surface, _opts), do: :ok
+
+  defp extension_context(profile, mode, surface) do
+    %{
+      provider: profile.provider,
+      family: profile.family,
+      model_id: profile.model_id,
+      operation: mode.operation,
+      transport: surface.transport,
+      semantic_protocol: surface.semantic_protocol,
+      stream?: mode.stream?,
+      tools?: mode.tools?,
+      structured?: mode.structured_output?,
+      features: profile.features
+    }
+  end
 end

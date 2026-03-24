@@ -98,7 +98,7 @@ defmodule ReqLlmNext.Wire.ResolverTest do
     test "delegates to wire_module!/1" do
       model = TestModels.openai()
 
-      deprecated_result = apply(Resolver, :streaming_module!, [model])
+      deprecated_result = Resolver.streaming_module!(model)
       expected = Resolver.wire_module!(model)
       assert deprecated_result == expected
     end
