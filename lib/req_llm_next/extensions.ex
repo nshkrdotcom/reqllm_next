@@ -7,7 +7,7 @@ defmodule ReqLlmNext.Extensions do
   structures instead of becoming the runtime architecture themselves.
   """
 
-  alias ReqLlmNext.Extensions.Manifest
+  alias ReqLlmNext.Extensions.{Manifest, Seams}
 
   @type context :: %{
           optional(:provider) => atom(),
@@ -38,6 +38,12 @@ defmodule ReqLlmNext.Extensions do
     Manifest.resolve_family(manifest, context)
   end
 
+  @spec provider(Manifest.t(), atom()) ::
+          {:ok, ReqLlmNext.Extensions.Provider.t()} | {:error, :unknown_provider}
+  def provider(%Manifest{} = manifest, provider_id) when is_atom(provider_id) do
+    Manifest.provider(manifest, provider_id)
+  end
+
   @spec matching_rules(Manifest.t(), context()) :: [ReqLlmNext.Extensions.Rule.t()]
   def matching_rules(%Manifest{} = manifest, context) when is_map(context) do
     Manifest.matching_rules(manifest, context)
@@ -46,5 +52,57 @@ defmodule ReqLlmNext.Extensions do
   @spec compiled_manifest() :: Manifest.t()
   def compiled_manifest do
     ReqLlmNext.Extensions.Compiled.manifest()
+  end
+
+  @spec resolve(Manifest.t(), context()) ::
+          {:ok,
+           %{
+             provider: ReqLlmNext.Extensions.Provider.t() | nil,
+             family: ReqLlmNext.Extensions.Family.t(),
+             rules: [ReqLlmNext.Extensions.Rule.t()],
+             seams: Seams.t()
+           }}
+          | {:error, :no_matching_family}
+  def resolve(%Manifest{} = manifest, context) when is_map(context) do
+    with {:ok, family} <- resolve_family(manifest, context) do
+      provider =
+        case Map.get(context, :provider) do
+          provider_id when is_atom(provider_id) ->
+            case provider(manifest, provider_id) do
+              {:ok, provider} -> provider
+              {:error, :unknown_provider} -> nil
+            end
+
+          _other ->
+            nil
+        end
+
+      rule_context = Map.put(context, :family, family.id)
+      rules = matching_rules(manifest, rule_context)
+
+      seams =
+        [
+          provider && provider.seams,
+          family.seams
+          | Enum.map(rules, & &1.patch)
+        ]
+        |> Enum.reject(&is_nil/1)
+        |> Enum.reduce(Seams.empty(), &Seams.merge(&2, &1))
+
+      {:ok, %{provider: provider, family: family, rules: rules, seams: seams}}
+    end
+  end
+
+  @spec resolve_compiled(context()) ::
+          {:ok,
+           %{
+             provider: ReqLlmNext.Extensions.Provider.t() | nil,
+             family: ReqLlmNext.Extensions.Family.t(),
+             rules: [ReqLlmNext.Extensions.Rule.t()],
+             seams: Seams.t()
+           }}
+          | {:error, :no_matching_family}
+  def resolve_compiled(context) when is_map(context) do
+    resolve(compiled_manifest(), context)
   end
 end

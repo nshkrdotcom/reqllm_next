@@ -3,7 +3,7 @@ defmodule ReqLlmNext.ModelProfile.ProviderFacts do
   Provider-scoped descriptive fact extraction for ModelProfile construction.
   """
 
-  alias ReqLlmNext.ModelProfile.ProviderFacts.{Anthropic, OpenAI}
+  alias ReqLlmNext.Extensions
 
   @type extracted :: %{
           additional_document_input?: boolean(),
@@ -14,10 +14,20 @@ defmodule ReqLlmNext.ModelProfile.ProviderFacts do
         }
 
   @spec extract(LLMDB.Model.t()) :: extracted()
-  def extract(%LLMDB.Model{provider: :anthropic} = model), do: Anthropic.extract(model)
-  def extract(%LLMDB.Model{provider: :openai} = model), do: OpenAI.extract(model)
+  def extract(%LLMDB.Model{} = model) do
+    default = default_facts()
 
-  def extract(%LLMDB.Model{}) do
+    case Extensions.provider(Extensions.compiled_manifest(), model.provider) do
+      {:ok, %{seams: %{provider_facts_module: module}}} when not is_nil(module) ->
+        Map.merge(default, module.extract(model))
+
+      _other ->
+        default
+    end
+  end
+
+  @spec default_facts() :: extracted()
+  def default_facts do
     %{
       additional_document_input?: false,
       citations_supported?: false,

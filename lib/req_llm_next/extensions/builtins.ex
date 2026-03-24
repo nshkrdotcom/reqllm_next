@@ -39,7 +39,7 @@ defmodule ReqLlmNext.Extensions.Builtins do
       end
 
       seams do
-        surface_catalog_module(ReqLlmNext.ModelProfile.SurfaceCatalog)
+        surface_catalog_module(ReqLlmNext.ModelProfile.SurfaceCatalog.OpenAICompatible)
       end
     end
 
@@ -52,7 +52,7 @@ defmodule ReqLlmNext.Extensions.Builtins do
       end
 
       seams do
-        surface_catalog_module(ReqLlmNext.ModelProfile.SurfaceCatalog)
+        surface_catalog_module(ReqLlmNext.ModelProfile.SurfaceCatalog.AnthropicMessages)
       end
     end
   end
@@ -68,7 +68,7 @@ defmodule ReqLlmNext.Extensions.Builtins do
       end
 
       seams do
-        surface_catalog_module(ReqLlmNext.ModelProfile.SurfaceCatalog)
+        surface_catalog_module(ReqLlmNext.ModelProfile.SurfaceCatalog.OpenAIResponses)
 
         surface_preparation_modules(
           openai_responses: ReqLlmNext.SurfacePreparation.OpenAIResponses

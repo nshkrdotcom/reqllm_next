@@ -24,7 +24,7 @@ decisions:
 
 ```spec-requirements
 - id: reqllm.model_profile.descriptive_facts
-  statement: ReqLlmNext shall normalize resolved model metadata into a request-independent `ModelProfile` that describes operations, features, modalities, limits, parameter defaults, constraints metadata, and session capabilities without choosing concrete request behavior, including provider-scoped descriptive fact extraction for normalized features such as Anthropic structured outputs, citations, context management, and additional document input.
+  statement: ReqLlmNext shall normalize resolved model metadata into a request-independent `ModelProfile` that describes operations, features, modalities, limits, parameter defaults, constraints metadata, and session capabilities without choosing concrete request behavior, including manifest-backed provider-scoped descriptive fact extraction for normalized features such as Anthropic structured outputs, citations, context management, and additional document input, plus the resolved extension family id that owns surface-catalog construction.
   priority: must
   stability: evolving
 
@@ -50,7 +50,7 @@ decisions:
     - reqllm.model_profile.request_independent
 
 - kind: command
-  target: mix test test/operation_planner_test.exs
+  target: mix test test/model_profile_test.exs test/operation_planner_test.exs
   execute: true
   covers:
     - reqllm.model_profile.descriptive_facts

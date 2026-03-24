@@ -38,6 +38,8 @@ The package therefore has three distinct pieces:
 
 Family resolution must prefer declarative criteria matches first, then provider-registered default families, and finally explicit global default families.
 
+Shared profile construction must consume provider-facts and surface-catalog seams from the compiled manifest rather than branching on provider atoms in generic code.
+
 ## Consequences
 
 Positive:

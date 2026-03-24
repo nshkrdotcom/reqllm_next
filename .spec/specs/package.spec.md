@@ -28,7 +28,7 @@ surface:
   stability: evolving
 
 - id: reqllm.package.execution_planning
-  statement: ReqLlmNext shall route supported requests through a deterministic planning path that normalizes model facts into `ModelProfile`, request intent into `ExecutionMode`, selects explicit `ExecutionSurface` support, validates surface-specific parameter compatibility, materializes an `ExecutionPlan`, and resolves an execution stack of provider, semantic protocol, wire, and transport modules before runtime execution.
+  statement: ReqLlmNext shall route supported requests through a deterministic planning path that normalizes model facts into `ModelProfile`, request intent into `ExecutionMode`, selects explicit `ExecutionSurface` support, validates surface-specific parameter compatibility, materializes an `ExecutionPlan`, and resolves an execution stack of provider, semantic protocol, wire, and transport modules before runtime execution, with provider facts and surface catalog construction driven from the compiled extension manifest rather than central provider branching.
   priority: must
   stability: evolving
 
@@ -58,7 +58,7 @@ surface:
   stability: evolving
 
 - id: reqllm.package.compile_time_extensions
-  statement: ReqLlmNext shall move provider and model edge-case support toward a compile-time extension manifest with provider registrations, explicit provider default families, global fallback families, narrow opt-in override rules, and Spark-authored built-in declarations that compile down to plain manifest data so common paths stay simple while edge cases remain explicit.
+  statement: ReqLlmNext shall move provider and model edge-case support toward a compile-time extension manifest with provider registrations, explicit provider default families, global fallback families, narrow opt-in override rules, manifest-backed provider facts and surface catalogs, and Spark-authored built-in declarations that compile down to plain manifest data so common paths stay simple while edge cases remain explicit.
   priority: should
   stability: evolving
 ```
@@ -86,6 +86,13 @@ surface:
   execute: true
   covers:
     - reqllm.package.execution_planning
+
+- kind: command
+  target: mix test test/model_profile_test.exs
+  execute: true
+  covers:
+    - reqllm.package.execution_planning
+    - reqllm.package.compile_time_extensions
 
 - kind: command
   target: mix test test/model_slices/anthropic_haiku_4_5_test.exs
