@@ -44,7 +44,7 @@ decisions:
 
 ```spec-requirements
 - id: reqllm.architecture.model_input_boundary
-  statement: ReqLlmNext runtime APIs shall accept model inputs only as `LLMDB` `model_spec` strings or `%LLMDB.Model{}` values, with handcrafted `LLMDB.Model` structs supported as a local-iteration boundary hook.
+  statement: ReqLlmNext runtime APIs shall accept model inputs only as `LLMDB` `model_spec` strings or `%LLMDB.Model{}` values, with handcrafted `LLMDB.Model` structs supported as a local-iteration boundary hook, and the top-level public API contract lane shall load the compiled facade before export assertions so architecture-boundary verification stays about the actual runtime module rather than code-loading order.
   priority: must
   stability: evolving
 

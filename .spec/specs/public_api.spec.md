@@ -17,7 +17,7 @@ surface:
 
 ```spec-requirements
 - id: reqllm.public_api.hard_surface
-  statement: `ReqLlmNext` shall expose the hard package boundary at the top-level facade with `generate_text/3`, `generate_text!/3`, `stream_text/3`, `stream_object/4`, `generate_object/4`, `generate_object!/4`, `embed/3`, `embed!/3`, `model/1`, `provider/1`, `context/1`, `tool/1`, `json_schema/2`, `cosine_similarity/2`, `embedding_models/0`, `put_key/2`, and `get_key/1`.
+  statement: `ReqLlmNext` shall expose the hard package boundary at the top-level facade with `generate_text/3`, `generate_text!/3`, `stream_text/3`, `stream_object/4`, `generate_object/4`, `generate_object!/4`, `embed/3`, `embed!/3`, `model/1`, `provider/1`, `context/1`, `tool/1`, `json_schema/2`, `cosine_similarity/2`, `embedding_models/0`, `put_key/2`, and `get_key/1`, and the contract test lane shall load the facade module before asserting exported functions so the boundary check reflects the compiled public module rather than code-loading timing.
   priority: must
   stability: evolving
 

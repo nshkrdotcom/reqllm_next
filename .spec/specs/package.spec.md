@@ -56,6 +56,11 @@ surface:
   statement: ReqLlmNext shall keep canonical cross-provider tool input on `ReqLlmNext.Tool`, allow provider-native helper maps only on the owning provider surfaces, and fail early during planning when foreign raw maps or provider-native helper shapes are used on the wrong surface.
   priority: must
   stability: evolving
+
+- id: reqllm.package.compile_time_extensions
+  statement: ReqLlmNext shall move provider and model edge-case support toward a compile-time extension manifest with default execution families and narrow opt-in override rules so common paths stay simple while edge cases remain explicit.
+  priority: should
+  stability: evolving
 ```
 
 ## Verification
@@ -145,4 +150,10 @@ surface:
   execute: true
   covers:
     - reqllm.package.provider_native_input_isolation
+
+- kind: command
+  target: mix test test/req_llm_next/extensions/manifest_test.exs
+  execute: true
+  covers:
+    - reqllm.package.compile_time_extensions
 ```

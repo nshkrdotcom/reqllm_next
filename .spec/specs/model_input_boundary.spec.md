@@ -36,7 +36,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.model_input.fail_fast
-  statement: The model boundary shall fail fast on tuples, ad hoc maps, unsupported types, or invalid model metadata and shall not let raw unvalidated model input continue into execution, while leaving later provider-native helper validation and surface-specific request validation to the planning boundary rather than reintroducing raw model checks downstream.
+  statement: The model boundary shall fail fast on tuples, ad hoc maps, unsupported types, or invalid model metadata and shall not let raw unvalidated model input continue into execution, while leaving later provider-native helper validation and surface-specific request validation to the planning boundary rather than reintroducing raw model checks downstream, and the public contract lane shall load the top-level facade before export assertions so model-boundary contract coverage is checking the real compiled API surface.
   priority: must
   stability: evolving
 ```

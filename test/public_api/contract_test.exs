@@ -25,6 +25,8 @@ defmodule ReqLlmNext.PublicAPI.ContractTest do
 
   describe "hard public surface" do
     test "exports the top-level ReqLlmNext contract" do
+      assert {:module, ReqLlmNext} = Code.ensure_loaded(ReqLlmNext)
+
       Enum.each(@expected_exports, fn {function, arity} ->
         assert function_exported?(ReqLlmNext, function, arity)
       end)

@@ -45,6 +45,11 @@ surface:
   statement: Provider-specific non-canonical endpoints shall live in explicit provider-scoped utility modules rather than expanding the top-level package facade or collapsing utility flows into provider, wire, or transport modules.
   priority: should
   stability: evolving
+
+- id: reqllm.source_layout.extension_contract_home
+  statement: Compile-time execution extension contracts shall live in a dedicated `lib/req_llm_next/extensions/` home so default execution families and edge-case override rules are defined outside the shared planner and executor code.
+  priority: should
+  stability: evolving
 ```
 
 ## Verification
@@ -58,4 +63,5 @@ surface:
     - reqllm.source_layout.layer_scoped_quirks
     - reqllm.source_layout.compat_outside_runtime
     - reqllm.source_layout.provider_utilities
+    - reqllm.source_layout.extension_contract_home
 ```
