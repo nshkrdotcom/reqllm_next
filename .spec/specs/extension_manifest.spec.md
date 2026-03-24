@@ -27,7 +27,7 @@ surface:
   stability: evolving
 
 - id: reqllm.extension_manifest.family_precedence
-  statement: Default execution families shall resolve deterministically from declarative criteria using explicit precedence so the happy path is stable and inspectable.
+  statement: Default execution families shall resolve deterministically from declarative criteria using explicit precedence, then fall back through provider-registered default families and finally global default families, so the happy path is stable and inspectable without reintroducing central provider branching.
   priority: must
   stability: evolving
 

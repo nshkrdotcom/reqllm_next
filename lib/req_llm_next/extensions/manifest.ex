@@ -47,18 +47,21 @@ defmodule ReqLlmNext.Extensions.Manifest do
     end
   end
 
+  @spec provider(t(), atom()) :: {:ok, Provider.t()} | {:error, :unknown_provider}
+  def provider(%__MODULE__{providers: providers}, provider_id) when is_atom(provider_id) do
+    case Map.fetch(providers, provider_id) do
+      {:ok, provider} -> {:ok, provider}
+      :error -> {:error, :unknown_provider}
+    end
+  end
+
   @spec resolve_family(t(), map()) :: {:ok, Family.t()} | {:error, :no_matching_family}
-  def resolve_family(%__MODULE__{families: families}, context) when is_map(context) do
-    families
-    |> Enum.with_index()
-    |> Enum.filter(fn {family, _index} -> Criteria.matches?(family.criteria, context) end)
-    |> Enum.sort_by(fn {family, index} ->
-      {-family.priority, -Criteria.specificity(family.criteria), (family.default? && 1) || 0,
-       index}
-    end)
+  def resolve_family(%__MODULE__{} = manifest, context) when is_map(context) do
+    manifest.families
+    |> matching_family_candidates(context)
     |> case do
       [{family, _index} | _rest] -> {:ok, family}
-      [] -> {:error, :no_matching_family}
+      [] -> fallback_family(manifest, context)
     end
   end
 
@@ -101,5 +104,44 @@ defmodule ReqLlmNext.Extensions.Manifest do
         provider = Provider.new!(provider)
         {provider.id, provider}
     end)
+  end
+
+  defp matching_family_candidates(families, context) do
+    families
+    |> Enum.with_index()
+    |> Enum.filter(fn {family, _index} -> Criteria.matches?(family.criteria, context) end)
+    |> Enum.sort_by(fn {family, index} ->
+      {-family.priority, -Criteria.specificity(family.criteria), (family.default? && 1) || 0,
+       index}
+    end)
+  end
+
+  defp fallback_family(%__MODULE__{} = manifest, context) do
+    with provider_id when is_atom(provider_id) <- Map.get(context, :provider),
+         {:ok, %Provider{default_family: default_family}} <- provider(manifest, provider_id),
+         default_family when not is_nil(default_family) <- default_family,
+         {:ok, family} <- family_by_id(manifest, default_family) do
+      {:ok, family}
+    else
+      _other -> global_default_family(manifest)
+    end
+  end
+
+  defp family_by_id(%__MODULE__{families: families}, family_id) when is_atom(family_id) do
+    case Enum.find(families, &(&1.id == family_id)) do
+      nil -> {:error, :no_matching_family}
+      family -> {:ok, family}
+    end
+  end
+
+  defp global_default_family(%__MODULE__{families: families}) do
+    families
+    |> Enum.with_index()
+    |> Enum.filter(fn {family, _index} -> family.default? end)
+    |> Enum.sort_by(fn {family, index} -> {-family.priority, index} end)
+    |> case do
+      [{family, _index} | _rest] -> {:ok, family}
+      [] -> {:error, :no_matching_family}
+    end
   end
 end

@@ -334,7 +334,7 @@
         "id": "reqllm.extension_manifest.family_precedence",
         "priority": "must",
         "stability": "evolving",
-        "statement": "Default execution families shall resolve deterministically from declarative criteria using explicit precedence so the happy path is stable and inspectable.",
+        "statement": "Default execution families shall resolve deterministically from declarative criteria using explicit precedence, then fall back through provider-registered default families and finally global default families, so the happy path is stable and inspectable without reintroducing central provider branching.",
         "subject_id": "reqllm.extension_manifest"
       },
       {
@@ -542,7 +542,7 @@
         "id": "reqllm.package.compile_time_extensions",
         "priority": "should",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall move provider and model edge-case support toward a compile-time extension manifest with provider registrations, default execution families, narrow opt-in override rules, and Spark-authored built-in declarations that compile down to plain manifest data so common paths stay simple while edge cases remain explicit.",
+        "statement": "ReqLlmNext shall move provider and model edge-case support toward a compile-time extension manifest with provider registrations, explicit provider default families, global fallback families, narrow opt-in override rules, and Spark-authored built-in declarations that compile down to plain manifest data so common paths stay simple while edge cases remain explicit.",
         "subject_id": "reqllm.package"
       },
       {
@@ -758,7 +758,7 @@
         "id": "reqllm.source_layout.concern_homes",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall keep model-boundary concerns, provider-scoped fact extraction, profile construction, mode normalization, policy resolution, surface-owned request preparation, semantic protocol normalization, wire envelopes, transport mechanics, response materialization, fixture replay, and session state in distinct source locations that match the architecture.",
+        "statement": "ReqLlmNext shall keep model-boundary concerns, provider-scoped fact extraction, manifest-backed provider registration, profile construction, mode normalization, policy resolution, surface-owned request preparation, semantic protocol normalization, wire envelopes, transport mechanics, response materialization, fixture replay, and session state in distinct source locations that match the architecture.",
         "subject_id": "reqllm.source_layout"
       },
       {
@@ -902,7 +902,7 @@
         "id": "reqllm.workflow.extension_dsl_guidance",
         "priority": "should",
         "stability": "evolving",
-        "statement": "Contributor workflow shall keep the extension-architecture guide, Spark dependency, and compile-time manifest proof in sync so contributors add edge-case support through declared extension rules instead of editing shared imperative branching directly.",
+        "statement": "Contributor workflow shall keep the extension-architecture guide, Spark dependency, compile-time manifest proof, and manifest-backed provider fallback behavior in sync so contributors add edge-case support through declared extension rules instead of editing shared imperative branching directly.",
         "subject_id": "reqllm.workflow"
       },
       {

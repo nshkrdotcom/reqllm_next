@@ -51,7 +51,7 @@ defmodule ReqLlmNext.Extensions.ManifestTest do
               id: :openai_chat_compatible,
               priority: 10,
               default?: true,
-              criteria: %{},
+              criteria: %{provider_ids: [:openai]},
               seams: %{surface_catalog_module: ReqLlmNext.ModelProfile.SurfaceCatalog}
             }
           ]
@@ -64,6 +64,42 @@ defmodule ReqLlmNext.Extensions.ManifestTest do
                })
 
       assert family.id == :openai_chat_compatible
+    end
+
+    test "falls back to a provider default family when no criteria match" do
+      manifest =
+        Manifest.new!(%{
+          providers: %{
+            anthropic: %{
+              id: :anthropic,
+              default_family: :anthropic_messages,
+              seams: %{provider_module: ReqLlmNext.Providers.Anthropic}
+            }
+          },
+          families: [
+            %{
+              id: :openai_chat_compatible,
+              priority: 10,
+              default?: true,
+              criteria: %{provider_ids: [:openai]},
+              seams: %{surface_catalog_module: ReqLlmNext.ModelProfile.SurfaceCatalog}
+            },
+            %{
+              id: :anthropic_messages,
+              priority: 50,
+              criteria: %{provider_ids: [:anthropic], facts: %{citations_supported?: true}},
+              seams: %{surface_catalog_module: ReqLlmNext.ModelProfile.SurfaceCatalog}
+            }
+          ]
+        })
+
+      assert {:ok, family} =
+               Extensions.resolve_family(manifest, %{
+                 provider: :anthropic,
+                 facts: %{citations_supported?: false}
+               })
+
+      assert family.id == :anthropic_messages
     end
   end
 

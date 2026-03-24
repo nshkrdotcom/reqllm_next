@@ -63,7 +63,10 @@ Families are selected by declarative criteria and ordered by:
 2. higher criteria specificity
 3. declaration order
 
-If no family-specific override exists, the selected family is the happy path.
+If no criteria-selected family matches, family resolution falls back through:
+
+1. the provider's registered default family
+2. the highest-priority global default family
 
 ## Rules
 

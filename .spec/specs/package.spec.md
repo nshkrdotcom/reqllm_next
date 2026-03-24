@@ -58,7 +58,7 @@ surface:
   stability: evolving
 
 - id: reqllm.package.compile_time_extensions
-  statement: ReqLlmNext shall move provider and model edge-case support toward a compile-time extension manifest with provider registrations, default execution families, narrow opt-in override rules, and Spark-authored built-in declarations that compile down to plain manifest data so common paths stay simple while edge cases remain explicit.
+  statement: ReqLlmNext shall move provider and model edge-case support toward a compile-time extension manifest with provider registrations, explicit provider default families, global fallback families, narrow opt-in override rules, and Spark-authored built-in declarations that compile down to plain manifest data so common paths stay simple while edge cases remain explicit.
   priority: should
   stability: evolving
 ```

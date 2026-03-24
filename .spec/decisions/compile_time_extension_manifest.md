@@ -36,6 +36,8 @@ The package therefore has three distinct pieces:
 2. Spark authoring modules such as `ReqLlmNext.Extensions.Dsl` and `ReqLlmNext.Extensions.Definition`
 3. compiled built-in manifest modules such as `ReqLlmNext.Extensions.Compiled`
 
+Family resolution must prefer declarative criteria matches first, then provider-registered default families, and finally explicit global default families.
+
 ## Consequences
 
 Positive:

@@ -1,19 +1,13 @@
 defmodule ReqLlmNext.Providers do
   @moduledoc """
-  Provider registry - maps provider atoms to provider modules.
+  Provider registry resolved from the compiled extension manifest.
   """
 
-  @providers %{
-    openai: ReqLlmNext.Providers.OpenAI,
-    anthropic: ReqLlmNext.Providers.Anthropic
-  }
+  alias ReqLlmNext.Extensions
 
   @spec get(atom()) :: {:ok, module()} | {:error, term()}
   def get(provider_id) when is_atom(provider_id) do
-    case Map.get(@providers, provider_id) do
-      nil -> {:error, {:unknown_provider, provider_id}}
-      module -> {:ok, module}
-    end
+    Extensions.provider_module(Extensions.compiled_manifest(), provider_id)
   end
 
   @spec get!(atom()) :: module()
@@ -25,5 +19,9 @@ defmodule ReqLlmNext.Providers do
   end
 
   @spec list() :: [atom()]
-  def list, do: Map.keys(@providers)
+  def list do
+    Extensions.compiled_manifest().providers
+    |> Map.keys()
+    |> Enum.sort()
+  end
 end
