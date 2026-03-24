@@ -98,6 +98,17 @@
       },
       {
         "affects": [
+          "reqllm.workflow",
+          "reqllm.model_compat"
+        ],
+        "date": "2026-03-23",
+        "file": ".spec/decisions/provider_surface_maps_in_guides.md",
+        "id": "reqllm.decision.provider_surface_maps_in_guides",
+        "status": "accepted",
+        "title": "Provider Surface Maps Live In Guides"
+      },
+      {
+        "affects": [
           "reqllm.architecture",
           "reqllm.package",
           "reqllm.model_compat",
@@ -966,6 +977,7 @@
           "summary": "Live scenario execution, anomaly classification, and drift detection built on the same runtime architecture as normal execution.",
           "surface": [
             "guides/package_thesis.md",
+            "guides/anthropic_surface_map.md",
             "lib/req_llm_next/support_matrix.ex",
             "lib/req_llm_next/provider_test/comprehensive.ex",
             "lib/mix/tasks/model_compat.ex",
@@ -1271,6 +1283,7 @@
             ".spec/README.md",
             ".spec/AGENTS.md",
             "guides/package_thesis.md",
+            "guides/anthropic_surface_map.md",
             "mix.exs"
           ],
           "verification_minimum_strength": null
@@ -1927,7 +1940,7 @@
   "specification_version": "1.0",
   "summary": {
     "decision_parse_errors": 0,
-    "decisions": 9,
+    "decisions": 10,
     "exceptions": 0,
     "findings": 0,
     "requirements": 84,
@@ -3433,7 +3446,7 @@
     "threshold_failures": 0
   },
   "workspace": {
-    "decision_count": 9,
+    "decision_count": 10,
     "spec_count": 23
   }
 }

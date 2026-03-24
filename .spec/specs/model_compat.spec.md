@@ -11,6 +11,7 @@ status: active
 summary: Live scenario execution, anomaly classification, and drift detection built on the same runtime architecture as normal execution.
 surface:
   - guides/package_thesis.md
+  - guides/anthropic_surface_map.md
   - lib/req_llm_next/support_matrix.ex
   - lib/req_llm_next/provider_test/comprehensive.ex
   - lib/mix/tasks/model_compat.ex

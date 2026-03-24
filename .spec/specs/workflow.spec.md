@@ -15,6 +15,7 @@ surface:
   - .spec/README.md
   - .spec/AGENTS.md
   - guides/package_thesis.md
+  - guides/anthropic_surface_map.md
   - mix.exs
 ```
 

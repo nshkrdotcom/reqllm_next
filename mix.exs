@@ -24,10 +24,14 @@ defmodule ReqLlmNext.MixProject do
         main: "ReqLlmNext",
         extras: [
           "README.md",
-          "guides/package_thesis.md"
+          "guides/package_thesis.md",
+          "guides/anthropic_surface_map.md"
         ],
         groups_for_extras: [
-          Guides: ["guides/package_thesis.md"]
+          Guides: [
+            "guides/package_thesis.md",
+            "guides/anthropic_surface_map.md"
+          ]
         ]
       ]
     ]
