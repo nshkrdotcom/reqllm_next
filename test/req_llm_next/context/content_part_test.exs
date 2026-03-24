@@ -246,7 +246,10 @@ defmodule ReqLlmNext.Context.ContentPartTest do
       assert ContentPart.valid?(ContentPart.image(<<1, 2, 3>>))
       assert ContentPart.valid?(ContentPart.file(<<1, 2, 3>>, "file.bin"))
       assert ContentPart.valid?(ContentPart.document_text("Document"))
-      assert ContentPart.valid?(ContentPart.search_result("Example", "https://example.com", "Body"))
+
+      assert ContentPart.valid?(
+               ContentPart.search_result("Example", "https://example.com", "Body")
+             )
     end
 
     test "returns false for invalid structures" do

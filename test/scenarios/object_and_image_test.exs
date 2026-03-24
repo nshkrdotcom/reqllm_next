@@ -12,21 +12,21 @@ defmodule ReqLlmNext.Scenarios.ObjectAndImageTest do
       assert Scenarios.ObjectStreaming.applies?(
                TestModels.openai(%{
                  capabilities: %{
-                    chat: true,
-                    json: %{native: true, schema: true, strict: true},
-                    streaming: %{text: true, tool_calls: true}
-                  }
-                })
-              )
+                   chat: true,
+                   json: %{native: true, schema: true, strict: true},
+                   streaming: %{text: true, tool_calls: true}
+                 }
+               })
+             )
 
       assert Scenarios.ObjectStreaming.applies?(
                TestModels.anthropic(%{
                  capabilities: %{
-                    chat: true,
-                    json: %{native: true, schema: false, strict: false}
-                  }
-                })
-              )
+                   chat: true,
+                   json: %{native: true, schema: false, strict: false}
+                 }
+               })
+             )
 
       refute Scenarios.ObjectStreaming.applies?(TestModels.openai_embedding())
 
@@ -34,11 +34,11 @@ defmodule ReqLlmNext.Scenarios.ObjectAndImageTest do
                TestModels.openai(%{
                  capabilities: %{
                    chat: true,
-                    json: %{native: true, schema: true, strict: true},
-                    streaming: %{text: false, tool_calls: false}
-                  }
-                })
-              )
+                   json: %{native: true, schema: true, strict: true},
+                   streaming: %{text: false, tool_calls: false}
+                 }
+               })
+             )
     end
 
     test "validates streamed object shapes" do

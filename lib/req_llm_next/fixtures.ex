@@ -11,7 +11,7 @@ defmodule ReqLlmNext.Fixtures do
   - Format matches req_llm: request/response metadata + b64-encoded raw SSE chunks
   """
 
-  alias ReqLlmNext.{ExecutionModules, Wire.Resolver}
+  alias ReqLlmNext.{ExecutionModules, ModelProfile, Wire.Resolver}
 
   @root Path.expand("../../test/fixtures", __DIR__)
 
@@ -361,10 +361,21 @@ defmodule ReqLlmNext.Fixtures do
   defp request_transport(_fixture), do: "http_sse"
 
   defp runtime_from_model(model) do
-    %{
-      protocol_mod: ExecutionModules.protocol_module!(semantic_protocol_for_model(model)),
-      wire_mod: Resolver.wire_module!(model)
-    }
+    with {:ok, profile} <- ModelProfile.from_model(model),
+         operation <- preferred_runtime_operation(profile),
+         [%{semantic_protocol: semantic_protocol, wire_format: wire_format} | _] <-
+           ModelProfile.surfaces_for(profile, operation) do
+      %{
+        protocol_mod: ExecutionModules.protocol_module!(semantic_protocol),
+        wire_mod: ExecutionModules.wire_module!(wire_format)
+      }
+    else
+      _ ->
+        %{
+          protocol_mod: ExecutionModules.protocol_module!(semantic_protocol_for_model(model)),
+          wire_mod: Resolver.wire_module!(model)
+        }
+    end
   end
 
   defp semantic_protocol_for_model(%LLMDB.Model{} = model) do
@@ -372,6 +383,15 @@ defmodule ReqLlmNext.Fixtures do
       model.provider == :anthropic -> :anthropic_messages
       Resolver.responses_api?(model) -> :openai_responses
       true -> :openai_chat
+    end
+  end
+
+  defp preferred_runtime_operation(profile) do
+    cond do
+      ModelProfile.supports_operation?(profile, :text) -> :text
+      ModelProfile.supports_operation?(profile, :object) -> :object
+      ModelProfile.supports_operation?(profile, :embed) -> :embed
+      true -> :text
     end
   end
 

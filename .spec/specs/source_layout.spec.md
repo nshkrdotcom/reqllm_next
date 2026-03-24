@@ -8,7 +8,7 @@ Current-truth source-ownership contract for ReqLlmNext.
 id: reqllm.source_layout
 kind: source_layout
 status: active
-summary: Source ownership rules that keep model quirks, planning logic, semantic protocol logic, and compat tooling in distinct homes.
+summary: Source ownership rules that keep the top-level facade, planning logic, semantic protocol logic, provider-specific utilities, and compat tooling in distinct homes.
 surface:
   - AGENTS.md
   - .spec/specs/source_layout.spec.md
@@ -22,7 +22,7 @@ surface:
 
 ```spec-requirements
 - id: reqllm.source_layout.concern_homes
-  statement: ReqLlmNext shall keep model-boundary concerns, profile construction, mode normalization, policy resolution, semantic protocol normalization, wire envelopes, transport mechanics, response materialization, fixture replay, and session state in distinct source locations that match the architecture.
+  statement: ReqLlmNext shall keep model-boundary concerns, provider-scoped fact extraction, profile construction, mode normalization, policy resolution, surface-owned request preparation, semantic protocol normalization, wire envelopes, transport mechanics, response materialization, fixture replay, and session state in distinct source locations that match the architecture.
   priority: must
   stability: evolving
 

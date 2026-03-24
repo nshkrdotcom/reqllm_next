@@ -27,7 +27,7 @@ surface:
   stability: evolving
 
 - id: reqllm.public_api.thin_facade
-  statement: The top-level `ReqLlmNext` module shall remain a thin compatibility facade over the internal planning and execution pipeline rather than accumulating provider, protocol, wire, transport, fixture-specific, or provider-utility branching logic.
+  statement: The top-level `ReqLlmNext` module shall remain a thin compatibility facade over the internal planning and execution pipeline rather than accumulating provider, protocol, wire, transport, fixture-specific, provider-utility, or provider-native helper branching logic.
   priority: must
   stability: evolving
 ```

@@ -30,63 +30,19 @@ defmodule ReqLlmNext.Wire.Anthropic do
 
   @behaviour ReqLlmNext.Wire.Streaming
 
+  alias ReqLlmNext.Anthropic.Headers
+  alias ReqLlmNext.Anthropic.Tools, as: AnthropicTools
   alias ReqLlmNext.Context.ContentPart
   alias ReqLlmNext.SemanticProtocols.AnthropicMessages, as: AnthropicMessagesProtocol
   alias ReqLlmNext.{Tool, ToolCall}
-
-  @anthropic_version "2023-06-01"
-  @beta_thinking "interleaved-thinking-2025-05-14"
-  @beta_prompt_caching "prompt-caching-2024-07-31"
-  @beta_context_1m "context-1m-2025-08-07"
-  @beta_files_api "files-api-2025-04-14"
-  @beta_code_execution "code-execution-2025-08-25"
-  @beta_mcp_client "mcp-client-2025-04-04"
-  @beta_computer_use "computer-use-2025-01-24"
-  @beta_token_efficient_tools "token-efficient-tools-2025-02-19"
 
   @reasoning_budget_low 1024
   @reasoning_budget_medium 2048
   @reasoning_budget_high 4096
 
-  @doc """
-  Build headers including beta features.
-
-  Returns headers list including anthropic-beta if thinking or caching is enabled.
-  """
   @impl ReqLlmNext.Wire.Streaming
   @spec headers(keyword()) :: [{String.t(), String.t()}]
-  def headers(opts \\ []) do
-    base_headers = [
-      {"anthropic-version", @anthropic_version},
-      {"content-type", "application/json"}
-    ]
-
-    beta_flags = build_beta_flags(opts)
-
-    if beta_flags != "" do
-      [{"anthropic-beta", beta_flags} | base_headers]
-    else
-      base_headers
-    end
-  end
-
-  defp build_beta_flags(opts) do
-    flags = []
-    flags = if has_thinking?(opts), do: [@beta_thinking | flags], else: flags
-    flags = if has_prompt_caching?(opts), do: [@beta_prompt_caching | flags], else: flags
-    flags = if has_context_1m?(opts), do: [@beta_context_1m | flags], else: flags
-    flags = if has_files_api?(opts), do: [@beta_files_api | flags], else: flags
-    flags = if has_code_execution_tools?(opts), do: [@beta_code_execution | flags], else: flags
-    flags = if has_mcp_connectors?(opts), do: [@beta_mcp_client | flags], else: flags
-    flags = if has_computer_use_tools?(opts), do: [@beta_computer_use | flags], else: flags
-    flags = if has_token_efficient_tools?(opts), do: [@beta_token_efficient_tools | flags], else: flags
-    flags = custom_beta_flags(opts) ++ flags
-
-    flags
-    |> Enum.reverse()
-    |> Enum.uniq()
-    |> Enum.join(",")
-  end
+  def headers(opts \\ []), do: Headers.headers(opts)
 
   defp has_thinking?(opts) do
     Keyword.has_key?(opts, :thinking) or Keyword.has_key?(opts, :reasoning_effort)
@@ -94,44 +50,6 @@ defmodule ReqLlmNext.Wire.Anthropic do
 
   defp has_prompt_caching?(opts) do
     Keyword.get(opts, :anthropic_prompt_cache, false) == true
-  end
-
-  defp has_context_1m?(opts) do
-    Keyword.get(opts, :anthropic_context_1m, false) == true
-  end
-
-  defp has_files_api?(opts) do
-    Keyword.get(opts, :anthropic_files_api, false) == true
-  end
-
-  defp has_code_execution_tools?(opts) do
-    Enum.any?(Keyword.get(opts, :tools, []), &tool_type?(&1, "code_execution"))
-  end
-
-  defp has_mcp_connectors?(opts) do
-    mcp_servers = Keyword.get(opts, :mcp_servers, [])
-    mcp_servers != [] or Enum.any?(Keyword.get(opts, :tools, []), &tool_type?(&1, "mcp"))
-  end
-
-  defp has_computer_use_tools?(opts) do
-    Enum.any?(Keyword.get(opts, :tools, []), fn tool ->
-      tool_type?(tool, "computer") or tool_type?(tool, "text_editor") or tool_type?(tool, "bash")
-    end)
-  end
-
-  defp has_token_efficient_tools?(opts) do
-    Keyword.get(opts, :anthropic_token_efficient_tools, false) == true
-  end
-
-  defp tool_type?(%{type: type}, prefix) when is_binary(type), do: String.starts_with?(type, prefix)
-  defp tool_type?(_, _prefix), do: false
-
-  defp custom_beta_flags(opts) do
-    case Keyword.get(opts, :anthropic_beta_headers, []) do
-      flags when is_binary(flags) -> [flags]
-      flags when is_list(flags) -> Enum.filter(flags, &is_binary/1)
-      _ -> []
-    end
   end
 
   @doc """
@@ -246,10 +164,10 @@ defmodule ReqLlmNext.Wire.Anthropic do
 
   defp maybe_add_output_config(body, opts) do
     case {
-           Keyword.get(opts, :operation),
-           Keyword.get(opts, :compiled_schema),
-           Keyword.get(opts, :_structured_output_strategy)
-         } do
+      Keyword.get(opts, :operation),
+      Keyword.get(opts, :compiled_schema),
+      Keyword.get(opts, :_structured_output_strategy)
+    } do
       {:object, %{schema: schema}, :native_json_schema} when not is_nil(schema) ->
         Map.put(body, :output_config, %{
           format: %{
@@ -265,8 +183,11 @@ defmodule ReqLlmNext.Wire.Anthropic do
 
   defp maybe_add_mcp_servers(body, opts) do
     case Keyword.get(opts, :mcp_servers) do
-      servers when is_list(servers) and servers != [] -> Map.put(body, :mcp_servers, servers)
-      _ -> body
+      servers when is_list(servers) and servers != [] ->
+        Map.put(body, :mcp_servers, Enum.map(servers, &AnthropicTools.normalize_mcp_server/1))
+
+      _ ->
+        body
     end
   end
 
@@ -282,8 +203,11 @@ defmodule ReqLlmNext.Wire.Anthropic do
 
   defp maybe_add_container(body, opts) do
     case Keyword.get(opts, :container) do
-      container when is_map(container) and map_size(container) > 0 -> Map.put(body, :container, container)
-      _ -> body
+      container when is_map(container) and map_size(container) > 0 ->
+        Map.put(body, :container, container)
+
+      _ ->
+        body
     end
   end
 
@@ -434,7 +358,7 @@ defmodule ReqLlmNext.Wire.Anthropic do
   end
 
   defp encode_tool_def(%Tool{} = tool), do: Tool.to_schema(tool, :anthropic)
-  defp encode_tool_def(tool) when is_map(tool), do: tool
+  defp encode_tool_def(tool) when is_map(tool), do: AnthropicTools.normalize_tool(tool)
 
   defp maybe_add_tool_choice(body, opts) do
     case Keyword.get(opts, :tool_choice) do
@@ -480,7 +404,8 @@ defmodule ReqLlmNext.Wire.Anthropic do
 
   defp document_source(%ContentPart{metadata: metadata}, file_id, _url, media_type)
        when is_binary(file_id) do
-    source_type = Map.get(metadata || %{}, :source_type) || Map.get(metadata || %{}, "source_type")
+    source_type =
+      Map.get(metadata || %{}, :source_type) || Map.get(metadata || %{}, "source_type")
 
     case source_type do
       :file_id -> %{type: "file", file_id: file_id}
@@ -514,10 +439,17 @@ defmodule ReqLlmNext.Wire.Anthropic do
     %{type: "base64", media_type: media_type, data: Base.encode64(data)}
   end
 
-  defp encode_document_content_block(%ContentPart{type: :text, text: text}), do: %{type: "text", text: text}
-  defp encode_document_content_block(%ContentPart{type: :search_result} = part), do: encode_content_part(part)
+  defp encode_document_content_block(%ContentPart{type: :text, text: text}),
+    do: %{type: "text", text: text}
+
+  defp encode_document_content_block(%ContentPart{type: :search_result} = part),
+    do: encode_content_part(part)
+
   defp encode_document_content_block(%{type: :text, text: text}), do: %{type: "text", text: text}
-  defp encode_document_content_block(%{type: :search_result} = part), do: encode_content_part(ContentPart.new!(part))
+
+  defp encode_document_content_block(%{type: :search_result} = part),
+    do: encode_content_part(ContentPart.new!(part))
+
   defp encode_document_content_block(part), do: encode_content_part(part)
 
   defp maybe_add_document_title(block, %ContentPart{metadata: metadata}) do

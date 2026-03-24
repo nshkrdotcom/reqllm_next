@@ -7,7 +7,12 @@ defmodule ReqLlmNext.Anthropic.MessageBatches do
   alias ReqLlmNext.ModelResolver
   alias ReqLlmNext.Wire.Anthropic, as: AnthropicWire
 
-  @spec build_request(String.t(), ReqLlmNext.model_spec(), String.t() | ReqLlmNext.Context.t(), keyword()) ::
+  @spec build_request(
+          String.t(),
+          ReqLlmNext.model_spec(),
+          String.t() | ReqLlmNext.Context.t(),
+          keyword()
+        ) ::
           {:ok, map()} | {:error, term()}
   def build_request(custom_id, model_source, prompt, opts \\ []) when is_binary(custom_id) do
     with {:ok, model} <- ModelResolver.resolve(model_source) do

@@ -19,7 +19,8 @@ defmodule ReqLlmNext.Context.ContentPart do
   @schema Zoi.struct(
             __MODULE__,
             %{
-              type: Zoi.enum([:text, :image_url, :image, :file, :document, :search_result, :thinking]),
+              type:
+                Zoi.enum([:text, :image_url, :image, :file, :document, :search_result, :thinking]),
               text: Zoi.string() |> Zoi.nullish(),
               url: Zoi.string() |> Zoi.nullish(),
               data: Zoi.any() |> Zoi.nullish(),
@@ -174,7 +175,7 @@ defmodule ReqLlmNext.Context.ContentPart do
 
     defp inspect_document(%{data: data, media_type: media_type}, opts) when is_binary(data) do
       case data do
-        "file_" <> _rest -> "file_id: #{inspect(data, opts)}"
+        "file_" <> _rest -> "file_id: #{Kernel.inspect(data, opts)}"
         _ -> "#{media_type} (#{byte_size(data)} bytes)"
       end
     end

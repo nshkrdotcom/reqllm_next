@@ -14,7 +14,8 @@ defmodule ReqLlmNext.Anthropic do
     do: ContentPart.document_binary(data, media_type, metadata)
 
   @spec document_file_id(String.t(), map()) :: ContentPart.t()
-  def document_file_id(file_id, metadata \\ %{}), do: ContentPart.document_file_id(file_id, metadata)
+  def document_file_id(file_id, metadata \\ %{}),
+    do: ContentPart.document_file_id(file_id, metadata)
 
   @spec container_upload(String.t(), keyword()) :: ContentPart.t()
   def container_upload(file_id, opts \\ []) when is_binary(file_id) do
@@ -52,7 +53,8 @@ defmodule ReqLlmNext.Anthropic do
 
   @spec token_count(ReqLlmNext.model_spec(), String.t() | ReqLlmNext.Context.t(), keyword()) ::
           {:ok, map()} | {:error, term()}
-  def token_count(model_source, prompt, opts \\ []), do: TokenCount.count(model_source, prompt, opts)
+  def token_count(model_source, prompt, opts \\ []),
+    do: TokenCount.count(model_source, prompt, opts)
 
   @spec upload_file(String.t() | binary(), keyword()) :: {:ok, map()} | {:error, term()}
   def upload_file(path_or_data, opts \\ []), do: Files.upload(path_or_data, opts)
@@ -66,7 +68,12 @@ defmodule ReqLlmNext.Anthropic do
   @spec delete_file(String.t(), keyword()) :: {:ok, map()} | {:error, term()}
   def delete_file(file_id, opts \\ []), do: Files.delete(file_id, opts)
 
-  @spec build_batch_request(String.t(), ReqLlmNext.model_spec(), String.t() | ReqLlmNext.Context.t(), keyword()) ::
+  @spec build_batch_request(
+          String.t(),
+          ReqLlmNext.model_spec(),
+          String.t() | ReqLlmNext.Context.t(),
+          keyword()
+        ) ::
           {:ok, map()} | {:error, term()}
   def build_batch_request(custom_id, model_source, prompt, opts \\ []) do
     MessageBatches.build_request(custom_id, model_source, prompt, opts)

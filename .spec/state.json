@@ -153,7 +153,7 @@
         "id": "reqllm.architecture.facts_mode_policy_plan",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext architecture shall normalize model facts into `ModelProfile`, request intent into `ExecutionMode`, resolve ordered policy rules, and materialize a single `ExecutionPlan` before downstream execution, including honoring explicit transport preference when a matching surface exists and validating surface-specific parameter compatibility before wire encoding.",
+        "statement": "ReqLlmNext architecture shall normalize model facts into `ModelProfile`, request intent into `ExecutionMode`, resolve ordered policy rules, run surface-owned request preparation, and materialize a single `ExecutionPlan` before downstream execution, including provider-scoped descriptive fact extraction, honoring explicit transport preference when a matching surface exists, and validating surface-specific parameter compatibility before wire encoding.",
         "subject_id": "reqllm.architecture"
       },
       {
@@ -169,7 +169,7 @@
         "id": "reqllm.architecture.provider_specific_utilities",
         "priority": "should",
         "stability": "evolving",
-        "statement": "ReqLlmNext architecture may expose provider-scoped utility modules for non-canonical provider endpoints, but those utilities shall remain outside the top-level cross-provider facade and outside the core execution-plan layer stack.",
+        "statement": "ReqLlmNext architecture may expose provider-scoped utility modules for non-canonical provider endpoints, but those utilities and provider-native helper shapes shall remain outside the top-level cross-provider facade and outside the core execution-plan layer stack except where a selected provider surface explicitly accepts them.",
         "subject_id": "reqllm.architecture"
       },
       {
@@ -209,7 +209,7 @@
         "id": "reqllm.enforcement.runtime_hard_fail",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall use runtime hard-fail validation for invalid model metadata, unsupported profile combinations, unsupported surface-parameter combinations, unknown keys, invalid enums, and unsafe source combinations rather than best-effort fallback behavior.",
+        "statement": "ReqLlmNext shall use runtime hard-fail validation for invalid model metadata, unsupported profile combinations, unsupported surface-parameter combinations, wrong-provider provider-native helper inputs, raw tool maps on non-owning surfaces, unknown keys, invalid enums, and unsafe source combinations rather than best-effort fallback behavior.",
         "subject_id": "reqllm.enforcement"
       },
       {
@@ -241,7 +241,7 @@
         "id": "reqllm.execution_mode.provider_agnostic",
         "priority": "must",
         "stability": "evolving",
-        "statement": "`ExecutionMode` shall remain provider-agnostic and shall not contain chosen surfaces, chosen protocols, encoded payloads, or raw tool definitions.",
+        "statement": "`ExecutionMode` shall remain provider-agnostic and shall not contain chosen surfaces, chosen protocols, encoded payloads, raw tool definitions, or provider-native helper maps.",
         "subject_id": "reqllm.execution_mode"
       },
       {
@@ -265,7 +265,7 @@
         "id": "reqllm.execution_plan.planner_owns_assembly",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall keep plan assembly in the planner boundary, including mode normalization, rule evaluation, surface selection, parameter normalization, surface-specific parameter validation, session planning, and adapter selection.",
+        "statement": "ReqLlmNext shall keep plan assembly in the planner boundary, including mode normalization, provider-fact-fed profile interpretation, rule evaluation, surface selection, parameter normalization, surface-owned request preparation, surface-specific parameter validation, session planning, and adapter selection.",
         "subject_id": "reqllm.execution_plan"
       },
       {
@@ -281,7 +281,7 @@
         "id": "reqllm.execution_plan.surface_and_fallbacks",
         "priority": "must",
         "stability": "evolving",
-        "statement": "`ExecutionPlan` shall record exactly one chosen primary execution surface plus any fallback surfaces, normalized parameter values, timeout policy, session strategy, and adapter references for the request attempt, including provider-native request fields that are valid for the selected surface.",
+        "statement": "`ExecutionPlan` shall record exactly one chosen primary execution surface plus any fallback surfaces, normalized parameter values, timeout policy, session strategy, and adapter references for the request attempt, including provider-native request fields that are prepared only for and valid only on the selected surface.",
         "subject_id": "reqllm.execution_plan"
       },
       {
@@ -297,7 +297,7 @@
         "id": "reqllm.execution_surfaces.support_unit",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall represent each valid endpoint style as a named `ExecutionSurface` that bundles semantic protocol, wire format, transport, session compatibility, and feature tags for one operation family, including provider-native structured-output strategies declared on an existing semantic family such as Anthropic Messages.",
+        "statement": "ReqLlmNext shall represent each valid endpoint style as a named `ExecutionSurface` that bundles semantic protocol, wire format, transport, session compatibility, and feature tags for one operation family, including provider-native structured-output strategies and provider-native request-preparation rules declared on an existing semantic family such as Anthropic Messages.",
         "subject_id": "reqllm.execution_surfaces"
       },
       {
@@ -321,7 +321,7 @@
         "id": "reqllm.layer_boundaries.no_cross_layer_skips",
         "priority": "must",
         "stability": "evolving",
-        "statement": "No execution layer shall skip across another layer's ownership boundary by choosing transports in semantic protocol code, reinterpreting semantic meaning in wire code, or introducing model-specific behavior in provider or transport code.",
+        "statement": "No execution layer shall skip across another layer's ownership boundary by choosing transports in semantic protocol code, reinterpreting semantic meaning in wire code, introducing model-specific behavior in provider or transport code, or deriving provider-native request flags in shared executor code after planning.",
         "subject_id": "reqllm.layer_boundaries"
       },
       {
@@ -374,6 +374,14 @@
       },
       {
         "file": ".spec/specs/model_compat.spec.md",
+        "id": "reqllm.model_compat.provider_native_request_shapes",
+        "priority": "should",
+        "stability": "evolving",
+        "statement": "Provider-native utility coverage shall keep request-shape proofs for supported non-canonical endpoints so batch, file, and similar utility surfaces stay reconciled with the shared execution architecture without claiming top-level API support they do not provide.",
+        "subject_id": "reqllm.model_compat"
+      },
+      {
+        "file": ".spec/specs/model_compat.spec.md",
         "id": "reqllm.model_compat.provider_native_surfaces",
         "priority": "should",
         "stability": "evolving",
@@ -409,7 +417,7 @@
         "id": "reqllm.model_input.fail_fast",
         "priority": "must",
         "stability": "evolving",
-        "statement": "The model boundary shall fail fast on tuples, ad hoc maps, unsupported types, or invalid model metadata and shall not let raw unvalidated model input continue into execution, while leaving later surface-specific validation to the planning boundary rather than reintroducing raw model checks downstream.",
+        "statement": "The model boundary shall fail fast on tuples, ad hoc maps, unsupported types, or invalid model metadata and shall not let raw unvalidated model input continue into execution, while leaving later provider-native helper validation and surface-specific request validation to the planning boundary rather than reintroducing raw model checks downstream.",
         "subject_id": "reqllm.model_input"
       },
       {
@@ -425,7 +433,7 @@
         "id": "reqllm.model_profile.descriptive_facts",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall normalize resolved model metadata into a request-independent `ModelProfile` that describes operations, features, modalities, limits, parameter defaults, constraints metadata, and session capabilities without choosing concrete request behavior, including provider-native descriptive facts such as Anthropic structured outputs, citations, and context-management support.",
+        "statement": "ReqLlmNext shall normalize resolved model metadata into a request-independent `ModelProfile` that describes operations, features, modalities, limits, parameter defaults, constraints metadata, and session capabilities without choosing concrete request behavior, including provider-scoped descriptive fact extraction for normalized features such as Anthropic structured outputs, citations, context management, and additional document input.",
         "subject_id": "reqllm.model_profile"
       },
       {
@@ -449,7 +457,7 @@
         "id": "reqllm.operation_planner.assembly_scope",
         "priority": "must",
         "stability": "evolving",
-        "statement": "The planner boundary shall own mode normalization, rule evaluation, surface selection, parameter normalization, explicit transport preference handling, fallback planning, surface-specific parameter validation, session planning, and adapter selection, including provider-native structured-output strategies when those are declared in `ModelProfile`.",
+        "statement": "The planner boundary shall own mode normalization, rule evaluation, surface selection, parameter normalization, explicit transport preference handling, fallback planning, surface-specific parameter validation, provider-native helper acceptance or rejection, surface-owned request preparation, session planning, and adapter selection, including provider-native structured-output strategies when those are declared in `ModelProfile`.",
         "subject_id": "reqllm.operation_planner"
       },
       {
@@ -518,6 +526,14 @@
       },
       {
         "file": ".spec/specs/package.spec.md",
+        "id": "reqllm.package.provider_native_input_isolation",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "ReqLlmNext shall keep canonical cross-provider tool input on `ReqLlmNext.Tool`, allow provider-native helper maps only on the owning provider surfaces, and fail early during planning when foreign raw maps or provider-native helper shapes are used on the wrong surface.",
+        "subject_id": "reqllm.package"
+      },
+      {
+        "file": ".spec/specs/package.spec.md",
         "id": "reqllm.package.provider_specific_utilities",
         "priority": "should",
         "stability": "evolving",
@@ -529,7 +545,7 @@
         "id": "reqllm.policy_rules.allowed_patch_domains",
         "priority": "must",
         "stability": "evolving",
-        "statement": "Policy rules may patch preferred and fallback surfaces, timeout classes, session defaults, stable parameter defaults for the active mode, and plan-adapter references, but they shall not patch model identity, provider identity, unsupported operations, raw payloads, or provider-specific utility endpoint behavior.",
+        "statement": "Policy rules may patch preferred and fallback surfaces, timeout classes, session defaults, stable parameter defaults for the active mode, and plan-adapter references, but they shall not patch model identity, provider identity, unsupported operations, raw payloads, provider-native helper validation, or provider-specific utility endpoint behavior.",
         "subject_id": "reqllm.policy_rules"
       },
       {
@@ -609,7 +625,7 @@
         "id": "reqllm.public_api.thin_facade",
         "priority": "must",
         "stability": "evolving",
-        "statement": "The top-level `ReqLlmNext` module shall remain a thin compatibility facade over the internal planning and execution pipeline rather than accumulating provider, protocol, wire, transport, fixture-specific, or provider-utility branching logic.",
+        "statement": "The top-level `ReqLlmNext` module shall remain a thin compatibility facade over the internal planning and execution pipeline rather than accumulating provider, protocol, wire, transport, fixture-specific, provider-utility, or provider-native helper branching logic.",
         "subject_id": "reqllm.public_api"
       },
       {
@@ -681,7 +697,7 @@
         "id": "reqllm.source_layout.concern_homes",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall keep model-boundary concerns, profile construction, mode normalization, policy resolution, semantic protocol normalization, wire envelopes, transport mechanics, response materialization, fixture replay, and session state in distinct source locations that match the architecture.",
+        "statement": "ReqLlmNext shall keep model-boundary concerns, provider-scoped fact extraction, profile construction, mode normalization, policy resolution, surface-owned request preparation, semantic protocol normalization, wire envelopes, transport mechanics, response materialization, fixture replay, and session state in distinct source locations that match the architecture.",
         "subject_id": "reqllm.source_layout"
       },
       {
@@ -785,7 +801,7 @@
         "id": "reqllm.wire_format.provider_feature_envelopes",
         "priority": "should",
         "stability": "evolving",
-        "statement": "Wire format may own provider-family feature envelopes such as Anthropic beta headers, native structured-output payloads, document references, context-management fields, and provider-native tool definitions when those details belong to the request shape of an existing execution surface.",
+        "statement": "Wire format may own provider-family feature envelopes such as Anthropic beta headers, native structured-output payloads, document references, context-management fields, and provider-native tool definitions when those details belong to the request shape of an existing execution surface, but foreign provider-native helper maps shall not be accepted through generic raw-map passthrough on other surfaces.",
         "subject_id": "reqllm.wire_format"
       },
       {
@@ -801,7 +817,7 @@
         "id": "reqllm.workflow.agent_instructions",
         "priority": "must",
         "stability": "evolving",
-        "statement": "Repository agent instructions shall direct agents to run bw prime before work and mix spec.prime --base HEAD before editing current-truth package guidance.",
+        "statement": "Repository agent instructions shall direct agents to run bw prime before work and mix spec.prime --base HEAD before editing current-truth package guidance, and they shall keep provider-native behavior behind planning, layer, and provider-utility boundaries instead of reintroducing shared executor shortcuts.",
         "subject_id": "reqllm.workflow"
       },
       {
@@ -904,7 +920,7 @@
           "id": "reqllm.architecture",
           "kind": "architecture",
           "status": "active",
-          "summary": "Current-truth runtime boundary and layer-separation contract for model input and execution flow, including handcrafted `LLMDB.Model` support at the boundary, the deterministic planning bridge, and the separated execution stack.",
+          "summary": "Current-truth runtime boundary and layer-separation contract for model input and execution flow, including handcrafted `LLMDB.Model` support at the boundary, the deterministic planning bridge, the thin top-level facade, and the separated execution stack.",
           "surface": [
             "README.md",
             "AGENTS.md",
@@ -1040,7 +1056,7 @@
           "id": "reqllm.layer_boundaries",
           "kind": "layer_boundaries",
           "status": "active",
-          "summary": "Explicit handoff rules for provider, session runtime, transport, wire format, semantic protocol, and plan adapters, with one deterministic layer stack per resolved plan and replay path.",
+          "summary": "Explicit handoff rules for provider, session runtime, transport, wire format, semantic protocol, and plan-aware adapters, with one deterministic layer stack per resolved plan and replay path.",
           "surface": [
             "AGENTS.md",
             "lib/req_llm_next/execution_modules.ex",
@@ -1063,7 +1079,7 @@
           "id": "reqllm.model_compat",
           "kind": "compat",
           "status": "active",
-          "summary": "Live scenario execution, anomaly classification, and drift detection built on the same runtime architecture as normal execution.",
+          "summary": "Live scenario execution, curated provider sweeps, and drift detection built on the same runtime architecture as normal execution.",
           "surface": [
             "guides/package_thesis.md",
             "guides/anthropic_surface_map.md",
@@ -1092,7 +1108,7 @@
           "id": "reqllm.model_input",
           "kind": "model_input",
           "status": "active",
-          "summary": "Narrow public model boundary for `model_spec` strings and `%LLMDB.Model{}` values.",
+          "summary": "Narrow public model boundary for `model_spec` strings and `%LLMDB.Model{}` values, including handcrafted structs as a first-class local-iteration hook.",
           "surface": [
             "README.md",
             "AGENTS.md",
@@ -1121,6 +1137,8 @@
           "summary": "Canonical descriptive model facts and execution-surface catalog.",
           "surface": [
             "lib/req_llm_next/model_profile.ex",
+            "lib/req_llm_next/model_profile/provider_facts.ex",
+            "lib/req_llm_next/model_profile/provider_facts/**/*.ex",
             "lib/req_llm_next/execution_surface.ex",
             "lib/req_llm_next/operation_planner.ex"
           ],
@@ -1143,6 +1161,8 @@
           "summary": "Planner boundary that turns profile, mode, and policy into one execution plan.",
           "surface": [
             "lib/req_llm_next/operation_planner.ex",
+            "lib/req_llm_next/surface_preparation.ex",
+            "lib/req_llm_next/surface_preparation/**/*.ex",
             "lib/req_llm_next/execution_mode.ex",
             "lib/req_llm_next/execution_plan.ex",
             "lib/req_llm_next/policy_rules.ex",
@@ -1239,7 +1259,7 @@
           "id": "reqllm.semantic_protocol",
           "kind": "semantic_protocol",
           "status": "active",
-          "summary": "Provider API-family meaning, payload mapping, and canonical chunk decoding.",
+          "summary": "Provider API-family meaning, payload mapping, and canonical chunk decoding, including rich provider-native metadata preservation.",
           "surface": [
             ".spec/specs/semantic_protocol.spec.md",
             ".spec/specs/layer_boundaries.spec.md",
@@ -1276,7 +1296,7 @@
           "id": "reqllm.source_layout",
           "kind": "source_layout",
           "status": "active",
-          "summary": "Source ownership rules that keep model quirks, planning logic, semantic protocol logic, and compat tooling in distinct homes.",
+          "summary": "Source ownership rules that keep the top-level facade, planning logic, semantic protocol logic, provider-specific utilities, and compat tooling in distinct homes.",
           "surface": [
             "AGENTS.md",
             ".spec/specs/source_layout.spec.md",
@@ -1373,7 +1393,7 @@
           "id": "reqllm.workflow",
           "kind": "workflow",
           "status": "active",
-          "summary": "Contributor workflow contract for durable work tracking, current-truth maintenance, and keeping contributor docs aligned with the Spec Led workspace, including the public model-input boundary contract and the repo's package-thesis narrative.",
+          "summary": "Contributor workflow contract for durable work tracking, current-truth maintenance, and keeping contributor docs aligned with the Spec Led workspace, including the public model-input boundary contract, the thin facade guidance in AGENTS, and the repo's package-thesis narrative.",
           "surface": [
             "README.md",
             "AGENTS.md",
@@ -1624,6 +1644,16 @@
       },
       {
         "covers": [
+          "reqllm.model_compat.provider_native_request_shapes"
+        ],
+        "execute": true,
+        "file": ".spec/specs/model_compat.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.model_compat",
+        "target": "mix test test/anthropic/message_batches_test.exs"
+      },
+      {
+        "covers": [
           "reqllm.model_input.accepted_forms",
           "reqllm.model_input.llmdb_resolution",
           "reqllm.model_input.fail_fast"
@@ -1818,6 +1848,16 @@
       },
       {
         "covers": [
+          "reqllm.package.provider_native_input_isolation"
+        ],
+        "execute": true,
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/operation_planner_test.exs test/wire/anthropic_test.exs test/wire/openai_chat_test.exs test/req_llm_next/wire/openai_responses_request_test.exs"
+      },
+      {
+        "covers": [
           "reqllm.policy_rules.five_scopes",
           "reqllm.policy_rules.match_patch",
           "reqllm.policy_rules.capability_safe",
@@ -1884,6 +1924,16 @@
         "kind": "source_file",
         "subject_id": "reqllm.semantic_protocol",
         "target": ".spec/specs/semantic_protocol.spec.md"
+      },
+      {
+        "covers": [
+          "reqllm.semantic_protocol.provider_rich_events"
+        ],
+        "execute": true,
+        "file": ".spec/specs/semantic_protocol.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.semantic_protocol",
+        "target": "mix test test/semantic_protocols/anthropic_messages_test.exs"
       },
       {
         "covers": [
@@ -2085,10 +2135,10 @@
     "decisions": 11,
     "exceptions": 0,
     "findings": 0,
-    "requirements": 93,
+    "requirements": 95,
     "scenarios": 0,
     "subjects": 23,
-    "verifications": 64
+    "verifications": 67
   },
   "verification": {
     "claims": [
@@ -2698,6 +2748,17 @@
         "verification_index": 3
       },
       {
+        "cover_id": "reqllm.model_compat.provider_native_request_shapes",
+        "file": ".spec/specs/model_compat.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.model_compat",
+        "target": "mix test test/anthropic/message_batches_test.exs",
+        "verification_index": 4
+      },
+      {
         "cover_id": "reqllm.model_input.accepted_forms",
         "file": ".spec/specs/model_input_boundary.spec.md",
         "kind": "source_file",
@@ -3083,6 +3144,17 @@
         "verification_index": 11
       },
       {
+        "cover_id": "reqllm.package.provider_native_input_isolation",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/operation_planner_test.exs test/wire/anthropic_test.exs test/wire/openai_chat_test.exs test/req_llm_next/wire/openai_responses_request_test.exs",
+        "verification_index": 12
+      },
+      {
         "cover_id": "reqllm.policy_rules.allowed_patch_domains",
         "file": ".spec/specs/policy_rules.spec.md",
         "kind": "source_file",
@@ -3290,6 +3362,17 @@
         "subject_id": "reqllm.semantic_protocol",
         "target": ".spec/specs/semantic_protocol.spec.md",
         "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.semantic_protocol.provider_rich_events",
+        "file": ".spec/specs/semantic_protocol.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.semantic_protocol",
+        "target": "mix test test/semantic_protocols/anthropic_messages_test.exs",
+        "verification_index": 1
       },
       {
         "cover_id": "reqllm.session_runtime.fallback_and_diagnostics",
@@ -3692,7 +3775,7 @@
     "default_minimum_strength": "claimed",
     "strength_summary": {
       "claimed": 2,
-      "executed": 52,
+      "executed": 55,
       "linked": 91
     },
     "threshold_failures": 0

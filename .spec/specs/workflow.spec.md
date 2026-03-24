@@ -8,7 +8,7 @@ Repository workflow contract for Beadwork and Spec Led Development.
 id: reqllm.workflow
 kind: workflow
 status: active
-summary: Contributor workflow contract for durable work tracking, current-truth maintenance, and keeping contributor docs aligned with the Spec Led workspace, including the public model-input boundary contract and the repo's package-thesis narrative.
+summary: Contributor workflow contract for durable work tracking, current-truth maintenance, and keeping contributor docs aligned with the Spec Led workspace, including the public model-input boundary contract, the thin facade guidance in AGENTS, and the repo's package-thesis narrative.
 surface:
   - README.md
   - AGENTS.md
@@ -34,7 +34,7 @@ surface:
   stability: evolving
 
 - id: reqllm.workflow.agent_instructions
-  statement: Repository agent instructions shall direct agents to run bw prime before work and mix spec.prime --base HEAD before editing current-truth package guidance.
+  statement: Repository agent instructions shall direct agents to run bw prime before work and mix spec.prime --base HEAD before editing current-truth package guidance, and they shall keep provider-native behavior behind planning, layer, and provider-utility boundaries instead of reintroducing shared executor shortcuts.
   priority: must
   stability: evolving
 

@@ -36,7 +36,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.policy_rules.allowed_patch_domains
-  statement: Policy rules may patch preferred and fallback surfaces, timeout classes, session defaults, stable parameter defaults for the active mode, and plan-adapter references, but they shall not patch model identity, provider identity, unsupported operations, raw payloads, or provider-specific utility endpoint behavior.
+  statement: Policy rules may patch preferred and fallback surfaces, timeout classes, session defaults, stable parameter defaults for the active mode, and plan-adapter references, but they shall not patch model identity, provider identity, unsupported operations, raw payloads, provider-native helper validation, or provider-specific utility endpoint behavior.
   priority: must
   stability: evolving
 ```

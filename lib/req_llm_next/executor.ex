@@ -1,14 +1,14 @@
 defmodule ReqLlmNext.Executor do
   @moduledoc """
-  Central pipeline orchestration for ReqLLM v2.
+  Executes planned ReqLLM v2 requests without choosing behavior itself.
 
-  The Executor implements a 6-step pipeline:
-  1. ModelResolver - LLMDB + config overrides
-  2. Validation - Modalities, operation compatibility (stub)
-  3. Constraints - Parameter transforms from metadata (stub)
-  4. Adapter Pipeline - Per-model customizations
-  5. Wire Protocol - JSON encode/decode per API family
-  6. Provider HTTP - Base URL, auth, Finch orchestration
+  The executor owns:
+
+  1. top-level facade dispatch
+  2. fixture replay versus live execution
+  3. adapter application for the selected plan
+  4. transport invocation through the resolved execution modules
+  5. buffering and response materialization
   """
 
   alias ReqLlmNext.Adapters.Pipeline, as: AdapterPipeline
@@ -67,7 +67,7 @@ defmodule ReqLlmNext.Executor do
              |> Keyword.put(:_stream?, true)
              |> Keyword.put(:_model_spec, inspect_model_spec(model_spec))
            ),
-         runtime_opts <- runtime_opts(plan, model, prompt),
+         runtime_opts <- runtime_opts(plan, model),
          %{
            provider_mod: provider_mod,
            protocol_mod: protocol_mod,
@@ -108,7 +108,7 @@ defmodule ReqLlmNext.Executor do
            |> Keyword.put(:_model_spec, inspect_model_spec(model_spec)),
          {:ok, plan} <- OperationPlanner.plan(model, :object, prompt, planning_opts),
          {:ok, execution_prompt} <- object_prompt(prompt, plan, compiled_schema),
-         runtime_opts <- runtime_opts(plan, model, prompt),
+         runtime_opts <- runtime_opts(plan, model),
          %{
            provider_mod: provider_mod,
            protocol_mod: protocol_mod,
@@ -205,7 +205,7 @@ defmodule ReqLlmNext.Executor do
              input,
              opts |> Keyword.put(:_model_spec, inspect_model_spec(model_spec))
            ),
-         runtime_opts <- runtime_opts(plan, model, input),
+         runtime_opts <- runtime_opts(plan, model),
          %{provider_mod: provider_mod, wire_mod: wire_mod} <- ExecutionModules.resolve(plan),
          {:ok, raw_response} <-
            execute_embedding_request(provider_mod, wire_mod, model, input, runtime_opts) do
@@ -213,7 +213,7 @@ defmodule ReqLlmNext.Executor do
     end
   end
 
-  defp runtime_opts(plan, model, prompt) do
+  defp runtime_opts(plan, model) do
     plan.parameter_values
     |> Enum.into([])
     |> Keyword.drop([:transport])
@@ -223,27 +223,8 @@ defmodule ReqLlmNext.Executor do
       _execution_semantic_protocol: plan.semantic_protocol,
       _execution_wire_format: plan.wire_format,
       _execution_transport: plan.transport,
-      _structured_output_strategy: plan.surface.features.structured_output,
-      anthropic_files_api: anthropic_files_api?(prompt)
+      _structured_output_strategy: plan.surface.features.structured_output
     )
-  end
-
-  defp anthropic_files_api?(%ReqLlmNext.Context{messages: messages}) do
-    Enum.any?(messages, fn message ->
-      Enum.any?(message.content || [], fn
-        %ReqLlmNext.Context.ContentPart{type: :document} -> true
-        %ReqLlmNext.Context.ContentPart{type: :file} = part -> anthropic_file_reference?(part)
-        _ -> false
-      end)
-    end)
-  end
-
-  defp anthropic_files_api?(_), do: false
-
-  defp anthropic_file_reference?(%ReqLlmNext.Context.ContentPart{metadata: metadata}) do
-    type = Map.get(metadata || %{}, :anthropic_type) || Map.get(metadata || %{}, "anthropic_type")
-    source = Map.get(metadata || %{}, :source_type) || Map.get(metadata || %{}, "source_type")
-    type == :container_upload or type == "container_upload" or source == :file_id or source == "file_id"
   end
 
   defp object_prompt(prompt, plan, compiled_schema) do

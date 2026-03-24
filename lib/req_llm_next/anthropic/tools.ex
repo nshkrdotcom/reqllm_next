@@ -3,6 +3,9 @@ defmodule ReqLlmNext.Anthropic.Tools do
   Anthropic-specific helper constructors for provider-native tools and MCP connectors.
   """
 
+  @provider_marker :__req_llm_provider__
+  @kind_marker :__req_llm_kind__
+
   @spec web_search(keyword()) :: map()
   def web_search(opts \\ []) do
     %{
@@ -13,6 +16,7 @@ defmodule ReqLlmNext.Anthropic.Tools do
     |> maybe_put(:allowed_domains, Keyword.get(opts, :allowed_domains))
     |> maybe_put(:blocked_domains, Keyword.get(opts, :blocked_domains))
     |> maybe_put(:user_location, Keyword.get(opts, :user_location))
+    |> mark(:tool)
   end
 
   @spec code_execution(keyword()) :: map()
@@ -22,6 +26,7 @@ defmodule ReqLlmNext.Anthropic.Tools do
       name: Keyword.get(opts, :name, "code_execution")
     }
     |> maybe_put(:container, Keyword.get(opts, :container))
+    |> mark(:tool)
   end
 
   @spec computer_use(keyword()) :: map()
@@ -33,6 +38,7 @@ defmodule ReqLlmNext.Anthropic.Tools do
       display_height_px: Keyword.get(opts, :display_height_px, 768),
       display_number: Keyword.get(opts, :display_number, 1)
     }
+    |> mark(:tool)
   end
 
   @spec bash(keyword()) :: map()
@@ -41,6 +47,7 @@ defmodule ReqLlmNext.Anthropic.Tools do
       type: Keyword.get(opts, :type, "bash_20250124"),
       name: Keyword.get(opts, :name, "bash")
     }
+    |> mark(:tool)
   end
 
   @spec text_editor(keyword()) :: map()
@@ -49,6 +56,7 @@ defmodule ReqLlmNext.Anthropic.Tools do
       type: Keyword.get(opts, :type, "text_editor_20250124"),
       name: Keyword.get(opts, :name, "text_editor")
     }
+    |> mark(:tool)
   end
 
   @spec mcp_server(String.t(), keyword()) :: map()
@@ -61,6 +69,46 @@ defmodule ReqLlmNext.Anthropic.Tools do
     |> maybe_put(:authorization_token, Keyword.get(opts, :authorization_token))
     |> maybe_put(:tool_configuration, Keyword.get(opts, :tool_configuration))
     |> maybe_put(:server_label, Keyword.get(opts, :server_label))
+    |> mark(:mcp_server)
+  end
+
+  @spec provider_native_tool?(term()) :: boolean()
+  def provider_native_tool?(%{@provider_marker => :anthropic, @kind_marker => :tool}), do: true
+  def provider_native_tool?(_), do: false
+
+  @spec normalize_tool(map()) :: map()
+  def normalize_tool(tool) when is_map(tool) do
+    if provider_native_tool?(tool) do
+      strip_internal_keys(tool)
+    else
+      raise ArgumentError,
+            "Anthropic raw tool maps must come from ReqLlmNext.Anthropic helper constructors"
+    end
+  end
+
+  @spec provider_native_mcp_server?(term()) :: boolean()
+  def provider_native_mcp_server?(%{@provider_marker => :anthropic, @kind_marker => :mcp_server}),
+    do: true
+
+  def provider_native_mcp_server?(_), do: false
+
+  @spec normalize_mcp_server(map()) :: map()
+  def normalize_mcp_server(server) when is_map(server) do
+    if provider_native_mcp_server?(server) do
+      strip_internal_keys(server)
+    else
+      server
+    end
+  end
+
+  defp mark(map, kind) do
+    map
+    |> Map.put(@provider_marker, :anthropic)
+    |> Map.put(@kind_marker, kind)
+  end
+
+  defp strip_internal_keys(map) do
+    Map.drop(map, [@provider_marker, @kind_marker])
   end
 
   defp maybe_put(map, _key, nil), do: map

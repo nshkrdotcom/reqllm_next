@@ -8,7 +8,6 @@ defmodule ReqLlmNext.Adapters.Pipeline do
 
   @adapters [
     ReqLlmNext.Adapters.OpenAI.Reasoning,
-    ReqLlmNext.Adapters.OpenAI.GPT4oMini,
     ReqLlmNext.Adapters.Anthropic.Thinking
   ]
 

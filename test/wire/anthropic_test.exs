@@ -291,13 +291,24 @@ defmodule ReqLlmNext.Wire.AnthropicTest do
       assert length(body.tools) == 1
     end
 
-    test "passes through raw tool maps" do
+    test "accepts Anthropic helper tool maps" do
       model = TestModels.anthropic()
-      raw_tool = %{name: "raw_tool", description: "A raw tool", input_schema: %{}}
+      raw_tool = ReqLlmNext.Anthropic.web_search_tool(max_uses: 2)
 
       body = Anthropic.encode_body(model, "Hello", tools: [raw_tool])
 
-      assert body.tools == [raw_tool]
+      assert body.tools == [%{name: "web_search", type: "web_search_20250305", max_uses: 2}]
+    end
+
+    test "rejects unmarked raw tool maps" do
+      model = TestModels.anthropic()
+      raw_tool = %{name: "raw_tool", description: "A raw tool", input_schema: %{}}
+
+      assert_raise ArgumentError,
+                   ~r/ReqLlmNext.Anthropic helper constructors/,
+                   fn ->
+                     Anthropic.encode_body(model, "Hello", tools: [raw_tool])
+                   end
     end
 
     test "encodes tool_choice" do
@@ -450,7 +461,10 @@ defmodule ReqLlmNext.Wire.AnthropicTest do
         Context.new([
           Context.user([
             ReqLlmNext.Context.ContentPart.text("Analyze this file"),
-            ReqLlmNext.Anthropic.container_upload("file_456", filename: "data.csv", content_type: "text/csv")
+            ReqLlmNext.Anthropic.container_upload("file_456",
+              filename: "data.csv",
+              content_type: "text/csv"
+            )
           ])
         ])
 
@@ -464,7 +478,9 @@ defmodule ReqLlmNext.Wire.AnthropicTest do
 
     test "passes through context management and MCP servers" do
       model = TestModels.anthropic()
-      mcp_server = ReqLlmNext.Anthropic.mcp_server("https://mcp.example.com", name: "remote_tools")
+
+      mcp_server =
+        ReqLlmNext.Anthropic.mcp_server("https://mcp.example.com", name: "remote_tools")
 
       body =
         Anthropic.encode_body(
@@ -475,7 +491,10 @@ defmodule ReqLlmNext.Wire.AnthropicTest do
         )
 
       assert body.context_management == %{compact: true}
-      assert body.mcp_servers == [mcp_server]
+
+      assert body.mcp_servers == [
+               %{type: "url", url: "https://mcp.example.com", name: "remote_tools"}
+             ]
     end
   end
 

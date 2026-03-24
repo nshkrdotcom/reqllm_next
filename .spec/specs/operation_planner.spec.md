@@ -11,6 +11,8 @@ status: active
 summary: Planner boundary that turns profile, mode, and policy into one execution plan.
 surface:
   - lib/req_llm_next/operation_planner.ex
+  - lib/req_llm_next/surface_preparation.ex
+  - lib/req_llm_next/surface_preparation/**/*.ex
   - lib/req_llm_next/execution_mode.ex
   - lib/req_llm_next/execution_plan.ex
   - lib/req_llm_next/policy_rules.ex
@@ -30,7 +32,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.operation_planner.assembly_scope
-  statement: The planner boundary shall own mode normalization, rule evaluation, surface selection, parameter normalization, explicit transport preference handling, fallback planning, surface-specific parameter validation, session planning, and adapter selection, including provider-native structured-output strategies when those are declared in `ModelProfile`.
+  statement: The planner boundary shall own mode normalization, rule evaluation, surface selection, parameter normalization, explicit transport preference handling, fallback planning, surface-specific parameter validation, provider-native helper acceptance or rejection, surface-owned request preparation, session planning, and adapter selection, including provider-native structured-output strategies when those are declared in `ModelProfile`.
   priority: must
   stability: evolving
 

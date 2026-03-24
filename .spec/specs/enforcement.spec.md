@@ -25,7 +25,7 @@ surface:
   stability: evolving
 
 - id: reqllm.enforcement.runtime_hard_fail
-  statement: ReqLlmNext shall use runtime hard-fail validation for invalid model metadata, unsupported profile combinations, unsupported surface-parameter combinations, unknown keys, invalid enums, and unsafe source combinations rather than best-effort fallback behavior.
+  statement: ReqLlmNext shall use runtime hard-fail validation for invalid model metadata, unsupported profile combinations, unsupported surface-parameter combinations, wrong-provider provider-native helper inputs, raw tool maps on non-owning surfaces, unknown keys, invalid enums, and unsafe source combinations rather than best-effort fallback behavior.
   priority: must
   stability: evolving
 

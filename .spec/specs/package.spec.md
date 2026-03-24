@@ -51,6 +51,11 @@ surface:
   statement: ReqLlmNext shall keep the top-level cross-provider facade narrow while exposing explicit provider-scoped utility modules for non-canonical provider endpoints such as Anthropic token counting, files, batches, and provider-native tool helpers.
   priority: should
   stability: evolving
+
+- id: reqllm.package.provider_native_input_isolation
+  statement: ReqLlmNext shall keep canonical cross-provider tool input on `ReqLlmNext.Tool`, allow provider-native helper maps only on the owning provider surfaces, and fail early during planning when foreign raw maps or provider-native helper shapes are used on the wrong surface.
+  priority: must
+  stability: evolving
 ```
 
 ## Verification
@@ -134,4 +139,10 @@ surface:
   execute: true
   covers:
     - reqllm.package.provider_specific_utilities
+
+- kind: command
+  target: mix test test/operation_planner_test.exs test/wire/anthropic_test.exs test/wire/openai_chat_test.exs test/req_llm_next/wire/openai_responses_request_test.exs
+  execute: true
+  covers:
+    - reqllm.package.provider_native_input_isolation
 ```

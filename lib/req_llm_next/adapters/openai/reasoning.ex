@@ -16,14 +16,15 @@ defmodule ReqLlmNext.Adapters.OpenAI.Reasoning do
 
   @behaviour ReqLlmNext.Adapters.ModelAdapter
 
-  alias ReqLlmNext.Wire.Resolver
+  alias ReqLlmNext.ModelHelpers
+  alias ReqLlmNext.ModelProfile.ProviderFacts.OpenAI, as: OpenAIFacts
 
   @default_max_completion_tokens 16_000
   @default_receive_timeout 300_000
 
   @impl true
   def matches?(%LLMDB.Model{} = model) do
-    Resolver.responses_api?(model) and reasoning_model?(model)
+    model.provider == :openai and OpenAIFacts.responses_api?(model) and reasoning_model?(model)
   end
 
   @impl true
@@ -65,7 +66,7 @@ defmodule ReqLlmNext.Adapters.OpenAI.Reasoning do
   end
 
   defp reasoning_enabled?(%LLMDB.Model{} = model) do
-    get_in(model, [Access.key(:capabilities, %{}), :reasoning, :enabled]) == true
+    ModelHelpers.reasoning_enabled?(model)
   end
 
   defp reasoning_model_id?(id) when is_binary(id) do

@@ -8,7 +8,7 @@ Current-truth live compatibility and drift-detection contract for ReqLlmNext.
 id: reqllm.model_compat
 kind: compat
 status: active
-summary: Live scenario execution, anomaly classification, and drift detection built on the same runtime architecture as normal execution.
+summary: Live scenario execution, curated provider sweeps, and drift detection built on the same runtime architecture as normal execution.
 surface:
   - guides/package_thesis.md
   - guides/anthropic_surface_map.md
@@ -51,6 +51,11 @@ surface:
   statement: Provider coverage work may include provider-native utility surfaces and evaluation guides when those artifacts clarify how non-canonical provider endpoints fit the architecture without broadening the main public API contract.
   priority: should
   stability: evolving
+
+- id: reqllm.model_compat.provider_native_request_shapes
+  statement: Provider-native utility coverage shall keep request-shape proofs for supported non-canonical endpoints so batch, file, and similar utility surfaces stay reconciled with the shared execution architecture without claiming top-level API support they do not provide.
+  priority: should
+  stability: evolving
 ```
 
 ## Verification
@@ -84,4 +89,10 @@ surface:
   execute: true
   covers:
     - reqllm.model_compat.provider_native_surfaces
+
+- kind: command
+  target: mix test test/anthropic/message_batches_test.exs
+  execute: true
+  covers:
+    - reqllm.model_compat.provider_native_request_shapes
 ```

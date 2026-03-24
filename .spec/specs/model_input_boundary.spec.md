@@ -8,7 +8,7 @@ Current-truth public model-input contract for ReqLlmNext 2.0.
 id: reqllm.model_input
 kind: model_input
 status: active
-summary: Narrow public model boundary for `model_spec` strings and `%LLMDB.Model{}` values.
+summary: Narrow public model boundary for `model_spec` strings and `%LLMDB.Model{}` values, including handcrafted structs as a first-class local-iteration hook.
 surface:
   - README.md
   - AGENTS.md
@@ -36,7 +36,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.model_input.fail_fast
-  statement: The model boundary shall fail fast on tuples, ad hoc maps, unsupported types, or invalid model metadata and shall not let raw unvalidated model input continue into execution, while leaving later surface-specific validation to the planning boundary rather than reintroducing raw model checks downstream.
+  statement: The model boundary shall fail fast on tuples, ad hoc maps, unsupported types, or invalid model metadata and shall not let raw unvalidated model input continue into execution, while leaving later provider-native helper validation and surface-specific request validation to the planning boundary rather than reintroducing raw model checks downstream.
   priority: must
   stability: evolving
 ```

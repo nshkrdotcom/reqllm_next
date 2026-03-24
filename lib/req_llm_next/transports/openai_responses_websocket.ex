@@ -90,8 +90,7 @@ defmodule ReqLlmNext.Transports.OpenAIResponsesWebSocket do
          {:ok, conn, ref} <- Mint.WebSocket.upgrade(:wss, conn, ws_path, auth_headers),
          {:ok, conn, status, headers} <- await_upgrade(conn, ref, timeout),
          {:ok, conn, websocket} <- Mint.WebSocket.new(conn, ref, status, headers, mode: :passive),
-         {:ok, websocket, data} <-
-           Mint.WebSocket.encode(websocket, {:text, Jason.encode!(payload)}),
+         {:ok, websocket, data} <- encode_text_frame(websocket, Jason.encode!(payload)),
          {:ok, conn} <- Mint.WebSocket.stream_request_body(conn, ref, data) do
       recorder =
         recorder
@@ -137,12 +136,12 @@ defmodule ReqLlmNext.Transports.OpenAIResponsesWebSocket do
       {:ok, conn, responses} ->
         handle_responses(%{state | conn: conn}, websocket, ref, responses)
 
-      {:error, conn, reason, _responses} ->
+      {:error, _recv_state, reason, _responses} ->
         error_chunk =
           {:error,
            %{message: "WebSocket receive failed: #{inspect(reason)}", type: "transport_error"}}
 
-        {[error_chunk], %{state | conn: conn, done?: true}}
+        {[error_chunk], %{state | done?: true}}
     end
   end
 
@@ -203,11 +202,11 @@ defmodule ReqLlmNext.Transports.OpenAIResponsesWebSocket do
         end
 
       {:ping, payload} ->
-        with {:ok, websocket, pong} <- Mint.WebSocket.encode(websocket, {:pong, payload}),
+        with {:ok, websocket, pong} <- encode_pong_frame(websocket, payload),
              {:ok, conn} <- Mint.WebSocket.stream_request_body(state.conn, ref, pong) do
           handle_frames(rest, %{state | conn: conn}, websocket, ref, chunks)
         else
-          {:error, _term} ->
+          {:error, _transport_state, _reason} ->
             error_chunk =
               {:error, %{message: "Failed to reply to WebSocket ping", type: "transport_error"}}
 
@@ -237,6 +236,18 @@ defmodule ReqLlmNext.Transports.OpenAIResponsesWebSocket do
 
   defp default_port("https"), do: 443
   defp default_port("http"), do: 80
+
+  @spec encode_text_frame(Mint.WebSocket.t(), String.t()) ::
+          {:ok, Mint.WebSocket.t(), bitstring()} | {:error, Mint.WebSocket.t(), term()}
+  defp encode_text_frame(websocket, payload) when is_binary(payload) do
+    Mint.WebSocket.encode(websocket, {:text, payload})
+  end
+
+  @spec encode_pong_frame(Mint.WebSocket.t(), binary()) ::
+          {:ok, Mint.WebSocket.t(), bitstring()} | {:error, Mint.WebSocket.t(), term()}
+  defp encode_pong_frame(websocket, payload) when is_binary(payload) do
+    Mint.WebSocket.encode(websocket, {:pong, payload})
+  end
 
   defp execution_metadata(opts) do
     %{

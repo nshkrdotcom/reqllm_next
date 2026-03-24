@@ -129,7 +129,10 @@ defmodule ReqLlmNext.Wire.OpenAIResponses do
   end
 
   defp encode_tool_def(%Tool{} = tool), do: encode_responses_tool(tool)
-  defp encode_tool_def(tool) when is_map(tool), do: tool
+
+  defp encode_tool_def(tool) when is_map(tool) do
+    raise ArgumentError, "OpenAI surfaces require ReqLlmNext.Tool values"
+  end
 
   defp encode_responses_tool(%Tool{} = tool) do
     json_schema = Tool.to_schema(tool, :openai)
@@ -180,10 +183,10 @@ defmodule ReqLlmNext.Wire.OpenAIResponses do
 
   defp maybe_add_response_format(body, opts) do
     case {
-           Keyword.get(opts, :operation),
-           Keyword.get(opts, :compiled_schema),
-           Keyword.get(opts, :_structured_output_strategy)
-         } do
+      Keyword.get(opts, :operation),
+      Keyword.get(opts, :compiled_schema),
+      Keyword.get(opts, :_structured_output_strategy)
+    } do
       {:object, %{schema: schema}, :native_json_schema} when not is_nil(schema) ->
         json_schema = ReqLlmNext.Schema.to_json(schema)
 

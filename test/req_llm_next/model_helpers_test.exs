@@ -352,11 +352,6 @@ defmodule ReqLlmNext.ModelHelpersTest do
       helpers = ModelHelpers.list_helpers()
 
       assert helpers == [
-               :anthropic_citations?,
-               :anthropic_code_execution?,
-               :anthropic_context_management?,
-               :anthropic_message_batches?,
-               :anthropic_structured_outputs?,
                :chat?,
                :embeddings?,
                :json_native?,
@@ -365,7 +360,6 @@ defmodule ReqLlmNext.ModelHelpersTest do
                :reasoning_enabled?,
                :streaming_text?,
                :streaming_tool_calls?,
-               :supports_document_input?,
                :tools_enabled?,
                :tools_parallel?,
                :tools_streaming?,

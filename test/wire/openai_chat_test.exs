@@ -190,7 +190,7 @@ defmodule ReqLlmNext.Wire.OpenAIChatTest do
       assert Enum.at(body.tools, 0)["function"]["name"] == "get_weather"
     end
 
-    test "includes raw tool maps when provided" do
+    test "rejects raw tool maps when provided" do
       model = TestModels.openai()
 
       raw_tool = %{
@@ -202,9 +202,9 @@ defmodule ReqLlmNext.Wire.OpenAIChatTest do
         }
       }
 
-      body = OpenAIChat.encode_body(model, "Hello", tools: [raw_tool])
-
-      assert Enum.at(body.tools, 0) == raw_tool
+      assert_raise ArgumentError, ~r/ReqLlmNext.Tool values/, fn ->
+        OpenAIChat.encode_body(model, "Hello", tools: [raw_tool])
+      end
     end
 
     test "omits tools when empty list" do

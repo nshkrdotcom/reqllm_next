@@ -1,98 +1,44 @@
 defmodule ReqLlmNext.AdaptersTest do
   use ExUnit.Case, async: true
 
-  alias ReqLlmNext.Adapters.OpenAI.GPT4oMini
+  alias ReqLlmNext.Adapters.OpenAI.Reasoning
   alias ReqLlmNext.Adapters.Pipeline
 
   describe "Pipeline.adapters_for/1" do
-    test "finds gpt-4o-mini adapter" do
+    test "returns no adapter for gpt-4o-mini" do
       {:ok, model} = LLMDB.model("openai:gpt-4o-mini")
-      adapters = Pipeline.adapters_for(model)
-      assert GPT4oMini in adapters
+      assert Pipeline.adapters_for(model) == []
     end
 
-    test "returns empty list for models without adapters" do
-      {:ok, model} = LLMDB.model("openai:gpt-4o")
-      adapters = Pipeline.adapters_for(model)
-      assert adapters == []
+    test "finds reasoning adapter for reasoning models" do
+      {:ok, model} = LLMDB.model("openai:o4-mini")
+      assert Reasoning in Pipeline.adapters_for(model)
     end
 
-    test "returns thinking adapter for anthropic models" do
+    test "finds thinking adapter for anthropic models" do
       {:ok, model} = LLMDB.model("anthropic:claude-sonnet-4-20250514")
-      adapters = Pipeline.adapters_for(model)
-      assert ReqLlmNext.Adapters.Anthropic.Thinking in adapters
+      assert ReqLlmNext.Adapters.Anthropic.Thinking in Pipeline.adapters_for(model)
     end
   end
 
   describe "Pipeline.apply/2" do
-    test "applies gpt-4o-mini adapter transforms" do
+    test "passes gpt-4o-mini opts through unchanged" do
       {:ok, model} = LLMDB.model("openai:gpt-4o-mini")
       opts = [max_tokens: 100]
+
+      assert Pipeline.apply(model, opts) == opts
+    end
+
+    test "applies reasoning adapter transforms" do
+      {:ok, model} = LLMDB.model("openai:o4-mini")
+      opts = [max_tokens: 100, temperature: 0.5]
 
       result = Pipeline.apply(model, opts)
 
-      assert result[:max_tokens] == 100
-      assert result[:temperature] == 0.7
-      assert result[:_adapter_applied] == GPT4oMini
-    end
-
-    test "does not override existing temperature" do
-      {:ok, model} = LLMDB.model("openai:gpt-4o-mini")
-      opts = [temperature: 0.5]
-
-      result = Pipeline.apply(model, opts)
-
-      assert result[:temperature] == 0.5
-      assert result[:_adapter_applied] == GPT4oMini
-    end
-
-    test "passes through opts unchanged for models without adapters" do
-      {:ok, model} = LLMDB.model("openai:gpt-4o")
-      opts = [max_tokens: 100]
-
-      result = Pipeline.apply(model, opts)
-
-      assert result == opts
-    end
-  end
-
-  describe "GPT4oMini adapter" do
-    test "matches gpt-4o-mini" do
-      {:ok, model} = LLMDB.model("openai:gpt-4o-mini")
-      assert GPT4oMini.matches?(model)
-    end
-
-    test "does not match gpt-4o" do
-      {:ok, model} = LLMDB.model("openai:gpt-4o")
-      refute GPT4oMini.matches?(model)
-    end
-  end
-
-  describe "integration - adapter affects wire encoding" do
-    alias ReqLlmNext.Wire.Resolver
-
-    test "gpt-4o-mini gets default temperature in encoded body" do
-      {:ok, model} = LLMDB.model("openai:gpt-4o-mini")
-      opts = [max_tokens: 100]
-      adapted_opts = Pipeline.apply(model, opts)
-      %{wire_mod: wire_mod} = Resolver.resolve!(model)
-
-      body = wire_mod.encode_body(model, "hello", adapted_opts)
-
-      assert body.temperature == 0.7
-      assert body.max_output_tokens == 100
-    end
-
-    test "gpt-4o does not get default temperature" do
-      {:ok, model} = LLMDB.model("openai:gpt-4o")
-      opts = [max_tokens: 100]
-      adapted_opts = Pipeline.apply(model, opts)
-      %{wire_mod: wire_mod} = Resolver.resolve!(model)
-
-      body = wire_mod.encode_body(model, "hello", adapted_opts)
-
-      refute Map.has_key?(body, :temperature)
-      assert body.max_output_tokens == 100
+      assert result[:max_completion_tokens] == 100
+      refute Keyword.has_key?(result, :max_tokens)
+      refute Keyword.has_key?(result, :temperature)
+      assert result[:_adapter_applied] == Reasoning
     end
   end
 end

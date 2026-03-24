@@ -89,10 +89,10 @@ defmodule ReqLlmNext.Wire.OpenAIChat do
 
   defp maybe_add_response_format(body, opts) do
     case {
-           Keyword.get(opts, :operation),
-           Keyword.get(opts, :compiled_schema),
-           Keyword.get(opts, :_structured_output_strategy)
-         } do
+      Keyword.get(opts, :operation),
+      Keyword.get(opts, :compiled_schema),
+      Keyword.get(opts, :_structured_output_strategy)
+    } do
       {:object, %{schema: schema}, :native_json_schema} when not is_nil(schema) ->
         json_schema = ReqLlmNext.Schema.to_json(schema)
 
@@ -119,7 +119,10 @@ defmodule ReqLlmNext.Wire.OpenAIChat do
   end
 
   defp encode_tool_def(%Tool{} = tool), do: Tool.to_schema(tool, :openai)
-  defp encode_tool_def(tool) when is_map(tool), do: tool
+
+  defp encode_tool_def(tool) when is_map(tool) do
+    raise ArgumentError, "OpenAI surfaces require ReqLlmNext.Tool values"
+  end
 
   defp maybe_add_tool_choice(body, opts) do
     case Keyword.get(opts, :tool_choice) do

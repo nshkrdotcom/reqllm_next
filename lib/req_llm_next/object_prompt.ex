@@ -5,7 +5,11 @@ defmodule ReqLlmNext.ObjectPrompt do
 
   alias ReqLlmNext.Context
 
-  @spec for_prompt_and_parse(String.t() | Context.t(), %{schema: term()}) :: String.t() | Context.t()
+  @spec for_prompt_and_parse(
+          String.t() | Context.t(),
+          %{required(:schema) => term(), optional(:compiled) => term()}
+        ) ::
+          String.t() | Context.t()
   def for_prompt_and_parse(prompt, %{schema: schema}) do
     instruction = instruction(schema)
 

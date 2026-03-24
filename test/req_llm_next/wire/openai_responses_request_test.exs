@@ -223,13 +223,13 @@ defmodule ReqLlmNext.Wire.OpenAIResponses.RequestTest do
       assert encoded_tool.strict == true
     end
 
-    test "passes through raw tool maps" do
+    test "rejects raw tool maps" do
       model = TestModels.openai_reasoning()
       raw_tool = %{type: "function", name: "raw", description: "Raw tool"}
 
-      body = OpenAIResponses.encode_body(model, "Hello", tools: [raw_tool])
-
-      assert body.tools == [raw_tool]
+      assert_raise ArgumentError, ~r/ReqLlmNext.Tool values/, fn ->
+        OpenAIResponses.encode_body(model, "Hello", tools: [raw_tool])
+      end
     end
 
     test "does not add tools key when tools is empty list" do

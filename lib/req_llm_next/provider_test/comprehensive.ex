@@ -40,7 +40,8 @@ defmodule ReqLlmNext.ProviderTest.Comprehensive do
       @moduletag timeout: 300_000
 
       @provider provider
-      @entries entries || ReqLlmNext.ProviderTest.Comprehensive.entries_for_provider(provider, group)
+      @entries entries ||
+                 ReqLlmNext.ProviderTest.Comprehensive.entries_for_provider(provider, group)
 
       setup_all do
         LLMDB.load(allow: :all, custom: %{})

@@ -9,7 +9,7 @@ defmodule ReqLlmNext.Scenarios.EmbeddingTest do
     test "reports metadata and embedding support" do
       assert_scenario_metadata(Embedding, :embedding, "Embedding")
       assert Embedding.applies?(embedding_model())
-      refute Embedding.applies?(TestModels.openai_embedding())
+      assert Embedding.applies?(TestModels.openai_embedding())
       refute Embedding.applies?(TestModels.openai())
       refute Embedding.applies?(TestModels.openai_reasoning())
       refute Embedding.applies?(nil)

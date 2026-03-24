@@ -63,13 +63,6 @@ defmodule ReqLlmNext.ExecutorTest do
 
       assert {:error, {:model_not_found, "openai:nonexistent-model", _}} = result
     end
-
-    test "applies adapter pipeline for gpt-4o-mini" do
-      {:ok, resp} =
-        Executor.stream_text("openai:gpt-4o-mini", "Hello!", fixture: "basic")
-
-      assert resp.model.id == "gpt-4o-mini"
-    end
   end
 
   describe "pipeline integration" do

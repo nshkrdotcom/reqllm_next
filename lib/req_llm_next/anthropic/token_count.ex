@@ -11,7 +11,12 @@ defmodule ReqLlmNext.Anthropic.TokenCount do
           {:ok, map()} | {:error, term()}
   def count(model_source, prompt, opts \\ []) do
     with {:ok, model} <- ModelResolver.resolve(model_source) do
-      Client.json_request(:post, "/v1/messages/count_tokens", build_body(model, prompt, opts), opts)
+      Client.json_request(
+        :post,
+        "/v1/messages/count_tokens",
+        build_body(model, prompt, opts),
+        opts
+      )
     end
   end
 

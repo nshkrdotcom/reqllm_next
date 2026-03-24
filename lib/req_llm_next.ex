@@ -7,14 +7,14 @@ defmodule ReqLlmNext do
 
   ## Architecture Overview
 
-  ReqLlmNext uses a 6-step pipeline for all operations:
+  ReqLlmNext plans each request before execution:
 
-  1. **ModelResolver** - Resolves model specs via LLMDB + config overrides
-  2. **Validation** - Validates modalities and operation compatibility
-  3. **Constraints** - Applies parameter transforms from model metadata
-  4. **Adapter Pipeline** - Handles per-model customizations (reasoning, thinking, etc.)
-  5. **Wire Protocol** - JSON encoding/decoding per API family
-  6. **Provider HTTP** - Base URL, authentication, Finch orchestration
+  1. **ModelResolver** - Resolves `model_spec` input to `%LLMDB.Model{}`
+  2. **ModelProfile** - Normalizes request-independent model facts
+  3. **ExecutionMode** - Normalizes request intent
+  4. **PolicyRules / OperationPlanner** - Selects one execution surface and one execution plan
+  5. **ExecutionModules** - Resolves semantic protocol, wire, transport, and provider modules
+  6. **Executor** - Replays fixtures or executes the planned stack and normalizes the result
 
   ## Quick Start
 

@@ -38,6 +38,8 @@ That includes two practical rules in the bridge stage:
 
 1. explicit transport preference must be resolved in planning rather than bypassed later by surface-order accidents
 2. surface-specific parameter incompatibilities must fail or normalize in the planning boundary rather than being silently patched in wire code
+3. provider-native descriptive facts must feed the shared `ModelProfile` through provider-scoped extraction rather than through Anthropic- or OpenAI-specific helper branches in generic code
+4. provider-native request preparation must happen in planner-owned surface preparation rather than in shared executor branching after plan assembly
 
 Future refactors can split provider, wire format, semantic protocol, and transport behind the planning boundary while keeping the public API, fixtures, and scenarios stable.
 

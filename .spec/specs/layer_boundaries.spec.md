@@ -8,7 +8,7 @@ Current-truth execution-layer handoff contract for ReqLlmNext 2.0.
 id: reqllm.layer_boundaries
 kind: layer_boundaries
 status: active
-summary: Explicit handoff rules for provider, session runtime, transport, wire format, semantic protocol, and plan adapters, with one deterministic layer stack per resolved plan and replay path.
+summary: Explicit handoff rules for provider, session runtime, transport, wire format, semantic protocol, and plan-aware adapters, with one deterministic layer stack per resolved plan and replay path.
 surface:
   - AGENTS.md
   - lib/req_llm_next/execution_modules.ex
@@ -38,7 +38,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.layer_boundaries.no_cross_layer_skips
-  statement: No execution layer shall skip across another layer's ownership boundary by choosing transports in semantic protocol code, reinterpreting semantic meaning in wire code, or introducing model-specific behavior in provider or transport code.
+  statement: No execution layer shall skip across another layer's ownership boundary by choosing transports in semantic protocol code, reinterpreting semantic meaning in wire code, introducing model-specific behavior in provider or transport code, or deriving provider-native request flags in shared executor code after planning.
   priority: must
   stability: evolving
 

@@ -8,7 +8,7 @@ Current-truth boundary and execution-layer contract for ReqLlmNext 2.0.
 id: reqllm.architecture
 kind: architecture
 status: active
-summary: Current-truth runtime boundary and layer-separation contract for model input and execution flow, including handcrafted `LLMDB.Model` support at the boundary, the deterministic planning bridge, and the separated execution stack.
+summary: Current-truth runtime boundary and layer-separation contract for model input and execution flow, including handcrafted `LLMDB.Model` support at the boundary, the deterministic planning bridge, the thin top-level facade, and the separated execution stack.
 surface:
   - README.md
   - AGENTS.md
@@ -49,7 +49,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.architecture.facts_mode_policy_plan
-  statement: ReqLlmNext architecture shall normalize model facts into `ModelProfile`, request intent into `ExecutionMode`, resolve ordered policy rules, and materialize a single `ExecutionPlan` before downstream execution, including honoring explicit transport preference when a matching surface exists and validating surface-specific parameter compatibility before wire encoding.
+  statement: ReqLlmNext architecture shall normalize model facts into `ModelProfile`, request intent into `ExecutionMode`, resolve ordered policy rules, run surface-owned request preparation, and materialize a single `ExecutionPlan` before downstream execution, including provider-scoped descriptive fact extraction, honoring explicit transport preference when a matching surface exists, and validating surface-specific parameter compatibility before wire encoding.
   priority: must
   stability: evolving
 
@@ -59,7 +59,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.architecture.provider_specific_utilities
-  statement: ReqLlmNext architecture may expose provider-scoped utility modules for non-canonical provider endpoints, but those utilities shall remain outside the top-level cross-provider facade and outside the core execution-plan layer stack.
+  statement: ReqLlmNext architecture may expose provider-scoped utility modules for non-canonical provider endpoints, but those utilities and provider-native helper shapes shall remain outside the top-level cross-provider facade and outside the core execution-plan layer stack except where a selected provider surface explicitly accepts them.
   priority: should
   stability: evolving
 ```

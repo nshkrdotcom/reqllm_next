@@ -44,7 +44,7 @@ defmodule ReqLlmNext.ModelHelpers do
     Returns `true` if `model.capabilities.#{path_str}` is `true`.
     """
     def unquote(function_name)(%LLMDB.Model{} = model) do
-      get_in(model.capabilities, unquote(path)) == true
+      capability_enabled?(Map.get(model, :capabilities), unquote(path))
     end
 
     def unquote(function_name)(_), do: false
@@ -137,86 +137,24 @@ defmodule ReqLlmNext.ModelHelpers do
   def supports_pdf_input?(_), do: false
 
   @doc """
-  Check if an Anthropic model supports native structured outputs.
-  """
-  @spec anthropic_structured_outputs?(LLMDB.Model.t()) :: boolean()
-  def anthropic_structured_outputs?(%LLMDB.Model{provider: :anthropic} = model) do
-    extra_capability_enabled?(model, [:structured_outputs, :supported])
-  end
-
-  def anthropic_structured_outputs?(_), do: false
-
-  @doc """
-  Check if an Anthropic model supports citations.
-  """
-  @spec anthropic_citations?(LLMDB.Model.t()) :: boolean()
-  def anthropic_citations?(%LLMDB.Model{provider: :anthropic} = model) do
-    extra_capability_enabled?(model, [:citations, :supported])
-  end
-
-  def anthropic_citations?(_), do: false
-
-  @doc """
-  Check if an Anthropic model supports server-side batch execution.
-  """
-  @spec anthropic_message_batches?(LLMDB.Model.t()) :: boolean()
-  def anthropic_message_batches?(%LLMDB.Model{provider: :anthropic} = model) do
-    extra_capability_enabled?(model, [:batch, :supported])
-  end
-
-  def anthropic_message_batches?(_), do: false
-
-  @doc """
-  Check if an Anthropic model supports code execution tools.
-  """
-  @spec anthropic_code_execution?(LLMDB.Model.t()) :: boolean()
-  def anthropic_code_execution?(%LLMDB.Model{provider: :anthropic} = model) do
-    extra_capability_enabled?(model, [:code_execution, :supported])
-  end
-
-  def anthropic_code_execution?(_), do: false
-
-  @doc """
-  Check if an Anthropic model supports context management controls.
-  """
-  @spec anthropic_context_management?(LLMDB.Model.t()) :: boolean()
-  def anthropic_context_management?(%LLMDB.Model{provider: :anthropic} = model) do
-    extra_capability_enabled?(model, [:context_management, :supported])
-  end
-
-  def anthropic_context_management?(_), do: false
-
-  @doc """
-  Check if model supports document input through the public API.
-  """
-  @spec supports_document_input?(LLMDB.Model.t()) :: boolean()
-  def supports_document_input?(%LLMDB.Model{} = model) do
-    supports_pdf_input?(model) or anthropic_code_execution?(model)
-  end
-
-  def supports_document_input?(_), do: false
-
-  @doc """
   List all available capability helper functions.
   """
   @spec list_helpers() :: [atom()]
   def list_helpers do
     @capability_checks
     |> Enum.map(fn {name, _path} -> name end)
-    |> Kernel.++([
-      :streaming_text?,
-      :streaming_tool_calls?,
-      :anthropic_structured_outputs?,
-      :anthropic_citations?,
-      :anthropic_message_batches?,
-      :anthropic_code_execution?,
-      :anthropic_context_management?,
-      :supports_document_input?
-    ])
+    |> Kernel.++([:streaming_text?, :streaming_tool_calls?])
     |> Enum.sort()
   end
 
-  defp extra_capability_enabled?(%LLMDB.Model{} = model, path) when is_list(path) do
-    get_in(model, [Access.key(:extra, %{}), Access.key(:capabilities, %{}) | path]) == true
+  defp capability_enabled?(nil, _path), do: false
+  defp capability_enabled?(value, []) when is_map(value), do: map_size(value) > 0
+  defp capability_enabled?(value, []), do: value == true
+
+  defp capability_enabled?(value, [segment | rest]) when is_map(value) do
+    capability_enabled?(Map.get(value, segment), rest)
   end
+
+  defp capability_enabled?(true, [:enabled]), do: true
+  defp capability_enabled?(_value, _path), do: false
 end

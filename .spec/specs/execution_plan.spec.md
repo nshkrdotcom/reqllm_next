@@ -29,7 +29,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.execution_plan.surface_and_fallbacks
-  statement: `ExecutionPlan` shall record exactly one chosen primary execution surface plus any fallback surfaces, normalized parameter values, timeout policy, session strategy, and adapter references for the request attempt, including provider-native request fields that are valid for the selected surface.
+  statement: `ExecutionPlan` shall record exactly one chosen primary execution surface plus any fallback surfaces, normalized parameter values, timeout policy, session strategy, and adapter references for the request attempt, including provider-native request fields that are prepared only for and valid only on the selected surface.
   priority: must
   stability: evolving
 
@@ -39,7 +39,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.execution_plan.planner_owns_assembly
-  statement: ReqLlmNext shall keep plan assembly in the planner boundary, including mode normalization, rule evaluation, surface selection, parameter normalization, surface-specific parameter validation, session planning, and adapter selection.
+  statement: ReqLlmNext shall keep plan assembly in the planner boundary, including mode normalization, provider-fact-fed profile interpretation, rule evaluation, surface selection, parameter normalization, surface-owned request preparation, surface-specific parameter validation, session planning, and adapter selection.
   priority: must
   stability: evolving
 

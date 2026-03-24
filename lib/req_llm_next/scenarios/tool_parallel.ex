@@ -15,7 +15,7 @@ defmodule ReqLlmNext.Scenarios.ToolParallel do
 
   @impl true
   def applies?(model) do
-    ModelHelpers.tools_enabled?(model) and ModelHelpers.tools_parallel?(model)
+    ModelHelpers.tools_parallel?(model)
   end
 
   @impl true
@@ -59,12 +59,14 @@ defmodule ReqLlmNext.Scenarios.ToolParallel do
   end
 
   defp validate_parallel_calls(stream_resp, tool_calls) do
+    tool_call_count = if is_list(tool_calls), do: length(tool_calls), else: 0
+
     cond do
-      not is_list(tool_calls) or length(tool_calls) < 2 ->
-        error({:expected_multiple_tool_calls, length(tool_calls || [])}, [
+      not is_list(tool_calls) or tool_call_count < 2 ->
+        error({:expected_multiple_tool_calls, tool_call_count}, [
           step("parallel_tools", :error,
             response: stream_resp,
-            error: {:expected_multiple_tool_calls, length(tool_calls || [])}
+            error: {:expected_multiple_tool_calls, tool_call_count}
           )
         ])
 

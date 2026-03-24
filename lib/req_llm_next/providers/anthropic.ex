@@ -1,20 +1,9 @@
 defmodule ReqLlmNext.Providers.Anthropic do
   @moduledoc """
   Anthropic provider configuration.
-
-  ## Extended Thinking
-
-  Anthropic Claude models support extended thinking, where the model shows
-  its reasoning process. This is enabled via the adapter pipeline or
-  directly through options.
-
-  ## Prompt Caching
-
-  Cache expensive system prompts and context for faster responses and
-  reduced costs.
-
-  See `ReqLlmNext.Wire.Anthropic` for wire protocol details.
   """
+
+  alias ReqLlmNext.Anthropic.Headers
 
   use ReqLlmNext.Provider,
     base_url: "https://api.anthropic.com",
@@ -35,7 +24,7 @@ defmodule ReqLlmNext.Providers.Anthropic do
   """
   def headers(api_key, opts \\ []) do
     auth = auth_headers(api_key)
-    wire_headers = ReqLlmNext.Wire.Anthropic.headers(opts)
+    wire_headers = Headers.headers(opts)
     auth ++ wire_headers
   end
 end

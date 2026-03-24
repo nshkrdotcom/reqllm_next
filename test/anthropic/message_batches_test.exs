@@ -6,7 +6,9 @@ defmodule ReqLlmNext.Anthropic.MessageBatchesTest do
 
   test "builds batch request envelopes from the Anthropic messages wire" do
     assert {:ok, request} =
-             MessageBatches.build_request("req-1", TestModels.anthropic(), "Hello", max_tokens: 256)
+             MessageBatches.build_request("req-1", TestModels.anthropic(), "Hello",
+               max_tokens: 256
+             )
 
     assert request.custom_id == "req-1"
     assert request.params.model == "test-model"

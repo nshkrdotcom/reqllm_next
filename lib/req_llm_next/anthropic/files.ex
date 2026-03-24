@@ -41,7 +41,12 @@ defmodule ReqLlmNext.Anthropic.Files do
 
   @spec get(String.t(), keyword()) :: {:ok, map()} | {:error, term()}
   def get(file_id, opts \\ []) when is_binary(file_id) do
-    Client.json_request(:get, "/v1/files/#{file_id}", nil, Keyword.put(opts, :anthropic_files_api, true))
+    Client.json_request(
+      :get,
+      "/v1/files/#{file_id}",
+      nil,
+      Keyword.put(opts, :anthropic_files_api, true)
+    )
   end
 
   @spec list(keyword()) :: {:ok, map()} | {:error, term()}
@@ -51,7 +56,12 @@ defmodule ReqLlmNext.Anthropic.Files do
 
   @spec delete(String.t(), keyword()) :: {:ok, map()} | {:error, term()}
   def delete(file_id, opts \\ []) when is_binary(file_id) do
-    Client.json_request(:delete, "/v1/files/#{file_id}", nil, Keyword.put(opts, :anthropic_files_api, true))
+    Client.json_request(
+      :delete,
+      "/v1/files/#{file_id}",
+      nil,
+      Keyword.put(opts, :anthropic_files_api, true)
+    )
   end
 
   @spec content_type_for(String.t()) :: String.t()

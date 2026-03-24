@@ -1,13 +1,15 @@
 defmodule ReqLlmNext.Wire.Resolver do
   @moduledoc """
-  Resolves provider and wire modules for a given model.
+  Transitional metadata helper for legacy provider and wire lookups.
 
-  Uses model metadata (provider, extra.wire.protocol) to determine:
-  - Which Provider module handles HTTP config (base URL, auth)
-  - Which Wire module handles encoding/decoding
+  New planning code should use `ModelProfile`, `ExecutionSurface`, and
+  `ExecutionModules` instead. This module remains as a compatibility helper for
+  existing tests, fixtures, and adapter logic that still need catalog-level
+  metadata questions such as Responses API detection.
   """
 
   alias ReqLlmNext.{Error, Providers, Wire}
+  alias ReqLlmNext.ModelProfile.ProviderFacts.OpenAI, as: OpenAIFacts
 
   @type resolution :: %{
           provider_mod: module(),
@@ -31,9 +33,7 @@ defmodule ReqLlmNext.Wire.Resolver do
   """
   @spec responses_api?(LLMDB.Model.t()) :: boolean()
   def responses_api?(%LLMDB.Model{} = model) do
-    wire_protocol = get_wire_protocol(model)
-    api = get_in(model, [Access.key(:extra, %{}), :api])
-    wire_protocol == :openai_responses or api == "responses"
+    OpenAIFacts.responses_api?(model)
   end
 
   @spec resolve!(LLMDB.Model.t(), operation()) :: resolution()

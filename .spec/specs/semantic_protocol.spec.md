@@ -8,7 +8,7 @@ Current-truth semantic API-family contract for ReqLlmNext 2.0.
 id: reqllm.semantic_protocol
 kind: semantic_protocol
 status: active
-summary: Provider API-family meaning, payload mapping, and canonical chunk decoding.
+summary: Provider API-family meaning, payload mapping, and canonical chunk decoding, including rich provider-native metadata preservation.
 surface:
   - .spec/specs/semantic_protocol.spec.md
   - .spec/specs/layer_boundaries.spec.md
@@ -50,5 +50,11 @@ decisions:
     - reqllm.semantic_protocol.family_meaning
     - reqllm.semantic_protocol.transport_separation
     - reqllm.semantic_protocol.canonical_chunks
+    - reqllm.semantic_protocol.provider_rich_events
+
+- kind: command
+  target: mix test test/semantic_protocols/anthropic_messages_test.exs
+  execute: true
+  covers:
     - reqllm.semantic_protocol.provider_rich_events
 ```

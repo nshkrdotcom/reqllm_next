@@ -11,6 +11,8 @@ status: active
 summary: Canonical descriptive model facts and execution-surface catalog.
 surface:
   - lib/req_llm_next/model_profile.ex
+  - lib/req_llm_next/model_profile/provider_facts.ex
+  - lib/req_llm_next/model_profile/provider_facts/**/*.ex
   - lib/req_llm_next/execution_surface.ex
   - lib/req_llm_next/operation_planner.ex
 decisions:
@@ -22,7 +24,7 @@ decisions:
 
 ```spec-requirements
 - id: reqllm.model_profile.descriptive_facts
-  statement: ReqLlmNext shall normalize resolved model metadata into a request-independent `ModelProfile` that describes operations, features, modalities, limits, parameter defaults, constraints metadata, and session capabilities without choosing concrete request behavior, including provider-native descriptive facts such as Anthropic structured outputs, citations, and context-management support.
+  statement: ReqLlmNext shall normalize resolved model metadata into a request-independent `ModelProfile` that describes operations, features, modalities, limits, parameter defaults, constraints metadata, and session capabilities without choosing concrete request behavior, including provider-scoped descriptive fact extraction for normalized features such as Anthropic structured outputs, citations, context management, and additional document input.
   priority: must
   stability: evolving
 

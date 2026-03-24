@@ -181,7 +181,9 @@ defmodule ReqLlmNext.SemanticProtocols.AnthropicMessages do
 
   defp normalize_web_search_result(_result), do: []
 
-  defp citation_metadata(%{"citations" => citations}) when is_list(citations), do: %{citations: citations}
+  defp citation_metadata(%{"citations" => citations}) when is_list(citations),
+    do: %{citations: citations}
+
   defp citation_metadata(_block), do: %{}
 
   defp normalize_stop_reason("end_turn"), do: :stop

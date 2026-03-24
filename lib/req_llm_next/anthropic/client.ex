@@ -3,15 +3,16 @@ defmodule ReqLlmNext.Anthropic.Client do
   Shared low-level HTTP client for Anthropic-specific utility endpoints.
   """
 
+  alias ReqLlmNext.Anthropic.Headers
   alias ReqLlmNext.Error
   alias ReqLlmNext.Providers.Anthropic, as: AnthropicProvider
-  alias ReqLlmNext.Wire.Anthropic, as: AnthropicWire
 
   @type multipart_part ::
           {:field, String.t(), String.t()}
           | {:file, String.t(), String.t(), String.t(), binary()}
 
-  @spec json_request(atom(), String.t(), map() | nil, keyword()) :: {:ok, map()} | {:error, term()}
+  @spec json_request(atom(), String.t(), map() | nil, keyword()) ::
+          {:ok, map()} | {:error, term()}
   def json_request(method, path, body \\ nil, opts \\ []) when method in [:get, :post, :delete] do
     headers = [{"content-type", "application/json"}]
     request(method, path, headers, encode_body(body), opts)
@@ -39,9 +40,14 @@ defmodule ReqLlmNext.Anthropic.Client do
     common_headers = common_headers(api_key, opts)
     request = Finch.build(method, url, common_headers ++ headers, body)
 
-    case Finch.request(request, ReqLlmNext.Finch, receive_timeout: Keyword.get(opts, :receive_timeout, 30_000)) do
-      {:ok, %Finch.Response{} = response} -> {:ok, response}
-      {:error, reason} -> {:error, Error.API.Request.exception(reason: "HTTP request failed: #{inspect(reason)}")}
+    case Finch.request(request, ReqLlmNext.Finch,
+           receive_timeout: Keyword.get(opts, :receive_timeout, 30_000)
+         ) do
+      {:ok, %Finch.Response{} = response} ->
+        {:ok, response}
+
+      {:error, reason} ->
+        {:error, Error.API.Request.exception(reason: "HTTP request failed: #{inspect(reason)}")}
     end
   end
 
@@ -53,17 +59,29 @@ defmodule ReqLlmNext.Anthropic.Client do
       Enum.flat_map(parts, fn
         {:field, name, value} ->
           [
-            "--", boundary, "\r\n",
-            "Content-Disposition: form-data; name=\"", name, "\"\r\n\r\n",
+            "--",
+            boundary,
+            "\r\n",
+            "Content-Disposition: form-data; name=\"",
+            name,
+            "\"\r\n\r\n",
             value,
             "\r\n"
           ]
 
         {:file, name, filename, content_type, data} ->
           [
-            "--", boundary, "\r\n",
-            "Content-Disposition: form-data; name=\"", name, "\"; filename=\"", filename, "\"\r\n",
-            "Content-Type: ", content_type, "\r\n\r\n",
+            "--",
+            boundary,
+            "\r\n",
+            "Content-Disposition: form-data; name=\"",
+            name,
+            "\"; filename=\"",
+            filename,
+            "\"\r\n",
+            "Content-Type: ",
+            content_type,
+            "\r\n\r\n",
             data,
             "\r\n"
           ]
@@ -79,11 +97,7 @@ defmodule ReqLlmNext.Anthropic.Client do
   end
 
   defp common_headers(api_key, opts) do
-    wire_headers =
-      AnthropicWire.headers(opts)
-      |> Enum.reject(fn {key, _value} -> String.downcase(key) == "content-type" end)
-
-    AnthropicProvider.auth_headers(api_key) ++ wire_headers
+    AnthropicProvider.auth_headers(api_key) ++ Headers.common_headers(opts)
   end
 
   defp encode_body(nil), do: nil
@@ -94,10 +108,14 @@ defmodule ReqLlmNext.Anthropic.Client do
     {:ok, %{}}
   end
 
-  defp decode_json_response(%Finch.Response{status: status, body: body}) when status in 200..299 do
+  defp decode_json_response(%Finch.Response{status: status, body: body})
+       when status in 200..299 do
     case Jason.decode(body) do
-      {:ok, decoded} when is_map(decoded) -> {:ok, decoded}
-      {:ok, _decoded} -> {:ok, %{}}
+      {:ok, decoded} when is_map(decoded) ->
+        {:ok, decoded}
+
+      {:ok, _decoded} ->
+        {:ok, %{}}
 
       {:error, reason} ->
         {:error,

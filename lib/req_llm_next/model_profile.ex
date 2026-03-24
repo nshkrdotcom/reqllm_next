@@ -5,7 +5,8 @@ defmodule ReqLlmNext.ModelProfile do
 
   alias ReqLlmNext.ExecutionSurface
   alias ReqLlmNext.ModelHelpers
-  alias ReqLlmNext.Wire.Resolver
+  alias ReqLlmNext.ModelProfile.ProviderFacts
+  alias ReqLlmNext.ModelProfile.SurfaceCatalog
 
   @derive Jason.Encoder
 
@@ -91,7 +92,27 @@ defmodule ReqLlmNext.ModelProfile do
     get_in(operations, [operation, :supported]) == true
   end
 
+  @spec feature_supported?(t(), atom()) :: boolean()
+  def feature_supported?(%__MODULE__{features: features}, feature) when is_atom(feature) do
+    get_in(features, [feature, :supported]) == true
+  end
+
+  @spec input_modalities(t()) :: [atom()]
+  def input_modalities(%__MODULE__{modalities: modalities}) do
+    get_in(modalities, [:input]) || [:text]
+  end
+
+  @spec supports_streaming?(t(), operation()) :: boolean()
+  def supports_streaming?(%__MODULE__{} = profile, operation) when is_atom(operation) do
+    profile
+    |> surfaces_for(operation)
+    |> Enum.any?(&(Map.get(&1.features, :streaming) == true))
+  end
+
   defp build_attrs(model, opts) do
+    provider_facts = ProviderFacts.extract(model)
+    surface_catalog = SurfaceCatalog.build(model, provider_facts)
+
     %{
       source: :llmdb,
       spec: Keyword.get(opts, :spec),
@@ -100,39 +121,43 @@ defmodule ReqLlmNext.ModelProfile do
       family: model.family || get_in(model, [Access.key(:extra, %{}), :family]),
       name: model.name,
       operations: operation_facts(model),
-      features: feature_facts(model),
+      features: feature_facts(model, provider_facts),
       modalities: model.modalities || %{input: [:text], output: [:text]},
       limits: model.limits || %{},
       parameter_defaults: parameter_defaults(model),
       constraints: get_in(model, [Access.key(:extra, %{}), :constraints]) || %{},
-      session_capabilities: session_capabilities(model),
-      surfaces: surface_map(model)
+      session_capabilities: surface_catalog.session_capabilities,
+      surfaces: surface_catalog.surfaces
     }
   end
 
   defp operation_facts(model) do
     %{
-      text: %{supported: ModelHelpers.chat?(model)},
-      object: %{supported: ModelHelpers.chat?(model)},
-      embed: %{supported: ModelHelpers.embeddings?(model)}
+      text: %{supported: chat_supported?(model)},
+      object: %{supported: chat_supported?(model)},
+      embed: %{supported: embeddings_supported?(model)}
     }
   end
 
-  defp feature_facts(model) do
+  defp feature_facts(model, provider_facts) do
     %{
       tools: %{
-        supported: ModelHelpers.tools_enabled?(model),
-        strict: ModelHelpers.tools_strict?(model),
-        parallel: ModelHelpers.tools_parallel?(model)
+        supported: tools_supported?(model),
+        strict: tools_strict?(model),
+        parallel: tools_parallel?(model)
       },
       structured_outputs: %{
-        supported: ModelHelpers.chat?(model),
-        native: native_structured_outputs?(model),
-        strategy: object_strategy(model)
+        supported: chat_supported?(model),
+        native: native_structured_outputs?(model, provider_facts),
+        strategy: object_strategy(model, provider_facts)
       },
-      reasoning: %{supported: ModelHelpers.reasoning_enabled?(model)},
-      citations: %{supported: ModelHelpers.anthropic_citations?(model)},
-      context_management: %{supported: ModelHelpers.anthropic_context_management?(model)}
+      reasoning: %{supported: reasoning_supported?(model)},
+      citations: %{supported: provider_facts.citations_supported?},
+      context_management: %{supported: provider_facts.context_management_supported?},
+      document_input: %{
+        supported:
+          ModelHelpers.supports_pdf_input?(model) or provider_facts.additional_document_input?
+      }
     }
   end
 
@@ -140,162 +165,33 @@ defmodule ReqLlmNext.ModelProfile do
     %{}
   end
 
-  defp session_capabilities(model) do
-    if Resolver.responses_api?(model) do
-      %{persistent: true, continuation_strategies: [:previous_response_id]}
-    else
-      %{persistent: false, continuation_strategies: []}
-    end
-  end
-
-  defp surface_map(model) do
-    %{}
-    |> maybe_put_surfaces(:text, text_surfaces(model))
-    |> maybe_put_surfaces(:object, object_surfaces(model))
-    |> maybe_put_surfaces(:embed, embed_surfaces(model))
-  end
-
-  defp maybe_put_surfaces(map, _operation, []), do: map
-  defp maybe_put_surfaces(map, operation, surfaces), do: Map.put(map, operation, surfaces)
-
-  defp text_surfaces(model) do
-    if ModelHelpers.chat?(model) do
-      chat_surfaces(model, :text)
-    else
-      []
-    end
-  end
-
-  defp object_surfaces(model) do
-    if ModelHelpers.chat?(model) do
-      chat_surfaces(model, :object)
-    else
-      []
-    end
-  end
-
-  defp embed_surfaces(model) do
-    if ModelHelpers.embeddings?(model) do
-      [
-        ExecutionSurface.new!(%{
-          id: :openai_embeddings_embed_http,
-          operation: :embed,
-          semantic_protocol: :openai_embeddings,
-          wire_format: :openai_embeddings_json,
-          transport: :http,
-          features: %{streaming: false},
-          fallback_ids: []
-        })
-      ]
-    else
-      []
-    end
-  end
-
-  defp chat_surfaces(model, operation) do
-    case chat_surface_shape(model) do
-      {:openai_responses, :openai_responses, :openai_responses_sse_json} ->
-        [
-          chat_surface(
-            :openai_responses,
-            operation,
-            :openai_responses,
-            :openai_responses_sse_json,
-            :http_sse,
-            surface_features(model, operation),
-            [surface_id(:openai_responses, operation, :websocket)]
-          ),
-          chat_surface(
-            :openai_responses,
-            operation,
-            :openai_responses,
-            :openai_responses_ws_json,
-            :websocket,
-            Map.put(surface_features(model, operation), :persistent_session, true),
-            [surface_id(:openai_responses, operation, :http_sse)]
-          )
-        ]
-
-      {surface_prefix, semantic_protocol, wire_format} ->
-        [
-          chat_surface(
-            surface_prefix,
-            operation,
-            semantic_protocol,
-            wire_format,
-            :http_sse,
-            surface_features(model, operation),
-            []
-          )
-        ]
-    end
-  end
-
-  defp chat_surface_shape(%LLMDB.Model{provider: :anthropic}) do
-    {:anthropic_messages, :anthropic_messages, :anthropic_messages_sse_json}
-  end
-
-  defp chat_surface_shape(model) do
-    if Resolver.responses_api?(model) do
-      {:openai_responses, :openai_responses, :openai_responses_sse_json}
-    else
-      {:openai_chat, :openai_chat, :openai_chat_sse_json}
-    end
-  end
-
-  defp chat_surface(
-         surface_prefix,
-         operation,
-         semantic_protocol,
-         wire_format,
-         transport,
-         features,
-         fallback_ids
-       ) do
-    ExecutionSurface.new!(%{
-      id: surface_id(surface_prefix, operation, transport),
-      operation: operation,
-      semantic_protocol: semantic_protocol,
-      wire_format: wire_format,
-      transport: transport,
-      features: features,
-      fallback_ids: fallback_ids
-    })
-  end
-
-  defp surface_id(surface_prefix, operation, transport) do
-    :"#{surface_prefix}_#{operation}_#{transport}"
-  end
-
-  defp surface_features(model, :text) do
-    %{
-      streaming: ModelHelpers.streaming_text?(model),
-      tools: ModelHelpers.tools_enabled?(model),
-      reasoning: ModelHelpers.reasoning_enabled?(model),
-      citations: ModelHelpers.anthropic_citations?(model),
-      structured_output: false
-    }
-  end
-
-  defp surface_features(model, :object) do
-    %{
-      streaming: ModelHelpers.streaming_text?(model),
-      tools: ModelHelpers.tools_enabled?(model),
-      reasoning: ModelHelpers.reasoning_enabled?(model),
-      citations: ModelHelpers.anthropic_citations?(model),
-      structured_output: object_strategy(model)
-    }
-  end
-
-  defp object_strategy(model) do
+  defp object_strategy(model, provider_facts) do
     cond do
-      native_structured_outputs?(model) -> :native_json_schema
-      ModelHelpers.chat?(model) -> :prompt_and_parse
+      native_structured_outputs?(model, provider_facts) -> :native_json_schema
+      chat_supported?(model) -> :prompt_and_parse
       true -> false
     end
   end
 
-  defp native_structured_outputs?(model) do
-    ModelHelpers.json_schema?(model) or ModelHelpers.anthropic_structured_outputs?(model)
+  defp native_structured_outputs?(model, provider_facts) do
+    ModelHelpers.json_schema?(model) or provider_facts.structured_outputs_native?
   end
+
+  defp chat_supported?(%LLMDB.Model{capabilities: nil}), do: true
+  defp chat_supported?(model), do: ModelHelpers.chat?(model)
+
+  defp embeddings_supported?(%LLMDB.Model{capabilities: nil}), do: false
+  defp embeddings_supported?(model), do: ModelHelpers.embeddings?(model)
+
+  defp tools_supported?(%LLMDB.Model{capabilities: nil}), do: true
+  defp tools_supported?(model), do: ModelHelpers.tools_enabled?(model)
+
+  defp tools_strict?(%LLMDB.Model{capabilities: nil}), do: false
+  defp tools_strict?(model), do: ModelHelpers.tools_strict?(model)
+
+  defp tools_parallel?(%LLMDB.Model{capabilities: nil}), do: false
+  defp tools_parallel?(model), do: ModelHelpers.tools_parallel?(model)
+
+  defp reasoning_supported?(%LLMDB.Model{capabilities: nil}), do: false
+  defp reasoning_supported?(model), do: ModelHelpers.reasoning_enabled?(model)
 end
