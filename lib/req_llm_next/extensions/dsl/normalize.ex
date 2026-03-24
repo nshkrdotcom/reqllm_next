@@ -34,8 +34,8 @@ defmodule ReqLlmNext.Extensions.Dsl.Normalize do
     |> Rule.new()
   end
 
-  @spec criteria(Criteria.t()) :: {:ok, Criteria.t()} | {:error, term()}
-  def criteria(%Criteria{} = criteria) do
+  @spec match(Criteria.t()) :: {:ok, Criteria.t()} | {:error, term()}
+  def match(%Criteria{} = criteria) do
     criteria
     |> Map.from_struct()
     |> Map.drop([:__spark_metadata__])
@@ -43,8 +43,22 @@ defmodule ReqLlmNext.Extensions.Dsl.Normalize do
     |> Criteria.new()
   end
 
-  @spec seams(Seams.t()) :: {:ok, Seams.t()} | {:error, term()}
-  def seams(%Seams{} = seams) do
+  @spec register(Seams.t()) :: {:ok, Seams.t()} | {:error, term()}
+  def register(%Seams{} = seams) do
+    normalize_seams(seams)
+  end
+
+  @spec stack(Seams.t()) :: {:ok, Seams.t()} | {:error, term()}
+  def stack(%Seams{} = seams) do
+    normalize_seams(seams)
+  end
+
+  @spec patch(Seams.t()) :: {:ok, Seams.t()} | {:error, term()}
+  def patch(%Seams{} = seams) do
+    normalize_seams(seams)
+  end
+
+  defp normalize_seams(%Seams{} = seams) do
     seams
     |> Map.from_struct()
     |> Map.drop([:__spark_metadata__])

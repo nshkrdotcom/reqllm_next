@@ -10,7 +10,7 @@ defmodule ReqLlmNext.Extensions.Definitions.Anthropic do
       default_family(:anthropic_messages)
       description("Anthropic provider and Anthropic Messages family")
 
-      seams do
+      register do
         provider_module(ReqLlmNext.Providers.Anthropic)
         provider_facts_module(ReqLlmNext.ModelProfile.ProviderFacts.Anthropic)
 
@@ -30,11 +30,11 @@ defmodule ReqLlmNext.Extensions.Definitions.Anthropic do
       priority(100)
       description("Anthropic Messages family")
 
-      criteria do
+      match do
         provider_ids([:anthropic])
       end
 
-      seams do
+      stack do
         surface_catalog_module(ReqLlmNext.ModelProfile.SurfaceCatalog.AnthropicMessages)
 
         surface_preparation_modules(

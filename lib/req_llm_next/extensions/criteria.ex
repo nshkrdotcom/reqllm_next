@@ -86,6 +86,24 @@ defmodule ReqLlmNext.Extensions.Criteria do
     ])
   end
 
+  @spec merge(t(), t()) :: t()
+  def merge(%__MODULE__{} = parent, %__MODULE__{} = child) do
+    %__MODULE__{
+      provider_ids: inherited_or_override(parent.provider_ids, child.provider_ids),
+      family_ids: inherited_or_override(parent.family_ids, child.family_ids),
+      model_ids: inherited_or_override(parent.model_ids, child.model_ids),
+      operations: inherited_or_override(parent.operations, child.operations),
+      transports: inherited_or_override(parent.transports, child.transports),
+      semantic_protocols:
+        inherited_or_override(parent.semantic_protocols, child.semantic_protocols),
+      stream?: inherited_boolean(parent.stream?, child.stream?),
+      tools?: inherited_boolean(parent.tools?, child.tools?),
+      structured?: inherited_boolean(parent.structured?, child.structured?),
+      facts: deep_merge(parent.facts, child.facts),
+      features: deep_merge(parent.features, child.features)
+    }
+  end
+
   defp provider_match?([], _provider), do: true
   defp provider_match?(_providers, nil), do: false
   defp provider_match?(providers, provider), do: provider in providers
@@ -133,4 +151,23 @@ defmodule ReqLlmNext.Extensions.Criteria do
 
   defp boolean_weight(nil), do: 0
   defp boolean_weight(_value), do: 1
+
+  defp inherited_or_override(parent, []), do: parent
+  defp inherited_or_override(_parent, child), do: child
+
+  defp inherited_boolean(parent, nil), do: parent
+  defp inherited_boolean(_parent, child), do: child
+
+  defp deep_merge(left, right) when left == %{}, do: right
+  defp deep_merge(left, right) when right == %{}, do: left
+
+  defp deep_merge(left, right) when is_map(left) and is_map(right) do
+    Map.merge(left, right, fn _key, left_value, right_value ->
+      if is_map(left_value) and is_map(right_value) do
+        deep_merge(left_value, right_value)
+      else
+        right_value
+      end
+    end)
+  end
 end

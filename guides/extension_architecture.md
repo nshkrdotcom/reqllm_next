@@ -56,6 +56,18 @@ The intended contributor shape is:
 3. add narrow rules for real edge cases
 4. let compile-time manifest verification catch duplicates, bad references, and illegal seam ownership
 
+The DSL surface is intentionally shaped around author intent:
+
+- `register` for provider-owned seams
+- `match` for family and rule criteria
+- `stack` for family-owned runtime seams
+- `patch` for rule-owned overrides
+- `extends` for reusing an existing family and only declaring the differences
+
+That keeps the contributor story closer to "start from the happy path, then opt
+into only the edge-case deltas" than "restate the whole runtime stack for every
+provider family".
+
 ## Families
 
 A family defines the default execution behavior for a class of models.

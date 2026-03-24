@@ -8,8 +8,8 @@ defmodule ReqLlmNext.Extensions.Dsl do
   alias ReqLlmNext.Extensions.Dsl.Transformers.PersistDefinitionManifest
   alias ReqLlmNext.Extensions.Dsl.Verifiers.VerifySeamModules
 
-  @criteria %Spark.Dsl.Entity{
-    name: :criteria,
+  @match %Spark.Dsl.Entity{
+    name: :match,
     target: Criteria,
     schema: [
       provider_ids: [type: {:list, :atom}, default: []],
@@ -24,11 +24,11 @@ defmodule ReqLlmNext.Extensions.Dsl do
       facts: [type: :keyword_list, default: []],
       features: [type: :keyword_list, default: []]
     ],
-    transform: {Normalize, :criteria, []}
+    transform: {Normalize, :match, []}
   }
 
-  @seams %Spark.Dsl.Entity{
-    name: :seams,
+  @register %Spark.Dsl.Entity{
+    name: :register,
     target: Seams,
     schema: [
       provider_module: [type: :atom, required: false],
@@ -41,7 +41,41 @@ defmodule ReqLlmNext.Extensions.Dsl do
       adapter_modules: [type: {:list, :atom}, default: []],
       utility_modules: [type: :keyword_list, default: []]
     ],
-    transform: {Normalize, :seams, []}
+    transform: {Normalize, :register, []}
+  }
+
+  @stack %Spark.Dsl.Entity{
+    name: :stack,
+    target: Seams,
+    schema: [
+      provider_module: [type: :atom, required: false],
+      provider_facts_module: [type: :atom, required: false],
+      surface_catalog_module: [type: :atom, required: false],
+      surface_preparation_modules: [type: :keyword_list, default: []],
+      semantic_protocol_modules: [type: :keyword_list, default: []],
+      wire_modules: [type: :keyword_list, default: []],
+      transport_modules: [type: :keyword_list, default: []],
+      adapter_modules: [type: {:list, :atom}, default: []],
+      utility_modules: [type: :keyword_list, default: []]
+    ],
+    transform: {Normalize, :stack, []}
+  }
+
+  @patch %Spark.Dsl.Entity{
+    name: :patch,
+    target: Seams,
+    schema: [
+      provider_module: [type: :atom, required: false],
+      provider_facts_module: [type: :atom, required: false],
+      surface_catalog_module: [type: :atom, required: false],
+      surface_preparation_modules: [type: :keyword_list, default: []],
+      semantic_protocol_modules: [type: :keyword_list, default: []],
+      wire_modules: [type: :keyword_list, default: []],
+      transport_modules: [type: :keyword_list, default: []],
+      adapter_modules: [type: {:list, :atom}, default: []],
+      utility_modules: [type: :keyword_list, default: []]
+    ],
+    transform: {Normalize, :patch, []}
   }
 
   @provider %Spark.Dsl.Entity{
@@ -53,7 +87,7 @@ defmodule ReqLlmNext.Extensions.Dsl do
       default_family: [type: :atom, required: false],
       description: [type: :string, required: false]
     ],
-    entities: [seams: [@seams]],
+    entities: [seams: [@register]],
     singleton_entity_keys: [:seams],
     transform: {Normalize, :provider, []}
   }
@@ -64,11 +98,12 @@ defmodule ReqLlmNext.Extensions.Dsl do
     args: [:id],
     schema: [
       id: [type: :atom, required: true],
+      extends: [type: :atom, required: false],
       priority: [type: :integer, default: 100],
       default?: [type: :boolean, default: false],
       description: [type: :string, required: false]
     ],
-    entities: [criteria: [@criteria], seams: [@seams]],
+    entities: [criteria: [@match], seams: [@stack]],
     singleton_entity_keys: [:criteria, :seams],
     transform: {Normalize, :family, []}
   }
@@ -82,7 +117,7 @@ defmodule ReqLlmNext.Extensions.Dsl do
       priority: [type: :integer, default: 100],
       description: [type: :string, required: false]
     ],
-    entities: [criteria: [@criteria], patch: [@seams]],
+    entities: [criteria: [@match], patch: [@patch]],
     singleton_entity_keys: [:criteria, :patch],
     transform: {Normalize, :rule, []}
   }

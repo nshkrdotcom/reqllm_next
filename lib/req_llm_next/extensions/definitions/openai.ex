@@ -10,7 +10,7 @@ defmodule ReqLlmNext.Extensions.Definitions.OpenAI do
       default_family(:openai_chat_compatible)
       description("OpenAI provider and OpenAI-compatible happy-path family")
 
-      seams do
+      register do
         provider_module(ReqLlmNext.Providers.OpenAI)
         provider_facts_module(ReqLlmNext.ModelProfile.ProviderFacts.OpenAI)
       end
@@ -19,37 +19,29 @@ defmodule ReqLlmNext.Extensions.Definitions.OpenAI do
 
   families do
     family :openai_responses_compatible do
+      extends(:openai_chat_compatible)
       priority(200)
       description("OpenAI Responses family")
 
-      criteria do
-        provider_ids([:openai])
+      match do
         facts(responses_api?: true)
       end
 
-      seams do
+      stack do
         surface_catalog_module(ReqLlmNext.ModelProfile.SurfaceCatalog.OpenAIResponses)
 
         surface_preparation_modules(
           openai_responses: ReqLlmNext.SurfacePreparation.OpenAIResponses
         )
 
-        semantic_protocol_modules(
-          openai_responses: ReqLlmNext.SemanticProtocols.OpenAIResponses,
-          openai_embeddings: nil
-        )
+        semantic_protocol_modules(openai_responses: ReqLlmNext.SemanticProtocols.OpenAIResponses)
 
         wire_modules(
           openai_responses_sse_json: ReqLlmNext.Wire.OpenAIResponses,
-          openai_responses_ws_json: ReqLlmNext.Wire.OpenAIResponses,
-          openai_embeddings_json: ReqLlmNext.Wire.OpenAIEmbeddings
+          openai_responses_ws_json: ReqLlmNext.Wire.OpenAIResponses
         )
 
-        transport_modules(
-          http: nil,
-          http_sse: ReqLlmNext.Transports.HTTPStream,
-          websocket: ReqLlmNext.Transports.OpenAIResponsesWebSocket
-        )
+        transport_modules(websocket: ReqLlmNext.Transports.OpenAIResponsesWebSocket)
       end
     end
   end
@@ -59,12 +51,12 @@ defmodule ReqLlmNext.Extensions.Definitions.OpenAI do
       priority(200)
       description("Apply reasoning-model adapter behavior on OpenAI Responses models")
 
-      criteria do
+      match do
         family_ids([:openai_responses_compatible])
         features(reasoning: [supported: true])
       end
 
-      seams do
+      patch do
         adapter_modules([ReqLlmNext.Adapters.OpenAI.Reasoning])
       end
     end

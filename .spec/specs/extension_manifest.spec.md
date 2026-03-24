@@ -42,7 +42,7 @@ surface:
   stability: evolving
 
 - id: reqllm.extension_manifest.spark_authoring_layer
-  statement: ReqLlmNext may use Spark as a compile-time authoring DSL for built-in extension declarations, but that authoring layer shall compile to the plain manifest contract and compiled manifest modules rather than becoming the runtime extension API itself.
+  statement: ReqLlmNext may use Spark as a compile-time authoring DSL for built-in extension declarations, but that authoring layer shall compile to the plain manifest contract and compiled manifest modules rather than becoming the runtime extension API itself, and the contributor-facing DSL should prefer intention-shaped blocks such as `register`, `match`, `stack`, `patch`, and family inheritance over exposing raw runtime seam structs directly.
   priority: should
   stability: evolving
 

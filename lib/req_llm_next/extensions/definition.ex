@@ -7,8 +7,7 @@ defmodule ReqLlmNext.Extensions.Definition do
     many_extension_kinds: [:extensions],
     default_extensions: [extensions: [ReqLlmNext.Extensions.Dsl]]
 
-  alias ReqLlmNext.Extensions.Manifest
-  alias ReqLlmNext.Extensions.ManifestVerifier
+  alias ReqLlmNext.Extensions.{Manifest, ManifestExpander, ManifestVerifier}
 
   @spec manifest(module()) :: Manifest.t()
   def manifest(module) when is_atom(module) do
@@ -43,6 +42,7 @@ defmodule ReqLlmNext.Extensions.Definition do
         rules: acc.rules ++ manifest.rules
       })
     end)
+    |> ManifestExpander.expand!()
     |> ManifestVerifier.verify!()
   end
 end

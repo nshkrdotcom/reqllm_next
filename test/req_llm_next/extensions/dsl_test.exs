@@ -12,7 +12,7 @@ defmodule ReqLlmNext.Extensions.DslTest do
         default_family(:openai_chat_compatible)
         description("Example OpenAI-compatible provider")
 
-        seams do
+        register do
           provider_module(ReqLlmNext.Providers.OpenAI)
           provider_facts_module(ReqLlmNext.ModelProfile.ProviderFacts.OpenAI)
         end
@@ -24,13 +24,29 @@ defmodule ReqLlmNext.Extensions.DslTest do
         default?(true)
         description("Example family")
 
-        criteria do
+        match do
           provider_ids([:example])
           features(structured_outputs: [supported: true])
         end
 
-        seams do
+        stack do
           surface_catalog_module(ReqLlmNext.ModelProfile.SurfaceCatalog)
+        end
+      end
+
+      family :openai_responses_compatible do
+        extends(:openai_chat_compatible)
+        priority(200)
+        description("Example responses family")
+
+        match do
+          facts(responses_api?: true)
+        end
+
+        stack do
+          semantic_protocol_modules(
+            openai_responses: ReqLlmNext.SemanticProtocols.OpenAIResponses
+          )
         end
       end
     end
@@ -39,13 +55,12 @@ defmodule ReqLlmNext.Extensions.DslTest do
       rule :example_responses do
         priority(200)
 
-        criteria do
-          provider_ids([:example])
-          facts(responses_api?: true)
+        match do
+          family_ids([:openai_responses_compatible])
         end
 
-        seams do
-          semantic_protocol_modules(text: ReqLlmNext.SemanticProtocols.OpenAIResponses)
+        patch do
+          wire_modules(openai_responses_sse_json: ReqLlmNext.Wire.OpenAIResponses)
         end
       end
     end
@@ -56,13 +71,32 @@ defmodule ReqLlmNext.Extensions.DslTest do
 
     assert %Manifest{} = manifest
     assert %Provider{} = manifest.providers.example
-    assert [%Family{}] = manifest.families
+    assert [%Family{}, %Family{}] = manifest.families
     assert [%Rule{}] = manifest.rules
     assert manifest.providers.example.default_family == :openai_chat_compatible
-    assert hd(manifest.families).criteria.features == %{structured_outputs: %{supported: true}}
+    assert Enum.any?(manifest.families, &(&1.id == :openai_responses_compatible))
 
-    assert hd(manifest.rules).patch.semantic_protocol_modules.text ==
+    responses_family =
+      Enum.find(manifest.families, &(&1.id == :openai_responses_compatible))
+
+    assert responses_family.extends == :openai_chat_compatible
+    assert responses_family.criteria.facts == %{responses_api?: true}
+
+    assert responses_family.seams.semantic_protocol_modules.openai_responses ==
              ReqLlmNext.SemanticProtocols.OpenAIResponses
+
+    assert hd(manifest.rules).patch.wire_modules.openai_responses_sse_json ==
+             ReqLlmNext.Wire.OpenAIResponses
+  end
+
+  test "merged manifests expand inherited family criteria and seams" do
+    manifest = Definition.merge_manifests!([ExampleDefinition])
+
+    responses_family =
+      Enum.find(manifest.families, &(&1.id == :openai_responses_compatible))
+
+    assert responses_family.criteria.provider_ids == [:example]
+    assert responses_family.seams.surface_catalog_module == ReqLlmNext.ModelProfile.SurfaceCatalog
   end
 
   test "compiled manifest aggregates built-in definition modules" do

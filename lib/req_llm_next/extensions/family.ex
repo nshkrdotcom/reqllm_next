@@ -11,6 +11,7 @@ defmodule ReqLlmNext.Extensions.Family do
             __MODULE__,
             %{
               id: Zoi.atom(),
+              extends: Zoi.atom() |> Zoi.nullish() |> Zoi.default(nil),
               priority: Zoi.integer() |> Zoi.default(100),
               default?: Zoi.boolean() |> Zoi.default(false),
               description: Zoi.string() |> Zoi.nullish() |> Zoi.default(nil),
@@ -23,6 +24,7 @@ defmodule ReqLlmNext.Extensions.Family do
   @type t :: %__MODULE__{
           __spark_metadata__: map() | nil,
           id: atom(),
+          extends: atom() | nil,
           priority: integer(),
           default?: boolean(),
           description: String.t() | nil,

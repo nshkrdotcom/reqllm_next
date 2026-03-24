@@ -374,7 +374,7 @@
         "id": "reqllm.extension_manifest.spark_authoring_layer",
         "priority": "should",
         "stability": "evolving",
-        "statement": "ReqLlmNext may use Spark as a compile-time authoring DSL for built-in extension declarations, but that authoring layer shall compile to the plain manifest contract and compiled manifest modules rather than becoming the runtime extension API itself.",
+        "statement": "ReqLlmNext may use Spark as a compile-time authoring DSL for built-in extension declarations, but that authoring layer shall compile to the plain manifest contract and compiled manifest modules rather than becoming the runtime extension API itself, and the contributor-facing DSL should prefer intention-shaped blocks such as `register`, `match`, `stack`, `patch`, and family inheritance over exposing raw runtime seam structs directly.",
         "subject_id": "reqllm.extension_manifest"
       },
       {
@@ -550,7 +550,7 @@
         "id": "reqllm.package.compile_time_extensions",
         "priority": "should",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall move provider and model edge-case support toward a compile-time extension manifest with provider registrations, explicit provider default families, global fallback families, narrow opt-in override rules, manifest-backed provider facts and surface catalogs, definition-pack-based built-in declarations, and compile-time manifest verification so common paths stay simple while edge cases remain explicit.",
+        "statement": "ReqLlmNext shall move provider and model edge-case support toward a compile-time extension manifest with provider registrations, explicit provider default families, global fallback families, family inheritance for reusing a happy-path stack, narrow opt-in override rules, manifest-backed provider facts and surface catalogs, definition-pack-based built-in declarations, and compile-time manifest verification so common paths stay simple while edge cases remain explicit.",
         "subject_id": "reqllm.package"
       },
       {
@@ -774,7 +774,7 @@
         "id": "reqllm.source_layout.extension_contract_home",
         "priority": "should",
         "stability": "evolving",
-        "statement": "Compile-time execution extension contracts shall live in a dedicated `lib/req_llm_next/extensions/` home, including the plain runtime structs, Spark DSL authoring modules, manifest verifiers, compiled manifest modules, and provider or family definition packs under `extensions/definitions/`, so default execution families and edge-case override rules are defined outside the shared planner and executor code.",
+        "statement": "Compile-time execution extension contracts shall live in a dedicated `lib/req_llm_next/extensions/` home, including the plain runtime structs, Spark DSL authoring modules, inheritance expansion, manifest verifiers, compiled manifest modules, and provider or family definition packs under `extensions/definitions/`, so default execution families and edge-case override rules are defined outside the shared planner and executor code.",
         "subject_id": "reqllm.source_layout"
       },
       {
@@ -910,7 +910,7 @@
         "id": "reqllm.workflow.extension_dsl_guidance",
         "priority": "should",
         "stability": "evolving",
-        "statement": "Contributor workflow shall keep the extension-architecture guide, Spark dependency, compile-time manifest proof, definition-pack layout, and manifest-backed provider fallback and verification behavior in sync so contributors add edge-case support through declared extension rules instead of editing shared imperative branching directly.",
+        "statement": "Contributor workflow shall keep the extension-architecture guide, Spark dependency, compile-time manifest proof, definition-pack layout, match or stack or patch authoring surface, inheritance behavior, and manifest-backed provider fallback and verification behavior in sync so contributors add edge-case support through declared extension rules instead of editing shared imperative branching directly.",
         "subject_id": "reqllm.workflow"
       },
       {

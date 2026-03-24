@@ -30,6 +30,14 @@ The runtime contract is plain data:
 
 Spark is the accepted authoring layer for built-in extension declarations, but runtime code must consume the resulting plain manifest data rather than depending directly on Spark internals.
 
+The contributor-facing authoring surface should be shaped around intent:
+
+1. `register` for provider-owned seams
+2. `match` for family and rule criteria
+3. `stack` for family-owned runtime seams
+4. `patch` for rule-owned override seams
+5. `extends` so child families can reuse a happy-path family and declare only their differences
+
 The package therefore has three distinct pieces:
 
 1. plain runtime structs such as `Provider`, `Family`, `Rule`, and `Manifest`
@@ -56,6 +64,7 @@ Tradeoffs:
 1. introduces a new declaration and manifest layer that must stay well designed
 2. requires migration away from existing imperative provider branching
 3. demands careful seam design so the DSL stays narrow and useful rather than becoming another escape hatch
+4. requires inheritance semantics that are easy to reason about when a family reuses a parent stack
 
 Guardrails:
 1. Spark declarations may not become the runtime extension API

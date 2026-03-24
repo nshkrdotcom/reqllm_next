@@ -11,11 +11,11 @@ defmodule ReqLlmNext.Extensions.Definitions.OpenAICompatible do
       default?(true)
       description("Default OpenAI-compatible chat family")
 
-      criteria do
+      match do
         provider_ids([:openai])
       end
 
-      seams do
+      stack do
         surface_catalog_module(ReqLlmNext.ModelProfile.SurfaceCatalog.OpenAICompatible)
 
         semantic_protocol_modules(
