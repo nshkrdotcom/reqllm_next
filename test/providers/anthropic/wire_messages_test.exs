@@ -54,6 +54,23 @@ defmodule ReqLlmNext.Wire.AnthropicTest do
       assert "context-1m-2025-08-07" in String.split(beta_value, ",")
     end
 
+    test "includes context management and compaction beta flags when requested" do
+      headers =
+        Anthropic.headers(
+          context_management: %{
+            edits: [
+              %{type: "clear_thinking_20251015"},
+              %{type: "compact_20260112"}
+            ]
+          }
+        )
+
+      assert {"anthropic-beta", beta_value} = List.keyfind(headers, "anthropic-beta", 0)
+      beta_flags = String.split(beta_value, ",")
+      assert "context-management-2025-06-27" in beta_flags
+      assert "compact-2026-01-12" in beta_flags
+    end
+
     test "accepts custom Anthropic beta headers" do
       headers =
         Anthropic.headers(

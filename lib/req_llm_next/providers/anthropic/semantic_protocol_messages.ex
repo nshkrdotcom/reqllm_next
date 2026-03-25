@@ -40,19 +40,7 @@ defmodule ReqLlmNext.SemanticProtocols.AnthropicMessages do
       end
 
     meta_events =
-      case Map.get(event, "delta") do
-        %{"stop_reason" => stop_reason} ->
-          [
-            {:meta,
-             %{
-               finish_reason: normalize_stop_reason(stop_reason),
-               anthropic_stop_reason: stop_reason
-             }}
-          ]
-
-        _ ->
-          []
-      end
+      stop_reason_meta(Map.get(event, "delta")) ++ context_management_meta(Map.get(event, "context_management"))
 
     usage_events ++ meta_events
   end
@@ -137,6 +125,16 @@ defmodule ReqLlmNext.SemanticProtocols.AnthropicMessages do
   def decode_event(
         %{
           "type" => "content_block_start",
+          "content_block" => %{"type" => "compaction"} = block
+        },
+        _model
+      ) do
+    [{:provider_item, Map.put(block, "anthropic_type", "compaction")}]
+  end
+
+  def decode_event(
+        %{
+          "type" => "content_block_start",
           "content_block" => %{"type" => "web_search_tool_result", "content" => content}
         },
         _model
@@ -186,10 +184,34 @@ defmodule ReqLlmNext.SemanticProtocols.AnthropicMessages do
 
   defp citation_metadata(_block), do: %{}
 
+  defp stop_reason_meta(%{"stop_reason" => stop_reason}) do
+    [
+      {:meta,
+       %{
+         finish_reason: normalize_stop_reason(stop_reason),
+         anthropic_stop_reason: stop_reason
+       }}
+    ]
+  end
+
+  defp stop_reason_meta(_delta), do: []
+
+  defp context_management_meta(%{"applied_edits" => applied_edits} = context_management)
+       when is_list(applied_edits) do
+    [{:meta, %{anthropic_context_management: context_management, anthropic_applied_edits: applied_edits}}]
+  end
+
+  defp context_management_meta(context_management) when is_map(context_management) do
+    [{:meta, %{anthropic_context_management: context_management}}]
+  end
+
+  defp context_management_meta(_context_management), do: []
+
   defp normalize_stop_reason("end_turn"), do: :stop
   defp normalize_stop_reason("stop_sequence"), do: :stop
   defp normalize_stop_reason("max_tokens"), do: :length
   defp normalize_stop_reason("tool_use"), do: :tool_calls
   defp normalize_stop_reason("pause_turn"), do: :stop
+  defp normalize_stop_reason("compaction"), do: :stop
   defp normalize_stop_reason(_reason), do: nil
 end

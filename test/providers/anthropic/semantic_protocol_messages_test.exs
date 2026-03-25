@@ -136,6 +136,41 @@ defmodule ReqLlmNext.SemanticProtocols.AnthropicMessagesTest do
                },
                nil
              ) == [{:meta, %{finish_reason: :stop, anthropic_stop_reason: "pause_turn"}}]
+
+      assert AnthropicMessages.decode_event(
+               %{
+                 "type" => "message_delta",
+                 "delta" => %{"stop_reason" => "compaction"},
+                 "context_management" => %{
+                   "applied_edits" => [%{"type" => "compact_20260112"}]
+                 }
+               },
+               nil
+             ) == [
+               {:meta, %{finish_reason: :stop, anthropic_stop_reason: "compaction"}},
+               {:meta,
+                %{
+                  anthropic_context_management: %{
+                    "applied_edits" => [%{"type" => "compact_20260112"}]
+                  },
+                  anthropic_applied_edits: [%{"type" => "compact_20260112"}]
+                }}
+             ]
+    end
+
+    test "preserves compaction blocks as provider items" do
+      assert AnthropicMessages.decode_event(
+               %{
+                 "type" => "content_block_start",
+                 "content_block" => %{
+                   "type" => "compaction",
+                   "summary" => "Conversation compacted"
+                 }
+               },
+               nil
+             ) == [
+               {:provider_item, %{"anthropic_type" => "compaction", "summary" => "Conversation compacted", "type" => "compaction"}}
+             ]
     end
   end
 
