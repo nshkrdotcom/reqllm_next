@@ -28,6 +28,7 @@ surface:
   - test/live_verifiers/**/*.exs
   - test/providers/deepseek/**/*.exs
   - test/providers/groq/**/*.exs
+  - test/providers/openrouter/**/*.exs
   - test/providers/anthropic/**/*.exs
 decisions:
   - reqllm.decision.provider_surface_maps_in_guides
@@ -74,7 +75,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.model_compat.extension_pressure_tests
-  statement: Compatibility expansion work shall keep at least one non-OpenAI OpenAI-compatible provider proof lane and should expand that lane as concrete providers such as DeepSeek and Groq land, so family reuse, provider-specific semantic overrides, provider-local media-family overrides, and wire-resolution fallbacks are tested before broad live coverage is claimed for that ecosystem.
+  statement: Compatibility expansion work shall keep at least one non-OpenAI OpenAI-compatible provider proof lane and should expand that lane as concrete providers such as DeepSeek, Groq, and OpenRouter land, so family reuse, provider-specific semantic overrides, provider-local routing or media-family overrides, and wire-resolution fallbacks are tested before broad live coverage is claimed for that ecosystem.
   priority: should
   stability: evolving
 
@@ -130,7 +131,7 @@ decisions:
     - reqllm.model_compat.provider_native_request_shapes
 
 - kind: command
-  target: mix test test/providers/deepseek test/providers/groq
+  target: mix test test/providers/deepseek test/providers/groq test/providers/openrouter
   execute: true
   covers:
     - reqllm.model_compat.extension_pressure_tests

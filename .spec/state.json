@@ -445,7 +445,7 @@
         "id": "reqllm.extension_manifest.family_precedence",
         "priority": "must",
         "stability": "evolving",
-        "statement": "Default execution families shall resolve deterministically from declarative criteria using explicit precedence, then fall back through provider-registered default families and finally global default families, so the happy path is stable and inspectable without reintroducing central provider branching, while allowing provider-local media families such as Groq transcription support to shadow a provider chat family without mutating the shared family defaults.",
+        "statement": "Default execution families shall resolve deterministically from declarative criteria using explicit precedence, then fall back through provider-registered default families and finally global default families, so the happy path is stable and inspectable without reintroducing central provider branching, while allowing provider-local chat and media families such as OpenRouter routing overrides or Groq transcription support to shadow provider baselines without mutating the shared family defaults.",
         "subject_id": "reqllm.extension_manifest"
       },
       {
@@ -517,7 +517,7 @@
         "id": "reqllm.layer_boundaries.separated_io",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall keep provider, session runtime, realtime adapter, realtime session reduction, transport, wire format, semantic protocol, and telemetry-kernel responsibilities separated so no layer skips across another layer's ownership boundary and each resolved plan binds one deterministic layer stack including explicit provider, protocol, wire, and transport modules resolved from manifest-declared seams and the compiled runtime registry across both streaming execution and request-style HTTP media lanes, allowing provider-local wire swaps and media-family overrides such as Groq chat and transcription support without mutating the shared family baseline.",
+        "statement": "ReqLlmNext shall keep provider, session runtime, realtime adapter, realtime session reduction, transport, wire format, semantic protocol, and telemetry-kernel responsibilities separated so no layer skips across another layer's ownership boundary and each resolved plan binds one deterministic layer stack including explicit provider, protocol, wire, and transport modules resolved from manifest-declared seams and the compiled runtime registry across both streaming execution and request-style HTTP media lanes, allowing provider-local wire swaps and family overrides such as Groq chat and transcription support or OpenRouter routing-aware request shaping without mutating the shared family baseline.",
         "subject_id": "reqllm.layer_boundaries"
       },
       {
@@ -541,7 +541,7 @@
         "id": "reqllm.model_compat.extension_pressure_tests",
         "priority": "should",
         "stability": "evolving",
-        "statement": "Compatibility expansion work shall keep at least one non-OpenAI OpenAI-compatible provider proof lane and should expand that lane as concrete providers such as DeepSeek and Groq land, so family reuse, provider-specific semantic overrides, provider-local media-family overrides, and wire-resolution fallbacks are tested before broad live coverage is claimed for that ecosystem.",
+        "statement": "Compatibility expansion work shall keep at least one non-OpenAI OpenAI-compatible provider proof lane and should expand that lane as concrete providers such as DeepSeek, Groq, and OpenRouter land, so family reuse, provider-specific semantic overrides, provider-local routing or media-family overrides, and wire-resolution fallbacks are tested before broad live coverage is claimed for that ecosystem.",
         "subject_id": "reqllm.model_compat"
       },
       {
@@ -637,7 +637,7 @@
         "id": "reqllm.model_profile.descriptive_facts",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall normalize resolved model metadata into a request-independent `ModelProfile` that describes operations, features, modalities, limits, parameter defaults, constraints metadata, and session capabilities without choosing concrete request behavior, including manifest-backed provider-scoped descriptive fact extraction for normalized features such as Anthropic structured outputs, citations, context management, additional document input, provider-owned media operation support, and OpenAI-compatible provider deltas such as DeepSeek chat or reasoning behavior and Groq transcription-media routing, plus the resolved extension family id selected by declarative criteria and provider or global fallback rules that owns surface-catalog construction and must declare the catalog module that builds the model's execution surfaces.",
+        "statement": "ReqLlmNext shall normalize resolved model metadata into a request-independent `ModelProfile` that describes operations, features, modalities, limits, parameter defaults, constraints metadata, and session capabilities without choosing concrete request behavior, including manifest-backed provider-scoped descriptive fact extraction for normalized features such as Anthropic structured outputs, citations, context management, additional document input, provider-owned media operation support, and OpenAI-compatible provider deltas such as DeepSeek chat or reasoning behavior, Groq transcription-media routing, and OpenRouter routing-aware chat overrides, plus the resolved extension family id selected by declarative criteria and provider or global fallback rules that owns surface-catalog construction and must declare the catalog module that builds the model's execution surfaces.",
         "subject_id": "reqllm.model_profile"
       },
       {
@@ -949,7 +949,7 @@
         "id": "reqllm.source_layout.concern_homes",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall keep model-boundary concerns, provider-scoped fact extraction, manifest-backed provider registration, family-owned or provider-owned surface catalog modules, profile construction, mode normalization, policy resolution, surface-owned request preparation, session-runtime modules, semantic protocol normalization, wire envelopes, transport mechanics, shared response output-item materialization, fixture replay, provider-feature probes, sparse live verifier probes, media input and output contracts, realtime commands and session state, and telemetry emission in distinct source locations that match the architecture, while co-locating concrete family implementations under `lib/req_llm_next/families/` and provider-owned implementations and utilities under `lib/req_llm_next/providers/`, including provider-local chat and media variants such as the Groq slice.",
+        "statement": "ReqLlmNext shall keep model-boundary concerns, provider-scoped fact extraction, manifest-backed provider registration, family-owned or provider-owned surface catalog modules, profile construction, mode normalization, policy resolution, surface-owned request preparation, session-runtime modules, semantic protocol normalization, wire envelopes, transport mechanics, shared response output-item materialization, fixture replay, provider-feature probes, sparse live verifier probes, media input and output contracts, realtime commands and session state, and telemetry emission in distinct source locations that match the architecture, while co-locating concrete family implementations under `lib/req_llm_next/families/` and provider-owned implementations and utilities under `lib/req_llm_next/providers/`, including provider-local chat and media variants such as the Groq and OpenRouter slices.",
         "subject_id": "reqllm.source_layout"
       },
       {
@@ -1437,6 +1437,7 @@
             "test/live_verifiers/**/*.exs",
             "test/providers/deepseek/**/*.exs",
             "test/providers/groq/**/*.exs",
+            "test/providers/openrouter/**/*.exs",
             "test/providers/anthropic/**/*.exs"
           ],
           "verification_minimum_strength": null
@@ -2000,7 +2001,7 @@
         "file": ".spec/specs/extension_manifest.spec.md",
         "kind": "command",
         "subject_id": "reqllm.extension_manifest",
-        "target": "mix test test/providers/deepseek/execution_stack_test.exs test/providers/groq/execution_stack_test.exs test/model_profile_test.exs"
+        "target": "mix test test/providers/deepseek/execution_stack_test.exs test/providers/groq/execution_stack_test.exs test/providers/openrouter/execution_stack_test.exs test/model_profile_test.exs"
       },
       {
         "covers": [
@@ -2131,7 +2132,7 @@
         "file": ".spec/specs/model_compat.spec.md",
         "kind": "command",
         "subject_id": "reqllm.model_compat",
-        "target": "mix test test/providers/deepseek test/providers/groq"
+        "target": "mix test test/providers/deepseek test/providers/groq test/providers/openrouter"
       },
       {
         "covers": [
@@ -2294,7 +2295,7 @@
         "file": ".spec/specs/package.spec.md",
         "kind": "command",
         "subject_id": "reqllm.package",
-        "target": "mix test test/providers/deepseek test/providers/groq test/model_profile_test.exs test/wire/resolver_test.exs"
+        "target": "mix test test/providers/deepseek test/providers/groq test/providers/openrouter test/model_profile_test.exs test/wire/resolver_test.exs"
       },
       {
         "covers": [
@@ -3401,7 +3402,7 @@
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.extension_manifest",
-        "target": "mix test test/providers/deepseek/execution_stack_test.exs test/providers/groq/execution_stack_test.exs test/model_profile_test.exs",
+        "target": "mix test test/providers/deepseek/execution_stack_test.exs test/providers/groq/execution_stack_test.exs test/providers/openrouter/execution_stack_test.exs test/model_profile_test.exs",
         "verification_index": 3
       },
       {
@@ -3412,7 +3413,7 @@
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.extension_manifest",
-        "target": "mix test test/providers/deepseek/execution_stack_test.exs test/providers/groq/execution_stack_test.exs test/model_profile_test.exs",
+        "target": "mix test test/providers/deepseek/execution_stack_test.exs test/providers/groq/execution_stack_test.exs test/providers/openrouter/execution_stack_test.exs test/model_profile_test.exs",
         "verification_index": 3
       },
       {
@@ -3423,7 +3424,7 @@
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.extension_manifest",
-        "target": "mix test test/providers/deepseek/execution_stack_test.exs test/providers/groq/execution_stack_test.exs test/model_profile_test.exs",
+        "target": "mix test test/providers/deepseek/execution_stack_test.exs test/providers/groq/execution_stack_test.exs test/providers/openrouter/execution_stack_test.exs test/model_profile_test.exs",
         "verification_index": 3
       },
       {
@@ -3709,7 +3710,7 @@
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.model_compat",
-        "target": "mix test test/providers/deepseek test/providers/groq",
+        "target": "mix test test/providers/deepseek test/providers/groq test/providers/openrouter",
         "verification_index": 6
       },
       {
@@ -4061,7 +4062,7 @@
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.package",
-        "target": "mix test test/providers/deepseek test/providers/groq test/model_profile_test.exs test/wire/resolver_test.exs",
+        "target": "mix test test/providers/deepseek test/providers/groq test/providers/openrouter test/model_profile_test.exs test/wire/resolver_test.exs",
         "verification_index": 5
       },
       {

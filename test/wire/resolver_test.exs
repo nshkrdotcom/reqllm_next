@@ -12,6 +12,7 @@ defmodule ReqLlmNext.Wire.ResolverTest do
     OpenAIEmbeddings,
     OpenAIImages,
     OpenAISpeech,
+    OpenRouterChat,
     OpenAITranscriptions,
     Resolver
   }
@@ -67,7 +68,7 @@ defmodule ReqLlmNext.Wire.ResolverTest do
 
     test "infers OpenAIChat for openrouter provider" do
       model = TestModels.openrouter()
-      assert Resolver.wire_module!(model) == OpenAIChat
+      assert Resolver.wire_module!(model) == OpenRouterChat
     end
 
     test "infers OpenAIChat for xai provider" do

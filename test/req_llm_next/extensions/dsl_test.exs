@@ -110,16 +110,19 @@ defmodule ReqLlmNext.Extensions.DslTest do
                ReqLlmNext.Extensions.Definitions.OpenAI,
                ReqLlmNext.Extensions.Definitions.Anthropic,
                ReqLlmNext.Extensions.Definitions.DeepSeek,
-               ReqLlmNext.Extensions.Definitions.Groq
+               ReqLlmNext.Extensions.Definitions.Groq,
+               ReqLlmNext.Extensions.Definitions.OpenRouter
              ])
 
     assert Map.has_key?(manifest.providers, :openai)
     assert Map.has_key?(manifest.providers, :anthropic)
     assert Map.has_key?(manifest.providers, :groq)
+    assert Map.has_key?(manifest.providers, :openrouter)
     assert Enum.any?(manifest.families, &(&1.id == :openai_chat_compatible))
     assert Enum.any?(manifest.families, &(&1.id == :openai_responses_compatible))
     assert Enum.any?(manifest.families, &(&1.id == :anthropic_messages))
     assert Enum.any?(manifest.families, &(&1.id == :groq_chat_compatible))
+    assert Enum.any?(manifest.families, &(&1.id == :openrouter_chat_compatible))
     assert Enum.any?(manifest.rules, &(&1.id == :openai_reasoning_models))
     assert {:ok, ReqLlmNext.Providers.OpenAI} = Extensions.provider_module(manifest, :openai)
 

@@ -3,7 +3,7 @@ defmodule ReqLlmNext.ProvidersTest do
 
   alias ReqLlmNext.Provider
   alias ReqLlmNext.Providers
-  alias ReqLlmNext.Providers.{Anthropic, DeepSeek, Groq, OpenAI}
+  alias ReqLlmNext.Providers.{Anthropic, DeepSeek, Groq, OpenAI, OpenRouter}
 
   describe "Providers.get/1" do
     test "returns OpenAI module for :openai" do
@@ -20,6 +20,10 @@ defmodule ReqLlmNext.ProvidersTest do
 
     test "returns Groq module for :groq" do
       assert Providers.get(:groq) == {:ok, Groq}
+    end
+
+    test "returns OpenRouter module for :openrouter" do
+      assert Providers.get(:openrouter) == {:ok, OpenRouter}
     end
 
     test "returns error for unknown provider" do
@@ -44,6 +48,10 @@ defmodule ReqLlmNext.ProvidersTest do
       assert Providers.get!(:groq) == Groq
     end
 
+    test "returns OpenRouter module for :openrouter" do
+      assert Providers.get!(:openrouter) == OpenRouter
+    end
+
     test "raises for unknown provider" do
       assert_raise RuntimeError, ~r/Provider error/, fn ->
         Providers.get!(:unknown)
@@ -59,6 +67,7 @@ defmodule ReqLlmNext.ProvidersTest do
       assert :anthropic in providers
       assert :deepseek in providers
       assert :groq in providers
+      assert :openrouter in providers
     end
   end
 
@@ -137,6 +146,21 @@ defmodule ReqLlmNext.ProvidersTest do
     end
   end
 
+  describe "Providers.OpenRouter" do
+    test "base_url returns OpenRouter API URL" do
+      assert OpenRouter.base_url() == "https://openrouter.ai/api/v1"
+    end
+
+    test "env_key returns OPENROUTER_API_KEY" do
+      assert OpenRouter.env_key() == "OPENROUTER_API_KEY"
+    end
+
+    test "auth_headers returns Bearer token" do
+      headers = OpenRouter.auth_headers("test-key")
+      assert headers == [{"Authorization", "Bearer test-key"}]
+    end
+  end
+
   describe "Provider.build_auth_headers/2" do
     test "builds bearer auth header" do
       headers = Provider.build_auth_headers(:bearer, "my-token")
@@ -165,6 +189,12 @@ defmodule ReqLlmNext.ProvidersTest do
     test "Groq returns api_key from opts" do
       test_key = "test-key-groq"
       key = Groq.get_api_key(api_key: test_key)
+      assert key == test_key
+    end
+
+    test "OpenRouter returns api_key from opts" do
+      test_key = "test-key-openrouter"
+      key = OpenRouter.get_api_key(api_key: test_key)
       assert key == test_key
     end
 
