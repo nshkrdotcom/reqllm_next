@@ -43,7 +43,7 @@ defmodule ReqLlmNext.Extensions.Definitions.OpenAI do
       end
 
       stack do
-        surface_catalog_module(ReqLlmNext.ModelProfile.SurfaceCatalog.OpenAIImages)
+        surface_catalog_module(ReqLlmNext.ModelProfile.SurfaceCatalog.OpenAIMedia)
 
         surface_preparation_modules(openai_images: ReqLlmNext.SurfacePreparation.OpenAIImages)
 
@@ -63,7 +63,7 @@ defmodule ReqLlmNext.Extensions.Definitions.OpenAI do
       end
 
       stack do
-        surface_catalog_module(ReqLlmNext.ModelProfile.SurfaceCatalog.OpenAITranscriptions)
+        surface_catalog_module(ReqLlmNext.ModelProfile.SurfaceCatalog.OpenAIMedia)
 
         surface_preparation_modules(
           openai_transcription: ReqLlmNext.SurfacePreparation.OpenAITranscriptions
@@ -85,7 +85,7 @@ defmodule ReqLlmNext.Extensions.Definitions.OpenAI do
       end
 
       stack do
-        surface_catalog_module(ReqLlmNext.ModelProfile.SurfaceCatalog.OpenAISpeech)
+        surface_catalog_module(ReqLlmNext.ModelProfile.SurfaceCatalog.OpenAIMedia)
 
         surface_preparation_modules(openai_speech: ReqLlmNext.SurfacePreparation.OpenAISpeech)
 
