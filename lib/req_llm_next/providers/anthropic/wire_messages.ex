@@ -22,9 +22,11 @@ defmodule ReqLlmNext.Wire.Anthropic do
 
   ## Prompt Caching
 
-  Cache expensive prompts for faster responses:
+  Cache prompt prefixes using Anthropic automatic caching:
 
-      opts = [anthropic_prompt_cache: true]  # Adds cache_control to system
+      opts = [anthropic_prompt_cache: true]
+
+  Use `anthropic_prompt_cache_ttl: "1h"` for the extended 1-hour cache.
 
   """
 
@@ -89,6 +91,7 @@ defmodule ReqLlmNext.Wire.Anthropic do
       max_tokens: Keyword.get(opts, :max_tokens, 1024)
     }
     |> maybe_add_system(system_prompt, opts)
+    |> maybe_add_cache_control(opts)
     |> maybe_add_temperature(opts)
     |> maybe_add_thinking(opts)
     |> maybe_add_output_config(opts)
@@ -101,39 +104,24 @@ defmodule ReqLlmNext.Wire.Anthropic do
 
   defp maybe_add_system(body, nil, _opts), do: body
 
-  defp maybe_add_system(body, system_prompt, opts) when is_binary(system_prompt) do
-    if has_prompt_caching?(opts) do
-      cache_control = cache_control_meta(opts)
+  defp maybe_add_system(body, system_prompt, _opts) when is_binary(system_prompt),
+    do: Map.put(body, :system, system_prompt)
 
-      Map.put(body, :system, [
-        %{type: "text", text: system_prompt, cache_control: cache_control}
-      ])
-    else
-      Map.put(body, :system, system_prompt)
-    end
-  end
-
-  defp maybe_add_system(body, system_blocks, opts) when is_list(system_blocks) do
-    if has_prompt_caching?(opts) do
-      cache_control = cache_control_meta(opts)
-      cached_blocks = add_cache_control_to_last(system_blocks, cache_control)
-      Map.put(body, :system, cached_blocks)
-    else
-      Map.put(body, :system, system_blocks)
-    end
-  end
-
-  defp add_cache_control_to_last([], _cache_control), do: []
-
-  defp add_cache_control_to_last(blocks, cache_control) do
-    {last, rest} = List.pop_at(blocks, -1)
-    rest ++ [Map.put(last, :cache_control, cache_control)]
-  end
+  defp maybe_add_system(body, system_blocks, _opts) when is_list(system_blocks),
+    do: Map.put(body, :system, system_blocks)
 
   defp cache_control_meta(opts) do
-    case Keyword.get(opts, :anthropic_prompt_cache_ttl) do
+    case normalize_cache_ttl(Keyword.get(opts, :anthropic_prompt_cache_ttl)) do
       nil -> %{type: "ephemeral"}
       ttl -> %{type: "ephemeral", ttl: ttl}
+    end
+  end
+
+  defp maybe_add_cache_control(body, opts) do
+    if has_prompt_caching?(opts) do
+      Map.put(body, :cache_control, cache_control_meta(opts))
+    else
+      body
     end
   end
 
@@ -163,21 +151,15 @@ defmodule ReqLlmNext.Wire.Anthropic do
   end
 
   defp maybe_add_output_config(body, opts) do
-    case {
-      Keyword.get(opts, :operation),
-      Keyword.get(opts, :compiled_schema),
-      Keyword.get(opts, :_structured_output_strategy)
-    } do
-      {:object, %{schema: schema}, :native_json_schema} when not is_nil(schema) ->
-        Map.put(body, :output_config, %{
-          format: %{
-            type: "json_schema",
-            schema: ReqLlmNext.Schema.to_json(schema)
-          }
-        })
+    output_config =
+      %{}
+      |> maybe_put_effort(opts)
+      |> maybe_put_schema(opts)
 
-      _ ->
-        body
+    if map_size(output_config) == 0 do
+      body
+    else
+      Map.put(body, :output_config, output_config)
     end
   end
 
@@ -210,6 +192,46 @@ defmodule ReqLlmNext.Wire.Anthropic do
         body
     end
   end
+
+  defp maybe_put_effort(output_config, opts) do
+    case normalize_effort(Keyword.get(opts, :effort)) do
+      nil -> output_config
+      effort -> Map.put(output_config, :effort, effort)
+    end
+  end
+
+  defp maybe_put_schema(output_config, opts) do
+    case {
+      Keyword.get(opts, :operation),
+      Keyword.get(opts, :compiled_schema),
+      Keyword.get(opts, :_structured_output_strategy)
+    } do
+      {:object, %{schema: schema}, :native_json_schema} when not is_nil(schema) ->
+        Map.put(output_config, :format, %{
+          type: "json_schema",
+          schema: ReqLlmNext.Schema.to_json(schema)
+        })
+
+      _ ->
+        output_config
+    end
+  end
+
+  defp normalize_effort(effort) when effort in [:low, :medium, :high, :max],
+    do: Atom.to_string(effort)
+
+  defp normalize_effort(effort) when effort in ["low", "medium", "high", "max"], do: effort
+  defp normalize_effort(_effort), do: nil
+
+  defp normalize_cache_ttl(nil), do: nil
+  defp normalize_cache_ttl("1h"), do: "1h"
+  defp normalize_cache_ttl(3600), do: "1h"
+  defp normalize_cache_ttl("3600"), do: "1h"
+  defp normalize_cache_ttl("5m"), do: nil
+  defp normalize_cache_ttl(300), do: nil
+  defp normalize_cache_ttl("300"), do: nil
+  defp normalize_cache_ttl(ttl) when is_binary(ttl), do: ttl
+  defp normalize_cache_ttl(_ttl), do: nil
 
   defp encode_messages(prompt, _opts) when is_binary(prompt) do
     {[%{role: "user", content: prompt}], nil}

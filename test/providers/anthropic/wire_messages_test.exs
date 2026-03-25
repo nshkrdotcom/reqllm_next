@@ -33,24 +33,18 @@ defmodule ReqLlmNext.Wire.AnthropicTest do
       assert {"anthropic-beta", "interleaved-thinking-2025-05-14"} in headers
     end
 
-    test "includes prompt caching beta flag" do
-      headers = Anthropic.headers(anthropic_prompt_cache: true)
-
-      assert {"anthropic-beta", "prompt-caching-2024-07-31"} in headers
-    end
-
     test "combines multiple beta flags" do
       headers =
         Anthropic.headers(
           thinking: %{type: "enabled", budget_tokens: 4096},
-          anthropic_prompt_cache: true
+          anthropic_context_1m: true
         )
 
       beta_header = Enum.find(headers, fn {k, _} -> k == "anthropic-beta" end)
       assert beta_header != nil
       {_, beta_value} = beta_header
       assert "interleaved-thinking-2025-05-14" in String.split(beta_value, ",")
-      assert "prompt-caching-2024-07-31" in String.split(beta_value, ",")
+      assert "context-1m-2025-08-07" in String.split(beta_value, ",")
     end
 
     test "includes the 1m context beta flag when requested" do
@@ -73,7 +67,7 @@ defmodule ReqLlmNext.Wire.AnthropicTest do
       assert Enum.count(String.split(beta_value, ","), &(&1 == "context-1m-2025-08-07")) == 1
     end
 
-    test "includes beta headers for files, MCP, and code execution surfaces" do
+    test "includes beta headers for files surfaces only" do
       headers =
         Anthropic.headers(
           anthropic_files_api: true,
@@ -84,18 +78,29 @@ defmodule ReqLlmNext.Wire.AnthropicTest do
       assert {"anthropic-beta", beta_value} = List.keyfind(headers, "anthropic-beta", 0)
       beta_flags = String.split(beta_value, ",")
       assert "files-api-2025-04-14" in beta_flags
-      assert "mcp-client-2025-11-20" in beta_flags
-      assert "code-execution-2025-08-25" in beta_flags
     end
 
-    test "includes latest computer-use beta header for the latest computer tool" do
+    test "does not include GA tool beta headers for MCP, code execution, or computer use" do
       headers =
         Anthropic.headers(
-          tools: [ReqLlmNext.Anthropic.computer_use_tool(version: :latest, enable_zoom: true)]
+          mcp_servers: [ReqLlmNext.Anthropic.mcp_server("https://mcp.example.com")],
+          tools: [
+            ReqLlmNext.Anthropic.code_execution_tool(),
+            ReqLlmNext.Anthropic.computer_use_tool(version: :latest, enable_zoom: true)
+          ]
         )
 
-      assert {"anthropic-beta", beta_value} = List.keyfind(headers, "anthropic-beta", 0)
-      assert "computer-use-2025-11-24" in String.split(beta_value, ",")
+      refute Enum.any?(headers, fn
+               {"anthropic-beta", value} ->
+                 beta_flags = String.split(value, ",")
+                 "mcp-client-2025-11-20" in beta_flags or
+                   "code-execution-2025-08-25" in beta_flags or
+                   "computer-use-2025-11-24" in beta_flags or
+                   "computer-use-2025-01-24" in beta_flags
+
+               _ ->
+                 false
+             end)
     end
 
     test "does not include computer-use beta header for bash and text editor alone" do
@@ -114,12 +119,21 @@ defmodule ReqLlmNext.Wire.AnthropicTest do
              end)
     end
 
-    test "includes code-execution web tools beta header for dynamic web search" do
+    test "does not include dynamic web beta headers for GA web search" do
       headers =
-        Anthropic.headers(tools: [ReqLlmNext.Anthropic.web_search_tool(dynamic_filtering: true)])
+        Anthropic.headers(
+          tools: [
+            ReqLlmNext.Anthropic.web_search_tool(dynamic_filtering: true, allowed_callers: ["direct"])
+          ]
+        )
 
-      assert {"anthropic-beta", beta_value} = List.keyfind(headers, "anthropic-beta", 0)
-      assert "code-execution-web-tools-2026-02-09" in String.split(beta_value, ",")
+      refute Enum.any?(headers, fn
+               {"anthropic-beta", value} ->
+                 "code-execution-web-tools-2026-02-09" in String.split(value, ",")
+
+               _ ->
+                 false
+             end)
     end
 
     test "does not include beta header when no beta features enabled" do
@@ -217,6 +231,15 @@ defmodule ReqLlmNext.Wire.AnthropicTest do
       body = Anthropic.encode_body(model, "Hello!", reasoning_effort: :high)
 
       assert body.thinking == %{type: "enabled", budget_tokens: 4096}
+    end
+
+    test "encodes output_config effort without enabling thinking" do
+      model = TestModels.anthropic()
+      body = Anthropic.encode_body(model, "Hello!", effort: :medium, temperature: 0.5)
+
+      assert body.output_config == %{effort: "medium"}
+      assert body.temperature == 0.5
+      refute Map.has_key?(body, :thinking)
     end
 
     test "encodes thinking config from explicit thinking option" do
@@ -371,7 +394,7 @@ defmodule ReqLlmNext.Wire.AnthropicTest do
       assert body.tool_choice == %{type: "auto"}
     end
 
-    test "encodes system prompt with cache control when caching enabled" do
+    test "encodes top-level cache control when caching enabled" do
       model = TestModels.anthropic()
 
       context =
@@ -382,14 +405,11 @@ defmodule ReqLlmNext.Wire.AnthropicTest do
 
       body = Anthropic.encode_body(model, context, anthropic_prompt_cache: true)
 
-      assert is_list(body.system)
-      [cached_block] = body.system
-      assert cached_block.type == "text"
-      assert cached_block.text == "You are helpful"
-      assert cached_block.cache_control == %{type: "ephemeral"}
+      assert body.system == "You are helpful"
+      assert body.cache_control == %{type: "ephemeral"}
     end
 
-    test "encodes system prompt with custom cache TTL" do
+    test "encodes top-level cache control with 1-hour TTL" do
       model = TestModels.anthropic()
 
       context =
@@ -401,11 +421,10 @@ defmodule ReqLlmNext.Wire.AnthropicTest do
       body =
         Anthropic.encode_body(model, context,
           anthropic_prompt_cache: true,
-          anthropic_prompt_cache_ttl: 300
+          anthropic_prompt_cache_ttl: 3600
         )
 
-      [cached_block] = body.system
-      assert cached_block.cache_control == %{type: "ephemeral", ttl: 300}
+      assert body.cache_control == %{type: "ephemeral", ttl: "1h"}
     end
 
     test "encodes image content part" do

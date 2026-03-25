@@ -27,19 +27,12 @@ defmodule ReqLlmNext.Wire.AnthropicThinkingTest do
       assert beta =~ "interleaved-thinking-2025-05-14"
     end
 
-    test "includes prompt caching beta flag" do
-      headers = Anthropic.headers(anthropic_prompt_cache: true)
-
-      assert {"anthropic-beta", beta} = List.keyfind(headers, "anthropic-beta", 0)
-      assert beta =~ "prompt-caching-2024-07-31"
-    end
-
     test "combines multiple beta flags" do
-      headers = Anthropic.headers(thinking: %{type: "enabled"}, anthropic_prompt_cache: true)
+      headers = Anthropic.headers(thinking: %{type: "enabled"}, anthropic_context_1m: true)
 
       assert {"anthropic-beta", beta} = List.keyfind(headers, "anthropic-beta", 0)
       assert beta =~ "interleaved-thinking-2025-05-14"
-      assert beta =~ "prompt-caching-2024-07-31"
+      assert beta =~ "context-1m-2025-08-07"
     end
   end
 
@@ -85,6 +78,14 @@ defmodule ReqLlmNext.Wire.AnthropicThinkingTest do
       assert body.thinking == %{type: "enabled", budget_tokens: 4096}
     end
 
+    test "encodes output_config effort without enabling thinking", %{model: model} do
+      body = Anthropic.encode_body(model, "Hello!", effort: :medium, temperature: 0.7)
+
+      assert body.output_config == %{effort: "medium"}
+      assert body.temperature == 0.7
+      refute Map.has_key?(body, :thinking)
+    end
+
     test "supports all effort levels", %{model: model} do
       low = Anthropic.encode_body(model, "Hello!", reasoning_effort: :low)
       medium = Anthropic.encode_body(model, "Hello!", reasoning_effort: :medium)
@@ -114,7 +115,7 @@ defmodule ReqLlmNext.Wire.AnthropicThinkingTest do
       {:ok, model: TestModels.anthropic_thinking()}
     end
 
-    test "adds cache_control to system content when caching enabled", %{model: model} do
+    test "adds top-level cache_control when caching enabled", %{model: model} do
       context = %ReqLlmNext.Context{
         messages: [
           %ReqLlmNext.Context.Message{
@@ -130,13 +131,11 @@ defmodule ReqLlmNext.Wire.AnthropicThinkingTest do
 
       body = Anthropic.encode_body(model, context, anthropic_prompt_cache: true)
 
-      assert [%{type: "text", text: "You are helpful.", cache_control: cache_control}] =
-               body.system
-
-      assert cache_control == %{type: "ephemeral"}
+      assert body.system == "You are helpful."
+      assert body.cache_control == %{type: "ephemeral"}
     end
 
-    test "supports custom TTL for cache", %{model: model} do
+    test "supports 1-hour TTL for automatic caching", %{model: model} do
       context = %ReqLlmNext.Context{
         messages: [
           %ReqLlmNext.Context.Message{
@@ -156,7 +155,7 @@ defmodule ReqLlmNext.Wire.AnthropicThinkingTest do
           anthropic_prompt_cache_ttl: 3600
         )
 
-      assert [%{cache_control: %{type: "ephemeral", ttl: 3600}}] = body.system
+      assert body.cache_control == %{type: "ephemeral", ttl: "1h"}
     end
 
     test "keeps system as string when caching disabled", %{model: model} do

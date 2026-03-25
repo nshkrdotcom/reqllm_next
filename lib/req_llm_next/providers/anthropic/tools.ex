@@ -22,6 +22,7 @@ defmodule ReqLlmNext.Anthropic.Tools do
       name: Keyword.get(opts, :name, "web_search")
     }
     |> maybe_put(:max_uses, Keyword.get(opts, :max_uses))
+    |> maybe_put(:allowed_callers, Keyword.get(opts, :allowed_callers))
     |> maybe_put(:allowed_domains, Keyword.get(opts, :allowed_domains))
     |> maybe_put(:blocked_domains, Keyword.get(opts, :blocked_domains))
     |> maybe_put(:user_location, Keyword.get(opts, :user_location))

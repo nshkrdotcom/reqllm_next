@@ -5,14 +5,8 @@ defmodule ReqLlmNext.Anthropic.Headers do
 
   @anthropic_version "2023-06-01"
   @beta_thinking "interleaved-thinking-2025-05-14"
-  @beta_prompt_caching "prompt-caching-2024-07-31"
   @beta_context_1m "context-1m-2025-08-07"
   @beta_files_api "files-api-2025-04-14"
-  @beta_code_execution "code-execution-2025-08-25"
-  @beta_code_execution_web_tools "code-execution-web-tools-2026-02-09"
-  @beta_mcp_client "mcp-client-2025-11-20"
-  @beta_computer_use "computer-use-2025-11-24"
-  @beta_computer_use_legacy "computer-use-2025-01-24"
   @beta_token_efficient_tools "token-efficient-tools-2025-02-19"
 
   @spec headers(keyword()) :: [{String.t(), String.t()}]
@@ -42,11 +36,6 @@ defmodule ReqLlmNext.Anthropic.Headers do
     flags = if has_thinking?(opts), do: [@beta_thinking | flags], else: flags
 
     flags =
-      if Keyword.get(opts, :anthropic_prompt_cache, false) == true,
-        do: [@beta_prompt_caching | flags],
-        else: flags
-
-    flags =
       if Keyword.get(opts, :anthropic_context_1m, false) == true,
         do: [@beta_context_1m | flags],
         else: flags
@@ -55,19 +44,6 @@ defmodule ReqLlmNext.Anthropic.Headers do
       if Keyword.get(opts, :anthropic_files_api, false) == true,
         do: [@beta_files_api | flags],
         else: flags
-
-    flags = if has_code_execution_tools?(opts), do: [@beta_code_execution | flags], else: flags
-
-    flags =
-      if has_dynamic_web_tools?(opts), do: [@beta_code_execution_web_tools | flags], else: flags
-
-    flags = if has_mcp_connectors?(opts), do: [@beta_mcp_client | flags], else: flags
-
-    flags =
-      case computer_use_beta_flag(opts) do
-        nil -> flags
-        beta_flag -> [beta_flag | flags]
-      end
 
     flags =
       if Keyword.get(opts, :anthropic_token_efficient_tools, false) == true,
@@ -85,39 +61,6 @@ defmodule ReqLlmNext.Anthropic.Headers do
   defp has_thinking?(opts) do
     Keyword.has_key?(opts, :thinking) or Keyword.has_key?(opts, :reasoning_effort)
   end
-
-  defp has_code_execution_tools?(opts) do
-    Enum.any?(Keyword.get(opts, :tools, []), &tool_type?(&1, "code_execution"))
-  end
-
-  defp has_dynamic_web_tools?(opts) do
-    Enum.any?(Keyword.get(opts, :tools, []), fn tool ->
-      tool_type?(tool, "web_search_20260209") or tool_type?(tool, "web_fetch_20260209")
-    end)
-  end
-
-  defp has_mcp_connectors?(opts) do
-    mcp_servers = Keyword.get(opts, :mcp_servers, [])
-    mcp_servers != [] or Enum.any?(Keyword.get(opts, :tools, []), &tool_type?(&1, "mcp"))
-  end
-
-  defp computer_use_beta_flag(opts) do
-    cond do
-      Enum.any?(Keyword.get(opts, :tools, []), &tool_type?(&1, "computer_20251124")) ->
-        @beta_computer_use
-
-      Enum.any?(Keyword.get(opts, :tools, []), &tool_type?(&1, "computer")) ->
-        @beta_computer_use_legacy
-
-      true ->
-        nil
-    end
-  end
-
-  defp tool_type?(%{type: type}, prefix) when is_binary(type),
-    do: String.starts_with?(type, prefix)
-
-  defp tool_type?(_, _prefix), do: false
 
   defp custom_beta_flags(opts) do
     case Keyword.get(opts, :anthropic_beta_headers, []) do
