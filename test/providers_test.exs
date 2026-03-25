@@ -3,7 +3,7 @@ defmodule ReqLlmNext.ProvidersTest do
 
   alias ReqLlmNext.Provider
   alias ReqLlmNext.Providers
-  alias ReqLlmNext.Providers.{Anthropic, DeepSeek, OpenAI}
+  alias ReqLlmNext.Providers.{Anthropic, DeepSeek, Groq, OpenAI}
 
   describe "Providers.get/1" do
     test "returns OpenAI module for :openai" do
@@ -16,6 +16,10 @@ defmodule ReqLlmNext.ProvidersTest do
 
     test "returns DeepSeek module for :deepseek" do
       assert Providers.get(:deepseek) == {:ok, DeepSeek}
+    end
+
+    test "returns Groq module for :groq" do
+      assert Providers.get(:groq) == {:ok, Groq}
     end
 
     test "returns error for unknown provider" do
@@ -36,6 +40,10 @@ defmodule ReqLlmNext.ProvidersTest do
       assert Providers.get!(:deepseek) == DeepSeek
     end
 
+    test "returns Groq module for :groq" do
+      assert Providers.get!(:groq) == Groq
+    end
+
     test "raises for unknown provider" do
       assert_raise RuntimeError, ~r/Provider error/, fn ->
         Providers.get!(:unknown)
@@ -50,6 +58,7 @@ defmodule ReqLlmNext.ProvidersTest do
       assert :openai in providers
       assert :anthropic in providers
       assert :deepseek in providers
+      assert :groq in providers
     end
   end
 
@@ -113,6 +122,21 @@ defmodule ReqLlmNext.ProvidersTest do
     end
   end
 
+  describe "Providers.Groq" do
+    test "base_url returns Groq API URL" do
+      assert Groq.base_url() == "https://api.groq.com/openai/v1"
+    end
+
+    test "env_key returns GROQ_API_KEY" do
+      assert Groq.env_key() == "GROQ_API_KEY"
+    end
+
+    test "auth_headers returns Bearer token" do
+      headers = Groq.auth_headers("test-key")
+      assert headers == [{"Authorization", "Bearer test-key"}]
+    end
+  end
+
   describe "Provider.build_auth_headers/2" do
     test "builds bearer auth header" do
       headers = Provider.build_auth_headers(:bearer, "my-token")
@@ -135,6 +159,12 @@ defmodule ReqLlmNext.ProvidersTest do
     test "Anthropic returns api_key from opts" do
       test_key = "test-key-anthropic"
       key = Anthropic.get_api_key(api_key: test_key)
+      assert key == test_key
+    end
+
+    test "Groq returns api_key from opts" do
+      test_key = "test-key-groq"
+      key = Groq.get_api_key(api_key: test_key)
       assert key == test_key
     end
 

@@ -65,7 +65,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.package.compile_time_extensions
-  statement: ReqLlmNext shall move provider and model edge-case support toward a compile-time extension manifest with provider registrations, explicit provider default families, global fallback families, family inheritance for reusing a happy-path stack, narrow opt-in override rules, manifest-backed provider facts and surface catalogs, built-in declaration packs discovered from co-located family and provider slice homes, session-runtime seams, realtime adapter seams, and compile-time manifest verification so common paths stay simple while edge cases remain explicit.
+  statement: ReqLlmNext shall move provider and model edge-case support toward a compile-time extension manifest with provider registrations, explicit provider default families, global fallback families, family inheritance for reusing a happy-path stack, narrow opt-in override rules, manifest-backed provider facts and surface catalogs, built-in declaration packs discovered from co-located family and provider slice homes, session-runtime seams, realtime adapter seams, provider-local media family overrides where needed, and compile-time manifest verification so common paths stay simple while edge cases remain explicit.
   priority: should
   stability: evolving
 
@@ -130,7 +130,7 @@ decisions:
     - reqllm.package.compile_time_extensions
 
 - kind: command
-  target: mix test test/providers/deepseek test/model_profile_test.exs test/wire/resolver_test.exs
+  target: mix test test/providers/deepseek test/providers/groq test/model_profile_test.exs test/wire/resolver_test.exs
   execute: true
   covers:
     - reqllm.package.compile_time_extensions

@@ -298,6 +298,33 @@ defmodule ReqLlmNext.TestModels do
   end
 
   @doc """
+  Creates a Groq transcription model for testing.
+  """
+  def groq_transcription(overrides \\ %{}) do
+    base = %LLMDB.Model{
+      id: "whisper-large-v3-turbo",
+      provider: :groq,
+      name: "Test Groq Transcription Model",
+      capabilities: %{
+        chat: false,
+        embeddings: false,
+        reasoning: %{enabled: false},
+        tools: %{enabled: false, streaming: false, strict: false, parallel: false},
+        json: %{native: false, schema: false, strict: false},
+        streaming: %{text: true, tool_calls: false}
+      },
+      modalities: %{input: [:audio], output: [:text]},
+      extra: %{
+        api: "audio",
+        supported_formats: ["mp3", "wav"]
+      },
+      tags: ["stt", "transcription"]
+    }
+
+    struct!(base, Map.to_list(overrides))
+  end
+
+  @doc """
   Creates an xAI model for testing.
   """
   def xai(overrides \\ %{}) do

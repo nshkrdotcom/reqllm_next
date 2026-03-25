@@ -122,6 +122,20 @@ defmodule ReqLlmNext.TestModelsTest do
     end
   end
 
+  describe "groq_transcription/1" do
+    test "creates Groq transcription model" do
+      model = TestModels.groq_transcription()
+      assert model.provider == :groq
+      assert model.id == "whisper-large-v3-turbo"
+      assert model.extra.api == "audio"
+    end
+
+    test "applies overrides" do
+      model = TestModels.groq_transcription(%{id: "whisper-large-v3"})
+      assert model.id == "whisper-large-v3"
+    end
+  end
+
   describe "xai/1" do
     test "creates xAI model" do
       model = TestModels.xai()

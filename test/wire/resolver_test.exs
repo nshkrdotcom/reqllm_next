@@ -7,6 +7,7 @@ defmodule ReqLlmNext.Wire.ResolverTest do
   alias ReqLlmNext.Wire.{
     Anthropic,
     DeepSeekChat,
+    GroqChat,
     OpenAIChat,
     OpenAIEmbeddings,
     OpenAIImages,
@@ -61,7 +62,7 @@ defmodule ReqLlmNext.Wire.ResolverTest do
 
     test "infers OpenAIChat for groq provider" do
       model = TestModels.groq()
-      assert Resolver.wire_module!(model) == OpenAIChat
+      assert Resolver.wire_module!(model) == GroqChat
     end
 
     test "infers OpenAIChat for openrouter provider" do

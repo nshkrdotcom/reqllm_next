@@ -29,7 +29,7 @@ surface:
   stability: evolving
 
 - id: reqllm.extension_manifest.family_precedence
-  statement: Default execution families shall resolve deterministically from declarative criteria using explicit precedence, then fall back through provider-registered default families and finally global default families, so the happy path is stable and inspectable without reintroducing central provider branching.
+  statement: Default execution families shall resolve deterministically from declarative criteria using explicit precedence, then fall back through provider-registered default families and finally global default families, so the happy path is stable and inspectable without reintroducing central provider branching, while allowing provider-local media families such as Groq transcription support to shadow a provider chat family without mutating the shared family defaults.
   priority: must
   stability: evolving
 
@@ -82,7 +82,7 @@ surface:
     - reqllm.extension_manifest.compile_time_verification
 
 - kind: command
-  target: mix test test/providers/deepseek/execution_stack_test.exs test/model_profile_test.exs
+  target: mix test test/providers/deepseek/execution_stack_test.exs test/providers/groq/execution_stack_test.exs test/model_profile_test.exs
   execute: true
   covers:
     - reqllm.extension_manifest.plain_runtime_contract
