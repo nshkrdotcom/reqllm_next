@@ -66,7 +66,7 @@ decisions:
     - reqllm.operation_planner.assembly_scope
 
 - kind: command
-  target: mix test test/providers/xai/execution_stack_test.exs test/providers/xai/wire_responses_test.exs
+  target: mix test test/providers/xai/execution_stack_test.exs test/providers/xai/wire_responses_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/zenmux/wire_responses_test.exs
   execute: true
   covers:
     - reqllm.operation_planner.assembly_scope

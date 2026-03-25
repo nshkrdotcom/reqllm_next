@@ -96,7 +96,7 @@ decisions:
     - reqllm.layer_boundaries.replay_uses_recorded_stack
 
 - kind: command
-  target: mix test test/providers/xai/execution_stack_test.exs test/providers/xai/wire_responses_test.exs
+  target: mix test test/providers/xai/execution_stack_test.exs test/providers/xai/wire_responses_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/zenmux/wire_chat_test.exs test/providers/zenmux/wire_responses_test.exs
   execute: true
   covers:
     - reqllm.layer_boundaries.separated_io

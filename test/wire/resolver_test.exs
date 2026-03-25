@@ -17,6 +17,8 @@ defmodule ReqLlmNext.Wire.ResolverTest do
     OpenRouterChat,
     OpenAITranscriptions,
     Resolver,
+    ZenmuxChat,
+    ZenmuxResponses,
     VeniceChat,
     ZAIChat
   }
@@ -105,6 +107,16 @@ defmodule ReqLlmNext.Wire.ResolverTest do
     test "infers ZAIChat for zai provider" do
       model = TestModels.zai()
       assert Resolver.wire_module!(model) == ZAIChat
+    end
+
+    test "infers ZenmuxResponses for zenmux provider by default" do
+      model = TestModels.zenmux()
+      assert Resolver.wire_module!(model) == ZenmuxResponses
+    end
+
+    test "infers ZenmuxChat for zenmux chat-only models" do
+      model = TestModels.zenmux(%{extra: %{api: "chat"}})
+      assert Resolver.wire_module!(model) == ZenmuxChat
     end
 
     test "infers DeepSeekChat for deepseek provider" do

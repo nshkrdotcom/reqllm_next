@@ -30,6 +30,7 @@ surface:
   - test/providers/groq/**/*.exs
   - test/providers/openrouter/**/*.exs
   - test/providers/vllm/**/*.exs
+  - test/providers/zenmux/**/*.exs
   - test/providers/anthropic/**/*.exs
 decisions:
   - reqllm.decision.provider_surface_maps_in_guides
@@ -132,7 +133,7 @@ decisions:
     - reqllm.model_compat.provider_native_request_shapes
 
 - kind: command
-  target: mix test test/providers/deepseek test/providers/groq test/providers/openrouter test/providers/vllm
+  target: mix test test/providers/deepseek test/providers/groq test/providers/openrouter test/providers/vllm test/providers/zenmux
   execute: true
   covers:
     - reqllm.model_compat.extension_pressure_tests

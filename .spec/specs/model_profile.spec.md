@@ -52,7 +52,7 @@ decisions:
     - reqllm.model_profile.request_independent
 
 - kind: command
-  target: mix test test/model_profile_test.exs test/operation_planner_test.exs test/providers/xai/provider_facts_test.exs test/providers/xai/execution_stack_test.exs
+  target: mix test test/model_profile_test.exs test/operation_planner_test.exs test/providers/xai/provider_facts_test.exs test/providers/xai/execution_stack_test.exs test/providers/zenmux/provider_facts_test.exs test/providers/zenmux/execution_stack_test.exs
   execute: true
   covers:
     - reqllm.model_profile.descriptive_facts

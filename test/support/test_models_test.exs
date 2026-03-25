@@ -201,6 +201,19 @@ defmodule ReqLlmNext.TestModelsTest do
     end
   end
 
+  describe "zenmux/1" do
+    test "creates Zenmux model" do
+      model = TestModels.zenmux()
+      assert model.provider == :zenmux
+      assert model.id == "openai/gpt-5.2"
+    end
+
+    test "applies overrides" do
+      model = TestModels.zenmux(%{id: "openai/gpt-5.3"})
+      assert model.id == "openai/gpt-5.3"
+    end
+  end
+
   describe "xai_legacy/1" do
     test "creates a legacy xAI model" do
       model = TestModels.xai_legacy()

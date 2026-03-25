@@ -417,6 +417,29 @@ defmodule ReqLlmNext.TestModels do
   end
 
   @doc """
+  Creates a Zenmux model for testing.
+  """
+  def zenmux(overrides \\ %{}) do
+    base = %LLMDB.Model{
+      id: "openai/gpt-5.2",
+      provider: :zenmux,
+      name: "Test Zenmux Model",
+      capabilities: %{
+        chat: true,
+        embeddings: false,
+        reasoning: %{enabled: true, token_budget: 32_000},
+        tools: %{enabled: true, streaming: true, strict: true, parallel: true},
+        json: %{native: true, schema: true, strict: true},
+        streaming: %{text: true, tool_calls: true}
+      },
+      limits: %{context: 200_000, output: 16_384},
+      modalities: %{input: [:text], output: [:text]}
+    }
+
+    struct!(base, Map.to_list(overrides))
+  end
+
+  @doc """
   Creates an xAI model for testing.
   """
   def xai(overrides \\ %{}) do

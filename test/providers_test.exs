@@ -12,6 +12,7 @@ defmodule ReqLlmNext.ProvidersTest do
     Groq,
     OpenAI,
     OpenRouter,
+    Zenmux,
     VLLM,
     Venice,
     ZAI,
@@ -61,6 +62,10 @@ defmodule ReqLlmNext.ProvidersTest do
 
     test "returns Z.AI module for :zai" do
       assert Providers.get(:zai) == {:ok, ZAI}
+    end
+
+    test "returns Zenmux module for :zenmux" do
+      assert Providers.get(:zenmux) == {:ok, Zenmux}
     end
 
     test "returns error for unknown provider" do
@@ -113,6 +118,10 @@ defmodule ReqLlmNext.ProvidersTest do
       assert Providers.get!(:zai) == ZAI
     end
 
+    test "returns Zenmux module for :zenmux" do
+      assert Providers.get!(:zenmux) == Zenmux
+    end
+
     test "raises for unknown provider" do
       assert_raise RuntimeError, ~r/Provider error/, fn ->
         Providers.get!(:unknown)
@@ -135,6 +144,7 @@ defmodule ReqLlmNext.ProvidersTest do
       assert :alibaba in providers
       assert :cerebras in providers
       assert :zai in providers
+      assert :zenmux in providers
     end
   end
 
@@ -394,6 +404,21 @@ defmodule ReqLlmNext.ProvidersTest do
       after
         if original, do: System.put_env("ANTHROPIC_API_KEY", original)
       end
+    end
+  end
+
+  describe "Providers.Zenmux" do
+    test "base_url returns Zenmux API URL" do
+      assert Zenmux.base_url() == "https://zenmux.ai/api/v1"
+    end
+
+    test "env_key returns ZENMUX_API_KEY" do
+      assert Zenmux.env_key() == "ZENMUX_API_KEY"
+    end
+
+    test "auth_headers returns Bearer token" do
+      headers = Zenmux.auth_headers("test-key")
+      assert headers == [{"Authorization", "Bearer test-key"}]
     end
   end
 end

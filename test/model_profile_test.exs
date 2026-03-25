@@ -84,6 +84,13 @@ defmodule ReqLlmNext.ModelProfileTest do
     assert [%{id: :openai_chat_text_http_sse}] = ModelProfile.surfaces_for(profile, :text)
   end
 
+  test "uses provider-specific Zenmux responses family by default" do
+    {:ok, profile} = ModelProfile.from_model(ReqLlmNext.TestModels.zenmux())
+
+    assert profile.family == :zenmux_responses_compatible
+    assert [%{id: :zenmux_responses_text_http_sse}] = ModelProfile.surfaces_for(profile, :text)
+  end
+
   test "falls back to the global openai-compatible family for unregistered providers" do
     model =
       LLMDB.Model.new!(%{
