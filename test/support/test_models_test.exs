@@ -134,6 +134,32 @@ defmodule ReqLlmNext.TestModelsTest do
     end
   end
 
+  describe "deepseek/1" do
+    test "creates DeepSeek chat model" do
+      model = TestModels.deepseek()
+      assert model.provider == :deepseek
+      assert model.id == "deepseek-chat"
+    end
+
+    test "applies overrides" do
+      model = TestModels.deepseek(%{id: "deepseek-v3.2"})
+      assert model.id == "deepseek-v3.2"
+    end
+  end
+
+  describe "deepseek_reasoning/1" do
+    test "creates DeepSeek reasoning model" do
+      model = TestModels.deepseek_reasoning()
+      assert model.provider == :deepseek
+      assert model.capabilities.reasoning.enabled == true
+    end
+
+    test "applies overrides" do
+      model = TestModels.deepseek_reasoning(%{id: "deepseek-r1"})
+      assert model.id == "deepseek-r1"
+    end
+  end
+
   describe "minimal/1" do
     test "creates minimal model with only required fields" do
       model = TestModels.minimal()

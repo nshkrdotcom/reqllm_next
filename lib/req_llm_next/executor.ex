@@ -26,7 +26,8 @@ defmodule ReqLlmNext.Executor do
     Schema,
     SessionRuntime,
     Speech,
-    StreamResponse
+    StreamResponse,
+    Telemetry
   }
 
   alias ReqLlmNext.Transcription
@@ -34,24 +35,26 @@ defmodule ReqLlmNext.Executor do
   @spec generate_text(ReqLlmNext.model_spec(), String.t() | Context.t(), keyword()) ::
           {:ok, Response.t()} | {:error, term()}
   def generate_text(model_spec, prompt, opts \\ []) do
-    with {:ok, %StreamResponse{} = stream_resp} <- stream_text(model_spec, prompt, opts),
-         {:ok, context} <- Context.normalize(prompt) do
-      stream = stream_resp.stream
-      model = stream_resp.model
+    Telemetry.span_request(Telemetry.request_metadata(model_spec, :text, opts), fn ->
+      with {:ok, %StreamResponse{} = stream_resp} <- do_stream_text(model_spec, prompt, opts),
+           {:ok, context} <- Context.normalize(prompt) do
+        stream = stream_resp.stream
+        model = stream_resp.model
 
-      streaming_response = %Response{
-        id: generate_id(),
-        model: model,
-        context: context,
-        message: nil,
-        stream?: true,
-        stream: stream,
-        usage: nil,
-        finish_reason: nil
-      }
+        streaming_response = %Response{
+          id: generate_id(),
+          model: model,
+          context: context,
+          message: nil,
+          stream?: true,
+          stream: stream,
+          usage: nil,
+          finish_reason: nil
+        }
 
-      Response.join_stream(streaming_response)
-    end
+        Response.join_stream(streaming_response)
+      end
+    end)
   end
 
   defp generate_id do
@@ -61,6 +64,12 @@ defmodule ReqLlmNext.Executor do
   @spec stream_text(ReqLlmNext.model_spec(), String.t() | Context.t(), keyword()) ::
           {:ok, StreamResponse.t()} | {:error, term()}
   def stream_text(model_spec, prompt, opts \\ []) do
+    Telemetry.span_request(Telemetry.request_metadata(model_spec, :text, opts), fn ->
+      do_stream_text(model_spec, prompt, opts)
+    end)
+  end
+
+  defp do_stream_text(model_spec, prompt, opts) do
     with {:ok, model} <- ModelResolver.resolve(model_spec),
          {:ok, plan} <-
            OperationPlanner.plan(
@@ -82,7 +91,7 @@ defmodule ReqLlmNext.Executor do
          {:ok, runtime_opts} <- runtime_opts(plan, model, opts, session_runtime_mod) do
       case Fixtures.maybe_replay_stream(model, prompt, runtime_opts) do
         {:ok, replay_stream} ->
-          {:ok, StreamResponse.new!(%{stream: replay_stream, model: model})}
+          {:ok, stream_response(model, replay_stream, plan)}
 
         :no_fixture ->
           with {:ok, stream} <-
@@ -94,7 +103,7 @@ defmodule ReqLlmNext.Executor do
                    prompt,
                    runtime_opts
                  ) do
-            {:ok, StreamResponse.new!(%{stream: stream, model: model})}
+            {:ok, stream_response(model, stream, plan)}
           end
       end
     end
@@ -103,6 +112,12 @@ defmodule ReqLlmNext.Executor do
   @spec stream_object(ReqLlmNext.model_spec(), String.t() | Context.t(), term(), keyword()) ::
           {:ok, StreamResponse.t()} | {:error, term()}
   def stream_object(model_spec, prompt, object_schema, opts \\ []) do
+    Telemetry.span_request(Telemetry.request_metadata(model_spec, :object, opts), fn ->
+      do_stream_object(model_spec, prompt, object_schema, opts)
+    end)
+  end
+
+  defp do_stream_object(model_spec, prompt, object_schema, opts) do
     with {:ok, model} <- ModelResolver.resolve(model_spec),
          {:ok, compiled_schema} <- ReqLlmNext.Schema.compile(object_schema),
          planning_opts <-
@@ -124,7 +139,7 @@ defmodule ReqLlmNext.Executor do
          {:ok, runtime_opts} <- runtime_opts(plan, model, opts, session_runtime_mod) do
       case Fixtures.maybe_replay_stream(model, execution_prompt, runtime_opts) do
         {:ok, replay_stream} ->
-          {:ok, StreamResponse.new!(%{stream: replay_stream, model: model})}
+          {:ok, stream_response(model, replay_stream, plan)}
 
         :no_fixture ->
           with {:ok, stream} <-
@@ -136,7 +151,7 @@ defmodule ReqLlmNext.Executor do
                    execution_prompt,
                    runtime_opts
                  ) do
-            {:ok, StreamResponse.new!(%{stream: stream, model: model})}
+            {:ok, stream_response(model, stream, plan)}
           end
       end
     end
@@ -145,53 +160,57 @@ defmodule ReqLlmNext.Executor do
   @spec generate_object(ReqLlmNext.model_spec(), String.t() | Context.t(), term(), keyword()) ::
           {:ok, Response.t()} | {:error, term()}
   def generate_object(model_spec, prompt, object_schema, opts \\ []) do
-    with {:ok, compiled_schema} <- Schema.compile(object_schema),
-         {:ok, %StreamResponse{} = stream_resp} <-
-           stream_object(model_spec, prompt, object_schema, opts),
-         {:ok, context} <- Context.normalize(prompt) do
-      json_text = StreamResponse.text(stream_resp)
-      model = stream_resp.model
+    Telemetry.span_request(Telemetry.request_metadata(model_spec, :object, opts), fn ->
+      with {:ok, compiled_schema} <- Schema.compile(object_schema),
+           {:ok, %StreamResponse{} = stream_resp} <-
+             do_stream_object(model_spec, prompt, object_schema, opts),
+           {:ok, context} <- Context.normalize(prompt) do
+        json_text = StreamResponse.text(stream_resp)
+        model = stream_resp.model
 
-      case ObjectDecoder.decode(json_text) do
-        {:ok, object} ->
-          case Schema.validate(object, compiled_schema) do
-            {:ok, validated_object} ->
-              {:ok, build_object_response(model, validated_object, context)}
+        case ObjectDecoder.decode(json_text) do
+          {:ok, object} ->
+            case Schema.validate(object, compiled_schema) do
+              {:ok, validated_object} ->
+                {:ok, build_object_response(model, validated_object, context)}
 
-            {:error, {:validation_errors, errors}} ->
-              {:error,
-               Error.API.SchemaValidation.exception(
-                 message: "Schema validation failed",
-                 errors: errors,
-                 value: object
-               )}
-          end
+              {:error, {:validation_errors, errors}} ->
+                {:error,
+                 Error.API.SchemaValidation.exception(
+                   message: "Schema validation failed",
+                   errors: errors,
+                   value: object
+                 )}
+            end
 
-        {:error, jason_error} ->
-          {:error,
-           Error.API.JsonParse.exception(
-             message: "Failed to parse JSON: #{Exception.message(jason_error)}",
-             raw_json: json_text
-           )}
+          {:error, jason_error} ->
+            {:error,
+             Error.API.JsonParse.exception(
+               message: "Failed to parse JSON: #{Exception.message(jason_error)}",
+               raw_json: json_text
+             )}
+        end
       end
-    end
+    end)
   end
 
   @spec generate_image(ReqLlmNext.model_spec(), String.t() | Context.t(), keyword()) ::
           {:ok, Response.t()} | {:error, term()}
   def generate_image(model_spec, prompt, opts \\ []) do
-    with {:ok, model} <- ModelResolver.resolve(model_spec),
-         {:ok, plan} <-
-           safe_plan(model, :image, prompt, model_spec, opts),
-         %{
-           provider_mod: provider_mod,
-           session_runtime_mod: session_runtime_mod,
-           wire_mod: wire_mod,
-           transport_mod: transport_mod
-         } <- ExecutionModules.resolve(plan),
-         {:ok, runtime_opts} <- runtime_opts(plan, model, opts, session_runtime_mod) do
-      transport_mod.request(provider_mod, wire_mod, model, prompt, runtime_opts)
-    end
+    Telemetry.span_request(Telemetry.request_metadata(model_spec, :image, opts), fn ->
+      with {:ok, model} <- ModelResolver.resolve(model_spec),
+           {:ok, plan} <-
+             safe_plan(model, :image, prompt, model_spec, opts),
+           %{
+             provider_mod: provider_mod,
+             session_runtime_mod: session_runtime_mod,
+             wire_mod: wire_mod,
+             transport_mod: transport_mod
+           } <- ExecutionModules.resolve(plan),
+           {:ok, runtime_opts} <- runtime_opts(plan, model, opts, session_runtime_mod) do
+        transport_mod.request(provider_mod, wire_mod, model, prompt, runtime_opts)
+      end
+    end)
   end
 
   @spec transcribe(
@@ -200,33 +219,37 @@ defmodule ReqLlmNext.Executor do
           keyword()
         ) :: {:ok, Transcription.Result.t()} | {:error, term()}
   def transcribe(model_spec, audio, opts \\ []) do
-    with {:ok, model} <- ModelResolver.resolve(model_spec),
-         {:ok, plan} <- safe_plan(model, :transcription, audio, model_spec, opts),
-         %{
-           provider_mod: provider_mod,
-           session_runtime_mod: session_runtime_mod,
-           wire_mod: wire_mod,
-           transport_mod: transport_mod
-         } <- ExecutionModules.resolve(plan),
-         {:ok, runtime_opts} <- runtime_opts(plan, model, opts, session_runtime_mod) do
-      transport_mod.request(provider_mod, wire_mod, model, audio, runtime_opts)
-    end
+    Telemetry.span_request(Telemetry.request_metadata(model_spec, :transcription, opts), fn ->
+      with {:ok, model} <- ModelResolver.resolve(model_spec),
+           {:ok, plan} <- safe_plan(model, :transcription, audio, model_spec, opts),
+           %{
+             provider_mod: provider_mod,
+             session_runtime_mod: session_runtime_mod,
+             wire_mod: wire_mod,
+             transport_mod: transport_mod
+           } <- ExecutionModules.resolve(plan),
+           {:ok, runtime_opts} <- runtime_opts(plan, model, opts, session_runtime_mod) do
+        transport_mod.request(provider_mod, wire_mod, model, audio, runtime_opts)
+      end
+    end)
   end
 
   @spec speak(ReqLlmNext.model_spec(), String.t(), keyword()) ::
           {:ok, Speech.Result.t()} | {:error, term()}
   def speak(model_spec, text, opts \\ []) do
-    with {:ok, model} <- ModelResolver.resolve(model_spec),
-         {:ok, plan} <- safe_plan(model, :speech, text, model_spec, opts),
-         %{
-           provider_mod: provider_mod,
-           session_runtime_mod: session_runtime_mod,
-           wire_mod: wire_mod,
-           transport_mod: transport_mod
-         } <- ExecutionModules.resolve(plan),
-         {:ok, runtime_opts} <- runtime_opts(plan, model, opts, session_runtime_mod) do
-      transport_mod.request(provider_mod, wire_mod, model, text, runtime_opts)
-    end
+    Telemetry.span_request(Telemetry.request_metadata(model_spec, :speech, opts), fn ->
+      with {:ok, model} <- ModelResolver.resolve(model_spec),
+           {:ok, plan} <- safe_plan(model, :speech, text, model_spec, opts),
+           %{
+             provider_mod: provider_mod,
+             session_runtime_mod: session_runtime_mod,
+             wire_mod: wire_mod,
+             transport_mod: transport_mod
+           } <- ExecutionModules.resolve(plan),
+           {:ok, runtime_opts} <- runtime_opts(plan, model, opts, session_runtime_mod) do
+        transport_mod.request(provider_mod, wire_mod, model, text, runtime_opts)
+      end
+    end)
   end
 
   defp build_object_response(model, object, context) do
@@ -254,26 +277,28 @@ defmodule ReqLlmNext.Executor do
   @spec embed(ReqLlmNext.model_spec(), String.t() | [String.t()], keyword()) ::
           {:ok, [float()] | [[float()]]} | {:error, term()}
   def embed(model_spec, input, opts \\ []) do
-    with {:ok, model} <- ModelResolver.resolve(model_spec),
-         :ok <- validate_embedding_input(input),
-         {:ok, plan} <-
-           OperationPlanner.plan(
-             model,
-             :embed,
-             input,
-             opts |> Keyword.put(:_model_spec, inspect_model_spec(model_spec))
-           ),
-         %{
-           provider_mod: provider_mod,
-           session_runtime_mod: session_runtime_mod,
-           wire_mod: wire_mod,
-           transport_mod: transport_mod
-         } <- ExecutionModules.resolve(plan),
-         {:ok, runtime_opts} <- runtime_opts(plan, model, opts, session_runtime_mod),
-         {:ok, raw_response} <-
-           transport_mod.request(provider_mod, wire_mod, model, input, runtime_opts) do
-      wire_mod.extract_embeddings(raw_response, input)
-    end
+    Telemetry.span_request(Telemetry.request_metadata(model_spec, :embed, opts), fn ->
+      with {:ok, model} <- ModelResolver.resolve(model_spec),
+           :ok <- validate_embedding_input(input),
+           {:ok, plan} <-
+             OperationPlanner.plan(
+               model,
+               :embed,
+               input,
+               opts |> Keyword.put(:_model_spec, inspect_model_spec(model_spec))
+             ),
+           %{
+             provider_mod: provider_mod,
+             session_runtime_mod: session_runtime_mod,
+             wire_mod: wire_mod,
+             transport_mod: transport_mod
+           } <- ExecutionModules.resolve(plan),
+           {:ok, runtime_opts} <- runtime_opts(plan, model, opts, session_runtime_mod),
+           {:ok, raw_response} <-
+             transport_mod.request(provider_mod, wire_mod, model, input, runtime_opts) do
+        wire_mod.extract_embeddings(raw_response, input)
+      end
+    end)
   end
 
   defp runtime_opts(plan, model, user_opts, session_runtime_mod) do
@@ -355,5 +380,12 @@ defmodule ReqLlmNext.Executor do
   defp validate_embedding_input(_) do
     {:error,
      Error.Invalid.Parameter.exception(parameter: "input: must be string or list of strings")}
+  end
+
+  defp stream_response(model, stream, plan) do
+    instrumented_stream =
+      Telemetry.instrument_stream(stream, Telemetry.request_metadata_from_plan(plan))
+
+    StreamResponse.new!(%{stream: instrumented_stream, model: model})
   end
 end

@@ -11,7 +11,7 @@ defmodule ReqLlmNext.Fixtures do
   - Format matches req_llm: request/response metadata + b64-encoded raw SSE chunks
   """
 
-  alias ReqLlmNext.{ExecutionModules, ModelProfile}
+  alias ReqLlmNext.{ExecutionModules, ModelProfile, Telemetry}
 
   @root Path.expand("../../test/fixtures", __DIR__)
 
@@ -61,6 +61,7 @@ defmodule ReqLlmNext.Fixtures do
             fixture = Jason.decode!(contents)
             runtime = replay_runtime(fixture, model, opts)
             stream = build_replay_stream(fixture, runtime, model)
+            Telemetry.emit_fixture(:replay, fixture_metadata(model, fixture_name, fixture))
             {:ok, stream}
 
           {:error, _} ->
@@ -85,6 +86,7 @@ defmodule ReqLlmNext.Fixtures do
         case File.read(fixture_path) do
           {:ok, contents} ->
             fixture = Jason.decode!(contents)
+            Telemetry.emit_fixture(:replay, fixture_metadata(model, fixture_name, fixture))
             replay_request_fixture(fixture, wire_mod, model, input, opts)
 
           {:error, _} ->
@@ -376,6 +378,12 @@ defmodule ReqLlmNext.Fixtures do
     }
 
     File.write!(fixture_path, Jason.encode!(fixture, pretty: true))
+
+    Telemetry.emit_fixture(
+      :record,
+      fixture_metadata(recorder.model, recorder.fixture_name, fixture)
+    )
+
     :ok
   end
 
@@ -412,6 +420,7 @@ defmodule ReqLlmNext.Fixtures do
     }
 
     File.write!(fixture_path, Jason.encode!(fixture, pretty: true))
+    Telemetry.emit_fixture(:record, fixture_metadata(model, fixture_name, fixture))
     :ok
   end
 
@@ -462,6 +471,16 @@ defmodule ReqLlmNext.Fixtures do
   defp decode_replay_body(binary) when is_binary(binary), do: binary
   defp decode_replay_body(body) when is_map(body), do: Jason.encode!(body)
   defp decode_replay_body(_body), do: ""
+
+  defp fixture_metadata(model, fixture_name, fixture) do
+    Telemetry.fixture_metadata(model, fixture_name, %{
+      fixture_transport: request_transport(fixture),
+      surface_id: get_in(fixture, ["execution", "surface_id"]),
+      semantic_protocol: get_in(fixture, ["execution", "semantic_protocol"]),
+      wire_format: get_in(fixture, ["execution", "wire_format"]),
+      transport: get_in(fixture, ["execution", "transport"])
+    })
+  end
 
   defp module_exports?(module, function_name, arity) when is_atom(module) do
     Code.ensure_loaded?(module) and function_exported?(module, function_name, arity)

@@ -25,6 +25,9 @@ surface:
   - lib/req_llm_next/operation_planner.ex
   - lib/req_llm_next/policy_rules.ex
   - lib/req_llm_next/execution_modules.ex
+  - lib/req_llm_next/realtime.ex
+  - lib/req_llm_next/response/output_item.ex
+  - lib/req_llm_next/telemetry.ex
   - .spec/specs/public_api.spec.md
   - test/public_api/**/*.exs
   - test/model_resolver_test.exs
@@ -39,6 +42,9 @@ decisions:
   - reqllm.decision.five_scope_policy_rules
   - reqllm.decision.layer_scoped_plan_aware_adapters
   - reqllm.decision.media_operation_families
+  - reqllm.decision.canonical_output_items
+  - reqllm.decision.transport_agnostic_realtime_core
+  - reqllm.decision.runtime_telemetry_kernel
   - reqllm.decision.zoi_backed_struct_contracts
 ```
 
@@ -56,7 +62,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.architecture.execution_layers
-  statement: ReqLlmNext architecture shall separate semantic protocol, wire format, transport, provider, and session-runtime concerns so request meaning, wire envelopes, persistent execution state, and byte movement can evolve independently.
+  statement: ReqLlmNext architecture shall separate realtime session reduction, semantic protocol, wire format, transport, provider, session-runtime, and telemetry-kernel concerns so canonical request and event meaning, wire envelopes, persistent execution state, byte movement, and diagnostics can evolve independently.
   priority: must
   stability: evolving
 

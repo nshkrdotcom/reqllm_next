@@ -4,13 +4,13 @@ defmodule ReqLlmNext.Response.Materializer do
   alias ReqLlmNext.Context
   alias ReqLlmNext.Context.{ContentPart, Message}
   alias ReqLlmNext.Response
+  alias ReqLlmNext.Response.OutputItem
 
   @schema Zoi.struct(
             __MODULE__,
             %{
-              content_parts: Zoi.array(Zoi.any()) |> Zoi.default([]),
+              output_items: Zoi.array(Zoi.any()) |> Zoi.default([]),
               tool_acc: Zoi.map() |> Zoi.default(%{}),
-              provider_items: Zoi.array(Zoi.map()) |> Zoi.default([]),
               usage: Zoi.map() |> Zoi.nullish() |> Zoi.default(nil),
               meta: Zoi.map() |> Zoi.default(%{})
             },
@@ -18,9 +18,8 @@ defmodule ReqLlmNext.Response.Materializer do
           )
 
   @type t :: %__MODULE__{
-          content_parts: [ContentPart.t()],
+          output_items: [OutputItem.t()],
           tool_acc: map(),
-          provider_items: [map()],
           usage: map() | nil,
           meta: map()
         }
@@ -57,17 +56,23 @@ defmodule ReqLlmNext.Response.Materializer do
   end
 
   @spec text(t()) :: String.t()
-  def text(%__MODULE__{content_parts: content_parts}) do
-    content_parts
-    |> Enum.filter(&(&1.type == :text))
-    |> Enum.map_join("", & &1.text)
+  def text(%__MODULE__{output_items: output_items}) do
+    output_items
+    |> Enum.flat_map(fn
+      %OutputItem{type: :text, data: text} when is_binary(text) -> [text]
+      _ -> []
+    end)
+    |> Enum.join("")
   end
 
   @spec thinking(t()) :: String.t()
-  def thinking(%__MODULE__{content_parts: content_parts}) do
-    content_parts
-    |> Enum.filter(&(&1.type == :thinking))
-    |> Enum.map_join("", & &1.text)
+  def thinking(%__MODULE__{output_items: output_items}) do
+    output_items
+    |> Enum.flat_map(fn
+      %OutputItem{type: :thinking, data: text} when is_binary(text) -> [text]
+      _ -> []
+    end)
+    |> Enum.join("")
   end
 
   @spec tool_calls(t()) :: [ReqLlmNext.ToolCall.t()]
@@ -85,11 +90,13 @@ defmodule ReqLlmNext.Response.Materializer do
   def finish_reason(%__MODULE__{meta: meta}), do: meta[:finish_reason]
 
   @spec provider_meta(t()) :: map()
-  def provider_meta(%__MODULE__{meta: meta, provider_items: provider_items}) when is_map(meta) do
+  def provider_meta(%__MODULE__{meta: meta, output_items: output_items}) when is_map(meta) do
     provider_meta =
       meta
       |> Map.drop([:terminal?, :finish_reason])
       |> Enum.into(%{})
+
+    provider_items = provider_items(output_items)
 
     if provider_items == [] do
       provider_meta
@@ -100,7 +107,7 @@ defmodule ReqLlmNext.Response.Materializer do
 
   @spec assistant_message(t()) :: Message.t() | nil
   def assistant_message(%__MODULE__{} = materialized) do
-    content_parts = materialized.content_parts
+    content_parts = content_parts(materialized.output_items)
     tool_calls = tool_calls(materialized)
 
     if content_parts != [] or tool_calls != [] do
@@ -131,6 +138,7 @@ defmodule ReqLlmNext.Response.Materializer do
         stream: nil,
         message: message,
         context: updated_context,
+        output_items: materialized.output_items,
         usage: usage(materialized) || response.usage,
         finish_reason: finish_reason(materialized) || response.finish_reason,
         provider_meta: Map.merge(response.provider_meta || %{}, provider_meta(materialized))
@@ -142,11 +150,7 @@ defmodule ReqLlmNext.Response.Materializer do
   end
 
   defp finalize(%__MODULE__{} = materialized) do
-    %{
-      materialized
-      | content_parts: Enum.reverse(materialized.content_parts),
-        provider_items: Enum.reverse(materialized.provider_items)
-    }
+    %{materialized | output_items: materialized_output_items(materialized)}
   end
 
   defp consume_chunk({:error, error_info}, {:ok, _materialized}) do
@@ -160,25 +164,38 @@ defmodule ReqLlmNext.Response.Materializer do
   end
 
   defp consume_chunk(text, {:ok, %__MODULE__{} = materialized}) when is_binary(text) do
-    {:cont, {:ok, add_content_part(materialized, ContentPart.text(text))}}
+    {:cont, {:ok, add_output_item(materialized, OutputItem.text(text))}}
   end
 
   defp consume_chunk({:thinking, text}, {:ok, %__MODULE__{} = materialized})
        when is_binary(text) do
-    {:cont, {:ok, add_content_part(materialized, ContentPart.thinking(text))}}
+    {:cont, {:ok, add_output_item(materialized, OutputItem.thinking(text))}}
   end
 
   defp consume_chunk({:content_part, %ContentPart{} = part}, {:ok, %__MODULE__{} = materialized}) do
-    {:cont, {:ok, add_content_part(materialized, part)}}
+    {:cont, {:ok, add_output_item(materialized, OutputItem.from_content_part(part))}}
   end
 
   defp consume_chunk({:usage, usage_map}, {:ok, %__MODULE__{} = materialized}) do
     {:cont, {:ok, %{materialized | usage: usage_map}}}
   end
 
+  defp consume_chunk({:audio, data}, {:ok, %__MODULE__{} = materialized}) when is_binary(data) do
+    {:cont, {:ok, add_output_item(materialized, OutputItem.audio(data))}}
+  end
+
+  defp consume_chunk({:transcript, text}, {:ok, %__MODULE__{} = materialized})
+       when is_binary(text) do
+    {:cont, {:ok, add_output_item(materialized, OutputItem.transcript(text))}}
+  end
+
   defp consume_chunk({:provider_item, item}, {:ok, %__MODULE__{} = materialized})
        when is_map(item) do
-    {:cont, {:ok, %{materialized | provider_items: [item | materialized.provider_items]}}}
+    {:cont, {:ok, add_output_item(materialized, OutputItem.provider_item(item))}}
+  end
+
+  defp consume_chunk({:event, event}, {:ok, %__MODULE__{} = materialized}) when is_map(event) do
+    {:cont, {:ok, add_output_item(materialized, OutputItem.provider_item(event))}}
   end
 
   defp consume_chunk(
@@ -215,8 +232,8 @@ defmodule ReqLlmNext.Response.Materializer do
     {:cont, {:ok, materialized}}
   end
 
-  defp add_content_part(%__MODULE__{} = materialized, %ContentPart{} = part) do
-    %{materialized | content_parts: [part | materialized.content_parts]}
+  defp add_output_item(%__MODULE__{} = materialized, %OutputItem{} = item) do
+    %{materialized | output_items: [item | materialized.output_items]}
   end
 
   defp init_tool_call(%{id: id, function: function} = delta) when not is_nil(id) do
@@ -273,5 +290,34 @@ defmodule ReqLlmNext.Response.Materializer do
 
   defp finalize_tool_call(%{id: id, name: name, arguments: args}) do
     ReqLlmNext.ToolCall.new(id, name, args)
+  end
+
+  defp materialized_output_items(%__MODULE__{output_items: output_items} = materialized) do
+    output_items
+    |> Enum.reverse()
+    |> Kernel.++(Enum.map(tool_calls(materialized), &OutputItem.tool_call/1))
+  end
+
+  defp content_parts(output_items) do
+    Enum.flat_map(output_items, fn
+      %OutputItem{type: :text, data: text, metadata: metadata} when is_binary(text) ->
+        [ContentPart.text(text, metadata)]
+
+      %OutputItem{type: :thinking, data: text, metadata: metadata} when is_binary(text) ->
+        [ContentPart.thinking(text, metadata)]
+
+      %OutputItem{type: :content_part, data: %ContentPart{} = part} ->
+        [part]
+
+      _ ->
+        []
+    end)
+  end
+
+  defp provider_items(output_items) do
+    Enum.flat_map(output_items, fn
+      %OutputItem{type: :provider_item, data: item} when is_map(item) -> [item]
+      _ -> []
+    end)
   end
 end

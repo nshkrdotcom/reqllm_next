@@ -321,6 +321,52 @@ defmodule ReqLlmNext.TestModels do
   end
 
   @doc """
+  Creates a DeepSeek chat model for testing.
+  """
+  def deepseek(overrides \\ %{}) do
+    base = %LLMDB.Model{
+      id: "deepseek-chat",
+      provider: :deepseek,
+      name: "Test DeepSeek Chat",
+      capabilities: %{
+        chat: true,
+        embeddings: false,
+        reasoning: %{enabled: false},
+        tools: %{enabled: true, streaming: true, strict: false, parallel: true},
+        json: %{native: true, schema: false, strict: false},
+        streaming: %{text: true, tool_calls: true}
+      },
+      limits: %{context: 128_000, output: 8_192},
+      modalities: %{input: [:text], output: [:text]}
+    }
+
+    struct!(base, Map.to_list(overrides))
+  end
+
+  @doc """
+  Creates a DeepSeek reasoning model for testing.
+  """
+  def deepseek_reasoning(overrides \\ %{}) do
+    base = %LLMDB.Model{
+      id: "deepseek-reasoner",
+      provider: :deepseek,
+      name: "Test DeepSeek Reasoner",
+      capabilities: %{
+        chat: true,
+        embeddings: false,
+        reasoning: %{enabled: true, token_budget: 32_000},
+        tools: %{enabled: true, streaming: true, strict: false, parallel: true},
+        json: %{native: true, schema: false, strict: false},
+        streaming: %{text: true, tool_calls: true}
+      },
+      limits: %{context: 128_000, output: 8_192},
+      modalities: %{input: [:text], output: [:text]}
+    }
+
+    struct!(base, Map.to_list(overrides))
+  end
+
+  @doc """
   Creates a minimal model with only required fields.
   Useful for testing error cases or minimal behavior.
   """

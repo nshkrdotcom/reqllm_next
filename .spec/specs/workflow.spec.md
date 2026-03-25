@@ -33,12 +33,12 @@ decisions:
   stability: evolving
 
 - id: reqllm.workflow.specled_loop
-  statement: Contributor workflow shall keep `.spec/` as the canonical spec workspace and use `mix spec.prime`, `mix spec.next`, and `mix spec.check` to maintain the subject specs, ADRs, README, AGENTS, and package-thesis guide in sync with current truth, including top-level media API parity and request-fixture replay behavior when those package boundaries evolve.
+  statement: Contributor workflow shall keep `.spec/` as the canonical spec workspace and use `mix spec.prime`, `mix spec.next`, and `mix spec.check` to maintain the subject specs, ADRs, README, AGENTS, and package-thesis guide in sync with current truth, including top-level media API parity, request-fixture replay behavior, runtime telemetry, canonical output items, and transport-agnostic realtime behavior when those package boundaries evolve.
   priority: must
   stability: evolving
 
 - id: reqllm.workflow.agent_instructions
-  statement: Repository agent instructions shall direct agents to run bw prime before work and mix spec.prime --base HEAD before editing current-truth package guidance, and they shall keep provider-native behavior behind planning, layer, and provider-utility boundaries instead of reintroducing shared executor shortcuts while standardizing package-owned structs on Zoi-backed schemas instead of plain `defstruct` declarations and preserving the top-level ReqLLM-style text, object, media, and embedding facade.
+  statement: Repository agent instructions shall direct agents to run bw prime before work and mix spec.prime --base HEAD before editing current-truth package guidance, and they shall keep provider-native behavior behind planning, layer, and provider-utility boundaries instead of reintroducing shared executor shortcuts while standardizing package-owned structs on Zoi-backed schemas instead of plain `defstruct` declarations, emitting package-level runtime telemetry through `ReqLlmNext.Telemetry`, and preserving the top-level ReqLLM-style text, object, media, and embedding facade.
   priority: must
   stability: evolving
 
@@ -53,7 +53,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.workflow.extension_dsl_guidance
-  statement: Contributor workflow shall keep the extension-architecture guide, Spark dependency, compile-time manifest proof, definition-pack layout, discovery of built-in definitions from co-located family and provider slice homes, match or stack or patch authoring surface, inheritance behavior, and manifest-backed provider fallback and verification behavior in sync so contributors add edge-case support through declared extension rules instead of editing shared imperative branching directly.
+  statement: Contributor workflow shall keep the extension-architecture guide, Spark dependency, compile-time manifest proof, definition-pack layout, discovery of built-in definitions from co-located family and provider slice homes, match or stack or patch authoring surface, inheritance behavior, manifest-backed provider fallback and verification behavior, and at least one concrete OpenAI-compatible third-provider proof lane in sync so contributors add edge-case support through declared extension rules instead of editing shared imperative branching directly.
   priority: should
   stability: evolving
 ```
@@ -111,5 +111,13 @@ decisions:
   target: mix test test/req_llm_next/extensions/dsl_test.exs
   execute: true
   covers:
+    - reqllm.workflow.extension_dsl_guidance
+
+- kind: command
+  target: mix test test/req_llm_next/telemetry_test.exs test/req_llm_next/realtime_test.exs test/providers/deepseek
+  execute: true
+  covers:
+    - reqllm.workflow.specled_loop
+    - reqllm.workflow.agent_instructions
     - reqllm.workflow.extension_dsl_guidance
 ```

@@ -23,6 +23,7 @@ defmodule ReqLlmNext.Response do
   alias ReqLlmNext.Context
   alias ReqLlmNext.Context.{ContentPart, Message}
   alias ReqLlmNext.Response.Materializer
+  alias ReqLlmNext.Response.OutputItem
 
   @derive {Jason.Encoder, except: [:stream]}
 
@@ -33,6 +34,7 @@ defmodule ReqLlmNext.Response do
               model: Zoi.any(),
               context: Zoi.any(),
               message: Zoi.any() |> Zoi.nullish(),
+              output_items: Zoi.array(Zoi.any()) |> Zoi.default([]),
               object: Zoi.map() |> Zoi.nullish() |> Zoi.default(nil),
               stream?: Zoi.boolean() |> Zoi.default(false),
               stream: Zoi.any() |> Zoi.nullish() |> Zoi.default(nil),
@@ -50,6 +52,7 @@ defmodule ReqLlmNext.Response do
           model: LLMDB.Model.t(),
           context: Context.t(),
           message: Message.t() | nil,
+          output_items: [OutputItem.t()],
           object: map() | nil,
           stream?: boolean(),
           stream: Enumerable.t() | nil,
@@ -67,7 +70,9 @@ defmodule ReqLlmNext.Response do
 
   @spec new(map()) :: {:ok, t()} | {:error, term()}
   def new(attrs) when is_map(attrs) do
-    Zoi.parse(@schema, attrs)
+    attrs
+    |> normalize_output_items()
+    |> then(&Zoi.parse(@schema, &1))
   end
 
   @spec new!(map()) :: t()
@@ -91,6 +96,15 @@ defmodule ReqLlmNext.Response do
 
   """
   @spec text(t()) :: String.t() | nil
+  def text(%__MODULE__{output_items: output_items}) when output_items != [] do
+    output_items
+    |> Enum.flat_map(fn
+      %OutputItem{type: :text, data: text} when is_binary(text) -> [text]
+      _ -> []
+    end)
+    |> Enum.join("")
+  end
+
   def text(%__MODULE__{message: nil}), do: nil
 
   def text(%__MODULE__{message: %Message{content: content}}) do
@@ -103,6 +117,18 @@ defmodule ReqLlmNext.Response do
   Extract image content parts from the response message.
   """
   @spec images(t()) :: [ContentPart.t()]
+  def images(%__MODULE__{output_items: output_items}) when output_items != [] do
+    output_items
+    |> Enum.flat_map(fn
+      %OutputItem{type: :content_part, data: %ContentPart{} = part}
+      when part.type in [:image, :image_url] ->
+        [part]
+
+      _ ->
+        []
+    end)
+  end
+
   def images(%__MODULE__{message: nil}), do: []
 
   def images(%__MODULE__{message: %Message{content: content}}) do
@@ -154,6 +180,15 @@ defmodule ReqLlmNext.Response do
 
   """
   @spec thinking(t()) :: String.t() | nil
+  def thinking(%__MODULE__{output_items: output_items}) when output_items != [] do
+    output_items
+    |> Enum.flat_map(fn
+      %OutputItem{type: :thinking, data: text} when is_binary(text) -> [text]
+      _ -> []
+    end)
+    |> Enum.join("")
+  end
+
   def thinking(%__MODULE__{message: nil}), do: nil
 
   def thinking(%__MODULE__{message: %Message{content: content}}) do
@@ -174,6 +209,13 @@ defmodule ReqLlmNext.Response do
 
   """
   @spec tool_calls(t()) :: [ReqLlmNext.ToolCall.t()]
+  def tool_calls(%__MODULE__{output_items: output_items}) when output_items != [] do
+    Enum.flat_map(output_items, fn
+      %OutputItem{type: :tool_call, data: tool_call} -> [tool_call]
+      _ -> []
+    end)
+  end
+
   def tool_calls(%__MODULE__{message: nil}), do: []
 
   def tool_calls(%__MODULE__{message: %Message{tool_calls: tool_calls}})
@@ -317,6 +359,12 @@ defmodule ReqLlmNext.Response do
   def object(%__MODULE__{object: object}), do: object
 
   @doc """
+  Return canonical normalized output items for this response.
+  """
+  @spec output_items(t()) :: [OutputItem.t()]
+  def output_items(%__MODULE__{output_items: output_items}), do: output_items
+
+  @doc """
   Get the finish reason for this response.
   """
   @spec finish_reason(t()) :: :stop | :length | :tool_calls | :content_filter | :error | nil
@@ -354,6 +402,7 @@ defmodule ReqLlmNext.Response do
       model: model,
       context: evolved_context,
       message: message,
+      output_items: opts[:output_items] || message_output_items(message),
       object: opts[:object],
       usage: opts[:usage],
       finish_reason: opts[:finish_reason],
@@ -363,5 +412,26 @@ defmodule ReqLlmNext.Response do
 
   defp generate_id do
     "resp_" <> (:crypto.strong_rand_bytes(12) |> Base.url_encode64(padding: false))
+  end
+
+  defp normalize_output_items(%{output_items: output_items} = attrs) when is_list(output_items),
+    do: attrs
+
+  defp normalize_output_items(%{message: %Message{} = message} = attrs) do
+    Map.put(attrs, :output_items, message_output_items(message))
+  end
+
+  defp normalize_output_items(attrs), do: Map.put(attrs, :output_items, [])
+
+  defp message_output_items(nil), do: []
+
+  defp message_output_items(%Message{} = message) do
+    content_items =
+      Enum.map(message.content || [], &OutputItem.from_content_part/1)
+
+    tool_items =
+      Enum.map(message.tool_calls || [], &OutputItem.tool_call/1)
+
+    content_items ++ tool_items
   end
 end

@@ -6,6 +6,7 @@ defmodule ReqLlmNext.Wire.ResolverTest do
 
   alias ReqLlmNext.Wire.{
     Anthropic,
+    DeepSeekChat,
     OpenAIChat,
     OpenAIEmbeddings,
     OpenAIImages,
@@ -71,6 +72,11 @@ defmodule ReqLlmNext.Wire.ResolverTest do
     test "infers OpenAIChat for xai provider" do
       model = TestModels.xai()
       assert Resolver.wire_module!(model) == OpenAIChat
+    end
+
+    test "infers DeepSeekChat for deepseek provider" do
+      model = TestModels.deepseek()
+      assert Resolver.wire_module!(model) == DeepSeekChat
     end
 
     test "infers Anthropic for anthropic provider" do

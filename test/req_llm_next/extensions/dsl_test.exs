@@ -108,7 +108,8 @@ defmodule ReqLlmNext.Extensions.DslTest do
              Enum.sort([
                ReqLlmNext.Extensions.Definitions.OpenAICompatible,
                ReqLlmNext.Extensions.Definitions.OpenAI,
-               ReqLlmNext.Extensions.Definitions.Anthropic
+               ReqLlmNext.Extensions.Definitions.Anthropic,
+               ReqLlmNext.Extensions.Definitions.DeepSeek
              ])
 
     assert Map.has_key?(manifest.providers, :openai)

@@ -14,6 +14,7 @@ surface:
   - guides/anthropic_surface_map.md
   - guides/openai_surface_map.md
   - guides/anthropic_openai_compatibility.md
+  - guides/extension_architecture.md
   - lib/req_llm_next/support_matrix.ex
   - lib/req_llm_next/provider_test/comprehensive.ex
   - lib/mix/tasks/model_compat.ex
@@ -23,6 +24,7 @@ surface:
   - test/coverage/openai_websocket_coverage_test.exs
   - test/provider_features/anthropic_beta_features_test.exs
   - test/provider_features/anthropic_advanced_messages_test.exs
+  - test/providers/deepseek/**/*.exs
   - test/providers/anthropic/**/*.exs
 ```
 
@@ -56,6 +58,11 @@ surface:
 
 - id: reqllm.model_compat.provider_native_request_shapes
   statement: Provider-native utility coverage shall keep request-shape proofs for supported non-canonical endpoints so batch, file, and similar utility surfaces stay reconciled with the shared execution architecture without claiming top-level API support they do not provide.
+  priority: should
+  stability: evolving
+
+- id: reqllm.model_compat.extension_pressure_tests
+  statement: Compatibility expansion work shall keep at least one non-OpenAI OpenAI-compatible provider proof lane so family reuse, provider-specific semantic overrides, and wire-resolution fallbacks are tested before broad live coverage is claimed for that ecosystem.
   priority: should
   stability: evolving
 ```
@@ -97,4 +104,10 @@ surface:
   execute: true
   covers:
     - reqllm.model_compat.provider_native_request_shapes
+
+- kind: command
+  target: mix test test/providers/deepseek
+  execute: true
+  covers:
+    - reqllm.model_compat.extension_pressure_tests
 ```

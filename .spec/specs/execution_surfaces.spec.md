@@ -41,6 +41,11 @@ decisions:
   statement: ReqLlmNext may declare multiple transport variants for one semantic protocol family, such as OpenAI Responses over HTTP SSE and WebSocket, and explicit transport preference shall only select among those declared surfaces and fallbacks.
   priority: should
   stability: evolving
+
+- id: reqllm.execution_surfaces.realtime_outside_surface_catalog
+  statement: First-class realtime session flows may live outside the normal request-surface catalog when the package owns canonical realtime commands, events, and session reduction separately from the request planner, but provider adapters for those flows shall still honor the same semantic, wire, transport, and provider boundary ownership rules.
+  priority: should
+  stability: evolving
 ```
 
 ## Verification
@@ -60,4 +65,5 @@ decisions:
     - reqllm.execution_surfaces.support_unit
     - reqllm.execution_surfaces.surface_selection
     - reqllm.execution_surfaces.transport_variants
+    - reqllm.execution_surfaces.realtime_outside_surface_catalog
 ```

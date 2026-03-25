@@ -199,6 +199,8 @@ Diagnostics and telemetry exist so the project can answer questions like:
 
 Without that structure, every failure becomes just "model failed," which does not scale.
 
+`ReqLlmNext.Telemetry` is now the stable runtime emission boundary for those answers, and `ReqLlmNext.Realtime` is the shared package-owned realtime core rather than an OpenAI-only utility experiment.
+
 ## The Role Of Agents
 
 The project is agent-assisted by design.

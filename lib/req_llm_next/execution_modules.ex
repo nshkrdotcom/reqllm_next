@@ -3,7 +3,7 @@ defmodule ReqLlmNext.ExecutionModules do
   Resolves the runtime modules for a planned execution stack.
   """
 
-  alias ReqLlmNext.{ExecutionPlan, Extensions}
+  alias ReqLlmNext.{ExecutionPlan, Extensions, Telemetry}
 
   @type resolution :: %{
           provider_mod: module(),
@@ -17,13 +17,16 @@ defmodule ReqLlmNext.ExecutionModules do
   def resolve(%ExecutionPlan{} = plan) do
     {:ok, %{seams: seams}} = Extensions.resolve_compiled(extension_context(plan))
 
-    %{
+    resolution = %{
       provider_mod: provider_module_from_seams!(seams, plan.provider),
       session_runtime_mod: session_runtime_module_from_seams!(seams, plan.session_runtime),
       protocol_mod: protocol_module_from_seams!(seams, plan.semantic_protocol),
       wire_mod: wire_module_from_seams!(seams, plan.wire_format),
       transport_mod: transport_module_from_seams!(seams, plan.transport, plan.wire_format)
     }
+
+    Telemetry.emit_execution_stack(plan, resolution)
+    resolution
   end
 
   @spec session_runtime_module!(atom()) :: module()

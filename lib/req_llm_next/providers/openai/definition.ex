@@ -26,7 +26,7 @@ defmodule ReqLlmNext.Extensions.Definitions.OpenAI do
           conversations: ReqLlmNext.OpenAI.Conversations,
           videos: ReqLlmNext.OpenAI.Videos,
           webhooks: ReqLlmNext.OpenAI.Webhooks,
-          realtime: ReqLlmNext.OpenAI.Realtime
+          realtime: ReqLlmNext.Providers.OpenAI.Realtime.Adapter
         )
       end
     end

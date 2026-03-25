@@ -3,6 +3,7 @@ defmodule ReqLlmNext.Transports.HTTPStream do
 
   alias ReqLlmNext.Executor.StreamState
   alias ReqLlmNext.Fixtures
+  alias ReqLlmNext.Telemetry
   alias ReqLlmNext.Wire.Streaming
 
   @default_stream_timeout Application.compile_env(:req_llm_next, :stream_timeout, 30_000)
@@ -17,29 +18,34 @@ defmodule ReqLlmNext.Transports.HTTPStream do
         ) ::
           {:ok, Enumerable.t()} | {:error, term()}
   def stream(provider_mod, protocol_mod, wire_mod, model, prompt, opts) do
-    with {:ok, finch_request} <-
-           Streaming.build_request(provider_mod, wire_mod, model, prompt, opts) do
-      recorder = maybe_start_recorder(model, prompt, finch_request, opts)
-      receive_timeout = Keyword.get(opts, :receive_timeout, @default_stream_timeout)
+    Telemetry.span_provider_request(
+      provider_request_metadata(provider_mod, model, opts, wire_mod, protocol_mod),
+      fn ->
+        with {:ok, finch_request} <-
+               Streaming.build_request(provider_mod, wire_mod, model, prompt, opts) do
+          recorder = maybe_start_recorder(model, prompt, finch_request, opts)
+          receive_timeout = Keyword.get(opts, :receive_timeout, @default_stream_timeout)
 
-      stream =
-        Stream.resource(
-          fn ->
-            start_finch_stream(
-              finch_request,
-              recorder,
-              model,
-              wire_mod,
-              protocol_mod,
-              receive_timeout
+          stream =
+            Stream.resource(
+              fn ->
+                start_finch_stream(
+                  finch_request,
+                  recorder,
+                  model,
+                  wire_mod,
+                  protocol_mod,
+                  receive_timeout
+                )
+              end,
+              &next_chunk/1,
+              &cleanup/1
             )
-          end,
-          &next_chunk/1,
-          &cleanup/1
-        )
 
-      {:ok, stream}
-    end
+          {:ok, stream}
+        end
+      end
+    )
   end
 
   defp maybe_start_recorder(model, prompt, finch_request, opts) do
@@ -133,5 +139,13 @@ defmodule ReqLlmNext.Transports.HTTPStream do
       wire_format: Keyword.get(opts, :_execution_wire_format),
       transport: Keyword.get(opts, :_execution_transport)
     }
+  end
+
+  defp provider_request_metadata(provider_mod, model, opts, wire_mod, protocol_mod) do
+    Telemetry.provider_request_metadata(model.provider, model, opts, %{
+      provider_module: inspect(provider_mod),
+      wire_module: inspect(wire_mod),
+      protocol_module: inspect(protocol_mod)
+    })
   end
 end

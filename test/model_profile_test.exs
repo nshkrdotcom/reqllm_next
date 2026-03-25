@@ -21,12 +21,19 @@ defmodule ReqLlmNext.ModelProfileTest do
              ModelProfile.surfaces_for(profile, :text)
   end
 
+  test "uses provider-specific deepseek family over the shared openai-compatible base" do
+    {:ok, profile} = ModelProfile.from_model(ReqLlmNext.TestModels.deepseek())
+
+    assert profile.family == :deepseek_chat_compatible
+    assert [%{id: :openai_chat_text_http_sse}] = ModelProfile.surfaces_for(profile, :text)
+  end
+
   test "falls back to the global openai-compatible family for unregistered providers" do
     model =
       LLMDB.Model.new!(%{
-        id: "deepseek-chat",
-        provider: :deepseek,
-        name: "DeepSeek Chat",
+        id: "router-model",
+        provider: :openrouter,
+        name: "OpenRouter Chat",
         capabilities: %{chat: true},
         extra: %{}
       })

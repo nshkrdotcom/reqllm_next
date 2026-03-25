@@ -131,4 +131,15 @@ defmodule ReqLlmNext.StreamResponse do
       {:error, _error} -> []
     end
   end
+
+  @doc """
+  Consume the stream and return canonical normalized output items.
+  """
+  @spec output_items(t()) :: [ReqLlmNext.Response.OutputItem.t()]
+  def output_items(%__MODULE__{stream: stream}) do
+    case Materializer.collect(stream) do
+      {:ok, materialized} -> materialized.output_items
+      {:error, _error} -> []
+    end
+  end
 end

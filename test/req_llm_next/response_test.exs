@@ -30,6 +30,7 @@ defmodule ReqLlmNext.ResponseTest do
         :context,
         :message,
         :object,
+        :output_items,
         :stream?,
         :stream,
         :usage,

@@ -3,6 +3,7 @@ defmodule ReqLlmNext.Transports.OpenAIResponsesWebSocket do
 
   alias ReqLlmNext.Executor.StreamState
   alias ReqLlmNext.Fixtures
+  alias ReqLlmNext.Telemetry
 
   @default_stream_timeout Application.compile_env(:req_llm_next, :stream_timeout, 30_000)
 
@@ -16,31 +17,36 @@ defmodule ReqLlmNext.Transports.OpenAIResponsesWebSocket do
         ) ::
           {:ok, Enumerable.t()} | {:error, term()}
   def stream(provider_mod, protocol_mod, wire_mod, model, prompt, opts) do
-    timeout = Keyword.get(opts, :receive_timeout, @default_stream_timeout)
+    Telemetry.span_provider_request(
+      provider_request_metadata(provider_mod, model, opts, wire_mod, protocol_mod),
+      fn ->
+        timeout = Keyword.get(opts, :receive_timeout, @default_stream_timeout)
 
-    with {:ok, request_info, payload, auth_headers, ws_path} <-
-           build_request_info(provider_mod, wire_mod, model, prompt, opts),
-         recorder <- maybe_start_recorder(model, prompt, request_info, opts),
-         {:ok, conn, ref, websocket, recorder} <-
-           open_connection(provider_mod, auth_headers, ws_path, payload, recorder, timeout) do
-      stream =
-        Stream.resource(
-          fn ->
-            %{
-              conn: conn,
-              ref: ref,
-              websocket: websocket,
-              stream_state: StreamState.new(recorder, model, wire_mod, protocol_mod),
-              receive_timeout: timeout,
-              done?: false
-            }
-          end,
-          &next_chunk/1,
-          &cleanup/1
-        )
+        with {:ok, request_info, payload, auth_headers, ws_path} <-
+               build_request_info(provider_mod, wire_mod, model, prompt, opts),
+             recorder <- maybe_start_recorder(model, prompt, request_info, opts),
+             {:ok, conn, ref, websocket, recorder} <-
+               open_connection(provider_mod, auth_headers, ws_path, payload, recorder, timeout) do
+          stream =
+            Stream.resource(
+              fn ->
+                %{
+                  conn: conn,
+                  ref: ref,
+                  websocket: websocket,
+                  stream_state: StreamState.new(recorder, model, wire_mod, protocol_mod),
+                  receive_timeout: timeout,
+                  done?: false
+                }
+              end,
+              &next_chunk/1,
+              &cleanup/1
+            )
 
-      {:ok, stream}
-    end
+          {:ok, stream}
+        end
+      end
+    )
   end
 
   defp build_request_info(provider_mod, wire_mod, model, prompt, opts) do
@@ -256,5 +262,13 @@ defmodule ReqLlmNext.Transports.OpenAIResponsesWebSocket do
       wire_format: Keyword.get(opts, :_execution_wire_format),
       transport: Keyword.get(opts, :_execution_transport)
     }
+  end
+
+  defp provider_request_metadata(provider_mod, model, opts, wire_mod, protocol_mod) do
+    Telemetry.provider_request_metadata(model.provider, model, opts, %{
+      provider_module: inspect(provider_mod),
+      wire_module: inspect(wire_mod),
+      protocol_module: inspect(protocol_mod)
+    })
   end
 end

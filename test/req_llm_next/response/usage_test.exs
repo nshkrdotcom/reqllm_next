@@ -64,6 +64,22 @@ defmodule ReqLlmNext.Response.UsageTest do
       assert result.cache_read_tokens == 80
     end
 
+    test "extracts cache hit tokens from DeepSeek-style OpenAI-compatible usage" do
+      raw = %{
+        "prompt_tokens" => 100,
+        "completion_tokens" => 25,
+        "prompt_cache_hit_tokens" => 60,
+        "prompt_cache_miss_tokens" => 40
+      }
+
+      result = Usage.normalize(raw, ReqLlmNext.TestModels.deepseek())
+
+      assert result.input_tokens == 100
+      assert result.output_tokens == 25
+      assert result.total_tokens == 125
+      assert result.cache_read_tokens == 60
+    end
+
     test "normalizes Anthropic usage format" do
       anthropic_model = TestModels.anthropic()
 

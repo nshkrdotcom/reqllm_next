@@ -31,9 +31,14 @@ defmodule ReqLlmNext.Extensions.Definition do
 
   @spec discover_definition_modules() :: [module()]
   def discover_definition_modules do
-    definition_paths()
+    discover_definition_paths()
     |> Enum.map(&definition_module_from_path/1)
     |> Enum.sort_by(&Atom.to_string/1)
+  end
+
+  @spec discover_definition_paths() :: [String.t()]
+  def discover_definition_paths do
+    definition_paths()
   end
 
   @spec merge_manifests!([module()]) :: Manifest.t()

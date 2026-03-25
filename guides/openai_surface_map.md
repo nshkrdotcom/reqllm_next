@@ -94,7 +94,7 @@ These OpenAI areas exist in some form but are not yet complete first-class surfa
 1. Built-in tools:
    request shaping, include helpers, and terminal lifecycle normalization are supported, but exhaustive live coverage is still not in place for every tool family and result shape.
 2. Realtime:
-   ReqLlmNext now has a provider-owned realtime protocol family and event helpers, but it is intentionally scoped as an OpenAI utility surface rather than a top-level cross-provider facade operation.
+   ReqLlmNext now has a first-class transport-agnostic realtime core with an OpenAI adapter. The package owns canonical realtime commands, events, and session reduction, while socket hosting may still live above the package boundary.
 3. Webhooks:
    webhook event parsing and categorization are supported, but this package does not yet claim full webhook signature-verification or dashboard-management coverage.
 4. Utility and secondary surfaces:
@@ -106,7 +106,7 @@ These OpenAI surfaces are not yet first-class ReqLlmNext support:
 
 1. exhaustive live verification for every built-in OpenAI tool family and result shape
 2. full webhook signature and delivery-management coverage
-3. a top-level cross-provider realtime facade
+3. exhaustive live verification for every realtime event family and session workflow
 4. broad utility-surface live fixtures on the same level as the core support matrix
 
 ## Recommended Package Boundary
@@ -118,11 +118,11 @@ ReqLlmNext should keep the OpenAI story intentionally split:
 3. provider-native built-in tool request helpers stay scoped to OpenAI Responses
 4. image edits and audio translations extend the existing media lane through the same top-level media facade instead of inventing a parallel OpenAI-only public API
 5. utility endpoints beyond core generation are explicit provider-owned surfaces, not silent planner creep
-6. realtime is treated as a distinct provider-owned protocol family rather than an extension of the current Responses lane
+6. realtime is treated as a first-class package concept with an OpenAI adapter rather than as a quiet extension of the current Responses lane
 7. Anthropic's standalone media boundary remains explicit rather than forcing fake symmetry with OpenAI
 
 ## Package Impact
 
 The honest OpenAI support claim today is:
 
-ReqLlmNext has deep core coverage for OpenAI-compatible chat, Responses HTTP, Responses WebSocket mode, embeddings, prompt caching, file inputs, continuation, built-in tool helpers, and standalone media operations including image edits and translations. It also now exposes a broad provider-owned OpenAI utility surface for files, vector stores, responses, conversations, background mode, batches, moderation, videos, webhooks, and realtime. The remaining honest gaps are mostly around exhaustive live verification and a few deliberately provider-owned surfaces that do not expand the top-level cross-provider facade.
+ReqLlmNext has deep core coverage for OpenAI-compatible chat, Responses HTTP, Responses WebSocket mode, embeddings, prompt caching, file inputs, continuation, built-in tool helpers, standalone media operations including image edits and translations, and a first-class realtime core with an OpenAI adapter. It also now exposes a broad provider-owned OpenAI utility surface for files, vector stores, responses, conversations, background mode, batches, moderation, videos, and webhooks. The remaining honest gaps are mostly around exhaustive live verification and a few deliberately provider-owned surfaces that do not expand the top-level cross-provider facade.

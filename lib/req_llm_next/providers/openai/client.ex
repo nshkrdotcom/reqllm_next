@@ -5,6 +5,7 @@ defmodule ReqLlmNext.OpenAI.Client do
 
   alias ReqLlmNext.Error
   alias ReqLlmNext.Providers.OpenAI, as: OpenAIProvider
+  alias ReqLlmNext.Telemetry
 
   @type multipart_part ::
           {:field, String.t(), String.t()}
@@ -44,19 +45,25 @@ defmodule ReqLlmNext.OpenAI.Client do
           {:ok, Finch.Response.t()} | {:error, term()}
   def raw_request(method, path, headers, body, opts \\ [])
       when method in [:get, :post, :delete] do
-    api_key = OpenAIProvider.get_api_key(opts)
-    url = request_url(path, opts)
-    request = Finch.build(method, url, OpenAIProvider.auth_headers(api_key) ++ headers, body)
+    Telemetry.span_provider_request(
+      provider_request_metadata(method, path, opts),
+      fn ->
+        api_key = OpenAIProvider.get_api_key(opts)
+        url = request_url(path, opts)
+        request = Finch.build(method, url, OpenAIProvider.auth_headers(api_key) ++ headers, body)
 
-    case Finch.request(request, ReqLlmNext.Finch,
-           receive_timeout: Keyword.get(opts, :receive_timeout, 30_000)
-         ) do
-      {:ok, %Finch.Response{} = response} ->
-        {:ok, response}
+        case Finch.request(request, ReqLlmNext.Finch,
+               receive_timeout: Keyword.get(opts, :receive_timeout, 30_000)
+             ) do
+          {:ok, %Finch.Response{} = response} ->
+            {:ok, response}
 
-      {:error, reason} ->
-        {:error, Error.API.Request.exception(reason: "HTTP request failed: #{inspect(reason)}")}
-    end
+          {:error, reason} ->
+            {:error,
+             Error.API.Request.exception(reason: "HTTP request failed: #{inspect(reason)}")}
+        end
+      end
+    )
   end
 
   @spec build_multipart_body([multipart_part()]) :: {String.t(), iodata()}
@@ -191,5 +198,12 @@ defmodule ReqLlmNext.OpenAI.Client do
     |> Enum.find_value(fn {key, value} ->
       if String.downcase(key) == String.downcase(name), do: value, else: nil
     end)
+  end
+
+  defp provider_request_metadata(method, path, opts) do
+    Telemetry.provider_request_metadata(:openai, nil, opts, %{
+      http_method: method,
+      utility_path: path
+    })
   end
 end

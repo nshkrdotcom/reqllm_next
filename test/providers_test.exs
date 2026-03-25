@@ -3,7 +3,7 @@ defmodule ReqLlmNext.ProvidersTest do
 
   alias ReqLlmNext.Provider
   alias ReqLlmNext.Providers
-  alias ReqLlmNext.Providers.{Anthropic, OpenAI}
+  alias ReqLlmNext.Providers.{Anthropic, DeepSeek, OpenAI}
 
   describe "Providers.get/1" do
     test "returns OpenAI module for :openai" do
@@ -12,6 +12,10 @@ defmodule ReqLlmNext.ProvidersTest do
 
     test "returns Anthropic module for :anthropic" do
       assert Providers.get(:anthropic) == {:ok, Anthropic}
+    end
+
+    test "returns DeepSeek module for :deepseek" do
+      assert Providers.get(:deepseek) == {:ok, DeepSeek}
     end
 
     test "returns error for unknown provider" do
@@ -28,6 +32,10 @@ defmodule ReqLlmNext.ProvidersTest do
       assert Providers.get!(:anthropic) == Anthropic
     end
 
+    test "returns DeepSeek module for :deepseek" do
+      assert Providers.get!(:deepseek) == DeepSeek
+    end
+
     test "raises for unknown provider" do
       assert_raise RuntimeError, ~r/Provider error/, fn ->
         Providers.get!(:unknown)
@@ -41,6 +49,7 @@ defmodule ReqLlmNext.ProvidersTest do
 
       assert :openai in providers
       assert :anthropic in providers
+      assert :deepseek in providers
     end
   end
 
@@ -86,6 +95,21 @@ defmodule ReqLlmNext.ProvidersTest do
 
       assert {"anthropic-beta", beta} = List.keyfind(headers, "anthropic-beta", 0)
       assert beta =~ "interleaved-thinking"
+    end
+  end
+
+  describe "Providers.DeepSeek" do
+    test "base_url returns DeepSeek API URL" do
+      assert DeepSeek.base_url() == "https://api.deepseek.com"
+    end
+
+    test "env_key returns DEEPSEEK_API_KEY" do
+      assert DeepSeek.env_key() == "DEEPSEEK_API_KEY"
+    end
+
+    test "auth_headers returns Bearer token" do
+      headers = DeepSeek.auth_headers("test-key")
+      assert headers == [{"Authorization", "Bearer test-key"}]
     end
   end
 

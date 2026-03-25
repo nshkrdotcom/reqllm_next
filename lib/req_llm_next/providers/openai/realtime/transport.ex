@@ -4,63 +4,69 @@ defmodule ReqLlmNext.OpenAI.Realtime.Transport do
   alias ReqLlmNext.Executor.StreamState
   alias ReqLlmNext.Fixtures
   alias ReqLlmNext.OpenAI.Realtime.Wire
+  alias ReqLlmNext.Telemetry
 
   @default_stream_timeout Application.compile_env(:req_llm_next, :stream_timeout, 30_000)
 
   @spec stream(module(), module(), module(), LLMDB.Model.t(), [map()], keyword()) ::
           {:ok, Enumerable.t()} | {:error, term()}
   def stream(provider_mod, protocol_mod, wire_mod, model, client_events, opts) do
-    timeout = Keyword.get(opts, :receive_timeout, @default_stream_timeout)
-    ws_url = Wire.websocket_url(provider_mod.base_url(), model, opts)
-    auth_headers = provider_mod.auth_headers(provider_mod.get_api_key(opts))
-    payloads = Enum.map(client_events, &Jason.encode!(wire_mod.encode_client_event(&1)))
+    Telemetry.span_provider_request(
+      provider_request_metadata(provider_mod, model, opts, wire_mod, protocol_mod),
+      fn ->
+        timeout = Keyword.get(opts, :receive_timeout, @default_stream_timeout)
+        ws_url = Wire.websocket_url(provider_mod.base_url(), model, opts)
+        auth_headers = provider_mod.auth_headers(provider_mod.get_api_key(opts))
+        payloads = Enum.map(client_events, &Jason.encode!(wire_mod.encode_client_event(&1)))
 
-    recorder =
-      case {Fixtures.mode(), Keyword.get(opts, :fixture)} do
-        {:record, fixture_name} when is_binary(fixture_name) ->
-          Fixtures.start_recorder(
-            model,
-            fixture_name,
-            client_events,
-            %{
-              "method" => "WEBSOCKET",
-              "url" => ws_url,
-              "transport" => "websocket",
-              "headers" => auth_headers,
-              "body" => client_events
-            },
-            %{
-              surface_id: :openai_realtime,
-              semantic_protocol: :openai_realtime,
-              wire_format: :openai_realtime_json,
-              transport: :websocket
-            }
-          )
+        recorder =
+          case {Fixtures.mode(), Keyword.get(opts, :fixture)} do
+            {:record, fixture_name} when is_binary(fixture_name) ->
+              Fixtures.start_recorder(
+                model,
+                fixture_name,
+                client_events,
+                %{
+                  "method" => "WEBSOCKET",
+                  "url" => ws_url,
+                  "transport" => "websocket",
+                  "headers" => auth_headers,
+                  "body" => client_events
+                },
+                %{
+                  surface_id: :openai_realtime,
+                  semantic_protocol: :openai_realtime,
+                  wire_format: :openai_realtime_json,
+                  transport: :websocket
+                }
+              )
 
-        _ ->
-          nil
+            _ ->
+              nil
+          end
+
+        with {:ok, conn, ref, websocket, recorder} <-
+               open_connection(ws_url, auth_headers, payloads, recorder, timeout) do
+          stream =
+            Stream.resource(
+              fn ->
+                %{
+                  conn: conn,
+                  ref: ref,
+                  websocket: websocket,
+                  stream_state: StreamState.new(recorder, model, wire_mod, protocol_mod),
+                  receive_timeout: timeout,
+                  done?: false
+                }
+              end,
+              &next_chunk/1,
+              &cleanup/1
+            )
+
+          {:ok, stream}
+        end
       end
-
-    with {:ok, conn, ref, websocket, recorder} <-
-           open_connection(ws_url, auth_headers, payloads, recorder, timeout) do
-      stream =
-        Stream.resource(
-          fn ->
-            %{
-              conn: conn,
-              ref: ref,
-              websocket: websocket,
-              stream_state: StreamState.new(recorder, model, wire_mod, protocol_mod),
-              receive_timeout: timeout,
-              done?: false
-            }
-          end,
-          &next_chunk/1,
-          &cleanup/1
-        )
-
-      {:ok, stream}
-    end
+    )
   end
 
   defp open_connection(ws_url, auth_headers, payloads, recorder, timeout) do
@@ -210,5 +216,14 @@ defmodule ReqLlmNext.OpenAI.Realtime.Transport do
       {:meta, %{terminal?: true}} -> true
       _ -> false
     end)
+  end
+
+  defp provider_request_metadata(provider_mod, model, opts, wire_mod, protocol_mod) do
+    Telemetry.provider_request_metadata(model.provider, model, opts, %{
+      provider_module: inspect(provider_mod),
+      wire_module: inspect(wire_mod),
+      protocol_module: inspect(protocol_mod),
+      realtime?: true
+    })
   end
 end

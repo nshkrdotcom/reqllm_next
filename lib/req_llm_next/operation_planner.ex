@@ -12,6 +12,7 @@ defmodule ReqLlmNext.OperationPlanner do
     ModelProfile,
     PolicyRules,
     SurfacePreparation,
+    Telemetry,
     Validation
   }
 
@@ -26,24 +27,27 @@ defmodule ReqLlmNext.OperationPlanner do
          {:ok, policy} <- PolicyRules.resolve(profile, mode, opts),
          {:ok, parameter_values} <-
            SurfacePreparation.prepare(model, profile, mode, policy.surface, prompt, opts) do
-      {:ok,
-       ExecutionPlan.new!(%{
-         model: profile,
-         mode: mode,
-         surface: policy.surface,
-         provider: profile.provider,
-         session_runtime:
-           session_runtime_for(profile, mode, policy.surface, policy.session_strategy),
-         semantic_protocol: policy.surface.semantic_protocol,
-         wire_format: policy.surface.wire_format,
-         transport: policy.surface.transport,
-         parameter_values: parameter_values,
-         timeout_class: policy.timeout_class,
-         timeout_ms: policy.timeout_ms,
-         session_strategy: policy.session_strategy,
-         fallback_surfaces: policy.fallback_surfaces,
-         plan_adapters: plan_adapters_for(model, profile, mode, policy.surface)
-       })}
+      plan =
+        ExecutionPlan.new!(%{
+          model: profile,
+          mode: mode,
+          surface: policy.surface,
+          provider: profile.provider,
+          session_runtime:
+            session_runtime_for(profile, mode, policy.surface, policy.session_strategy),
+          semantic_protocol: policy.surface.semantic_protocol,
+          wire_format: policy.surface.wire_format,
+          transport: policy.surface.transport,
+          parameter_values: parameter_values,
+          timeout_class: policy.timeout_class,
+          timeout_ms: policy.timeout_ms,
+          session_strategy: policy.session_strategy,
+          fallback_surfaces: policy.fallback_surfaces,
+          plan_adapters: plan_adapters_for(model, profile, mode, policy.surface)
+        })
+
+      Telemetry.emit_plan_resolved(plan)
+      {:ok, plan}
     end
   end
 

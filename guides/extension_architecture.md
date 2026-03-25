@@ -77,6 +77,7 @@ Examples:
 - `:openai_chat_compatible`
 - `:openai_responses_compatible`
 - `:anthropic_messages`
+- `:deepseek_chat_compatible`
 
 Families are selected by declarative criteria and ordered by:
 
@@ -133,6 +134,12 @@ Criteria may match on:
 
 This supports a default path with narrowly scoped exceptions.
 
+One current proof point is DeepSeek: it reuses the OpenAI-compatible chat family
+shape, then narrows only the provider-owned differences such as provider
+registration, reasoning-content semantic decoding, and request-body thinking
+controls. That is the exact contribution shape the extension system is supposed
+to enable.
+
 ## Fallback Principle
 
 The extension architecture must always preserve fallback behavior.
@@ -142,5 +149,9 @@ The extension architecture must always preserve fallback behavior.
   has a deterministic path.
 - OpenAI-compatible providers should be able to reuse a default family and opt
   in only to their actual differences.
+
+The compiled runtime registry acts as the shared fallback table for globally
+addressable seam keys, while resolved provider or family seams may still shadow
+those keys locally for one selected execution stack.
 
 That is the architectural goal the DSL and manifest system are meant to serve.

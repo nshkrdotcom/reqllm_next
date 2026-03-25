@@ -25,7 +25,7 @@ decisions:
 
 ```spec-requirements
 - id: reqllm.source_layout.concern_homes
-  statement: ReqLlmNext shall keep model-boundary concerns, provider-scoped fact extraction, manifest-backed provider registration, family-owned surface catalog modules, profile construction, mode normalization, policy resolution, surface-owned request preparation, session-runtime modules, semantic protocol normalization, wire envelopes, transport mechanics, shared response stream materialization, fixture replay, media input and output contracts, and session state in distinct source locations that match the architecture, while co-locating concrete family implementations under `lib/req_llm_next/families/` and provider-owned implementations and utilities under `lib/req_llm_next/providers/`.
+  statement: ReqLlmNext shall keep model-boundary concerns, provider-scoped fact extraction, manifest-backed provider registration, family-owned surface catalog modules, profile construction, mode normalization, policy resolution, surface-owned request preparation, session-runtime modules, semantic protocol normalization, wire envelopes, transport mechanics, shared response output-item materialization, fixture replay, media input and output contracts, realtime commands and session state, and telemetry emission in distinct source locations that match the architecture, while co-locating concrete family implementations under `lib/req_llm_next/families/` and provider-owned implementations and utilities under `lib/req_llm_next/providers/`.
   priority: must
   stability: evolving
 

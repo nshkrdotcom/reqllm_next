@@ -12,6 +12,8 @@ summary: Explicit handoff rules for provider, session runtime, transport, wire f
 surface:
   - AGENTS.md
   - lib/req_llm_next/execution_modules.ex
+  - lib/req_llm_next/realtime.ex
+  - lib/req_llm_next/telemetry.ex
   - lib/req_llm_next/families/**/*.ex
   - lib/req_llm_next/providers/**/*.ex
   - lib/req_llm_next/semantic_protocol.ex
@@ -21,6 +23,8 @@ decisions:
   - reqllm.decision.execution_layers
   - reqllm.decision.layer_scoped_plan_aware_adapters
   - reqllm.decision.execution_plan_bridge
+  - reqllm.decision.transport_agnostic_realtime_core
+  - reqllm.decision.runtime_telemetry_kernel
   - reqllm.decision.zoi_backed_struct_contracts
 ```
 
@@ -28,7 +32,7 @@ decisions:
 
 ```spec-requirements
 - id: reqllm.layer_boundaries.separated_io
-  statement: ReqLlmNext shall keep provider, session runtime, transport, wire format, and semantic protocol responsibilities separated so no layer skips across another layer's ownership boundary and each resolved plan binds one deterministic layer stack including explicit provider, protocol, wire, and transport modules resolved from manifest-declared seams and the compiled runtime registry across both streaming execution and request-style HTTP media lanes.
+  statement: ReqLlmNext shall keep provider, session runtime, realtime session reduction, transport, wire format, semantic protocol, and telemetry-kernel responsibilities separated so no layer skips across another layer's ownership boundary and each resolved plan binds one deterministic layer stack including explicit provider, protocol, wire, and transport modules resolved from manifest-declared seams and the compiled runtime registry across both streaming execution and request-style HTTP media lanes.
   priority: must
   stability: evolving
 

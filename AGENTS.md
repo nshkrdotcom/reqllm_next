@@ -87,11 +87,18 @@ Concrete provider and family implementation modules should be co-located in slic
 
 Shared planning, manifest, response, and contract code should stay central.
 
+Use `ReqLlmNext.Telemetry` as the single package-level telemetry boundary.
+
+- Prefer `ReqLlmNext.Telemetry` helpers over direct `:telemetry` calls in runtime layers.
+- Keep package telemetry metadata stable and sanitized.
+- Do not emit raw prompt, raw reasoning, or raw payload bodies unless an explicitly sanitized path allows it.
+
 ## Layer Ownership
 
 Use the layers for their intended concerns.
 
 - `Session Runtime`: persistent execution state such as continuation or response reuse
+- `Realtime`: canonical realtime commands, events, and session reduction owned by the package, with transport hosting allowed above the package boundary
 - `Semantic Protocol`: canonical meaning and event normalization for an API family
 - `Wire Format`: provider JSON bodies, streaming frames, and raw envelope parsing
 - `Transport`: HTTP streaming, WebSocket, and related byte movement concerns

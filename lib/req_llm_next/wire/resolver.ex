@@ -92,9 +92,34 @@ defmodule ReqLlmNext.Wire.Resolver do
 
   defp wire_resolution(%LLMDB.Model{} = model, operation) do
     with {:ok, profile} <- ModelProfile.from_model(model),
-         [%{wire_format: wire_format} | _] <- ModelProfile.surfaces_for(profile, operation) do
-      {:ok, ExecutionModules.wire_module!(wire_format)}
+         [%{wire_format: wire_format} = surface | _] <-
+           ModelProfile.surfaces_for(profile, operation) do
+      extension_context =
+        resolver_extension_context(profile, operation, surface)
+
+      case Extensions.resolve_compiled(extension_context) do
+        {:ok, %{seams: %{wire_modules: wire_modules}}} ->
+          {:ok, Map.get(wire_modules, wire_format, ExecutionModules.wire_module!(wire_format))}
+
+        {:error, :no_matching_family} ->
+          {:ok, ExecutionModules.wire_module!(wire_format)}
+      end
     end
+  end
+
+  defp resolver_extension_context(profile, operation, surface) do
+    %{
+      provider: profile.provider,
+      family: profile.family,
+      model_id: profile.model_id,
+      operation: operation,
+      transport: surface.transport,
+      semantic_protocol: surface.semantic_protocol,
+      stream?: Map.get(surface.features, :streaming, false),
+      tools?: get_in(profile.features, [:tools, :supported]),
+      structured?: operation == :object,
+      features: profile.features
+    }
   end
 
   defp default_operation!(%LLMDB.Model{} = model) do

@@ -3,6 +3,7 @@ defmodule ReqLlmNext.Transports.HTTPRequest do
 
   alias ReqLlmNext.Error
   alias ReqLlmNext.Fixtures
+  alias ReqLlmNext.Telemetry
 
   @spec request(module(), module(), LLMDB.Model.t(), term(), keyword()) ::
           {:ok, term()} | {:error, term()}
@@ -12,33 +13,38 @@ defmodule ReqLlmNext.Transports.HTTPRequest do
         {:ok, replay_response}
 
       :no_fixture ->
-        with {:ok, request} <- build_request(provider_mod, wire_mod, model, input, opts),
-             {:ok, response} <- Finch.request(request, ReqLlmNext.Finch),
-             :ok <- maybe_record_fixture(model, opts, request, response),
-             {:ok, decoded} <- decode_response(wire_mod, response, model, input, opts) do
-          {:ok, decoded}
-        else
-          {:ok, %Finch.Response{status: status, body: response_body}} ->
-            {:error,
-             Error.API.Request.exception(
-               reason: "HTTP request failed",
-               status: status,
-               response_body: response_body
-             )}
+        Telemetry.span_provider_request(
+          provider_request_metadata(provider_mod, model, opts, wire_mod),
+          fn ->
+            with {:ok, request} <- build_request(provider_mod, wire_mod, model, input, opts),
+                 {:ok, response} <- Finch.request(request, ReqLlmNext.Finch),
+                 :ok <- maybe_record_fixture(model, opts, request, response),
+                 {:ok, decoded} <- decode_response(wire_mod, response, model, input, opts) do
+              {:ok, decoded}
+            else
+              {:ok, %Finch.Response{status: status, body: response_body}} ->
+                {:error,
+                 Error.API.Request.exception(
+                   reason: "HTTP request failed",
+                   status: status,
+                   response_body: response_body
+                 )}
 
-          {:error, %Error.API.Request{} = error} ->
-            {:error, error}
+              {:error, %Error.API.Request{} = error} ->
+                {:error, error}
 
-          {:error, %Error.API.JsonParse{} = error} ->
-            {:error, error}
+              {:error, %Error.API.JsonParse{} = error} ->
+                {:error, error}
 
-          {:error, %Error.API.Response{} = error} ->
-            {:error, error}
+              {:error, %Error.API.Response{} = error} ->
+                {:error, error}
 
-          {:error, reason} ->
-            {:error,
-             Error.API.Request.exception(reason: "HTTP request failed: #{inspect(reason)}")}
-        end
+              {:error, reason} ->
+                {:error,
+                 Error.API.Request.exception(reason: "HTTP request failed: #{inspect(reason)}")}
+            end
+          end
+        )
     end
   end
 
@@ -135,5 +141,12 @@ defmodule ReqLlmNext.Transports.HTTPRequest do
 
   defp module_exports?(module, function_name, arity) when is_atom(module) do
     Code.ensure_loaded?(module) and function_exported?(module, function_name, arity)
+  end
+
+  defp provider_request_metadata(provider_mod, model, opts, wire_mod) do
+    Telemetry.provider_request_metadata(model.provider, model, opts, %{
+      provider_module: inspect(provider_mod),
+      wire_module: inspect(wire_mod)
+    })
   end
 end

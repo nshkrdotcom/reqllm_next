@@ -145,7 +145,8 @@ defmodule ReqLlmNext.Response.Usage do
   defp maybe_add_cached_tokens(normalized, usage) do
     cached_tokens =
       get_in(usage, ["prompt_tokens_details", "cached_tokens"]) ||
-        get_in(usage, [:prompt_tokens_details, :cached_tokens])
+        get_in(usage, [:prompt_tokens_details, :cached_tokens]) ||
+        get_value(usage, ["prompt_cache_hit_tokens", :prompt_cache_hit_tokens], nil)
 
     maybe_put(normalized, :cache_read_tokens, cached_tokens)
   end

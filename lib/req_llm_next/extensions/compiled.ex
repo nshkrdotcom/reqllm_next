@@ -5,8 +5,19 @@ defmodule ReqLlmNext.Extensions.Compiled do
 
   alias ReqLlmNext.Extensions.{Definition, RuntimeRegistry}
 
+  @definition_roots [
+    Path.expand("../providers", __DIR__),
+    Path.expand("../families", __DIR__)
+  ]
+
+  Enum.each(@definition_roots, &Module.put_attribute(__MODULE__, :external_resource, &1))
+
+  @definition_paths Definition.discover_definition_paths()
+  Enum.each(@definition_paths, &Module.put_attribute(__MODULE__, :external_resource, &1))
+
   @definitions Definition.discover_definition_modules()
                |> Enum.map(&Code.ensure_compiled!/1)
+               |> Enum.uniq()
   @manifest Definition.merge_manifests!(@definitions)
   @runtime_registry RuntimeRegistry.build(@manifest)
 

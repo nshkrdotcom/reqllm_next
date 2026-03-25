@@ -49,10 +49,8 @@ defmodule ReqLlmNext.Extensions.RuntimeRegistry do
           {:ok, ^module} ->
             current
 
-          {:ok, existing} ->
-            raise ArgumentError,
-                  "runtime seam #{inspect(key)} defines conflicting modules for #{inspect(module_key)}: " <>
-                    "#{inspect(existing)} vs #{inspect(module)}"
+          {:ok, _existing} ->
+            current
 
           :error ->
             Map.put(current, module_key, module)

@@ -34,7 +34,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.execution_plan.deterministic_stack
-  statement: `ExecutionPlan` shall deterministically resolve one implementation stack of provider, session runtime mode, semantic protocol, wire format, transport, and ordered plan adapters for a given profile, mode, and policy input, with provider, protocol, wire, and transport modules read from resolved extension seams and the compiled runtime registry instead of rediscovered by provider branching.
+  statement: `ExecutionPlan` shall deterministically resolve one implementation stack of provider, session runtime mode, semantic protocol, wire format, transport, ordered plan adapters, and any selected realtime adapter seam for a given profile, mode, and policy input, with provider, protocol, wire, transport, and realtime modules read from resolved extension seams and the compiled runtime registry instead of rediscovered by provider branching.
   priority: must
   stability: evolving
 

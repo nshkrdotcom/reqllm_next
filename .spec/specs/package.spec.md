@@ -14,6 +14,9 @@ surface:
   - test/fixtures/**/*.json
 decisions:
   - reqllm.decision.media_operation_families
+  - reqllm.decision.canonical_output_items
+  - reqllm.decision.transport_agnostic_realtime_core
+  - reqllm.decision.runtime_telemetry_kernel
   - reqllm.decision.zoi_backed_struct_contracts
 ```
 
@@ -36,7 +39,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.package.buffered_stream_metadata
-  statement: When ReqLlmNext buffers a streamed response into the canonical `Response` shape, it shall preserve terminal metadata such as finish reason and provider-facing response identifiers emitted by the canonical stream, and the same shared stream materialization path shall drive helper extraction for streamed text, thinking, usage, and tool calls so normalization stays consistent across buffered and streaming consumers.
+  statement: When ReqLlmNext buffers a streamed response into the canonical `Response` shape, it shall preserve terminal metadata such as finish reason and provider-facing response identifiers emitted by the canonical stream, and the same shared output-item materialization path shall drive helper extraction for streamed text, thinking, usage, transcripts, audio chunks, provider items, and tool calls so normalization stays consistent across buffered and streaming consumers.
   priority: should
   stability: evolving
 
@@ -61,7 +64,12 @@ decisions:
   stability: evolving
 
 - id: reqllm.package.compile_time_extensions
-  statement: ReqLlmNext shall move provider and model edge-case support toward a compile-time extension manifest with provider registrations, explicit provider default families, global fallback families, family inheritance for reusing a happy-path stack, narrow opt-in override rules, manifest-backed provider facts and surface catalogs, built-in declaration packs discovered from co-located family and provider slice homes, session-runtime seams, and compile-time manifest verification so common paths stay simple while edge cases remain explicit.
+  statement: ReqLlmNext shall move provider and model edge-case support toward a compile-time extension manifest with provider registrations, explicit provider default families, global fallback families, family inheritance for reusing a happy-path stack, narrow opt-in override rules, manifest-backed provider facts and surface catalogs, built-in declaration packs discovered from co-located family and provider slice homes, session-runtime seams, realtime adapter seams, and compile-time manifest verification so common paths stay simple while edge cases remain explicit.
+  priority: should
+  stability: evolving
+
+- id: reqllm.package.runtime_telemetry
+  statement: ReqLlmNext shall expose a stable `ReqLlmNext.Telemetry` kernel for request, plan, execution-stack, stream, provider-request, fixture, and realtime instrumentation so application code and compat tooling can observe the runtime without parsing provider-specific payloads.
   priority: should
   stability: evolving
 
@@ -82,6 +90,7 @@ decisions:
     - reqllm.package.fixture_replay
     - reqllm.package.execution_planning
     - reqllm.package.buffered_stream_metadata
+    - reqllm.package.runtime_telemetry
 
 - kind: command
   target: mix test test/public_api
@@ -107,6 +116,12 @@ decisions:
   execute: true
   covers:
     - reqllm.package.execution_planning
+    - reqllm.package.compile_time_extensions
+
+- kind: command
+  target: mix test test/providers/deepseek test/model_profile_test.exs test/wire/resolver_test.exs
+  execute: true
+  covers:
     - reqllm.package.compile_time_extensions
 
 - kind: command

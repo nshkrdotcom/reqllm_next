@@ -24,7 +24,7 @@ surface:
 
 ```spec-requirements
 - id: reqllm.extension_manifest.plain_runtime_contract
-  statement: ReqLlmNext shall model execution extension behavior as plain runtime data made of providers, families, rules, criteria, seam patches, and manifests so the runtime consumes a stable contract independent of any authoring DSL, with built-in declaration packs discovered from provider and family slice homes such as `lib/req_llm_next/families/**/definition.ex` and `lib/req_llm_next/providers/**/definition.ex`, merged into one compiled manifest at compile time, and expanded into a manifest-backed runtime registry for globally-addressable provider, session-runtime, protocol, wire, and transport seam keys.
+  statement: ReqLlmNext shall model execution extension behavior as plain runtime data made of providers, families, rules, criteria, seam patches, and manifests so the runtime consumes a stable contract independent of any authoring DSL, with built-in declaration packs discovered from provider and family slice homes such as `lib/req_llm_next/families/**/definition.ex` and `lib/req_llm_next/providers/**/definition.ex`, merged into one compiled manifest at compile time, and expanded into a manifest-backed runtime registry for globally-addressable provider, session-runtime, protocol, wire, and transport seam keys plus plan-local seam overrides for provider or family stacks that intentionally shadow the shared fallback registry.
   priority: must
   stability: evolving
 
@@ -49,7 +49,7 @@ surface:
   stability: evolving
 
 - id: reqllm.extension_manifest.compile_time_verification
-  statement: ReqLlmNext shall verify merged extension manifests at compile time for duplicate ids, missing default-family references, missing global defaults, invalid family references in rules, illegal seam ownership, and missing seam modules so the declaration layer enforces architectural boundaries instead of merely describing them.
+  statement: ReqLlmNext shall verify merged extension manifests at compile time for duplicate ids, missing default-family references, missing global defaults, invalid family references in rules, illegal seam ownership, and missing seam modules so the declaration layer enforces architectural boundaries instead of merely describing them, while still allowing provider or family definition packs to override shared semantic, wire, transport, or utility seam keys locally for their resolved stacks.
   priority: must
   stability: evolving
 ```
@@ -80,4 +80,12 @@ surface:
   execute: true
   covers:
     - reqllm.extension_manifest.compile_time_verification
+
+- kind: command
+  target: mix test test/providers/deepseek/execution_stack_test.exs test/model_profile_test.exs
+  execute: true
+  covers:
+    - reqllm.extension_manifest.plain_runtime_contract
+    - reqllm.extension_manifest.family_precedence
+    - reqllm.extension_manifest.narrow_seams
 ```
