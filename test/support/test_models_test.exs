@@ -140,11 +140,38 @@ defmodule ReqLlmNext.TestModelsTest do
     test "creates xAI model" do
       model = TestModels.xai()
       assert model.provider == :xai
+      assert model.id == "grok-4"
     end
 
     test "applies overrides" do
       model = TestModels.xai(%{id: "grok-custom"})
       assert model.id == "grok-custom"
+    end
+  end
+
+  describe "xai_legacy/1" do
+    test "creates a legacy xAI model" do
+      model = TestModels.xai_legacy()
+      assert model.provider == :xai
+      assert model.id == "grok-2"
+    end
+
+    test "applies overrides" do
+      model = TestModels.xai_legacy(%{id: "grok-2-custom"})
+      assert model.id == "grok-2-custom"
+    end
+  end
+
+  describe "xai_image/1" do
+    test "creates an xAI image model" do
+      model = TestModels.xai_image()
+      assert model.provider == :xai
+      assert model.extra.api == "images"
+    end
+
+    test "applies overrides" do
+      model = TestModels.xai_image(%{id: "grok-imagine-2"})
+      assert model.id == "grok-imagine-2"
     end
   end
 

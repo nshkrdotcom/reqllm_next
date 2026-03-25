@@ -26,7 +26,7 @@ decisions:
 
 ```spec-requirements
 - id: reqllm.model_profile.descriptive_facts
-  statement: ReqLlmNext shall normalize resolved model metadata into a request-independent `ModelProfile` that describes operations, features, modalities, limits, parameter defaults, constraints metadata, and session capabilities without choosing concrete request behavior, including manifest-backed provider-scoped descriptive fact extraction for normalized features such as Anthropic structured outputs, citations, context management, additional document input, provider-owned media operation support, and OpenAI-compatible provider deltas such as DeepSeek chat or reasoning behavior, Groq transcription-media routing, OpenRouter routing-aware chat overrides, and self-hosted providers such as vLLM that intentionally ride the shared OpenAI-compatible family without custom wire or protocol overrides, plus the resolved extension family id selected by declarative criteria and provider or global fallback rules that owns surface-catalog construction and must declare the catalog module that builds the model's execution surfaces.
+  statement: ReqLlmNext shall normalize resolved model metadata into a request-independent `ModelProfile` that describes operations, features, modalities, limits, parameter defaults, constraints metadata, and session capabilities without choosing concrete request behavior, including manifest-backed provider-scoped descriptive fact extraction for normalized features such as Anthropic structured outputs, citations, context management, additional document input, provider-owned media operation support, and OpenAI-compatible provider deltas such as DeepSeek chat or reasoning behavior, Groq transcription-media routing, OpenRouter routing-aware chat overrides, xAI responses-first versus image-media routing plus native-structured-output support by model generation, and self-hosted providers such as vLLM that intentionally ride the shared OpenAI-compatible family without custom wire or protocol overrides, plus the resolved extension family id selected by declarative criteria and provider or global fallback rules that owns surface-catalog construction and must declare the catalog module that builds the model's execution surfaces.
   priority: must
   stability: evolving
 
@@ -52,7 +52,7 @@ decisions:
     - reqllm.model_profile.request_independent
 
 - kind: command
-  target: mix test test/model_profile_test.exs test/operation_planner_test.exs
+  target: mix test test/model_profile_test.exs test/operation_planner_test.exs test/providers/xai/provider_facts_test.exs test/providers/xai/execution_stack_test.exs
   execute: true
   covers:
     - reqllm.model_profile.descriptive_facts

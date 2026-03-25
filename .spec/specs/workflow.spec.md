@@ -57,12 +57,12 @@ decisions:
   stability: evolving
 
 - id: reqllm.workflow.provider_surface_guides
-  statement: Provider expansion work shall keep provider surface-map, compatibility-evaluation, and provider-expansion roadmap guides in sync with code and subject specs so wide provider coverage remains explainable and reviewable, including honest boundaries around Anthropic-native tool helpers, prompt-cache and effort handling, context-management and compaction support, provider-feature proof depth, and the family-first ordering that defers wrapper platforms such as Azure, Google Vertex, and Amazon Bedrock.
+  statement: Provider expansion work shall keep provider surface-map, compatibility-evaluation, and provider-expansion roadmap guides in sync with code and subject specs so wide provider coverage remains explainable and reviewable, including honest boundaries around Anthropic-native tool helpers, prompt-cache and effort handling, context-management and compaction support, provider-feature proof depth, responses-first providers such as xAI that add provider-local tool helpers and media-family overrides, and the family-first ordering that defers wrapper platforms such as Azure, Google Vertex, and Amazon Bedrock.
   priority: should
   stability: evolving
 
 - id: reqllm.workflow.extension_dsl_guidance
-  statement: Contributor workflow shall keep the extension-architecture guide, Spark dependency, compile-time manifest proof, definition-pack layout, discovery of built-in definitions from co-located family and provider slice homes, match or stack or patch authoring surface, inheritance behavior, manifest-backed provider fallback and verification behavior, and at least one concrete OpenAI-compatible third-provider proof lane in sync so contributors add edge-case support through declared extension rules instead of editing shared imperative branching directly.
+  statement: Contributor workflow shall keep the extension-architecture guide, Spark dependency, compile-time manifest proof, definition-pack layout, discovery of built-in definitions from co-located family and provider slice homes, match or stack or patch authoring surface, inheritance behavior, manifest-backed provider fallback and verification behavior, and concrete OpenAI-compatible provider proof lanes such as DeepSeek, Groq, OpenRouter, vLLM, and xAI in sync so contributors add edge-case support through declared extension rules instead of editing shared imperative branching directly.
   priority: should
   stability: evolving
 ```
@@ -124,7 +124,7 @@ decisions:
     - reqllm.workflow.live_verifier_commands
 
 - kind: command
-  target: mix test test/req_llm_next/extensions/dsl_test.exs
+  target: mix test test/req_llm_next/extensions/dsl_test.exs test/providers/xai/execution_stack_test.exs
   execute: true
   covers:
     - reqllm.workflow.extension_dsl_guidance

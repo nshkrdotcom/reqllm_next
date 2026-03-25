@@ -3,7 +3,7 @@ defmodule ReqLlmNext.ProvidersTest do
 
   alias ReqLlmNext.Provider
   alias ReqLlmNext.Providers
-  alias ReqLlmNext.Providers.{Anthropic, DeepSeek, Groq, OpenAI, OpenRouter, VLLM}
+  alias ReqLlmNext.Providers.{Anthropic, DeepSeek, Groq, OpenAI, OpenRouter, VLLM, XAI}
 
   describe "Providers.get/1" do
     test "returns OpenAI module for :openai" do
@@ -28,6 +28,10 @@ defmodule ReqLlmNext.ProvidersTest do
 
     test "returns vLLM module for :vllm" do
       assert Providers.get(:vllm) == {:ok, VLLM}
+    end
+
+    test "returns xAI module for :xai" do
+      assert Providers.get(:xai) == {:ok, XAI}
     end
 
     test "returns error for unknown provider" do
@@ -60,6 +64,10 @@ defmodule ReqLlmNext.ProvidersTest do
       assert Providers.get!(:vllm) == VLLM
     end
 
+    test "returns xAI module for :xai" do
+      assert Providers.get!(:xai) == XAI
+    end
+
     test "raises for unknown provider" do
       assert_raise RuntimeError, ~r/Provider error/, fn ->
         Providers.get!(:unknown)
@@ -77,6 +85,7 @@ defmodule ReqLlmNext.ProvidersTest do
       assert :groq in providers
       assert :openrouter in providers
       assert :vllm in providers
+      assert :xai in providers
     end
   end
 
@@ -185,6 +194,21 @@ defmodule ReqLlmNext.ProvidersTest do
     end
   end
 
+  describe "Providers.XAI" do
+    test "base_url returns xAI API URL" do
+      assert XAI.base_url() == "https://api.x.ai"
+    end
+
+    test "env_key returns XAI_API_KEY" do
+      assert XAI.env_key() == "XAI_API_KEY"
+    end
+
+    test "auth_headers returns Bearer token" do
+      headers = XAI.auth_headers("test-key")
+      assert headers == [{"Authorization", "Bearer test-key"}]
+    end
+  end
+
   describe "Provider.build_auth_headers/2" do
     test "builds bearer auth header" do
       headers = Provider.build_auth_headers(:bearer, "my-token")
@@ -225,6 +249,12 @@ defmodule ReqLlmNext.ProvidersTest do
     test "vLLM returns api_key from opts" do
       test_key = "test-key-vllm"
       key = VLLM.get_api_key(api_key: test_key)
+      assert key == test_key
+    end
+
+    test "xAI returns api_key from opts" do
+      test_key = "test-key-xai"
+      key = XAI.get_api_key(api_key: test_key)
       assert key == test_key
     end
 

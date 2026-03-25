@@ -17,6 +17,8 @@ defmodule ReqLlmNext.Wire.ResolverTest do
     Resolver
   }
 
+  alias ReqLlmNext.Wire.XAIResponses
+
   describe "resolve!/1" do
     test "returns provider and wire module for OpenAI model" do
       model = TestModels.openai()
@@ -73,7 +75,7 @@ defmodule ReqLlmNext.Wire.ResolverTest do
 
     test "infers OpenAIChat for xai provider" do
       model = TestModels.xai()
-      assert Resolver.wire_module!(model) == OpenAIChat
+      assert Resolver.wire_module!(model) == XAIResponses
     end
 
     test "infers OpenAIChat for vllm provider" do
@@ -93,6 +95,11 @@ defmodule ReqLlmNext.Wire.ResolverTest do
 
     test "infers OpenAIImages for image-generation models" do
       model = TestModels.openai_image()
+      assert Resolver.wire_module!(model) == OpenAIImages
+    end
+
+    test "infers OpenAIImages for xAI image-generation models" do
+      model = TestModels.xai_image()
       assert Resolver.wire_module!(model) == OpenAIImages
     end
 

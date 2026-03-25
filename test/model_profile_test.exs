@@ -49,6 +49,13 @@ defmodule ReqLlmNext.ModelProfileTest do
     assert [%{id: :openai_chat_text_http_sse}] = ModelProfile.surfaces_for(profile, :text)
   end
 
+  test "uses provider-specific xai responses family over the shared openai-compatible base" do
+    {:ok, profile} = ModelProfile.from_model(ReqLlmNext.TestModels.xai())
+
+    assert profile.family == :xai_responses_compatible
+    assert [%{id: :xai_responses_text_http_sse}] = ModelProfile.surfaces_for(profile, :text)
+  end
+
   test "falls back to the global openai-compatible family for unregistered providers" do
     model =
       LLMDB.Model.new!(%{

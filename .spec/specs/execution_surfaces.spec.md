@@ -23,7 +23,7 @@ decisions:
 
 ```spec-requirements
 - id: reqllm.execution_surfaces.support_unit
-  statement: ReqLlmNext shall represent each valid endpoint style as a named `ExecutionSurface` that bundles semantic protocol, wire format, transport, session compatibility, and feature tags for one operation family, including provider-native structured-output strategies, provider-native request-preparation rules, any session-runtime seam selection implied by that semantic family, and request-style media surfaces when a provider exposes standalone image, transcription, or speech APIs.
+  statement: ReqLlmNext shall represent each valid endpoint style as a named `ExecutionSurface` that bundles semantic protocol, wire format, transport, session compatibility, and feature tags for one operation family, including provider-native structured-output strategies, provider-native request-preparation rules, any session-runtime seam selection implied by that semantic family, and request-style media surfaces when a provider exposes standalone image, transcription, or speech APIs, including provider-local responses-first surface ids such as xAI text and object Responses lanes and provider-local media-family overrides such as xAI image generation.
   priority: must
   stability: evolving
 
@@ -59,7 +59,7 @@ decisions:
     - reqllm.execution_surfaces.surface_selection
 
 - kind: command
-  target: mix test test/operation_planner_test.exs
+  target: mix test test/operation_planner_test.exs test/providers/xai/execution_stack_test.exs
   execute: true
   covers:
     - reqllm.execution_surfaces.support_unit

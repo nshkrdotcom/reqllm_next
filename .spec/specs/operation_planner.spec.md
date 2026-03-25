@@ -32,7 +32,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.operation_planner.assembly_scope
-  statement: The planner boundary shall own mode normalization, rule evaluation, compatibility-aware surface selection, parameter normalization, explicit transport and session preference handling, fallback planning, surface-specific parameter validation, documented provider-native dependency validation, provider-native helper acceptance or rejection, surface-owned request preparation, session planning, and adapter selection, including request-style media operations, OpenAI-compatible provider overrides such as DeepSeek chat families, Anthropic context-management validation such as `clear_thinking_20251015` requiring Anthropic thinking to be enabled, and resolution of surface-preparation, session-runtime, and adapter seams from the compiled extension manifest rather than from global imperative registries.
+  statement: The planner boundary shall own mode normalization, rule evaluation, compatibility-aware surface selection, parameter normalization, explicit transport and session preference handling, fallback planning, surface-specific parameter validation, documented provider-native dependency validation, provider-native helper acceptance or rejection, surface-owned request preparation, session planning, and adapter selection, including request-style media operations, OpenAI-compatible provider overrides such as DeepSeek chat families and xAI responses-first surfaces with provider-local built-in tool helpers plus image-family overrides, Anthropic context-management validation such as `clear_thinking_20251015` requiring Anthropic thinking to be enabled, and resolution of surface-preparation, session-runtime, and adapter seams from the compiled extension manifest rather than from global imperative registries.
   priority: must
   stability: evolving
 
@@ -61,6 +61,12 @@ decisions:
 
 - kind: command
   target: mix test test/providers/anthropic/surface_preparation_messages_test.exs
+  execute: true
+  covers:
+    - reqllm.operation_planner.assembly_scope
+
+- kind: command
+  target: mix test test/providers/xai/execution_stack_test.exs test/providers/xai/wire_responses_test.exs
   execute: true
   covers:
     - reqllm.operation_planner.assembly_scope

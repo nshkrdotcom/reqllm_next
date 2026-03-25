@@ -329,7 +329,7 @@ defmodule ReqLlmNext.TestModels do
   """
   def xai(overrides \\ %{}) do
     base = %LLMDB.Model{
-      id: "test-model",
+      id: "grok-4",
       provider: :xai,
       name: "Test xAI Model",
       capabilities: %{
@@ -342,6 +342,37 @@ defmodule ReqLlmNext.TestModels do
       },
       limits: %{context: 131_072, output: 8_192},
       modalities: %{input: [:text], output: [:text]}
+    }
+
+    struct!(base, Map.to_list(overrides))
+  end
+
+  @doc """
+  Creates a legacy xAI model without native structured outputs.
+  """
+  def xai_legacy(overrides \\ %{}) do
+    xai(%{id: "grok-2"} |> Map.merge(overrides))
+  end
+
+  @doc """
+  Creates an xAI image-generation model for testing.
+  """
+  def xai_image(overrides \\ %{}) do
+    base = %LLMDB.Model{
+      id: "grok-imagine-1",
+      provider: :xai,
+      name: "Test xAI Image Model",
+      family: "grok-imagine",
+      capabilities: %{
+        chat: false,
+        embeddings: false,
+        reasoning: %{enabled: false},
+        tools: %{enabled: false},
+        json: %{native: false, schema: false, strict: false},
+        streaming: %{text: false, tool_calls: false}
+      },
+      modalities: %{input: [:text, :image], output: [:image]},
+      extra: %{api: "images"}
     }
 
     struct!(base, Map.to_list(overrides))
