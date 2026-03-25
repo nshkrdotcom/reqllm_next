@@ -175,6 +175,19 @@ defmodule ReqLlmNext.TestModelsTest do
     end
   end
 
+  describe "zai/1" do
+    test "creates Z.AI model" do
+      model = TestModels.zai()
+      assert model.provider == :zai
+      assert model.id == "glm-4.6"
+    end
+
+    test "applies overrides" do
+      model = TestModels.zai(%{id: "glm-5"})
+      assert model.id == "glm-5"
+    end
+  end
+
   describe "xai/1" do
     test "creates xAI model" do
       model = TestModels.xai()

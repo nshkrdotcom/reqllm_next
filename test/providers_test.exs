@@ -14,6 +14,7 @@ defmodule ReqLlmNext.ProvidersTest do
     OpenRouter,
     VLLM,
     Venice,
+    ZAI,
     XAI
   }
 
@@ -56,6 +57,10 @@ defmodule ReqLlmNext.ProvidersTest do
 
     test "returns Cerebras module for :cerebras" do
       assert Providers.get(:cerebras) == {:ok, Cerebras}
+    end
+
+    test "returns Z.AI module for :zai" do
+      assert Providers.get(:zai) == {:ok, ZAI}
     end
 
     test "returns error for unknown provider" do
@@ -104,6 +109,10 @@ defmodule ReqLlmNext.ProvidersTest do
       assert Providers.get!(:cerebras) == Cerebras
     end
 
+    test "returns Z.AI module for :zai" do
+      assert Providers.get!(:zai) == ZAI
+    end
+
     test "raises for unknown provider" do
       assert_raise RuntimeError, ~r/Provider error/, fn ->
         Providers.get!(:unknown)
@@ -125,6 +134,7 @@ defmodule ReqLlmNext.ProvidersTest do
       assert :venice in providers
       assert :alibaba in providers
       assert :cerebras in providers
+      assert :zai in providers
     end
   end
 
@@ -292,6 +302,21 @@ defmodule ReqLlmNext.ProvidersTest do
 
     test "auth_headers returns Bearer token" do
       headers = Cerebras.auth_headers("test-key")
+      assert headers == [{"Authorization", "Bearer test-key"}]
+    end
+  end
+
+  describe "Providers.ZAI" do
+    test "base_url returns Z.AI API URL" do
+      assert ZAI.base_url() == "https://api.z.ai/api/paas/v4"
+    end
+
+    test "env_key returns ZAI_API_KEY" do
+      assert ZAI.env_key() == "ZAI_API_KEY"
+    end
+
+    test "auth_headers returns Bearer token" do
+      headers = ZAI.auth_headers("test-key")
       assert headers == [{"Authorization", "Bearer test-key"}]
     end
   end

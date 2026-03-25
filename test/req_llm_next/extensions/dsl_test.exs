@@ -116,6 +116,7 @@ defmodule ReqLlmNext.Extensions.DslTest do
                ReqLlmNext.Extensions.Definitions.OpenRouter,
                ReqLlmNext.Extensions.Definitions.VLLM,
                ReqLlmNext.Extensions.Definitions.Venice,
+               ReqLlmNext.Extensions.Definitions.ZAI,
                ReqLlmNext.Extensions.Definitions.XAI
              ])
 
@@ -127,6 +128,7 @@ defmodule ReqLlmNext.Extensions.DslTest do
     assert Map.has_key?(manifest.providers, :openrouter)
     assert Map.has_key?(manifest.providers, :vllm)
     assert Map.has_key?(manifest.providers, :venice)
+    assert Map.has_key?(manifest.providers, :zai)
     assert Map.has_key?(manifest.providers, :xai)
     assert Enum.any?(manifest.families, &(&1.id == :openai_chat_compatible))
     assert Enum.any?(manifest.families, &(&1.id == :openai_responses_compatible))
@@ -136,6 +138,7 @@ defmodule ReqLlmNext.Extensions.DslTest do
     assert Enum.any?(manifest.families, &(&1.id == :groq_chat_compatible))
     assert Enum.any?(manifest.families, &(&1.id == :openrouter_chat_compatible))
     assert Enum.any?(manifest.families, &(&1.id == :venice_chat_compatible))
+    assert Enum.any?(manifest.families, &(&1.id == :zai_chat_compatible))
     assert Enum.any?(manifest.families, &(&1.id == :xai_responses_compatible))
     assert Enum.any?(manifest.rules, &(&1.id == :openai_reasoning_models))
     assert {:ok, ReqLlmNext.Providers.OpenAI} = Extensions.provider_module(manifest, :openai)

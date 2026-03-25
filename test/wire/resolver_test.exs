@@ -17,7 +17,8 @@ defmodule ReqLlmNext.Wire.ResolverTest do
     OpenRouterChat,
     OpenAITranscriptions,
     Resolver,
-    VeniceChat
+    VeniceChat,
+    ZAIChat
   }
 
   alias ReqLlmNext.Wire.XAIResponses
@@ -99,6 +100,11 @@ defmodule ReqLlmNext.Wire.ResolverTest do
     test "infers CerebrasChat for cerebras provider" do
       model = TestModels.cerebras()
       assert Resolver.wire_module!(model) == CerebrasChat
+    end
+
+    test "infers ZAIChat for zai provider" do
+      model = TestModels.zai()
+      assert Resolver.wire_module!(model) == ZAIChat
     end
 
     test "infers DeepSeekChat for deepseek provider" do
