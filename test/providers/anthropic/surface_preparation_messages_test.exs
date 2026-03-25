@@ -35,6 +35,7 @@ defmodule ReqLlmNext.SurfacePreparation.AnthropicMessagesTest do
   test "validates documented context management edit order" do
     assert {:error, error} =
              AnthropicMessages.validate(surface(),
+               thinking: %{type: "adaptive"},
                context_management: %{
                  edits: [
                    %{type: "clear_tool_uses_20250919"},
@@ -44,6 +45,31 @@ defmodule ReqLlmNext.SurfacePreparation.AnthropicMessagesTest do
              )
 
     assert Exception.message(error) =~ "clear_thinking_20251015 before clear_tool_uses_20250919"
+  end
+
+  test "requires Anthropic thinking when clear_thinking edit is used" do
+    assert {:error, error} =
+             AnthropicMessages.validate(surface(),
+               context_management: %{edits: [%{type: "clear_thinking_20251015"}]}
+             )
+
+    assert Exception.message(error) =~ "clear_thinking_20251015 requires Anthropic thinking"
+  end
+
+  test "accepts clear_thinking edit when Anthropic thinking is enabled" do
+    assert :ok =
+             AnthropicMessages.validate(surface(),
+               thinking: %{type: "adaptive"},
+               context_management: %{edits: [%{type: "clear_thinking_20251015"}]}
+             )
+  end
+
+  test "accepts clear_thinking edit when reasoning_effort is set" do
+    assert :ok =
+             AnthropicMessages.validate(surface(),
+               reasoning_effort: :medium,
+               context_management: %{edits: [%{type: "clear_thinking_20251015"}]}
+             )
   end
 
   test "rejects unknown context management edit types" do

@@ -119,7 +119,8 @@ defmodule ReqLlmNext.SurfacePreparation.AnthropicMessages do
         :ok
 
       %{edits: edits} when is_list(edits) ->
-        with :ok <- validate_edit_order(edits),
+        with :ok <- validate_clear_thinking_dependency(edits, opts),
+             :ok <- validate_edit_order(edits),
              nil <- Enum.find(edits, &invalid_context_edit?/1) do
           :ok
         else
@@ -129,6 +130,18 @@ defmodule ReqLlmNext.SurfacePreparation.AnthropicMessages do
 
       _ ->
         :ok
+    end
+  end
+
+  defp validate_clear_thinking_dependency(edits, opts) do
+    if Enum.any?(edits, &edit_type?(&1, "clear_thinking_20251015")) and not thinking_requested?(opts) do
+      {:error,
+       Error.Invalid.Parameter.exception(
+         parameter:
+           "context_management.edits clear_thinking_20251015 requires Anthropic thinking to be enabled via :thinking or :reasoning_effort"
+       )}
+    else
+      :ok
     end
   end
 
@@ -200,6 +213,10 @@ defmodule ReqLlmNext.SurfacePreparation.AnthropicMessages do
 
   defp invalid_context_message(_invalid) do
     "context_management.edits must use Anthropic edit types clear_tool_uses_20250919, clear_thinking_20251015, or compact_20260112"
+  end
+
+  defp thinking_requested?(opts) do
+    Keyword.has_key?(opts, :thinking) or Keyword.has_key?(opts, :reasoning_effort)
   end
 
   defp edit_type?(%{type: type}, expected) when is_binary(type), do: type == expected
