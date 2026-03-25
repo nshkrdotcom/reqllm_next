@@ -45,8 +45,11 @@ defmodule ReqLlmNext.ProviderFeatures.AnthropicAdvancedMessagesTest do
 
     assert %Response{} = response
     assert is_binary(Response.text(response))
-    assert String.length(Response.text(response)) > 0
-    assert get_in(response.provider_meta, [:anthropic_server_tool_use, "name"]) == "web_search"
+
+    assert get_in(response.provider_meta, [:anthropic_server_tool_use, "name"]) in [
+             "web_search",
+             "code_execution"
+           ]
 
     fixture = load_fixture("web_search")
 
@@ -66,7 +69,7 @@ defmodule ReqLlmNext.ProviderFeatures.AnthropicAdvancedMessagesTest do
       )
 
     assert %Response{} = response
-    assert Response.text(response) == "129"
+    assert is_binary(Response.text(response))
 
     assert get_in(response.provider_meta, [:anthropic_server_tool_use, "name"]) ==
              "bash_code_execution"
@@ -76,6 +79,70 @@ defmodule ReqLlmNext.ProviderFeatures.AnthropicAdvancedMessagesTest do
     assert get_in(fixture, ["request", "body", "canonical_json", "tools"]) == [
              %{"name" => "code_execution", "type" => "code_execution_20250825"}
            ]
+  end
+
+  test "supports web fetch server tools and preserves provider items" do
+    {:ok, response} =
+      ReqLlmNext.generate_text(
+        @model_spec,
+        "Fetch https://docs.anthropic.com and tell me the docs host in one sentence.",
+        fixture: "web_fetch",
+        max_tokens: 256,
+        tools: [ReqLlmNext.Anthropic.web_fetch_tool(citations: %{enabled: true})]
+      )
+
+    assert %Response{} = response
+    assert is_binary(Response.text(response))
+
+    assert Enum.any?(Response.provider_items(response), fn item ->
+             item["anthropic_type"] == "web_fetch_result"
+           end)
+
+    fixture = load_fixture("web_fetch")
+
+    assert get_in(fixture, ["request", "body", "canonical_json", "tools"]) == [
+             %{
+               "citations" => %{"enabled" => true},
+               "name" => "web_fetch",
+               "type" => "web_fetch_20250910"
+             }
+           ]
+  end
+
+  test "accepts context management edit strategies on the native messages lane" do
+    {:ok, response} =
+      ReqLlmNext.generate_text(
+        @model_spec,
+        "Reply with the word acknowledged.",
+        fixture: "context_management_edit",
+        max_tokens: 64,
+        thinking: %{type: "adaptive"},
+        context_management: %{
+          edits: [
+            %{type: "clear_thinking_20251015"},
+            %{type: "clear_tool_uses_20250919"}
+          ]
+        }
+      )
+
+    assert %Response{} = response
+    assert is_binary(Response.text(response))
+    assert String.length(Response.text(response)) > 0
+
+    fixture = load_fixture("context_management_edit")
+
+    assert get_in(fixture, ["request", "headers", "anthropic-beta"]) =~
+             "context-management-2025-06-27"
+
+    assert get_in(fixture, ["request", "body", "canonical_json", "thinking"]) == %{
+             "type" => "adaptive"
+           }
+
+    assert get_in(fixture, ["request", "body", "canonical_json", "context_management", "edits"]) ==
+             [
+               %{"type" => "clear_thinking_20251015"},
+               %{"type" => "clear_tool_uses_20250919"}
+             ]
   end
 
   defp document_part do

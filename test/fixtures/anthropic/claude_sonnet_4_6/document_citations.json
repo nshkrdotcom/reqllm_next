@@ -1,11 +1,10 @@
 {
-  "captured_at": "2026-03-24T18:55:57.571320Z",
+  "captured_at": "2026-03-25T14:41:07.438466Z",
   "chunks": [
-    "ZXZlbnQ6IG1lc3NhZ2Vfc3RhcnQKZGF0YTogeyJ0eXBlIjoibWVzc2FnZV9zdGFydCIsIm1lc3NhZ2UiOnsibW9kZWwiOiJjbGF1ZGUtc29ubmV0LTQtNiIsImlkIjoibXNnXzAxNm5WY1EyODhyTWgyWXAyNTN0RE1qdCIsInR5cGUiOiJtZXNzYWdlIiwicm9sZSI6ImFzc2lzdGFudCIsImNvbnRlbnQiOltdLCJzdG9wX3JlYXNvbiI6bnVsbCwic3RvcF9zZXF1ZW5jZSI6bnVsbCwidXNhZ2UiOnsiaW5wdXRfdG9rZW5zIjo1NzksImNhY2hlX2NyZWF0aW9uX2lucHV0X3Rva2VucyI6MCwiY2FjaGVfcmVhZF9pbnB1dF90b2tlbnMiOjAsImNhY2hlX2NyZWF0aW9uIjp7ImVwaGVtZXJhbF81bV9pbnB1dF90b2tlbnMiOjAsImVwaGVtZXJhbF8xaF9pbnB1dF90b2tlbnMiOjB9LCJvdXRwdXRfdG9rZW5zIjo1LCJzZXJ2aWNlX3RpZXIiOiJzdGFuZGFyZCIsImluZmVyZW5jZV9nZW8iOiJnbG9iYWwifX19Cgo=",
-    "ZXZlbnQ6IGNvbnRlbnRfYmxvY2tfc3RhcnQKZGF0YTogeyJ0eXBlIjoiY29udGVudF9ibG9ja19zdGFydCIsImluZGV4IjowLCJjb250ZW50X2Jsb2NrIjp7ImNpdGF0aW9ucyI6W10sInR5cGUiOiJ0ZXh0IiwidGV4dCI6IiJ9ICAgIH0KCg==",
-    "ZXZlbnQ6IHBpbmcKZGF0YTogeyJ0eXBlIjogInBpbmcifQoKZXZlbnQ6IGNvbnRlbnRfYmxvY2tfZGVsdGEKZGF0YTogeyJ0eXBlIjoiY29udGVudF9ibG9ja19kZWx0YSIsImluZGV4IjowLCJkZWx0YSI6eyJ0eXBlIjoiY2l0YXRpb25zX2RlbHRhIiwiY2l0YXRpb24iOnsidHlwZSI6ImNoYXJfbG9jYXRpb24iLCJjaXRlZF90ZXh0IjoiUXVhcnRlcmx5IHJldmVudWUgaW5jcmVhc2VkIGJ5IDEyIHBlcmNlbnQgeWVhciBvdmVyIHllYXIuIiwiZG9jdW1lbnRfaW5kZXgiOjAsImRvY3VtZW50X3RpdGxlIjoiUXVhcnRlcmx5IFJlcG9ydCIsImZpbGVfaWQiOiJmaWxlXzAxMUNaTlIxUHZLRWhBeHRCb0RUdndaNyIsInN0YXJ0X2NoYXJfaW5kZXgiOjAsImVuZF9jaGFyX2luZGV4Ijo1N319ICAgICAgICAgICAgIH0KCg==",
-    "ZXZlbnQ6IGNvbnRlbnRfYmxvY2tfZGVsdGEKZGF0YTogeyJ0eXBlIjoiY29udGVudF9ibG9ja19kZWx0YSIsImluZGV4IjowLCJkZWx0YSI6eyJ0eXBlIjoidGV4dF9kZWx0YSIsInRleHQiOiJRdWFydGVybHkgcmV2ZW51ZSBpbmNyZWFzZWQgYnkgKioxMiBwZXJjZW50KiogeWVhciBvdmVyIHllYXIuIn0gICB9CgpldmVudDogY29udGVudF9ibG9ja19zdG9wCmRhdGE6IHsidHlwZSI6ImNvbnRlbnRfYmxvY2tfc3RvcCIsImluZGV4IjowfQoK",
-    "ZXZlbnQ6IG1lc3NhZ2VfZGVsdGEKZGF0YTogeyJ0eXBlIjoibWVzc2FnZV9kZWx0YSIsImRlbHRhIjp7InN0b3BfcmVhc29uIjoiZW5kX3R1cm4iLCJzdG9wX3NlcXVlbmNlIjpudWxsfSwidXNhZ2UiOnsiaW5wdXRfdG9rZW5zIjo1NzksImNhY2hlX2NyZWF0aW9uX2lucHV0X3Rva2VucyI6MCwiY2FjaGVfcmVhZF9pbnB1dF90b2tlbnMiOjAsIm91dHB1dF90b2tlbnMiOjMzfSAgICAgICB9CgpldmVudDogbWVzc2FnZV9zdG9wCmRhdGE6IHsidHlwZSI6Im1lc3NhZ2Vfc3RvcCIgICAgICAgICAgICAgICB9Cgo="
+    "ZXZlbnQ6IG1lc3NhZ2Vfc3RhcnQKZGF0YTogeyJ0eXBlIjoibWVzc2FnZV9zdGFydCIsIm1lc3NhZ2UiOnsibW9kZWwiOiJjbGF1ZGUtc29ubmV0LTQtNiIsImlkIjoibXNnXzAxQ2h6eGszU3dZYUVkeWhoWmh6TENFOSIsInR5cGUiOiJtZXNzYWdlIiwicm9sZSI6ImFzc2lzdGFudCIsImNvbnRlbnQiOltdLCJzdG9wX3JlYXNvbiI6bnVsbCwic3RvcF9zZXF1ZW5jZSI6bnVsbCwidXNhZ2UiOnsiaW5wdXRfdG9rZW5zIjo1NzksImNhY2hlX2NyZWF0aW9uX2lucHV0X3Rva2VucyI6MCwiY2FjaGVfcmVhZF9pbnB1dF90b2tlbnMiOjAsImNhY2hlX2NyZWF0aW9uIjp7ImVwaGVtZXJhbF81bV9pbnB1dF90b2tlbnMiOjAsImVwaGVtZXJhbF8xaF9pbnB1dF90b2tlbnMiOjB9LCJvdXRwdXRfdG9rZW5zIjo1LCJzZXJ2aWNlX3RpZXIiOiJzdGFuZGFyZCIsImluZmVyZW5jZV9nZW8iOiJnbG9iYWwifX0gICAgIH0KCg==",
+    "ZXZlbnQ6IGNvbnRlbnRfYmxvY2tfc3RhcnQKZGF0YTogeyJ0eXBlIjoiY29udGVudF9ibG9ja19zdGFydCIsImluZGV4IjowLCJjb250ZW50X2Jsb2NrIjp7ImNpdGF0aW9ucyI6W10sInR5cGUiOiJ0ZXh0IiwidGV4dCI6IiJ9ICAgICAgICAgICAgICB9CgpldmVudDogcGluZwpkYXRhOiB7InR5cGUiOiAicGluZyJ9CgpldmVudDogY29udGVudF9ibG9ja19kZWx0YQpkYXRhOiB7InR5cGUiOiJjb250ZW50X2Jsb2NrX2RlbHRhIiwiaW5kZXgiOjAsImRlbHRhIjp7InR5cGUiOiJjaXRhdGlvbnNfZGVsdGEiLCJjaXRhdGlvbiI6eyJ0eXBlIjoiY2hhcl9sb2NhdGlvbiIsImNpdGVkX3RleHQiOiJRdWFydGVybHkgcmV2ZW51ZSBpbmNyZWFzZWQgYnkgMTIgcGVyY2VudCB5ZWFyIG92ZXIgeWVhci4iLCJkb2N1bWVudF9pbmRleCI6MCwiZG9jdW1lbnRfdGl0bGUiOiJRdWFydGVybHkgUmVwb3J0IiwiZmlsZV9pZCI6ImZpbGVfMDExQ1pQeVBDdGU3WTFmbkM2ckNmdHk5Iiwic3RhcnRfY2hhcl9pbmRleCI6MCwiZW5kX2NoYXJfaW5kZXgiOjU3fX0gICAgICAgICAgICB9Cgo=",
+    "ZXZlbnQ6IGNvbnRlbnRfYmxvY2tfZGVsdGEKZGF0YTogeyJ0eXBlIjoiY29udGVudF9ibG9ja19kZWx0YSIsImluZGV4IjowLCJkZWx0YSI6eyJ0eXBlIjoidGV4dF9kZWx0YSIsInRleHQiOiJRdWFydGVybHkgcmV2ZW51ZSBpbmNyZWFzZWQgYnkgKioxMiBwZXJjZW50KiogeWVhciBvdmVyIHllYXIuIn0gICAgICAgICAgfQoKZXZlbnQ6IGNvbnRlbnRfYmxvY2tfc3RvcApkYXRhOiB7InR5cGUiOiJjb250ZW50X2Jsb2NrX3N0b3AiLCJpbmRleCI6MCAgICAgICAgfQoK",
+    "ZXZlbnQ6IG1lc3NhZ2VfZGVsdGEKZGF0YTogeyJ0eXBlIjoibWVzc2FnZV9kZWx0YSIsImRlbHRhIjp7InN0b3BfcmVhc29uIjoiZW5kX3R1cm4iLCJzdG9wX3NlcXVlbmNlIjpudWxsfSwidXNhZ2UiOnsiaW5wdXRfdG9rZW5zIjo1NzksImNhY2hlX2NyZWF0aW9uX2lucHV0X3Rva2VucyI6MCwiY2FjaGVfcmVhZF9pbnB1dF90b2tlbnMiOjAsIm91dHB1dF90b2tlbnMiOjMzfSAgICAgICAgICAgICB9CgpldmVudDogbWVzc2FnZV9zdG9wCmRhdGE6IHsidHlwZSI6Im1lc3NhZ2Vfc3RvcCIgICAgICAgICAgfQoK"
   ],
   "execution": {
     "semantic_protocol": "anthropic_messages",
@@ -31,7 +30,7 @@
             "media_type": null
           },
           {
-            "data": "ZmlsZV8wMTFDWk5SMVB2S0VoQXh0Qm9EVHZ3Wjc=",
+            "data": "ZmlsZV8wMTFDWlB5UEN0ZTdZMWZuQzZyQ2Z0eTk=",
             "type": "document",
             "filename": null,
             "text": null,
@@ -56,7 +55,7 @@
   "provider": "anthropic",
   "request": {
     "body": {
-      "b64": "eyJtZXNzYWdlcyI6W3sicm9sZSI6InVzZXIiLCJjb250ZW50IjpbeyJ0eXBlIjoidGV4dCIsInRleHQiOiJBbnN3ZXIgd2l0aCB0aGUgZXhhY3QgcGVyY2VudGFnZSBmcm9tIHRoZSBkb2N1bWVudC4ifSx7InR5cGUiOiJkb2N1bWVudCIsInRpdGxlIjoiUXVhcnRlcmx5IFJlcG9ydCIsInNvdXJjZSI6eyJ0eXBlIjoiZmlsZSIsImZpbGVfaWQiOiJmaWxlXzAxMUNaTlIxUHZLRWhBeHRCb0RUdndaNyJ9LCJjaXRhdGlvbnMiOnsiZW5hYmxlZCI6dHJ1ZX19XX1dLCJzdHJlYW0iOnRydWUsIm1vZGVsIjoiY2xhdWRlLXNvbm5ldC00LTYiLCJtYXhfdG9rZW5zIjoyNTZ9",
+      "b64": "eyJtZXNzYWdlcyI6W3sicm9sZSI6InVzZXIiLCJjb250ZW50IjpbeyJ0eXBlIjoidGV4dCIsInRleHQiOiJBbnN3ZXIgd2l0aCB0aGUgZXhhY3QgcGVyY2VudGFnZSBmcm9tIHRoZSBkb2N1bWVudC4ifSx7InR5cGUiOiJkb2N1bWVudCIsInRpdGxlIjoiUXVhcnRlcmx5IFJlcG9ydCIsInNvdXJjZSI6eyJ0eXBlIjoiZmlsZSIsImZpbGVfaWQiOiJmaWxlXzAxMUNaUHlQQ3RlN1kxZm5DNnJDZnR5OSJ9LCJjaXRhdGlvbnMiOnsiZW5hYmxlZCI6dHJ1ZX19XX1dLCJzdHJlYW0iOnRydWUsIm1vZGVsIjoiY2xhdWRlLXNvbm5ldC00LTYiLCJtYXhfdG9rZW5zIjoyNTZ9",
       "canonical_json": {
         "max_tokens": 256,
         "messages": [
@@ -71,7 +70,7 @@
                   "enabled": true
                 },
                 "source": {
-                  "file_id": "file_011CZNR1PvKEhAxtBoDTvwZ7",
+                  "file_id": "file_011CZPyPCte7Y1fnC6rCfty9",
                   "type": "file"
                 },
                 "title": "Quarterly Report",
@@ -101,31 +100,31 @@
       "anthropic-organization-id": "a71659e7-a922-4ff7-99de-f3ba615face1",
       "anthropic-ratelimit-input-tokens-limit": "800000",
       "anthropic-ratelimit-input-tokens-remaining": "800000",
-      "anthropic-ratelimit-input-tokens-reset": "2026-03-24T18:55:57Z",
+      "anthropic-ratelimit-input-tokens-reset": "2026-03-25T14:41:07Z",
       "anthropic-ratelimit-output-tokens-limit": "160000",
       "anthropic-ratelimit-output-tokens-remaining": "160000",
-      "anthropic-ratelimit-output-tokens-reset": "2026-03-24T18:55:57Z",
+      "anthropic-ratelimit-output-tokens-reset": "2026-03-25T14:41:07Z",
       "anthropic-ratelimit-requests-limit": "2000",
       "anthropic-ratelimit-requests-remaining": "1999",
-      "anthropic-ratelimit-requests-reset": "2026-03-24T18:55:57Z",
+      "anthropic-ratelimit-requests-reset": "2026-03-25T14:41:07Z",
       "anthropic-ratelimit-tokens-limit": "960000",
       "anthropic-ratelimit-tokens-remaining": "960000",
-      "anthropic-ratelimit-tokens-reset": "2026-03-24T18:55:57Z",
+      "anthropic-ratelimit-tokens-reset": "2026-03-25T14:41:07Z",
       "cache-control": "no-cache",
       "cf-cache-status": "DYNAMIC",
-      "cf-ray": "9e17e4a0fdac620c-ORD",
+      "cf-ray": "9e1eacb59903e80d-ORD",
       "connection": "keep-alive",
       "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
       "content-type": "text/event-stream; charset=utf-8",
-      "date": "Tue, 24 Mar 2026 18:55:59 GMT",
-      "request-id": "req_011CZNR1RUqA6fYcQgUUwvLv",
+      "date": "Wed, 25 Mar 2026 14:41:09 GMT",
+      "request-id": "req_011CZPyPEhHMidoiNV6Sson3",
       "server": "cloudflare",
-      "server-timing": "x-originResponse;dur=1568",
-      "set-cookie": "_cfuvid=hPsEPtLNfU5A6S2ca3qATGn81cAdKZLxddS7A_5qLhM-1774378557.5925658-1.0.1.1-1ad8iwos47Ww0MkwSL55xLkG_R8rb1yMjqxL_PiuuvU; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.anthropic.com",
+      "server-timing": "x-originResponse;dur=1497",
+      "set-cookie": "_cfuvid=c36N3Egfq2whjQNQEGh9Aw0YhyuhAjcKcm46pLulvNE-1774449667.4563947-1.0.1.1-iF_IwaVJ1fn1KHgsXwCM5MKiGcewMv3o0t6RSrjj3Wo; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.anthropic.com",
       "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
       "transfer-encoding": "chunked",
       "vary": "Accept-Encoding",
-      "x-envoy-upstream-service-time": "1565",
+      "x-envoy-upstream-service-time": "1495",
       "x-robots-tag": "none"
     },
     "status": 200
