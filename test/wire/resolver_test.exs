@@ -8,6 +8,7 @@ defmodule ReqLlmNext.Wire.ResolverTest do
     Anthropic,
     AlibabaChat,
     DeepSeekChat,
+    CerebrasChat,
     GroqChat,
     OpenAIChat,
     OpenAIEmbeddings,
@@ -93,6 +94,11 @@ defmodule ReqLlmNext.Wire.ResolverTest do
     test "infers AlibabaChat for alibaba provider" do
       model = TestModels.alibaba()
       assert Resolver.wire_module!(model) == AlibabaChat
+    end
+
+    test "infers CerebrasChat for cerebras provider" do
+      model = TestModels.cerebras()
+      assert Resolver.wire_module!(model) == CerebrasChat
     end
 
     test "infers DeepSeekChat for deepseek provider" do

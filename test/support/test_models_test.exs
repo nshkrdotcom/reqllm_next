@@ -162,6 +162,19 @@ defmodule ReqLlmNext.TestModelsTest do
     end
   end
 
+  describe "cerebras/1" do
+    test "creates Cerebras model" do
+      model = TestModels.cerebras()
+      assert model.provider == :cerebras
+      assert model.id == "llama3.1-8b"
+    end
+
+    test "applies overrides" do
+      model = TestModels.cerebras(%{id: "qwen-3-32b"})
+      assert model.id == "qwen-3-32b"
+    end
+  end
+
   describe "xai/1" do
     test "creates xAI model" do
       model = TestModels.xai()

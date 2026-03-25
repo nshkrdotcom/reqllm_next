@@ -7,6 +7,7 @@ defmodule ReqLlmNext.ProvidersTest do
   alias ReqLlmNext.Providers.{
     Alibaba,
     Anthropic,
+    Cerebras,
     DeepSeek,
     Groq,
     OpenAI,
@@ -53,6 +54,10 @@ defmodule ReqLlmNext.ProvidersTest do
       assert Providers.get(:alibaba) == {:ok, Alibaba}
     end
 
+    test "returns Cerebras module for :cerebras" do
+      assert Providers.get(:cerebras) == {:ok, Cerebras}
+    end
+
     test "returns error for unknown provider" do
       assert Providers.get(:unknown) == {:error, {:unknown_provider, :unknown}}
     end
@@ -95,6 +100,10 @@ defmodule ReqLlmNext.ProvidersTest do
       assert Providers.get!(:alibaba) == Alibaba
     end
 
+    test "returns Cerebras module for :cerebras" do
+      assert Providers.get!(:cerebras) == Cerebras
+    end
+
     test "raises for unknown provider" do
       assert_raise RuntimeError, ~r/Provider error/, fn ->
         Providers.get!(:unknown)
@@ -115,6 +124,7 @@ defmodule ReqLlmNext.ProvidersTest do
       assert :xai in providers
       assert :venice in providers
       assert :alibaba in providers
+      assert :cerebras in providers
     end
   end
 
@@ -267,6 +277,21 @@ defmodule ReqLlmNext.ProvidersTest do
 
     test "auth_headers returns Bearer token" do
       headers = Alibaba.auth_headers("test-key")
+      assert headers == [{"Authorization", "Bearer test-key"}]
+    end
+  end
+
+  describe "Providers.Cerebras" do
+    test "base_url returns Cerebras API URL" do
+      assert Cerebras.base_url() == "https://api.cerebras.ai/v1"
+    end
+
+    test "env_key returns CEREBRAS_API_KEY" do
+      assert Cerebras.env_key() == "CEREBRAS_API_KEY"
+    end
+
+    test "auth_headers returns Bearer token" do
+      headers = Cerebras.auth_headers("test-key")
       assert headers == [{"Authorization", "Bearer test-key"}]
     end
   end
