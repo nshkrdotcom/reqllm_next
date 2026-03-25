@@ -27,14 +27,25 @@ defmodule ReqLlmNext.OpenAI.ToolsTest do
   test "builds OpenAI computer use tools" do
     tool = OpenAI.computer_use_tool(display_width: 1440, display_height: 900)
 
-    assert tool.type == "computer_use_preview"
+    assert tool.type == "computer_use"
     assert tool.display_width == 1440
     assert tool.display_height == 900
     assert tool.environment == "browser"
   end
 
+  test "builds OpenAI advanced agentic tools" do
+    assert OpenAI.mcp_tool(server_label: "docs").type == "mcp"
+    assert OpenAI.hosted_shell_tool().type == "hosted_shell"
+    assert OpenAI.apply_patch_tool().type == "apply_patch"
+    assert OpenAI.local_shell_tool().type == "local_shell"
+    assert OpenAI.tool_search_tool().type == "tool_search"
+    assert OpenAI.skill_tool(skill_ids: ["skill_docs"]).type == "skills"
+    assert OpenAI.image_generation_tool().type == "image_generation"
+  end
+
   test "recognizes provider-native OpenAI helper maps" do
     assert Tools.provider_native_tool?(OpenAI.web_search_tool())
+    assert Tools.provider_native_tool?(OpenAI.apply_patch_tool())
     refute Tools.provider_native_tool?(%{type: "function"})
   end
 

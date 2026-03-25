@@ -11,7 +11,7 @@ This guide focuses on two questions:
 1. which OpenAI surfaces are part of ReqLlmNext's core generation story
 2. which OpenAI surfaces are only partially supported or still outside the package's first-class scope
 
-As of March 24, 2026, OpenAI's public surface is broader than ReqLlmNext's current OpenAI lane.
+As of March 25, 2026, OpenAI's public surface is broader than ReqLlmNext's current OpenAI lane.
 
 ## Official Surface
 
@@ -26,7 +26,13 @@ The current OpenAI docs cover at least these API and feature areas that matter t
 7. File inputs and document inputs
 8. Prompt caching
 9. Built-in tools such as web search, file search, code interpreter, and computer use
-10. Utility and secondary surfaces such as background mode, batch processing, and realtime
+10. Image edits
+11. Audio translations and richer speech-to-text variants such as diarization
+12. Utility and secondary surfaces such as background mode, batch processing, and realtime
+13. Files, uploads, vector stores, and related file-search workflow utilities
+14. Run-and-scale utilities such as webhooks, token counting, compaction, and optimization controls
+15. Advanced agentic tool surfaces such as MCP/connectors, Skills, hosted shell, apply patch, and tool search
+16. Additional provider-owned surfaces such as video generation and moderation
 
 Official sources used for this map:
 
@@ -51,8 +57,12 @@ ReqLlmNext currently has a strong OpenAI core generation lane through the v2 exe
 6. Native structured outputs where the selected surface supports them
 7. Prompt caching request controls and normalized cache-aware usage metadata
 8. File and document request shaping for attachment-capable models
-9. Built-in tool helper constructors for web search, file search, code interpreter, and computer use on OpenAI Responses surfaces
-10. Curated replay and live coverage for `gpt-4o-mini`, `gpt-4.1-mini`, and `o4-mini`
+9. Built-in tool helper constructors for web search, file search, code interpreter, computer use, MCP, hosted shell, apply patch, local shell, tool search, Skills, and image generation on OpenAI Responses surfaces
+10. Standalone image generation and image edits
+11. Standalone transcription, translation, and speech generation
+12. Richer transcription normalization with segment and speaker-count provider metadata
+13. Provider-owned OpenAI utility surfaces for files, vector stores, responses retrieval and compaction, input-token counting, background responses, conversations, batches, moderation, videos, webhooks, and realtime
+14. Curated replay and live coverage for `gpt-4o-mini`, `gpt-4.1-mini`, and `o4-mini`
 
 Current implementation homes:
 
@@ -63,34 +73,41 @@ Current implementation homes:
 5. [session_runtime_responses.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/providers/openai/session_runtime_responses.ex)
 6. [transport_responses_websocket.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/providers/openai/transport_responses_websocket.ex)
 7. [tools.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/providers/openai/tools.ex)
-8. [openai.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/openai.ex)
-9. [support_matrix.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/support_matrix.ex)
-10. [openai_comprehensive_test.exs](/Users/mhostetler/Source/ReqLLM/reqllm_next/test/coverage/openai_comprehensive_test.exs)
-11. [openai_websocket_coverage_test.exs](/Users/mhostetler/Source/ReqLLM/reqllm_next/test/coverage/openai_websocket_coverage_test.exs)
+8. [responses.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/providers/openai/responses.ex)
+9. [files.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/providers/openai/files.ex)
+10. [vector_stores.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/providers/openai/vector_stores.ex)
+11. [background.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/providers/openai/background.ex)
+12. [batches.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/providers/openai/batches.ex)
+13. [conversations.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/providers/openai/conversations.ex)
+14. [videos.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/providers/openai/videos.ex)
+15. [webhooks.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/providers/openai/webhooks.ex)
+16. [realtime.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/providers/openai/realtime.ex)
+17. [openai.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/openai.ex)
+18. [support_matrix.ex](/Users/mhostetler/Source/ReqLLM/reqllm_next/lib/req_llm_next/support_matrix.ex)
+19. [openai_comprehensive_test.exs](/Users/mhostetler/Source/ReqLLM/reqllm_next/test/coverage/openai_comprehensive_test.exs)
+20. [openai_websocket_coverage_test.exs](/Users/mhostetler/Source/ReqLLM/reqllm_next/test/coverage/openai_websocket_coverage_test.exs)
 
 ### Partial
 
 These OpenAI areas exist in some form but are not yet complete first-class surfaces:
 
 1. Built-in tools:
-   request shaping and include helpers are supported, but exhaustive live lifecycle coverage is not yet in place for every tool family.
-2. File inputs:
-   canonical file and document inputs are supported for OpenAI-compatible chat and Responses, but ReqLlmNext does not yet expose a broader OpenAI file-upload utility surface.
-3. Conversation state:
-   the Responses continuation lane is implemented, but ReqLlmNext does not yet treat broader OpenAI conversation/session utilities as a separate provider utility package.
-4. Utility surface differentiation:
-   the package intentionally focuses on core generation and the request-side tool lane, not every OpenAI platform endpoint.
+   request shaping, include helpers, and terminal lifecycle normalization are supported, but exhaustive live coverage is still not in place for every tool family and result shape.
+2. Realtime:
+   ReqLlmNext now has a provider-owned realtime protocol family and event helpers, but it is intentionally scoped as an OpenAI utility surface rather than a top-level cross-provider facade operation.
+3. Webhooks:
+   webhook event parsing and categorization are supported, but this package does not yet claim full webhook signature-verification or dashboard-management coverage.
+4. Utility and secondary surfaces:
+   the package now covers a wide OpenAI provider-owned utility surface, but curated replay/live verification still focuses on the core generation lanes rather than every utility endpoint.
 
 ## Missing Or Out Of Scope Today
 
 These OpenAI surfaces are not yet first-class ReqLlmNext support:
 
-1. first-class OpenAI utility endpoints beyond core generation
-2. background mode as a planned execution surface
-3. batch processing utilities
-4. realtime as a separate protocol family
-5. vector-store and file-management utilities that would complete file-search workflows
-6. exhaustive live coverage for every built-in tool lifecycle and result shape
+1. exhaustive live verification for every built-in OpenAI tool family and result shape
+2. full webhook signature and delivery-management coverage
+3. a top-level cross-provider realtime facade
+4. broad utility-surface live fixtures on the same level as the core support matrix
 
 ## Recommended Package Boundary
 
@@ -99,11 +116,13 @@ ReqLlmNext should keep the OpenAI story intentionally split:
 1. core generation surfaces remain first-class
 2. OpenAI-compatible defaults remain reusable for providers that fit the same happy path
 3. provider-native built-in tool request helpers stay scoped to OpenAI Responses
-4. utility endpoints beyond core generation should be introduced only as explicit provider-owned surfaces, not as silent planner creep
-5. realtime should be treated as a distinct protocol family rather than an extension of the current Responses lane
+4. image edits and audio translations extend the existing media lane through the same top-level media facade instead of inventing a parallel OpenAI-only public API
+5. utility endpoints beyond core generation are explicit provider-owned surfaces, not silent planner creep
+6. realtime is treated as a distinct provider-owned protocol family rather than an extension of the current Responses lane
+7. Anthropic's standalone media boundary remains explicit rather than forcing fake symmetry with OpenAI
 
 ## Package Impact
 
 The honest OpenAI support claim today is:
 
-ReqLlmNext has deep core coverage for OpenAI-compatible chat, Responses HTTP, Responses WebSocket mode, embeddings, prompt caching, file inputs, and continuation. It does not yet claim the full OpenAI platform surface beyond those lanes.
+ReqLlmNext has deep core coverage for OpenAI-compatible chat, Responses HTTP, Responses WebSocket mode, embeddings, prompt caching, file inputs, continuation, built-in tool helpers, and standalone media operations including image edits and translations. It also now exposes a broad provider-owned OpenAI utility surface for files, vector stores, responses, conversations, background mode, batches, moderation, videos, webhooks, and realtime. The remaining honest gaps are mostly around exhaustive live verification and a few deliberately provider-owned surfaces that do not expand the top-level cross-provider facade.

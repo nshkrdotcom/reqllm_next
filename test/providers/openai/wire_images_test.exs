@@ -73,4 +73,48 @@ defmodule ReqLlmNext.OpenAI.WireImagesTest do
     assert decoded.finish_reason == :stop
     assert hd(Response.images(decoded)).metadata.revised_prompt == "A refined kite prompt"
   end
+
+  test "builds multipart image edit requests when image inputs are present" do
+    context =
+      %Context{
+        messages: [
+          %ReqLlmNext.Context.Message{
+            role: :user,
+            content: [
+              ReqLlmNext.Context.ContentPart.text("Turn this sketch into watercolor"),
+              ReqLlmNext.Context.ContentPart.image(<<1, 2, 3>>, "image/png")
+            ]
+          }
+        ]
+      }
+
+    {:ok, prepared_opts} =
+      ImagePreparation.prepare(
+        %ReqLlmNext.ExecutionSurface{
+          id: :openai_images_image_http,
+          operation: :image,
+          semantic_protocol: :openai_images,
+          wire_format: :openai_images_json,
+          transport: :http,
+          features: %{}
+        },
+        context,
+        []
+      )
+
+    {:ok, request} =
+      OpenAIImages.build_request(
+        ReqLlmNext.Providers.OpenAI,
+        TestModels.openai_image(),
+        context,
+        [api_key: "test-key"] ++ prepared_opts
+      )
+
+    assert request.path == "/v1/images/edits"
+
+    body = IO.iodata_to_binary(request.body)
+    assert body =~ "name=\"image\""
+    assert body =~ "name=\"prompt\""
+    assert body =~ "Turn this sketch into watercolor"
+  end
 end

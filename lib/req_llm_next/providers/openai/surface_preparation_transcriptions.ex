@@ -10,7 +10,10 @@ defmodule ReqLlmNext.SurfacePreparation.OpenAITranscriptions do
   @spec prepare(ExecutionSurface.t(), term(), keyword()) :: {:ok, keyword()} | {:error, term()}
   def prepare(%ExecutionSurface{}, audio, opts) do
     with {:ok, resolved_audio} <- AudioInput.resolve(audio) do
-      {:ok, Keyword.put(opts, :_resolved_audio_input, resolved_audio)}
+      {:ok,
+       opts
+       |> Keyword.put(:_resolved_audio_input, resolved_audio)
+       |> Keyword.put(:_translation?, translation_requested?(opts))}
     end
   end
 
@@ -53,5 +56,9 @@ defmodule ReqLlmNext.SurfacePreparation.OpenAITranscriptions do
     else
       :ok
     end
+  end
+
+  defp translation_requested?(opts) do
+    Keyword.get(opts, :translate, false) or Keyword.get(opts, :task) in [:translate, "translate"]
   end
 end

@@ -13,6 +13,21 @@ defmodule ReqLlmNext.Extensions.Definitions.OpenAI do
       register do
         provider_module(ReqLlmNext.Providers.OpenAI)
         provider_facts_module(ReqLlmNext.ModelProfile.ProviderFacts.OpenAI)
+
+        utility_modules(
+          provider_api: ReqLlmNext.OpenAI,
+          tools: ReqLlmNext.OpenAI.Tools,
+          files: ReqLlmNext.OpenAI.Files,
+          vector_stores: ReqLlmNext.OpenAI.VectorStores,
+          responses: ReqLlmNext.OpenAI.Responses,
+          background: ReqLlmNext.OpenAI.Background,
+          batches: ReqLlmNext.OpenAI.Batches,
+          moderations: ReqLlmNext.OpenAI.Moderations,
+          conversations: ReqLlmNext.OpenAI.Conversations,
+          videos: ReqLlmNext.OpenAI.Videos,
+          webhooks: ReqLlmNext.OpenAI.Webhooks,
+          realtime: ReqLlmNext.OpenAI.Realtime
+        )
       end
     end
   end

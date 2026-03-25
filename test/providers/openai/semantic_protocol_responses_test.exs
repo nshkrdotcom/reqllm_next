@@ -84,6 +84,28 @@ defmodule ReqLlmNext.SemanticProtocols.OpenAIResponsesTest do
              ) == []
     end
 
+    test "captures provider-native tool items on output_item.done" do
+      event = %{
+        "type" => "response.output_item.done",
+        "item" => %{
+          "type" => "web_search_call",
+          "id" => "ws_123",
+          "status" => "completed",
+          "action" => %{"query" => "weather in chicago"}
+        }
+      }
+
+      assert OpenAIResponses.decode_event(event, nil) == [
+               {:provider_item,
+                %{
+                  type: "web_search_call",
+                  id: "ws_123",
+                  status: "completed",
+                  action: %{"query" => "weather in chicago"}
+                }}
+             ]
+    end
+
     test "normalizes function call argument deltas" do
       event = %{
         "type" => "response.function_call_arguments.delta",
@@ -184,6 +206,28 @@ defmodule ReqLlmNext.SemanticProtocols.OpenAIResponsesTest do
              ]
     end
 
+    test "normalizes usage events with built-in tool counts" do
+      assert OpenAIResponses.decode_event(
+               %{
+                 "type" => "response.usage",
+                 "usage" => %{
+                   "input_tokens" => 10,
+                   "output_tokens" => 20,
+                   "output_tokens_details" => %{"web_search_calls" => 2, "file_search_calls" => 1}
+                 }
+               },
+               nil
+             ) == [
+               {:usage,
+                %{
+                  input_tokens: 10,
+                  output_tokens: 20,
+                  total_tokens: 30,
+                  tool_usage: %{web_search: 2, file_search: 1}
+                }}
+             ]
+    end
+
     test "normalizes usage events with top-level reasoning tokens" do
       model = TestModels.openai_reasoning()
 
@@ -229,22 +273,32 @@ defmodule ReqLlmNext.SemanticProtocols.OpenAIResponsesTest do
         "type" => "response.completed",
         "response" => %{
           "id" => "resp_123",
+          "output" => [
+            %{"type" => "web_search_call", "id" => "ws_1"},
+            %{"type" => "file_search_call", "id" => "fs_1"}
+          ],
           "usage" => %{
             "input_tokens" => 5,
             "output_tokens" => 7,
-            "output_tokens_details" => %{"reasoning_tokens" => 2}
+            "output_tokens_details" => %{"reasoning_tokens" => 2, "web_search_calls" => 1}
           }
         }
       }
 
       assert [
                {:usage, usage},
-               {:meta, %{terminal?: true, response_id: "resp_123", finish_reason: :stop}}
+               {:meta, meta}
              ] = OpenAIResponses.decode_event(event, nil)
 
       assert usage.input_tokens == 5
       assert usage.output_tokens == 7
       assert usage.reasoning_tokens == 2
+      assert usage.tool_usage == %{web_search: 1, file_search: 1}
+      assert meta.terminal? == true
+      assert meta.response_id == "resp_123"
+      assert meta.finish_reason == :stop
+      assert meta.tool_usage == %{web_search: 1, file_search: 1}
+      assert [%{type: "web_search_call"}, %{type: "file_search_call"}] = meta.provider_items
     end
 
     test "normalizes completed events without usage" do

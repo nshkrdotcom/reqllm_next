@@ -90,4 +90,52 @@ defmodule ReqLlmNext.OpenAI.WireTranscriptionsTest do
 
     assert result.text == "Hello world"
   end
+
+  test "uses the translations endpoint when translation is requested" do
+    {:ok, request} =
+      OpenAITranscriptions.build_request(
+        ReqLlmNext.Providers.OpenAI,
+        TestModels.openai_transcription(),
+        {:binary, "audio-bytes", "audio/mpeg"},
+        api_key: "test-key",
+        translate: true
+      )
+
+    assert request.path == "/v1/audio/translations"
+  end
+
+  test "preserves speaker-aware segments from multichannel transcripts" do
+    response =
+      %Finch.Response{
+        status: 200,
+        headers: [{"content-type", "application/json"}],
+        body:
+          Jason.encode!(%{
+            "text" => "Hello there\nGeneral Kenobi",
+            "language_code" => "en",
+            "transcripts" => [
+              %{
+                "speaker" => "speaker_1",
+                "segments" => [%{"text" => "Hello there", "start" => 0.0, "end" => 0.8}]
+              },
+              %{
+                "speaker" => "speaker_2",
+                "segments" => [%{"text" => "General Kenobi", "start" => 0.8, "end" => 1.6}]
+              }
+            ]
+          })
+      }
+
+    {:ok, result} =
+      OpenAITranscriptions.decode_response(
+        response,
+        TestModels.openai_transcription(),
+        {:binary, "audio", "audio/mpeg"},
+        []
+      )
+
+    assert result.language == "en"
+    assert Enum.map(result.segments, & &1.speaker) == ["speaker_1", "speaker_2"]
+    assert result.provider_meta.speaker_count == 2
+  end
 end

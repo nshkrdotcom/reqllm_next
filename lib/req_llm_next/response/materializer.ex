@@ -10,6 +10,7 @@ defmodule ReqLlmNext.Response.Materializer do
             %{
               content_parts: Zoi.array(Zoi.any()) |> Zoi.default([]),
               tool_acc: Zoi.map() |> Zoi.default(%{}),
+              provider_items: Zoi.array(Zoi.map()) |> Zoi.default([]),
               usage: Zoi.map() |> Zoi.nullish() |> Zoi.default(nil),
               meta: Zoi.map() |> Zoi.default(%{})
             },
@@ -19,6 +20,7 @@ defmodule ReqLlmNext.Response.Materializer do
   @type t :: %__MODULE__{
           content_parts: [ContentPart.t()],
           tool_acc: map(),
+          provider_items: [map()],
           usage: map() | nil,
           meta: map()
         }
@@ -83,10 +85,17 @@ defmodule ReqLlmNext.Response.Materializer do
   def finish_reason(%__MODULE__{meta: meta}), do: meta[:finish_reason]
 
   @spec provider_meta(t()) :: map()
-  def provider_meta(%__MODULE__{meta: meta}) when is_map(meta) do
-    meta
-    |> Map.drop([:terminal?, :finish_reason])
-    |> Enum.into(%{})
+  def provider_meta(%__MODULE__{meta: meta, provider_items: provider_items}) when is_map(meta) do
+    provider_meta =
+      meta
+      |> Map.drop([:terminal?, :finish_reason])
+      |> Enum.into(%{})
+
+    if provider_items == [] do
+      provider_meta
+    else
+      Map.put(provider_meta, :provider_items, provider_items)
+    end
   end
 
   @spec assistant_message(t()) :: Message.t() | nil
@@ -133,7 +142,11 @@ defmodule ReqLlmNext.Response.Materializer do
   end
 
   defp finalize(%__MODULE__{} = materialized) do
-    %{materialized | content_parts: Enum.reverse(materialized.content_parts)}
+    %{
+      materialized
+      | content_parts: Enum.reverse(materialized.content_parts),
+        provider_items: Enum.reverse(materialized.provider_items)
+    }
   end
 
   defp consume_chunk({:error, error_info}, {:ok, _materialized}) do
@@ -161,6 +174,11 @@ defmodule ReqLlmNext.Response.Materializer do
 
   defp consume_chunk({:usage, usage_map}, {:ok, %__MODULE__{} = materialized}) do
     {:cont, {:ok, %{materialized | usage: usage_map}}}
+  end
+
+  defp consume_chunk({:provider_item, item}, {:ok, %__MODULE__{} = materialized})
+       when is_map(item) do
+    {:cont, {:ok, %{materialized | provider_items: [item | materialized.provider_items]}}}
   end
 
   defp consume_chunk(

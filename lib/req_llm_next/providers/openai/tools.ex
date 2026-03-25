@@ -9,7 +9,15 @@ defmodule ReqLlmNext.OpenAI.Tools do
                          "web_search_preview",
                          "file_search",
                          "code_interpreter",
-                         "computer_use_preview"
+                         "computer_use",
+                         "computer_use_preview",
+                         "mcp",
+                         "hosted_shell",
+                         "apply_patch",
+                         "local_shell",
+                         "tool_search",
+                         "skills",
+                         "image_generation"
                        ])
 
   @spec web_search(keyword()) :: map()
@@ -47,13 +55,48 @@ defmodule ReqLlmNext.OpenAI.Tools do
   def computer_use(opts \\ []) do
     %{
       @provider_native_marker => :openai,
-      type: "computer_use_preview",
+      type: computer_use_type(opts),
       display_width:
         Keyword.get(opts, :display_width, Keyword.get(opts, :display_width_px, 1024)),
       display_height:
         Keyword.get(opts, :display_height, Keyword.get(opts, :display_height_px, 768)),
       environment: Keyword.get(opts, :environment, "browser")
     }
+  end
+
+  @spec mcp(keyword()) :: map()
+  def mcp(opts \\ []) do
+    provider_tool("mcp", opts)
+  end
+
+  @spec hosted_shell(keyword()) :: map()
+  def hosted_shell(opts \\ []) do
+    provider_tool("hosted_shell", opts)
+  end
+
+  @spec apply_patch(keyword()) :: map()
+  def apply_patch(opts \\ []) do
+    provider_tool("apply_patch", opts)
+  end
+
+  @spec local_shell(keyword()) :: map()
+  def local_shell(opts \\ []) do
+    provider_tool("local_shell", opts)
+  end
+
+  @spec tool_search(keyword()) :: map()
+  def tool_search(opts \\ []) do
+    provider_tool("tool_search", opts)
+  end
+
+  @spec skill(keyword()) :: map()
+  def skill(opts \\ []) do
+    provider_tool("skills", opts)
+  end
+
+  @spec image_generation(keyword()) :: map()
+  def image_generation(opts \\ []) do
+    provider_tool("image_generation", opts)
   end
 
   @spec provider_native_tool?(map()) :: boolean()
@@ -87,6 +130,14 @@ defmodule ReqLlmNext.OpenAI.Tools do
     end
   end
 
+  defp computer_use_type(opts) do
+    case Keyword.get(opts, :version, :stable) do
+      :preview -> "computer_use_preview"
+      "preview" -> "computer_use_preview"
+      _ -> "computer_use"
+    end
+  end
+
   defp container(opts) do
     case Keyword.get(opts, :container) do
       nil -> container_from_file_ids(Keyword.get(opts, :file_ids))
@@ -109,6 +160,11 @@ defmodule ReqLlmNext.OpenAI.Tools do
 
   defp tool_type(tool) do
     Map.get(tool, :type) || Map.get(tool, "type")
+  end
+
+  defp provider_tool(type, opts) when is_binary(type) and is_list(opts) do
+    opts
+    |> Enum.into(%{@provider_native_marker => :openai, type: type})
   end
 
   defp maybe_add(map, _key, nil), do: map

@@ -31,8 +31,15 @@ defmodule ReqLlmNext.Wire.OpenAIResponses do
 
   @impl ReqLlmNext.Wire.Streaming
   def encode_body(model, prompt, opts) do
-    base_body(model, prompt, opts)
+    build_request_body(model, prompt, opts)
     |> Map.put(:stream, true)
+  end
+
+  @doc false
+  @spec build_request_body(LLMDB.Model.t(), String.t() | ReqLlmNext.Context.t(), keyword()) ::
+          map()
+  def build_request_body(model, prompt, opts) do
+    base_body(model, prompt, opts)
   end
 
   @spec encode_websocket_event(LLMDB.Model.t(), String.t() | ReqLlmNext.Context.t(), keyword()) ::
@@ -54,9 +61,14 @@ defmodule ReqLlmNext.Wire.OpenAIResponses do
       model: model.id,
       input: encode_input(prompt)
     }
+    |> maybe_add(:background, Keyword.get(opts, :background))
     |> maybe_add(:max_output_tokens, get_max_tokens(opts))
     |> maybe_add(:temperature, Keyword.get(opts, :temperature))
     |> maybe_add(:include, Keyword.get(opts, :include))
+    |> maybe_add(:metadata, Keyword.get(opts, :metadata))
+    |> maybe_add(:service_tier, Keyword.get(opts, :service_tier))
+    |> maybe_add(:prediction, Keyword.get(opts, :prediction))
+    |> maybe_add(:webhook, Keyword.get(opts, :webhook))
     |> maybe_add(:prompt_cache_key, Keyword.get(opts, :prompt_cache_key))
     |> maybe_add(:prompt_cache_retention, encode_prompt_cache_retention(opts))
     |> maybe_add(:reasoning, encode_reasoning_effort(Keyword.get(opts, :reasoning_effort)))

@@ -13,6 +13,7 @@ defmodule ReqLlmNext.Response.MaterializerTest do
 
       assert materialized.content_parts == []
       assert materialized.tool_acc == %{}
+      assert materialized.provider_items == []
       assert materialized.usage == nil
       assert materialized.meta == %{}
     end
@@ -22,11 +23,13 @@ defmodule ReqLlmNext.Response.MaterializerTest do
         Materializer.new!(%{
           content_parts: [],
           tool_acc: %{0 => %{index: 0}},
+          provider_items: [%{type: "web_search_call"}],
           usage: %{total_tokens: 1},
           meta: %{finish_reason: :stop}
         })
 
       assert materialized.tool_acc == %{0 => %{index: 0}}
+      assert materialized.provider_items == [%{type: "web_search_call"}]
       assert materialized.usage == %{total_tokens: 1}
       assert materialized.meta == %{finish_reason: :stop}
     end

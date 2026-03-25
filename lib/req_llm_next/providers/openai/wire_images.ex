@@ -11,16 +11,36 @@ defmodule ReqLlmNext.Wire.OpenAIImages do
   @spec path() :: String.t()
   def path, do: "/v1/images/generations"
 
+  @spec edit_path() :: String.t()
+  def edit_path, do: "/v1/images/edits"
+
   @spec build_request(module(), LLMDB.Model.t(), String.t() | Context.t(), keyword()) ::
           {:ok, Finch.Request.t()} | {:error, term()}
   def build_request(provider_mod, model, prompt, opts) do
     with {:ok, text_prompt} <- prepared_prompt(prompt, opts) do
       api_key = provider_mod.get_api_key(opts)
       base_url = Keyword.get(opts, :base_url, provider_mod.base_url())
-      url = base_url <> path()
-      headers = provider_mod.auth_headers(api_key) ++ headers(opts)
-      body = encode_body(model, text_prompt, opts) |> Jason.encode!()
-      {:ok, Finch.build(:post, url, headers, body)}
+      edit? = image_edit?(opts)
+
+      {headers, body, path} =
+        if edit? do
+          boundary = multipart_boundary()
+
+          {
+            provider_mod.auth_headers(api_key) ++
+              [{"Content-Type", "multipart/form-data; boundary=#{boundary}"}],
+            encode_edit_body(model, text_prompt, opts, boundary),
+            edit_path()
+          }
+        else
+          {
+            provider_mod.auth_headers(api_key) ++ headers(opts),
+            encode_body(model, text_prompt, opts) |> Jason.encode!(),
+            path()
+          }
+        end
+
+      {:ok, Finch.build(:post, base_url <> path, headers, body)}
     end
   end
 
@@ -72,6 +92,42 @@ defmodule ReqLlmNext.Wire.OpenAIImages do
       prompt when is_binary(prompt) and prompt != "" -> {:ok, prompt}
       _ -> ImagePreparation.extract_prompt(Keyword.get(opts, :_request_input, prompt))
     end
+  end
+
+  defp image_edit?(opts), do: Keyword.get(opts, :_image_edit?, false)
+
+  defp encode_edit_body(model, prompt, opts, boundary) do
+    images = Keyword.get(opts, :_prepared_images, [])
+    mask = Keyword.get(opts, :_prepared_mask)
+
+    [
+      multipart_field(boundary, "model", model.id),
+      multipart_field(boundary, "prompt", prompt),
+      multipart_field(boundary, "n", Integer.to_string(Keyword.get(opts, :n, 1))),
+      maybe_multipart_field(boundary, "size", normalize_size(Keyword.get(opts, :size))),
+      maybe_multipart_field(boundary, "quality", normalize_value(Keyword.get(opts, :quality))),
+      maybe_multipart_field(boundary, "style", normalize_value(Keyword.get(opts, :style))),
+      maybe_multipart_field(
+        boundary,
+        "output_format",
+        normalize_output_format_value(Keyword.get(opts, :output_format))
+      ),
+      maybe_multipart_field(boundary, "user", Keyword.get(opts, :user)),
+      Enum.with_index(images)
+      |> Enum.map(fn {image, index} ->
+        multipart_file(
+          boundary,
+          if(index == 0, do: "image", else: "image[]"),
+          Map.get(image, :filename, "image-#{index + 1}.png"),
+          image.media_type,
+          image.data
+        )
+      end),
+      maybe_mask_part(boundary, mask),
+      "--#{boundary}--\r\n"
+    ]
+    |> List.flatten()
+    |> IO.iodata_to_binary()
   end
 
   defp decode_images_response(model, context, %{"data" => data} = body, opts)
@@ -143,6 +199,50 @@ defmodule ReqLlmNext.Wire.OpenAIImages do
     end
   end
 
+  defp multipart_boundary do
+    "reqllmnext-" <> Base.url_encode64(:crypto.strong_rand_bytes(12), padding: false)
+  end
+
+  defp multipart_file(boundary, name, filename, content_type, data) do
+    [
+      "--#{boundary}\r\n",
+      "Content-Disposition: form-data; name=\"#{name}\"; filename=\"#{filename}\"\r\n",
+      "Content-Type: #{content_type}\r\n\r\n",
+      data,
+      "\r\n"
+    ]
+  end
+
+  defp multipart_field(boundary, name, value) do
+    [
+      "--#{boundary}\r\n",
+      "Content-Disposition: form-data; name=\"#{name}\"\r\n\r\n",
+      value,
+      "\r\n"
+    ]
+  end
+
+  defp maybe_mask_part(_boundary, nil), do: []
+
+  defp maybe_mask_part(boundary, %{data: data, media_type: media_type, filename: filename}) do
+    multipart_file(boundary, "mask", filename, media_type, data)
+  end
+
+  defp maybe_multipart_field(_boundary, _name, nil), do: []
+  defp maybe_multipart_field(boundary, name, value), do: multipart_field(boundary, name, value)
+
+  defp normalize_size(nil), do: nil
+
+  defp normalize_size({width, height}) when is_integer(width) and is_integer(height),
+    do: "#{width}x#{height}"
+
+  defp normalize_size(size) when is_binary(size), do: size
+  defp normalize_size(_size), do: nil
+
+  defp normalize_value(value) when is_atom(value), do: Atom.to_string(value)
+  defp normalize_value(value) when is_binary(value), do: value
+  defp normalize_value(_value), do: nil
+
   defp maybe_put_size(body, nil), do: body
 
   defp maybe_put_size(body, {width, height}) when is_integer(width) and is_integer(height) do
@@ -179,6 +279,13 @@ defmodule ReqLlmNext.Wire.OpenAIImages do
   defp normalize_response_format("url"), do: "url"
   defp normalize_response_format("b64_json"), do: "b64_json"
   defp normalize_response_format(_value), do: "b64_json"
+
+  defp normalize_output_format_value(nil), do: nil
+  defp normalize_output_format_value(:png), do: "png"
+  defp normalize_output_format_value(:jpeg), do: "jpeg"
+  defp normalize_output_format_value(:webp), do: "webp"
+  defp normalize_output_format_value(value) when is_binary(value), do: value
+  defp normalize_output_format_value(_value), do: nil
 
   defp output_format_to_media_type(:jpeg), do: "image/jpeg"
   defp output_format_to_media_type("jpeg"), do: "image/jpeg"
