@@ -49,7 +49,8 @@ defmodule ReqLlmNext.MixProject do
         "test.live": :test,
         "test.all": :test,
         "test.parity": :test,
-        "test.starter_slice": :test
+        "test.starter_slice": :test,
+        "test.live_verifiers": :test
       ]
     ]
   end
@@ -100,6 +101,9 @@ defmodule ReqLlmNext.MixProject do
       "test.live": ["test --include live --exclude slow"],
       "test.all": ["test --include integration --include live --include slow"],
       "test.parity": ["test --only parity"],
+      "test.live_verifiers": [
+        "test test/live_verifiers --include integration --include live --include live_verifier --exclude slow"
+      ],
       "test.starter_slice": [
         "test test/model_slices test/coverage/anthropic_comprehensive_test.exs test/coverage/openai_comprehensive_test.exs"
       ]
