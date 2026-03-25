@@ -56,6 +56,13 @@ defmodule ReqLlmNext.ModelProfileTest do
     assert [%{id: :xai_responses_text_http_sse}] = ModelProfile.surfaces_for(profile, :text)
   end
 
+  test "uses provider-specific venice family over the shared openai-compatible base" do
+    {:ok, profile} = ModelProfile.from_model(ReqLlmNext.TestModels.venice())
+
+    assert profile.family == :venice_chat_compatible
+    assert [%{id: :openai_chat_text_http_sse}] = ModelProfile.surfaces_for(profile, :text)
+  end
+
   test "falls back to the global openai-compatible family for unregistered providers" do
     model =
       LLMDB.Model.new!(%{

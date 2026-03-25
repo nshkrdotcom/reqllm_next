@@ -325,6 +325,29 @@ defmodule ReqLlmNext.TestModels do
   end
 
   @doc """
+  Creates a Venice model for testing.
+  """
+  def venice(overrides \\ %{}) do
+    base = %LLMDB.Model{
+      id: "venice-uncensored",
+      provider: :venice,
+      name: "Test Venice Model",
+      capabilities: %{
+        chat: true,
+        embeddings: false,
+        reasoning: %{enabled: false},
+        tools: %{enabled: true, streaming: true, strict: false, parallel: true},
+        json: %{native: true, schema: true, strict: true},
+        streaming: %{text: true, tool_calls: true}
+      },
+      limits: %{context: 128_000, output: 8_192},
+      modalities: %{input: [:text], output: [:text]}
+    }
+
+    struct!(base, Map.to_list(overrides))
+  end
+
+  @doc """
   Creates an xAI model for testing.
   """
   def xai(overrides \\ %{}) do

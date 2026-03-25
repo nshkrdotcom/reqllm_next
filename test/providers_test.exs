@@ -3,7 +3,7 @@ defmodule ReqLlmNext.ProvidersTest do
 
   alias ReqLlmNext.Provider
   alias ReqLlmNext.Providers
-  alias ReqLlmNext.Providers.{Anthropic, DeepSeek, Groq, OpenAI, OpenRouter, VLLM, XAI}
+  alias ReqLlmNext.Providers.{Anthropic, DeepSeek, Groq, OpenAI, OpenRouter, VLLM, Venice, XAI}
 
   describe "Providers.get/1" do
     test "returns OpenAI module for :openai" do
@@ -32,6 +32,10 @@ defmodule ReqLlmNext.ProvidersTest do
 
     test "returns xAI module for :xai" do
       assert Providers.get(:xai) == {:ok, XAI}
+    end
+
+    test "returns Venice module for :venice" do
+      assert Providers.get(:venice) == {:ok, Venice}
     end
 
     test "returns error for unknown provider" do
@@ -68,6 +72,10 @@ defmodule ReqLlmNext.ProvidersTest do
       assert Providers.get!(:xai) == XAI
     end
 
+    test "returns Venice module for :venice" do
+      assert Providers.get!(:venice) == Venice
+    end
+
     test "raises for unknown provider" do
       assert_raise RuntimeError, ~r/Provider error/, fn ->
         Providers.get!(:unknown)
@@ -86,6 +94,7 @@ defmodule ReqLlmNext.ProvidersTest do
       assert :openrouter in providers
       assert :vllm in providers
       assert :xai in providers
+      assert :venice in providers
     end
   end
 
@@ -205,6 +214,21 @@ defmodule ReqLlmNext.ProvidersTest do
 
     test "auth_headers returns Bearer token" do
       headers = XAI.auth_headers("test-key")
+      assert headers == [{"Authorization", "Bearer test-key"}]
+    end
+  end
+
+  describe "Providers.Venice" do
+    test "base_url returns Venice API URL" do
+      assert Venice.base_url() == "https://api.venice.ai/api/v1"
+    end
+
+    test "env_key returns VENICE_API_KEY" do
+      assert Venice.env_key() == "VENICE_API_KEY"
+    end
+
+    test "auth_headers returns Bearer token" do
+      headers = Venice.auth_headers("test-key")
       assert headers == [{"Authorization", "Bearer test-key"}]
     end
   end

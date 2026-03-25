@@ -136,6 +136,19 @@ defmodule ReqLlmNext.TestModelsTest do
     end
   end
 
+  describe "venice/1" do
+    test "creates Venice model" do
+      model = TestModels.venice()
+      assert model.provider == :venice
+      assert model.id == "venice-uncensored"
+    end
+
+    test "applies overrides" do
+      model = TestModels.venice(%{id: "venice-custom"})
+      assert model.id == "venice-custom"
+    end
+  end
+
   describe "xai/1" do
     test "creates xAI model" do
       model = TestModels.xai()
