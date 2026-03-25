@@ -7,7 +7,10 @@ defmodule ReqLlmNext.ModelProfile.SurfaceCatalog.OpenAIMedia do
 
   @spec build(LLMDB.Model.t(), map()) :: %{surfaces: map(), session_capabilities: map()}
   def build(%LLMDB.Model{} = _model, provider_facts) when is_map(provider_facts) do
-    %{surfaces: %{operation(provider_facts) => [surface(provider_facts)]}, session_capabilities: media_session_capabilities()}
+    %{
+      surfaces: %{operation(provider_facts) => [surface(provider_facts)]},
+      session_capabilities: media_session_capabilities()
+    }
   end
 
   defp operation(%{media_api: :images}), do: :image
@@ -15,7 +18,12 @@ defmodule ReqLlmNext.ModelProfile.SurfaceCatalog.OpenAIMedia do
   defp operation(%{media_api: :speech}), do: :speech
 
   defp surface(%{media_api: :images}) do
-    Helpers.request_surface(:openai_images_image_http, :image, :openai_images, :openai_images_json)
+    Helpers.request_surface(
+      :openai_images_image_http,
+      :image,
+      :openai_images,
+      :openai_images_json
+    )
   end
 
   defp surface(%{media_api: :transcription}) do

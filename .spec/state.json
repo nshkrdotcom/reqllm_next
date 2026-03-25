@@ -218,7 +218,7 @@
         "id": "reqllm.architecture.execution_layers",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext architecture shall separate realtime session reduction, semantic protocol, wire format, transport, provider, session-runtime, and telemetry-kernel concerns so canonical request and event meaning, wire envelopes, persistent execution state, byte movement, and diagnostics can evolve independently.",
+        "statement": "ReqLlmNext architecture shall separate realtime adapter, realtime session reduction, semantic protocol, wire format, transport, provider, session-runtime, and telemetry-kernel concerns so canonical request and event meaning, wire envelopes, persistent execution state, byte movement, and diagnostics can evolve independently, and canonical response normalization shall expose explicit result channels on top of output items so higher-level helpers do not have to recover those distinctions from provider metadata.",
         "subject_id": "reqllm.architecture"
       },
       {
@@ -266,7 +266,7 @@
         "id": "reqllm.diagnostics.layer_attributed",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext diagnostics shall attribute events and anomalies to explicit layers such as model profile, planner, execution-stack resolution, semantic protocol, wire format, transport, session runtime, provider, or canonical output-item materialization, including request-style media lanes, realtime event reduction, and fixture-replay anomalies that do not flow through streaming semantics.",
+        "statement": "ReqLlmNext diagnostics shall attribute events and anomalies to explicit layers such as model profile, planner, execution-stack resolution, semantic protocol, wire format, transport, session runtime, realtime adapter, provider, or canonical output-item materialization, including request-style media lanes, realtime event reduction, provider-owned utility request execution, and fixture-replay anomalies that do not flow through streaming semantics.",
         "subject_id": "reqllm.diagnostics"
       },
       {
@@ -370,7 +370,7 @@
         "id": "reqllm.execution_surfaces.non_cartesian",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall not infer endpoint support from a cartesian product of independent protocol, wire-format, and transport lists and shall instead resolve only declared execution surfaces through family-owned surface catalog modules selected by the compiled extension manifest and defined in explicit provider or family definition packs.",
+        "statement": "ReqLlmNext shall not infer endpoint support from a cartesian product of independent protocol, wire-format, and transport lists and shall instead resolve only declared execution surfaces through surface catalog modules selected by the compiled extension manifest and defined in explicit provider or family definition packs, while allowing one provider-owned catalog module to declare multiple closely related media surfaces when separate catalog files would add only low-value indirection.",
         "subject_id": "reqllm.execution_surfaces"
       },
       {
@@ -426,7 +426,7 @@
         "id": "reqllm.extension_manifest.narrow_seams",
         "priority": "must",
         "stability": "evolving",
-        "statement": "Extension declarations shall only patch explicit seams such as provider registration, provider facts, surface catalog construction, surface preparation, session-runtime mapping, semantic protocol mapping, wire mapping, transport mapping, adapters, and provider-native utility homes, including provider-owned media families and request-style media wires when needed, and shared runtime code shall consume those seams instead of branching on provider atoms directly.",
+        "statement": "Extension declarations shall only patch explicit seams such as provider registration, provider facts, surface catalog construction, surface preparation, session-runtime mapping, semantic protocol mapping, wire mapping, transport mapping, realtime adapter mapping, adapters, and provider-native utility homes, including provider-owned media families and request-style media wires when needed, and shared runtime code shall consume those seams instead of branching on provider atoms directly.",
         "subject_id": "reqllm.extension_manifest"
       },
       {
@@ -490,7 +490,7 @@
         "id": "reqllm.layer_boundaries.separated_io",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall keep provider, session runtime, realtime session reduction, transport, wire format, semantic protocol, and telemetry-kernel responsibilities separated so no layer skips across another layer's ownership boundary and each resolved plan binds one deterministic layer stack including explicit provider, protocol, wire, and transport modules resolved from manifest-declared seams and the compiled runtime registry across both streaming execution and request-style HTTP media lanes.",
+        "statement": "ReqLlmNext shall keep provider, session runtime, realtime adapter, realtime session reduction, transport, wire format, semantic protocol, and telemetry-kernel responsibilities separated so no layer skips across another layer's ownership boundary and each resolved plan binds one deterministic layer stack including explicit provider, protocol, wire, and transport modules resolved from manifest-declared seams and the compiled runtime registry across both streaming execution and request-style HTTP media lanes.",
         "subject_id": "reqllm.layer_boundaries"
       },
       {
@@ -530,7 +530,7 @@
         "id": "reqllm.model_compat.provider_native_request_shapes",
         "priority": "should",
         "stability": "evolving",
-        "statement": "Provider-native utility coverage shall keep request-shape proofs for supported non-canonical endpoints so batch, file, and similar utility surfaces stay reconciled with the shared execution architecture without claiming top-level API support they do not provide.",
+        "statement": "Provider-native utility coverage shall keep request-shape and representative request-execution proofs for supported non-canonical endpoints so batch, file, vector-store, background, and similar utility surfaces stay reconciled with the shared execution architecture without claiming top-level API support they do not provide.",
         "subject_id": "reqllm.model_compat"
       },
       {
@@ -586,7 +586,7 @@
         "id": "reqllm.model_input.zoi_handoff_contracts",
         "priority": "should",
         "stability": "evolving",
-        "statement": "Accepted model input shall hand off into Zoi-backed internal package contracts such as `ModelProfile`, `ExecutionMode`, `ExecutionPlan`, `Response`, `StreamResponse`, and realtime command or event or session state rather than into plain ad hoc structs so the public boundary feeds explicit internal schemas.",
+        "statement": "Accepted model input shall hand off into Zoi-backed internal package contracts such as `ModelProfile`, `ExecutionMode`, `ExecutionPlan`, `Response`, `StreamResponse`, and realtime command or event or session state rather than into plain ad hoc structs so the public boundary feeds explicit internal schemas, and realtime adapter behavior above that boundary shall continue to operate on resolved models instead of inventing alternate model descriptor inputs.",
         "subject_id": "reqllm.model_input"
       },
       {
@@ -602,7 +602,7 @@
         "id": "reqllm.model_profile.execution_surfaces_declared",
         "priority": "must",
         "stability": "evolving",
-        "statement": "`ModelProfile` shall declare explicit named `ExecutionSurface` entries for supported endpoint styles instead of implying support from independent protocol, wire-format, and transport lists, including multiple transport variants for one semantic family when the provider truly supports them.",
+        "statement": "`ModelProfile` shall declare explicit named `ExecutionSurface` entries for supported endpoint styles instead of implying support from independent protocol, wire-format, and transport lists, including multiple transport variants for one semantic family when the provider truly supports them and allowing one provider-owned media catalog to emit several explicit media-operation surfaces when the provider facts already disambiguate which family is active.",
         "subject_id": "reqllm.model_profile"
       },
       {
@@ -642,7 +642,7 @@
         "id": "reqllm.package.buffered_stream_metadata",
         "priority": "should",
         "stability": "evolving",
-        "statement": "When ReqLlmNext buffers a streamed response into the canonical `Response` shape, it shall preserve terminal metadata such as finish reason and provider-facing response identifiers emitted by the canonical stream, and the same shared output-item materialization path shall drive helper extraction for streamed text, thinking, usage, transcripts, audio chunks, provider items, and tool calls so normalization stays consistent across buffered and streaming consumers.",
+        "statement": "When ReqLlmNext buffers a streamed response into the canonical `Response` shape, it shall preserve terminal metadata such as finish reason and provider-facing response identifiers emitted by the canonical stream, and the same shared output-item materialization path shall drive explicit result-channel and helper extraction for streamed text, thinking, usage, transcripts, audio chunks, provider items, refusals, annotations, and tool calls so normalization stays consistent across buffered and streaming consumers.",
         "subject_id": "reqllm.package"
       },
       {
@@ -715,6 +715,14 @@
         "priority": "should",
         "stability": "evolving",
         "statement": "ReqLlmNext shall expose a stable `ReqLlmNext.Telemetry` kernel for request, plan, execution-stack, stream, provider-request, fixture, and realtime instrumentation so application code and compat tooling can observe the runtime without parsing provider-specific payloads.",
+        "subject_id": "reqllm.package"
+      },
+      {
+        "file": ".spec/specs/package.spec.md",
+        "id": "reqllm.package.utility_proof_depth",
+        "priority": "should",
+        "stability": "evolving",
+        "statement": "Provider-owned utility helpers shall keep representative request-execution proof lanes in addition to builder-level tests so files, batches, vector stores, background flows, and similar non-canonical utilities stay honest about their integration depth without pretending to be part of the cross-provider facade.",
         "subject_id": "reqllm.package"
       },
       {
@@ -890,7 +898,7 @@
         "id": "reqllm.source_layout.concern_homes",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall keep model-boundary concerns, provider-scoped fact extraction, manifest-backed provider registration, family-owned surface catalog modules, profile construction, mode normalization, policy resolution, surface-owned request preparation, session-runtime modules, semantic protocol normalization, wire envelopes, transport mechanics, shared response output-item materialization, fixture replay, media input and output contracts, realtime commands and session state, and telemetry emission in distinct source locations that match the architecture, while co-locating concrete family implementations under `lib/req_llm_next/families/` and provider-owned implementations and utilities under `lib/req_llm_next/providers/`.",
+        "statement": "ReqLlmNext shall keep model-boundary concerns, provider-scoped fact extraction, manifest-backed provider registration, family-owned or provider-owned surface catalog modules, profile construction, mode normalization, policy resolution, surface-owned request preparation, session-runtime modules, semantic protocol normalization, wire envelopes, transport mechanics, shared response output-item materialization, fixture replay, media input and output contracts, realtime commands and session state, and telemetry emission in distinct source locations that match the architecture, while co-locating concrete family implementations under `lib/req_llm_next/families/` and provider-owned implementations and utilities under `lib/req_llm_next/providers/`.",
         "subject_id": "reqllm.source_layout"
       },
       {
@@ -906,7 +914,7 @@
         "id": "reqllm.source_layout.layer_scoped_quirks",
         "priority": "must",
         "stability": "evolving",
-        "statement": "Imperative quirks shall live in explicit layer-scoped adapters rather than in omniscient global hooks or ad hoc model-name branches spread across the stack.",
+        "statement": "Imperative quirks shall live in explicit layer-scoped adapters rather than in omniscient global hooks or ad hoc model-name branches spread across the stack, and trivial per-provider helpers that do not buy a real seam may be consolidated into one provider-owned module instead of being preserved as one-file-per-variant indirection.",
         "subject_id": "reqllm.source_layout"
       },
       {
@@ -946,7 +954,7 @@
         "id": "reqllm.telemetry.kernel_boundary",
         "priority": "should",
         "stability": "evolving",
-        "statement": "Package-level runtime telemetry shall emit through `ReqLlmNext.Telemetry` rather than ad hoc direct `:telemetry` calls from runtime layers so event names, request spans, provider-request spans, stream instrumentation, and metadata redaction remain stable.",
+        "statement": "Package-level runtime telemetry shall emit through `ReqLlmNext.Telemetry` rather than ad hoc direct `:telemetry` calls from runtime layers so event names, request spans, provider-request spans, stream instrumentation, utility-request instrumentation, and metadata redaction remain stable.",
         "subject_id": "reqllm.telemetry"
       },
       {
@@ -954,7 +962,7 @@
         "id": "reqllm.telemetry.request_lifecycle",
         "priority": "must",
         "stability": "evolving",
-        "statement": "Every logical request shall emit one canonical request lifecycle that supports timing, finish classification, usage attribution, and runtime anomaly diagnosis across sync, streaming, and request-style media flows.",
+        "statement": "Every logical request shall emit one canonical request lifecycle that supports timing, finish classification, usage attribution, and runtime anomaly diagnosis across sync, streaming, request-style media flows, and provider-owned utility request helpers.",
         "subject_id": "reqllm.telemetry"
       },
       {
@@ -1066,7 +1074,7 @@
         "id": "reqllm.workflow.specled_loop",
         "priority": "must",
         "stability": "evolving",
-        "statement": "Contributor workflow shall keep `.spec/` as the canonical spec workspace and use `mix spec.prime`, `mix spec.next`, and `mix spec.check` to maintain the subject specs, ADRs, README, AGENTS, and package-thesis guide in sync with current truth, including top-level media API parity, request-fixture replay behavior, runtime telemetry, canonical output items, and transport-agnostic realtime behavior when those package boundaries evolve.",
+        "statement": "Contributor workflow shall keep `.spec/` as the canonical spec workspace and use `mix spec.prime`, `mix spec.next`, and `mix spec.check` to maintain the subject specs, ADRs, README, AGENTS, and package-thesis guide in sync with current truth, including top-level media API parity, request-fixture replay behavior, runtime telemetry, canonical output items, explicit result channels, transport-agnostic realtime behavior, and utility-proof claims when those package boundaries evolve.",
         "subject_id": "reqllm.workflow"
       },
       {
@@ -2029,6 +2037,17 @@
       },
       {
         "covers": [
+          "reqllm.model_compat.provider_native_surfaces",
+          "reqllm.model_compat.provider_native_request_shapes"
+        ],
+        "execute": true,
+        "file": ".spec/specs/model_compat.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.model_compat",
+        "target": "mix test test/providers/openai/client_test.exs test/providers/openai/background_test.exs test/providers/openai/files_test.exs test/providers/openai/vector_stores_test.exs test/providers/openai/batches_test.exs"
+      },
+      {
+        "covers": [
           "reqllm.model_compat.extension_pressure_tests"
         ],
         "execute": true,
@@ -2170,6 +2189,28 @@
         "kind": "command",
         "subject_id": "reqllm.package",
         "target": "mix test test/providers/deepseek test/model_profile_test.exs test/wire/resolver_test.exs"
+      },
+      {
+        "covers": [
+          "reqllm.package.provider_specific_utilities",
+          "reqllm.package.utility_proof_depth"
+        ],
+        "execute": true,
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/providers/openai/client_test.exs test/providers/openai/background_test.exs test/providers/openai/files_test.exs test/providers/openai/vector_stores_test.exs test/providers/openai/batches_test.exs"
+      },
+      {
+        "covers": [
+          "reqllm.package.execution_planning",
+          "reqllm.package.buffered_stream_metadata"
+        ],
+        "execute": true,
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/req_llm_next/realtime_adapter_contract_test.exs test/req_llm_next/realtime_test.exs"
       },
       {
         "covers": [
@@ -2646,10 +2687,10 @@
     "decisions": 17,
     "exceptions": 0,
     "findings": 0,
-    "requirements": 114,
+    "requirements": 115,
     "scenarios": 0,
     "subjects": 24,
-    "verifications": 86
+    "verifications": 89
   },
   "verification": {
     "claims": [
@@ -3512,6 +3553,28 @@
         "verification_index": 4
       },
       {
+        "cover_id": "reqllm.model_compat.provider_native_request_shapes",
+        "file": ".spec/specs/model_compat.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.model_compat",
+        "target": "mix test test/providers/openai/client_test.exs test/providers/openai/background_test.exs test/providers/openai/files_test.exs test/providers/openai/vector_stores_test.exs test/providers/openai/batches_test.exs",
+        "verification_index": 5
+      },
+      {
+        "cover_id": "reqllm.model_compat.provider_native_surfaces",
+        "file": ".spec/specs/model_compat.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.model_compat",
+        "target": "mix test test/providers/openai/client_test.exs test/providers/openai/background_test.exs test/providers/openai/files_test.exs test/providers/openai/vector_stores_test.exs test/providers/openai/batches_test.exs",
+        "verification_index": 5
+      },
+      {
         "cover_id": "reqllm.model_compat.extension_pressure_tests",
         "file": ".spec/specs/model_compat.spec.md",
         "kind": "command",
@@ -3520,7 +3583,7 @@
         "strength": "executed",
         "subject_id": "reqllm.model_compat",
         "target": "mix test test/providers/deepseek",
-        "verification_index": 5
+        "verification_index": 6
       },
       {
         "cover_id": "reqllm.model_input.accepted_forms",
@@ -3842,25 +3905,47 @@
         "verification_index": 5
       },
       {
-        "cover_id": "reqllm.package.model_slice_verification",
+        "cover_id": "reqllm.package.provider_specific_utilities",
         "file": ".spec/specs/package.spec.md",
         "kind": "command",
         "meets_minimum": true,
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.package",
-        "target": "mix test test/model_slices/anthropic_haiku_4_5_test.exs",
+        "target": "mix test test/providers/openai/client_test.exs test/providers/openai/background_test.exs test/providers/openai/files_test.exs test/providers/openai/vector_stores_test.exs test/providers/openai/batches_test.exs",
         "verification_index": 6
       },
       {
-        "cover_id": "reqllm.package.model_slice_verification",
+        "cover_id": "reqllm.package.utility_proof_depth",
         "file": ".spec/specs/package.spec.md",
         "kind": "command",
         "meets_minimum": true,
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.package",
-        "target": "mix test test/model_slices/openai_gpt_4o_mini_test.exs",
+        "target": "mix test test/providers/openai/client_test.exs test/providers/openai/background_test.exs test/providers/openai/files_test.exs test/providers/openai/vector_stores_test.exs test/providers/openai/batches_test.exs",
+        "verification_index": 6
+      },
+      {
+        "cover_id": "reqllm.package.buffered_stream_metadata",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/req_llm_next/realtime_adapter_contract_test.exs test/req_llm_next/realtime_test.exs",
+        "verification_index": 7
+      },
+      {
+        "cover_id": "reqllm.package.execution_planning",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/req_llm_next/realtime_adapter_contract_test.exs test/req_llm_next/realtime_test.exs",
         "verification_index": 7
       },
       {
@@ -3871,18 +3956,18 @@
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.package",
-        "target": "mix test.starter_slice",
+        "target": "mix test test/model_slices/anthropic_haiku_4_5_test.exs",
         "verification_index": 8
       },
       {
-        "cover_id": "reqllm.package.fixture_replay",
+        "cover_id": "reqllm.package.model_slice_verification",
         "file": ".spec/specs/package.spec.md",
         "kind": "command",
         "meets_minimum": true,
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.package",
-        "target": "mix test test/coverage/anthropic_comprehensive_test.exs",
+        "target": "mix test test/model_slices/openai_gpt_4o_mini_test.exs",
         "verification_index": 9
       },
       {
@@ -3893,40 +3978,18 @@
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.package",
+        "target": "mix test.starter_slice",
+        "verification_index": 10
+      },
+      {
+        "cover_id": "reqllm.package.fixture_replay",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
         "target": "mix test test/coverage/anthropic_comprehensive_test.exs",
-        "verification_index": 9
-      },
-      {
-        "cover_id": "reqllm.package.fixture_replay",
-        "file": ".spec/specs/package.spec.md",
-        "kind": "command",
-        "meets_minimum": true,
-        "required_strength": "claimed",
-        "strength": "executed",
-        "subject_id": "reqllm.package",
-        "target": "mix test test/coverage/openai_comprehensive_test.exs",
-        "verification_index": 10
-      },
-      {
-        "cover_id": "reqllm.package.model_slice_verification",
-        "file": ".spec/specs/package.spec.md",
-        "kind": "command",
-        "meets_minimum": true,
-        "required_strength": "claimed",
-        "strength": "executed",
-        "subject_id": "reqllm.package",
-        "target": "mix test test/coverage/openai_comprehensive_test.exs",
-        "verification_index": 10
-      },
-      {
-        "cover_id": "reqllm.package.fixture_replay",
-        "file": ".spec/specs/package.spec.md",
-        "kind": "command",
-        "meets_minimum": true,
-        "required_strength": "claimed",
-        "strength": "executed",
-        "subject_id": "reqllm.package",
-        "target": "mix test test/coverage/openai_websocket_coverage_test.exs",
         "verification_index": 11
       },
       {
@@ -3937,7 +4000,7 @@
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.package",
-        "target": "mix test test/coverage/openai_websocket_coverage_test.exs",
+        "target": "mix test test/coverage/anthropic_comprehensive_test.exs",
         "verification_index": 11
       },
       {
@@ -3948,7 +4011,7 @@
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.package",
-        "target": "mix test test/provider_features/anthropic_beta_features_test.exs",
+        "target": "mix test test/coverage/openai_comprehensive_test.exs",
         "verification_index": 12
       },
       {
@@ -3959,7 +4022,7 @@
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.package",
-        "target": "mix test test/provider_features/anthropic_beta_features_test.exs",
+        "target": "mix test test/coverage/openai_comprehensive_test.exs",
         "verification_index": 12
       },
       {
@@ -3970,7 +4033,7 @@
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.package",
-        "target": "mix test test/provider_features/anthropic_advanced_messages_test.exs",
+        "target": "mix test test/coverage/openai_websocket_coverage_test.exs",
         "verification_index": 13
       },
       {
@@ -3981,8 +4044,52 @@
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.package",
-        "target": "mix test test/provider_features/anthropic_advanced_messages_test.exs",
+        "target": "mix test test/coverage/openai_websocket_coverage_test.exs",
         "verification_index": 13
+      },
+      {
+        "cover_id": "reqllm.package.fixture_replay",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/provider_features/anthropic_beta_features_test.exs",
+        "verification_index": 14
+      },
+      {
+        "cover_id": "reqllm.package.model_slice_verification",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/provider_features/anthropic_beta_features_test.exs",
+        "verification_index": 14
+      },
+      {
+        "cover_id": "reqllm.package.fixture_replay",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/provider_features/anthropic_advanced_messages_test.exs",
+        "verification_index": 15
+      },
+      {
+        "cover_id": "reqllm.package.model_slice_verification",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/provider_features/anthropic_advanced_messages_test.exs",
+        "verification_index": 15
       },
       {
         "cover_id": "reqllm.package.local_env_loading",
@@ -3993,7 +4100,7 @@
         "strength": "executed",
         "subject_id": "reqllm.package",
         "target": "mix test test/env_test.exs",
-        "verification_index": 14
+        "verification_index": 16
       },
       {
         "cover_id": "reqllm.package.provider_specific_utilities",
@@ -4004,7 +4111,7 @@
         "strength": "executed",
         "subject_id": "reqllm.package",
         "target": "mix test test/providers/anthropic",
-        "verification_index": 15
+        "verification_index": 17
       },
       {
         "cover_id": "reqllm.package.provider_native_input_isolation",
@@ -4015,7 +4122,7 @@
         "strength": "executed",
         "subject_id": "reqllm.package",
         "target": "mix test test/operation_planner_test.exs test/providers/anthropic/wire_messages_test.exs test/families/openai_compatible/wire_chat_test.exs test/providers/openai/wire_responses_request_test.exs",
-        "verification_index": 16
+        "verification_index": 18
       },
       {
         "cover_id": "reqllm.package.compile_time_extensions",
@@ -4026,7 +4133,7 @@
         "strength": "executed",
         "subject_id": "reqllm.package",
         "target": "mix test test/req_llm_next/extensions/manifest_test.exs test/req_llm_next/extensions/dsl_test.exs test/req_llm_next/extensions/manifest_verifier_test.exs",
-        "verification_index": 17
+        "verification_index": 19
       },
       {
         "cover_id": "reqllm.package.zoi_struct_contracts",
@@ -4037,7 +4144,7 @@
         "strength": "executed",
         "subject_id": "reqllm.package",
         "target": "mix test test/stream_response_test.exs test/executor/stream_state_test.exs test/req_llm_next/response/materializer_test.exs",
-        "verification_index": 18
+        "verification_index": 20
       },
       {
         "cover_id": "reqllm.policy_rules.allowed_patch_domains",
@@ -4836,7 +4943,7 @@
     "default_minimum_strength": "claimed",
     "strength_summary": {
       "claimed": 2,
-      "executed": 92,
+      "executed": 98,
       "linked": 104
     },
     "threshold_failures": 0

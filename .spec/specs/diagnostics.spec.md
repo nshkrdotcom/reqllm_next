@@ -25,7 +25,7 @@ surface:
   stability: evolving
 
 - id: reqllm.diagnostics.layer_attributed
-  statement: ReqLlmNext diagnostics shall attribute events and anomalies to explicit layers such as model profile, planner, execution-stack resolution, semantic protocol, wire format, transport, session runtime, provider, or canonical output-item materialization, including request-style media lanes, realtime event reduction, and fixture-replay anomalies that do not flow through streaming semantics.
+  statement: ReqLlmNext diagnostics shall attribute events and anomalies to explicit layers such as model profile, planner, execution-stack resolution, semantic protocol, wire format, transport, session runtime, realtime adapter, provider, or canonical output-item materialization, including request-style media lanes, realtime event reduction, provider-owned utility request execution, and fixture-replay anomalies that do not flow through streaming semantics.
   priority: must
   stability: evolving
 

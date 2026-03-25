@@ -104,7 +104,11 @@ defmodule ReqLlmNext.TestSupport.OpenAIUtilityHarness do
       |> Map.get("content-length", "0")
       |> String.to_integer()
 
-    %{request_line: request_line, headers: headers, body: recv_body(socket, body_prefix, content_length)}
+    %{
+      request_line: request_line,
+      headers: headers,
+      body: recv_body(socket, body_prefix, content_length)
+    }
   end
 
   defp recv_until_headers(socket, acc) do

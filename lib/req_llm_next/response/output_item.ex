@@ -123,7 +123,9 @@ defmodule ReqLlmNext.Response.OutputItem do
   def channel(%__MODULE__{type: :annotation}), do: :annotations
   def channel(%__MODULE__{type: :refusal}), do: :refusals
   def channel(%__MODULE__{type: :provider_item}), do: :provider
-  def channel(%__MODULE__{type: :content_part, data: %ContentPart{} = part}), do: content_part_channel(part)
+
+  def channel(%__MODULE__{type: :content_part, data: %ContentPart{} = part}),
+    do: content_part_channel(part)
 
   @spec from_content_part(ContentPart.t()) :: t()
   def from_content_part(%ContentPart{type: :text, text: text, metadata: metadata}) do

@@ -35,11 +35,31 @@ defmodule ReqLlmNext.RealtimeAdapterContractTest do
     fake_model = TestModels.minimal(%{provider: :fake, id: "fake-realtime"})
 
     events =
-      OpenAIAdapter.decode_event(%{"type" => "response.text.delta", "delta" => "Hello"}, TestModels.openai(), []) ++
-        FakeRealtimeAdapter.decode_event(%{"kind" => "reasoning", "text" => "Think"}, fake_model, []) ++
-        FakeRealtimeAdapter.decode_event(%{"kind" => "media.audio", "chunk" => "YmFzZTY0"}, fake_model, []) ++
-        FakeRealtimeAdapter.decode_event(%{"kind" => "tool", "index" => 0, "name" => "lookup"}, fake_model, []) ++
-        FakeRealtimeAdapter.decode_event(%{"kind" => "tool.delta", "index" => 0, "arguments" => "{\"city\":\"Austin\"}"}, fake_model, []) ++
+      OpenAIAdapter.decode_event(
+        %{"type" => "response.text.delta", "delta" => "Hello"},
+        TestModels.openai(),
+        []
+      ) ++
+        FakeRealtimeAdapter.decode_event(
+          %{"kind" => "reasoning", "text" => "Think"},
+          fake_model,
+          []
+        ) ++
+        FakeRealtimeAdapter.decode_event(
+          %{"kind" => "media.audio", "chunk" => "YmFzZTY0"},
+          fake_model,
+          []
+        ) ++
+        FakeRealtimeAdapter.decode_event(
+          %{"kind" => "tool", "index" => 0, "name" => "lookup"},
+          fake_model,
+          []
+        ) ++
+        FakeRealtimeAdapter.decode_event(
+          %{"kind" => "tool.delta", "index" => 0, "arguments" => "{\"city\":\"Austin\"}"},
+          fake_model,
+          []
+        ) ++
         FakeRealtimeAdapter.decode_event(%{"kind" => "done", "id" => "resp_fake"}, fake_model, [])
 
     assert Enum.all?(events, &match?(%Event{}, &1))
@@ -57,6 +77,8 @@ defmodule ReqLlmNext.RealtimeAdapterContractTest do
 
   test "non-openai adapter websocket urls stay provider-owned" do
     model = TestModels.minimal(%{provider: :fake, id: "fake-realtime"})
-    assert FakeRealtimeAdapter.websocket_url(model, []) == "realtime://fake.example/sessions/fake-realtime"
+
+    assert FakeRealtimeAdapter.websocket_url(model, []) ==
+             "realtime://fake.example/sessions/fake-realtime"
   end
 end

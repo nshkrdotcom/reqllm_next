@@ -18,12 +18,12 @@ At the same time, ReqLlmNext should not become a WebSocket host. Applications or
 
 ## Decision
 
-ReqLlmNext now treats realtime as a first-class package concept through a shared `ReqLlmNext.Realtime` core with canonical commands, canonical events, and session-state reduction.
+ReqLlmNext now treats realtime as a first-class package concept through a shared `ReqLlmNext.Realtime` core with canonical commands, canonical events, session-state reduction, and an explicit adapter behaviour for provider-owned realtime integrations.
 
 The package owns:
 
 1. canonical realtime commands and events
-2. provider-specific adapter modules that encode commands and decode provider events
+2. a shared adapter contract that defines how provider-specific modules encode commands and decode provider events
 3. canonical session-state reduction and output-item materialization
 4. optional provider-owned streaming helpers built on top of that shared core
 
@@ -31,6 +31,6 @@ The package does not require ownership of the host WebSocket lifecycle. A higher
 
 ## Consequences
 
-Realtime is no longer merely an OpenAI utility helper. It is a package-level architectural concept with provider adapters.
+Realtime is no longer merely an OpenAI utility helper. It is a package-level architectural concept with provider adapters that can be verified against more than one event grammar.
 
-OpenAI remains the first concrete realtime adapter, but the shared core is now available for future providers without forcing WebSocket hosting into the facade or planner.
+OpenAI remains the first concrete realtime adapter, but the shared core is now available for future providers without forcing WebSocket hosting into the facade or planner, and adapter contract tests can now prove the shared realtime layer independently of any one provider's wire grammar.

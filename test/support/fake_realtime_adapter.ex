@@ -6,7 +6,8 @@ defmodule ReqLlmNext.TestSupport.FakeRealtimeAdapter do
   alias ReqLlmNext.Realtime.{Command, Event}
 
   @impl ReqLlmNext.Realtime.Adapter
-  def encode_command(_model, %Command{type: :session_update, data: data}, _opts) when is_map(data) do
+  def encode_command(_model, %Command{type: :session_update, data: data}, _opts)
+      when is_map(data) do
     %{event: "session.configure", payload: data}
   end
 

@@ -39,7 +39,9 @@ defmodule ReqLlmNext.OpenAI.BatchesTest do
     {:ok, server} =
       OpenAIUtilityHarness.start_server(self(), [
         fn _request -> OpenAIUtilityHarness.json_response(200, %{"id" => "file_123"}) end,
-        fn _request -> OpenAIUtilityHarness.json_response(200, %{"id" => "batch_123", "status" => "validating"}) end
+        fn _request ->
+          OpenAIUtilityHarness.json_response(200, %{"id" => "batch_123", "status" => "validating"})
+        end
       ])
 
     on_exit(fn -> OpenAIUtilityHarness.stop_server(server) end)

@@ -24,7 +24,9 @@ defmodule ReqLlmNext.OpenAI.BackgroundTest do
   test "submits background requests through the responses endpoint" do
     {:ok, server} =
       OpenAIUtilityHarness.start_server(self(), [
-        fn _request -> OpenAIUtilityHarness.json_response(200, %{"id" => "resp_bg_123", "status" => "queued"}) end
+        fn _request ->
+          OpenAIUtilityHarness.json_response(200, %{"id" => "resp_bg_123", "status" => "queued"})
+        end
       ])
 
     on_exit(fn -> OpenAIUtilityHarness.stop_server(server) end)

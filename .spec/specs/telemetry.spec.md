@@ -20,7 +20,7 @@ surface:
 
 ```spec-requirements
 - id: reqllm.telemetry.request_lifecycle
-  statement: Every logical request shall emit one canonical request lifecycle that supports timing, finish classification, usage attribution, and runtime anomaly diagnosis across sync, streaming, and request-style media flows.
+  statement: Every logical request shall emit one canonical request lifecycle that supports timing, finish classification, usage attribution, and runtime anomaly diagnosis across sync, streaming, request-style media flows, and provider-owned utility request helpers.
   priority: must
   stability: evolving
 
@@ -35,7 +35,7 @@ surface:
   stability: evolving
 
 - id: reqllm.telemetry.kernel_boundary
-  statement: Package-level runtime telemetry shall emit through `ReqLlmNext.Telemetry` rather than ad hoc direct `:telemetry` calls from runtime layers so event names, request spans, provider-request spans, stream instrumentation, and metadata redaction remain stable.
+  statement: Package-level runtime telemetry shall emit through `ReqLlmNext.Telemetry` rather than ad hoc direct `:telemetry` calls from runtime layers so event names, request spans, provider-request spans, stream instrumentation, utility-request instrumentation, and metadata redaction remain stable.
   priority: should
   stability: evolving
 ```

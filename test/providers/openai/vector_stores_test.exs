@@ -39,7 +39,9 @@ defmodule ReqLlmNext.OpenAI.VectorStoresTest do
   test "attaches files to vector stores through the utility client" do
     {:ok, server} =
       OpenAIUtilityHarness.start_server(self(), [
-        fn _request -> OpenAIUtilityHarness.json_response(200, %{"id" => "vsfile_123", "status" => "completed"}) end
+        fn _request ->
+          OpenAIUtilityHarness.json_response(200, %{"id" => "vsfile_123", "status" => "completed"})
+        end
       ])
 
     on_exit(fn -> OpenAIUtilityHarness.stop_server(server) end)

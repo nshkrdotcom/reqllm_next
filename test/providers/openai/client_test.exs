@@ -32,7 +32,9 @@ defmodule ReqLlmNext.OpenAI.ClientTest do
   test "json_request emits provider telemetry and decodes JSON responses" do
     {:ok, server} =
       OpenAIUtilityHarness.start_server(self(), [
-        fn _request -> OpenAIUtilityHarness.json_response(200, %{"id" => "batch_123", "status" => "queued"}) end
+        fn _request ->
+          OpenAIUtilityHarness.json_response(200, %{"id" => "batch_123", "status" => "queued"})
+        end
       ])
 
     on_exit(fn -> OpenAIUtilityHarness.stop_server(server) end)

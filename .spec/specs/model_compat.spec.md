@@ -57,7 +57,7 @@ surface:
   stability: evolving
 
 - id: reqllm.model_compat.provider_native_request_shapes
-  statement: Provider-native utility coverage shall keep request-shape proofs for supported non-canonical endpoints so batch, file, and similar utility surfaces stay reconciled with the shared execution architecture without claiming top-level API support they do not provide.
+  statement: Provider-native utility coverage shall keep request-shape and representative request-execution proofs for supported non-canonical endpoints so batch, file, vector-store, background, and similar utility surfaces stay reconciled with the shared execution architecture without claiming top-level API support they do not provide.
   priority: should
   stability: evolving
 
@@ -103,6 +103,13 @@ surface:
   target: mix test test/providers/anthropic/message_batches_test.exs
   execute: true
   covers:
+    - reqllm.model_compat.provider_native_request_shapes
+
+- kind: command
+  target: mix test test/providers/openai/client_test.exs test/providers/openai/background_test.exs test/providers/openai/files_test.exs test/providers/openai/vector_stores_test.exs test/providers/openai/batches_test.exs
+  execute: true
+  covers:
+    - reqllm.model_compat.provider_native_surfaces
     - reqllm.model_compat.provider_native_request_shapes
 
 - kind: command

@@ -39,7 +39,7 @@ defmodule ReqLlmNext.OpenAI.FilesTest do
 
     assert {:ok, %{"id" => "file_123"}} =
              Files.upload_binary(
-               "{\"custom_id\":\"req-1\"}\n",
+               ~s({"custom_id":"req-1"}) <> "\n",
                filename: "batch.jsonl",
                purpose: "batch",
                base_url: server.base_url,
@@ -55,7 +55,12 @@ defmodule ReqLlmNext.OpenAI.FilesTest do
     assert upload_request.body =~ "filename=\"batch.jsonl\""
 
     assert {:ok, %{"data" => []}} =
-             Files.list(limit: 10, purpose: "batch", base_url: server.base_url, api_key: "test-key")
+             Files.list(
+               limit: 10,
+               purpose: "batch",
+               base_url: server.base_url,
+               api_key: "test-key"
+             )
 
     assert_receive {:utility_request, 2, list_request}
     assert list_request.request_line == "GET /v1/files?limit=10&purpose=batch HTTP/1.1"

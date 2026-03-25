@@ -158,7 +158,11 @@ defmodule ReqLlmNext.StreamResponse do
   @doc """
   Consume the stream and return canonical output items grouped by result channel.
   """
-  @spec channels(t()) :: %{optional(ReqLlmNext.Response.OutputItem.channel()) => [ReqLlmNext.Response.OutputItem.t()]}
+  @spec channels(t()) :: %{
+          optional(ReqLlmNext.Response.OutputItem.channel()) => [
+            ReqLlmNext.Response.OutputItem.t()
+          ]
+        }
   def channels(%__MODULE__{stream: stream}) do
     case Materializer.collect(stream) do
       {:ok, materialized} -> Materializer.channels(materialized)
@@ -174,8 +178,11 @@ defmodule ReqLlmNext.StreamResponse do
     resp
     |> channel_items(:media)
     |> Enum.flat_map(fn
-      %ReqLlmNext.Response.OutputItem{type: :transcript, data: text} when is_binary(text) -> [text]
-      _ -> []
+      %ReqLlmNext.Response.OutputItem{type: :transcript, data: text} when is_binary(text) ->
+        [text]
+
+      _ ->
+        []
     end)
   end
 

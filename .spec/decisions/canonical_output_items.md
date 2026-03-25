@@ -20,6 +20,8 @@ ReqLlmNext now normalizes runtime output through canonical output items first, t
 
 The canonical output-item layer is package-owned and cross-provider. It is responsible for preserving meaningful distinctions such as text, thinking, audio, transcript, tool-call, content-part, annotation, refusal, and provider-item channels without forcing those distinctions into provider-specific metadata blobs.
 
+On top of those output items, the package now exposes explicit result channels such as message, reasoning, tools, media, annotations, refusals, and provider-native extras. Those channels are still derived from canonical output items rather than replacing them, which keeps the low-level normalized contract rich while making the high-level consumption model clearer and less message-centric.
+
 `provider_meta` remains available, but it is now reserved for true provider extras rather than serving as the primary carrier for canonical result semantics.
 
 ## Consequences

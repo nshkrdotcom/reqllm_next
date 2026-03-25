@@ -28,7 +28,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.execution_surfaces.non_cartesian
-  statement: ReqLlmNext shall not infer endpoint support from a cartesian product of independent protocol, wire-format, and transport lists and shall instead resolve only declared execution surfaces through family-owned surface catalog modules selected by the compiled extension manifest and defined in explicit provider or family definition packs.
+  statement: ReqLlmNext shall not infer endpoint support from a cartesian product of independent protocol, wire-format, and transport lists and shall instead resolve only declared execution surfaces through surface catalog modules selected by the compiled extension manifest and defined in explicit provider or family definition packs, while allowing one provider-owned catalog module to declare multiple closely related media surfaces when separate catalog files would add only low-value indirection.
   priority: must
   stability: evolving
 

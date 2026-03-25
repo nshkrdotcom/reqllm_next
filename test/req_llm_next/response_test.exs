@@ -218,7 +218,12 @@ defmodule ReqLlmNext.ResponseTest do
       assert Enum.map(Response.channel_items(response, :message), & &1.type) == [:text]
       assert Enum.map(Response.channel_items(response, :reasoning), & &1.type) == [:thinking]
       assert Enum.map(Response.channel_items(response, :tools), & &1.type) == [:tool_call]
-      assert Enum.map(Response.channel_items(response, :media), & &1.type) == [:audio, :transcript]
+
+      assert Enum.map(Response.channel_items(response, :media), & &1.type) == [
+               :audio,
+               :transcript
+             ]
+
       assert Enum.map(Response.channel_items(response, :annotations), & &1.type) == [:annotation]
       assert Enum.map(Response.channel_items(response, :refusals), & &1.type) == [:refusal]
       assert Enum.map(Response.channel_items(response, :provider), & &1.type) == [:provider_item]

@@ -39,7 +39,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.package.buffered_stream_metadata
-  statement: When ReqLlmNext buffers a streamed response into the canonical `Response` shape, it shall preserve terminal metadata such as finish reason and provider-facing response identifiers emitted by the canonical stream, and the same shared output-item materialization path shall drive helper extraction for streamed text, thinking, usage, transcripts, audio chunks, provider items, and tool calls so normalization stays consistent across buffered and streaming consumers.
+  statement: When ReqLlmNext buffers a streamed response into the canonical `Response` shape, it shall preserve terminal metadata such as finish reason and provider-facing response identifiers emitted by the canonical stream, and the same shared output-item materialization path shall drive explicit result-channel and helper extraction for streamed text, thinking, usage, transcripts, audio chunks, provider items, refusals, annotations, and tool calls so normalization stays consistent across buffered and streaming consumers.
   priority: should
   stability: evolving
 
@@ -70,6 +70,11 @@ decisions:
 
 - id: reqllm.package.runtime_telemetry
   statement: ReqLlmNext shall expose a stable `ReqLlmNext.Telemetry` kernel for request, plan, execution-stack, stream, provider-request, fixture, and realtime instrumentation so application code and compat tooling can observe the runtime without parsing provider-specific payloads.
+  priority: should
+  stability: evolving
+
+- id: reqllm.package.utility_proof_depth
+  statement: Provider-owned utility helpers shall keep representative request-execution proof lanes in addition to builder-level tests so files, batches, vector stores, background flows, and similar non-canonical utilities stay honest about their integration depth without pretending to be part of the cross-provider facade.
   priority: should
   stability: evolving
 
@@ -123,6 +128,20 @@ decisions:
   execute: true
   covers:
     - reqllm.package.compile_time_extensions
+
+- kind: command
+  target: mix test test/providers/openai/client_test.exs test/providers/openai/background_test.exs test/providers/openai/files_test.exs test/providers/openai/vector_stores_test.exs test/providers/openai/batches_test.exs
+  execute: true
+  covers:
+    - reqllm.package.provider_specific_utilities
+    - reqllm.package.utility_proof_depth
+
+- kind: command
+  target: mix test test/req_llm_next/realtime_adapter_contract_test.exs test/req_llm_next/realtime_test.exs
+  execute: true
+  covers:
+    - reqllm.package.execution_planning
+    - reqllm.package.buffered_stream_metadata
 
 - kind: command
   target: mix test test/model_slices/anthropic_haiku_4_5_test.exs

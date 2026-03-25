@@ -62,7 +62,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.architecture.execution_layers
-  statement: ReqLlmNext architecture shall separate realtime session reduction, semantic protocol, wire format, transport, provider, session-runtime, and telemetry-kernel concerns so canonical request and event meaning, wire envelopes, persistent execution state, byte movement, and diagnostics can evolve independently.
+  statement: ReqLlmNext architecture shall separate realtime adapter, realtime session reduction, semantic protocol, wire format, transport, provider, session-runtime, and telemetry-kernel concerns so canonical request and event meaning, wire envelopes, persistent execution state, byte movement, and diagnostics can evolve independently, and canonical response normalization shall expose explicit result channels on top of output items so higher-level helpers do not have to recover those distinctions from provider metadata.
   priority: must
   stability: evolving
 

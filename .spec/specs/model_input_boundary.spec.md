@@ -44,7 +44,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.model_input.zoi_handoff_contracts
-  statement: Accepted model input shall hand off into Zoi-backed internal package contracts such as `ModelProfile`, `ExecutionMode`, `ExecutionPlan`, `Response`, `StreamResponse`, and realtime command or event or session state rather than into plain ad hoc structs so the public boundary feeds explicit internal schemas.
+  statement: Accepted model input shall hand off into Zoi-backed internal package contracts such as `ModelProfile`, `ExecutionMode`, `ExecutionPlan`, `Response`, `StreamResponse`, and realtime command or event or session state rather than into plain ad hoc structs so the public boundary feeds explicit internal schemas, and realtime adapter behavior above that boundary shall continue to operate on resolved models instead of inventing alternate model descriptor inputs.
   priority: should
   stability: evolving
 ```

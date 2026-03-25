@@ -167,8 +167,16 @@ defmodule ReqLlmNext.StreamResponseTest do
 
       assert Enum.map(StreamResponse.channel_items(resp, :message), & &1.type) == [:text]
       assert Enum.map(StreamResponse.channel_items(resp, :reasoning), & &1.type) == [:thinking]
-      assert Enum.map(StreamResponse.channel_items(resp, :media), & &1.type) == [:audio, :transcript]
-      assert Enum.map(StreamResponse.channel_items(resp, :provider), & &1.type) == [:provider_item]
+
+      assert Enum.map(StreamResponse.channel_items(resp, :media), & &1.type) == [
+               :audio,
+               :transcript
+             ]
+
+      assert Enum.map(StreamResponse.channel_items(resp, :provider), & &1.type) == [
+               :provider_item
+             ]
+
       assert StreamResponse.audio_chunks(resp) == ["YmFzZTY0"]
       assert StreamResponse.transcripts(resp) == ["spoken"]
       assert Map.has_key?(channels, :annotations)

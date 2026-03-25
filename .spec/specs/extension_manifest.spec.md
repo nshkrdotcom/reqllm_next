@@ -39,7 +39,7 @@ surface:
   stability: evolving
 
 - id: reqllm.extension_manifest.narrow_seams
-  statement: Extension declarations shall only patch explicit seams such as provider registration, provider facts, surface catalog construction, surface preparation, session-runtime mapping, semantic protocol mapping, wire mapping, transport mapping, adapters, and provider-native utility homes, including provider-owned media families and request-style media wires when needed, and shared runtime code shall consume those seams instead of branching on provider atoms directly.
+  statement: Extension declarations shall only patch explicit seams such as provider registration, provider facts, surface catalog construction, surface preparation, session-runtime mapping, semantic protocol mapping, wire mapping, transport mapping, realtime adapter mapping, adapters, and provider-native utility homes, including provider-owned media families and request-style media wires when needed, and shared runtime code shall consume those seams instead of branching on provider atoms directly.
   priority: must
   stability: evolving
 

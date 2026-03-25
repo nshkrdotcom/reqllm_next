@@ -98,7 +98,7 @@ These OpenAI areas exist in some form but are not yet complete first-class surfa
 3. Webhooks:
    webhook event parsing and categorization are supported, but this package does not yet claim full webhook signature-verification or dashboard-management coverage.
 4. Utility and secondary surfaces:
-   the package now covers a wide OpenAI provider-owned utility surface, but curated replay/live verification still focuses on the core generation lanes rather than every utility endpoint.
+   the package now covers a wide OpenAI provider-owned utility surface, and representative helpers such as files, batches, vector stores, and background flows now have local request-execution proof lanes in addition to builder tests, but curated replay/live verification still focuses on the core generation lanes rather than every utility endpoint.
 
 ## Missing Or Out Of Scope Today
 

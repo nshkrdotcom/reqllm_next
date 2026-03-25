@@ -51,7 +51,7 @@ The core rules are:
 3. `ModelProfile` describes facts, `ExecutionMode` describes intent, and `ExecutionPlan` is the only prescriptive runtime object
 4. one resolved plan selects one deterministic stack of provider, session runtime, semantic protocol, wire format, transport, and plan adapters
 5. results are normalized back to the canonical ReqLlm API surface, including `Response`, `StreamResponse`, `ReqLlmNext.Transcription.Result`, and `ReqLlmNext.Speech.Result`
-6. canonical output items sit underneath `Response` and `StreamResponse`, so richer thinking, media, provider-item, and tool channels stay faithful before helper methods collapse them into simpler shapes
+6. canonical output items sit underneath `Response` and `StreamResponse`, and explicit result channels for message, reasoning, tools, media, annotations, refusals, and provider-native extras stay faithful before helper methods collapse them into simpler shapes
 
 Concrete provider and family implementation code is co-located in vertical slice homes under `lib/req_llm_next/families/` and `lib/req_llm_next/providers/`, while shared contracts and planning code stay central.
 
