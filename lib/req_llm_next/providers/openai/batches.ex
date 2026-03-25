@@ -23,9 +23,10 @@ defmodule ReqLlmNext.OpenAI.Batches do
 
   def create(requests, opts) when is_list(requests) do
     filename = Keyword.get(opts, :filename, "batch.jsonl")
+    upload_opts = Keyword.merge(opts, filename: filename, purpose: "batch")
 
     with {:ok, uploaded} <-
-           Files.upload_binary(build_input_jsonl(requests), filename: filename, purpose: "batch"),
+           Files.upload_binary(build_input_jsonl(requests), upload_opts),
          input_file_id when is_binary(input_file_id) <- uploaded["id"] || uploaded[:id] do
       create(input_file_id, opts)
     else

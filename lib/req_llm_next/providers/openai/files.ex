@@ -89,6 +89,7 @@ defmodule ReqLlmNext.OpenAI.Files do
   defp list_path(opts) do
     query =
       opts
+      |> Keyword.take([:after, :limit, :order, :purpose])
       |> Enum.filter(fn {_key, value} -> not is_nil(value) end)
       |> Enum.into(%{})
 

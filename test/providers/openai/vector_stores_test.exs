@@ -1,7 +1,8 @@
 defmodule ReqLlmNext.OpenAI.VectorStoresTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   alias ReqLlmNext.OpenAI.VectorStores
+  alias ReqLlmNext.TestSupport.OpenAIUtilityHarness
 
   test "builds create bodies for vector stores" do
     body =
@@ -33,5 +34,30 @@ defmodule ReqLlmNext.OpenAI.VectorStoresTest do
     assert path =~ "/v1/vector_stores?"
     assert path =~ "limit=20"
     assert path =~ "order=desc"
+  end
+
+  test "attaches files to vector stores through the utility client" do
+    {:ok, server} =
+      OpenAIUtilityHarness.start_server(self(), [
+        fn _request -> OpenAIUtilityHarness.json_response(200, %{"id" => "vsfile_123", "status" => "completed"}) end
+      ])
+
+    on_exit(fn -> OpenAIUtilityHarness.stop_server(server) end)
+
+    assert {:ok, %{"id" => "vsfile_123", "status" => "completed"}} =
+             VectorStores.attach_file(
+               "vs_123",
+               "file_123",
+               attributes: %{scope: "docs"},
+               base_url: server.base_url,
+               api_key: "test-key"
+             )
+
+    assert_receive {:utility_request, 1, request}
+    assert request.request_line == "POST /v1/vector_stores/vs_123/files HTTP/1.1"
+
+    body = Jason.decode!(request.body)
+
+    assert body == %{"file_id" => "file_123", "attributes" => %{"scope" => "docs"}}
   end
 end
