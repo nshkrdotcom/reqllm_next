@@ -1,12 +1,15 @@
 defmodule ReqLlmNext.Providers.OpenAI.Realtime.Adapter do
   @moduledoc false
 
+  @behaviour ReqLlmNext.Realtime.Adapter
+
   alias ReqLlmNext.OpenAI.Realtime.Transport
   alias ReqLlmNext.OpenAI.Realtime.Wire
   alias ReqLlmNext.Providers.OpenAI
   alias ReqLlmNext.Providers.OpenAI.Realtime.SemanticProtocolEvents
   alias ReqLlmNext.Realtime.Command
 
+  @impl ReqLlmNext.Realtime.Adapter
   @spec encode_command(LLMDB.Model.t(), Command.t(), keyword()) :: map()
   def encode_command(_model, %Command{type: :session_update, data: data}, _opts)
       when is_map(data) do
@@ -40,6 +43,7 @@ defmodule ReqLlmNext.Providers.OpenAI.Realtime.Adapter do
     %{type: "response.cancel"}
   end
 
+  @impl ReqLlmNext.Realtime.Adapter
   @spec decode_event(map() | binary(), LLMDB.Model.t(), keyword()) :: [
           ReqLlmNext.Realtime.Event.t()
         ]
@@ -49,11 +53,13 @@ defmodule ReqLlmNext.Providers.OpenAI.Realtime.Adapter do
     |> Enum.flat_map(&SemanticProtocolEvents.decode_event(&1, model))
   end
 
+  @impl ReqLlmNext.Realtime.Adapter
   @spec websocket_url(LLMDB.Model.t(), keyword()) :: String.t()
   def websocket_url(model, opts \\ []) do
     Wire.websocket_url(OpenAI.base_url(), model, opts)
   end
 
+  @impl ReqLlmNext.Realtime.Adapter
   @spec stream_commands(LLMDB.Model.t(), [Command.t()], keyword()) ::
           {:ok, Enumerable.t()} | {:error, term()}
   def stream_commands(model, commands, opts \\ []) do
