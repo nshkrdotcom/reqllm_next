@@ -29,7 +29,8 @@ defmodule ReqLlmNext.SurfacePreparation.AnthropicMessages do
           {:error, _} = error -> error
         end
 
-      {:error, _} = error -> error
+      {:error, _} = error ->
+        error
     end
   end
 
@@ -124,8 +125,12 @@ defmodule ReqLlmNext.SurfacePreparation.AnthropicMessages do
              nil <- Enum.find(edits, &invalid_context_edit?/1) do
           :ok
         else
-          {:error, _} = error -> error
-          invalid -> {:error, Error.Invalid.Parameter.exception(parameter: invalid_context_message(invalid))}
+          {:error, _} = error ->
+            error
+
+          invalid ->
+            {:error,
+             Error.Invalid.Parameter.exception(parameter: invalid_context_message(invalid))}
         end
 
       _ ->
@@ -134,7 +139,8 @@ defmodule ReqLlmNext.SurfacePreparation.AnthropicMessages do
   end
 
   defp validate_clear_thinking_dependency(edits, opts) do
-    if Enum.any?(edits, &edit_type?(&1, "clear_thinking_20251015")) and not thinking_requested?(opts) do
+    if Enum.any?(edits, &edit_type?(&1, "clear_thinking_20251015")) and
+         not thinking_requested?(opts) do
       {:error,
        Error.Invalid.Parameter.exception(
          parameter:
@@ -188,7 +194,8 @@ defmodule ReqLlmNext.SurfacePreparation.AnthropicMessages do
          clear_thinking_index > clear_tool_uses_index do
       {:error,
        Error.Invalid.Parameter.exception(
-         parameter: "context_management.edits must list clear_thinking_20251015 before clear_tool_uses_20250919"
+         parameter:
+           "context_management.edits must list clear_thinking_20251015 before clear_tool_uses_20250919"
        )}
     else
       :ok

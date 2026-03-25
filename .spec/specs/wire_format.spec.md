@@ -36,7 +36,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.wire_format.provider_feature_envelopes
-  statement: Wire format may own provider-family feature envelopes such as Anthropic beta headers, native structured-output payloads, document references, context-management fields, and provider-native tool definitions when those details belong to the request shape of an existing execution surface, but foreign provider-native helper maps shall not be accepted through generic raw-map passthrough on other surfaces.
+  statement: Wire format may own provider-family feature envelopes such as Anthropic beta headers, prompt-cache control, `output_config.effort`, native structured-output payloads, document references, context-management and compaction fields, and versioned provider-native tool definitions when those details belong to the request shape of an existing execution surface, but foreign provider-native helper maps shall not be accepted through generic raw-map passthrough on other surfaces.
   priority: should
   stability: evolving
 ```

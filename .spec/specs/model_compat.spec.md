@@ -26,6 +26,8 @@ surface:
   - test/provider_features/anthropic_advanced_messages_test.exs
   - test/providers/deepseek/**/*.exs
   - test/providers/anthropic/**/*.exs
+decisions:
+  - reqllm.decision.provider_surface_maps_in_guides
 ```
 
 ## Requirements
@@ -52,7 +54,7 @@ surface:
   stability: evolving
 
 - id: reqllm.model_compat.provider_native_surfaces
-  statement: Provider coverage work may include provider-native utility surfaces and evaluation guides when those artifacts clarify how non-canonical provider endpoints fit the architecture without broadening the main public API contract.
+  statement: Provider coverage work may include provider-native utility surfaces, server-tool feature probes such as Anthropic web search, web fetch, code execution, and context-management coverage, and evaluation guides when those artifacts clarify how non-canonical provider endpoints fit the architecture without broadening the main public API contract.
   priority: should
   stability: evolving
 

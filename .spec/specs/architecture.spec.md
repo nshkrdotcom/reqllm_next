@@ -72,7 +72,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.architecture.provider_specific_utilities
-  statement: ReqLlmNext architecture may expose provider-scoped utility modules for non-canonical provider endpoints, but those utilities and provider-native helper shapes shall remain outside the top-level cross-provider facade and outside the core execution-plan layer stack except where a selected provider surface explicitly accepts them.
+  statement: ReqLlmNext architecture may expose provider-scoped utility modules for non-canonical provider endpoints and provider-native helper shapes such as Anthropic web search, web fetch, code execution, MCP, computer use, token counting, files, and batches, but those utilities and helper shapes shall remain outside the top-level cross-provider facade and outside the core execution-plan layer stack except where a selected provider surface explicitly accepts them.
   priority: should
   stability: evolving
 ```

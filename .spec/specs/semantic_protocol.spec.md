@@ -36,7 +36,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.semantic_protocol.provider_rich_events
-  statement: Semantic protocol shall preserve rich provider-family semantics such as Anthropic citations, stop reasons, response identifiers, and server-tool result blocks by mapping them into canonical content or metadata rather than dropping them silently at the wire boundary.
+  statement: Semantic protocol shall preserve rich provider-family semantics such as Anthropic citations, context-management metadata, compaction stop and provider-item blocks, response identifiers, and server-tool result blocks such as web fetch results or errors by mapping them into canonical content, provider items, or metadata rather than dropping them silently at the wire boundary.
   priority: should
   stability: evolving
 ```

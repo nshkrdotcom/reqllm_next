@@ -232,7 +232,10 @@ defmodule ReqLlmNext.SemanticProtocols.AnthropicMessagesTest do
       assert part.metadata[:anthropic_type] == :web_fetch_result
       assert part.metadata[:url] == "https://example.com/article"
       assert part.metadata[:retrieved_at] == "2026-03-25T12:00:00Z"
-      assert Map.get(part.metadata, :citations) || Map.get(part.metadata, "citations") == %{"enabled" => true}
+
+      assert Map.get(part.metadata, :citations) ||
+               Map.get(part.metadata, "citations") == %{"enabled" => true}
+
       assert Map.get(part.metadata, :title) || Map.get(part.metadata, "title") == "Article title"
     end
 

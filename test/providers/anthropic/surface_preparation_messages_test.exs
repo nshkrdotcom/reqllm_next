@@ -28,7 +28,9 @@ defmodule ReqLlmNext.SurfacePreparation.AnthropicMessagesTest do
              )
 
     assert prepared[:context_management] == %{
-             edits: [%{type: "compact_20260112", trigger: %{type: "input_tokens", value: 100_000}}]
+             edits: [
+               %{type: "compact_20260112", trigger: %{type: "input_tokens", value: 100_000}}
+             ]
            }
   end
 

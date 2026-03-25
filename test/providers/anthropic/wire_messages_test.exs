@@ -110,6 +110,7 @@ defmodule ReqLlmNext.Wire.AnthropicTest do
       refute Enum.any?(headers, fn
                {"anthropic-beta", value} ->
                  beta_flags = String.split(value, ",")
+
                  "mcp-client-2025-11-20" in beta_flags or
                    "code-execution-2025-08-25" in beta_flags or
                    "computer-use-2025-11-24" in beta_flags or
@@ -140,7 +141,10 @@ defmodule ReqLlmNext.Wire.AnthropicTest do
       headers =
         Anthropic.headers(
           tools: [
-            ReqLlmNext.Anthropic.web_search_tool(dynamic_filtering: true, allowed_callers: ["direct"])
+            ReqLlmNext.Anthropic.web_search_tool(
+              dynamic_filtering: true,
+              allowed_callers: ["direct"]
+            )
           ]
         )
 

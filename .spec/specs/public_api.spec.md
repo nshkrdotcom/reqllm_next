@@ -32,7 +32,7 @@ surface:
   stability: evolving
 
 - id: reqllm.public_api.provider_scoped_utilities
-  statement: Provider-scoped public helper modules such as `ReqLlmNext.Anthropic` may expose explicit provider-native utility surfaces outside the top-level facade, including Anthropic document helpers, file upload and download helpers, token counting, and message-batch lifecycle helpers such as create, get, list, cancel, delete, and results retrieval.
+  statement: Provider-scoped public helper modules such as `ReqLlmNext.Anthropic` may expose explicit provider-native utility and helper surfaces outside the top-level facade, including Anthropic document helpers, provider-native tool helpers such as web search, web fetch, code execution, MCP, and computer use, file upload and download helpers, token counting, and message-batch lifecycle helpers such as create, get, list, cancel, delete, and results retrieval.
   priority: should
   stability: evolving
 ```

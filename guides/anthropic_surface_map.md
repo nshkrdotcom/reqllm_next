@@ -14,7 +14,7 @@ This guide is intentionally practical. It is not trying to restate all Anthropic
 4. what is still missing
 5. which runtime layer should own each gap
 
-As of March 24, 2026, the official Anthropic surface is broader than the current ReqLlmNext Anthropic lane.
+As of March 25, 2026, the official Anthropic surface is still broader than the current ReqLlmNext Anthropic lane, but the native Messages coverage is materially closer to current Anthropic docs than it was a day earlier.
 
 ## Official Surface
 
@@ -29,10 +29,12 @@ The official Anthropic developer docs currently cover at least these API and fea
 7. PDF and document support
 8. Native structured outputs
 9. Citations and search-result style output blocks
-10. Server-hosted tools such as web search and code execution
+10. Server-hosted tools such as web search, web fetch, and code execution
 11. MCP connector support in the Messages API
 12. Computer use
-13. OpenAI SDK compatibility
+13. Context editing and compaction
+14. Effort and adaptive thinking controls on newer Claude models
+15. OpenAI SDK compatibility
 
 Official sources used for this map:
 
@@ -44,12 +46,16 @@ Official sources used for this map:
 6. [Context windows](https://docs.anthropic.com/en/docs/build-with-claude/context-windows)
 7. [Tool use overview](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/overview)
 8. [Web search tool](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/web-search-tool)
-9. [Code execution tool](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/code-execution-tool)
-10. [Computer use](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/computer-use)
-11. [MCP connector](https://docs.anthropic.com/en/docs/agents-and-tools/mcp-connector)
-12. [Citations](https://platform.claude.com/docs/en/build-with-claude/citations)
-13. [OpenAI SDK compatibility](https://platform.claude.com/docs/en/api/openai-sdk)
-14. [Release notes overview](https://platform.claude.com/docs/en/release-notes/overview)
+9. [Web fetch tool](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/web-fetch-tool)
+10. [Code execution tool](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/code-execution-tool)
+11. [Computer use](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/computer-use)
+12. [MCP connector](https://docs.anthropic.com/en/docs/agents-and-tools/mcp-connector)
+13. [Context editing](https://docs.anthropic.com/en/docs/build-with-claude/context-editing)
+14. [Compaction](https://docs.anthropic.com/en/docs/build-with-claude/compaction)
+15. [Effort](https://docs.anthropic.com/en/docs/build-with-claude/effort)
+16. [Citations](https://platform.claude.com/docs/en/build-with-claude/citations)
+17. [OpenAI SDK compatibility](https://platform.claude.com/docs/en/api/openai-sdk)
+18. [Release notes overview](https://platform.claude.com/docs/en/release-notes/overview)
 
 ## Current ReqLlmNext Coverage
 
@@ -63,15 +69,18 @@ ReqLlmNext currently supports a real Anthropic Messages lane through the v2 plan
 4. image input
 5. Anthropic-native structured outputs through `output_config.format`
 6. reasoning or thinking mode
-7. prompt caching headers and normalized usage handling
-8. 1M-context beta-header injection
-9. document blocks, `file_id` document references, and container-upload content blocks
-10. token counting utility support
-11. files utility support for upload, get, list, delete, and binary download
-12. message batches utility support for create, get, list, cancel, delete, and JSONL results retrieval
-13. provider-native tool helpers for web search, code execution, MCP connectors, and computer use
-14. curated live and replay verification for Haiku 4.5, Sonnet 4.6, and Opus 4.6
-15. version-aware beta-header handling for newer MCP, computer-use, and dynamic web-tool lanes
+7. Anthropic `effort` request shaping through `output_config.effort`
+8. prompt caching request shaping and normalized usage handling without stale prompt-caching beta headers
+9. context-management request shaping, compaction shorthand normalization, and documented edit-order validation
+10. provider-side validation that `clear_thinking_20251015` requires Anthropic thinking to be enabled
+11. 1M-context beta-header injection
+12. document blocks, `file_id` document references, and container-upload content blocks
+13. token counting utility support
+14. files utility support for upload, get, list, delete, and binary download
+15. message batches utility support for create, get, list, cancel, delete, and JSONL results retrieval
+16. provider-native tool helpers for web search, web fetch, code execution, MCP connectors, and computer use
+17. curated live and replay verification for Haiku 4.5, Sonnet 4.6, and Opus 4.6
+18. current beta-header handling for thinking, 1M context, context management, compaction, files API, and token-efficient tools while leaving GA Anthropic tool lanes off by default
 
 Current implementation homes:
 
@@ -93,15 +102,15 @@ Current implementation homes:
 These areas exist in some form but are not yet first-class Anthropic surfaces:
 
 1. Citations and search-result normalization:
-   request-side citation enablement and search-result content parts are supported, but the canonical response model still treats many richer citation shapes as provider metadata rather than a fully generalized cross-provider content system.
+   request-side citation enablement and document/search-result content parts are supported, but the canonical response model still treats some richer citation and server-tool result envelopes as provider items or metadata rather than a fully generalized cross-provider content system.
 2. Context editing and compaction:
-   ReqLlmNext now forwards `context_management` controls and preserves richer stop metadata, but there is not yet a full session-runtime story around automatic compaction loops or pause-turn continuation.
+   ReqLlmNext now forwards `context_management`, normalizes compaction shorthand, preserves compaction stop metadata, and validates documented edit ordering and `clear_thinking` dependencies, but there is not yet a full session-runtime story around automatic compaction loops or pause-turn continuation.
 3. Provider-native tools:
-   web search and code execution now have live provider-feature coverage for the native Messages lane, but MCP, computer use, and the full range of server-tool result shapes are not yet exhaustively pressure-tested.
+   web search, web fetch, and code execution now have focused live provider-feature coverage for the native Messages lane, but MCP, computer use, and the full range of server-tool result shapes are not yet exhaustively pressure-tested.
 4. Versioned tool defaults:
-   ReqLlmNext now distinguishes between broadly compatible defaults and newer doc versions for Anthropic server tools. Newer tool variants can opt in through helper options and trigger the matching beta headers, but the package does not yet have exhaustive live verification for every versioned tool combination across Claude model families.
-5. Context management:
-   request shaping is implemented and covered at the wire layer, but ReqLlmNext is not yet claiming a stable live context-management lane in the broader provider coverage suite.
+   ReqLlmNext now distinguishes between broadly compatible defaults and newer doc versions for Anthropic server tools, but the package does not yet have exhaustive live verification for every versioned tool combination across Claude model families.
+5. Thinking controls:
+   Anthropic `effort` is now passed through directly for newer models, while the older compatibility path that maps `reasoning_effort` into thinking budgets remains for Anthropic-native thinking mode. That keeps current usage practical, but it is still a mixed compatibility story rather than one unified Anthropic thinking abstraction.
 
 ## Missing Surface Areas
 
@@ -110,7 +119,8 @@ These Anthropic areas are not yet first-class ReqLlmNext support:
 1. exhaustive live coverage for every provider-native tool lifecycle
 2. persistent pause-turn and compaction session handling
 3. richer refusal and citation normalization into the canonical response model
-4. OpenAI-compat Anthropic lane as a deliberate secondary evaluation surface
+4. first-class memory, tool-search, and programmatic-tool-calling coverage when those Anthropic-native tool surfaces are brought into scope
+5. OpenAI-compat Anthropic lane as a deliberate secondary evaluation surface
 
 ## Ownership Map
 

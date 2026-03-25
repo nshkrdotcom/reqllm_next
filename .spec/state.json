@@ -242,7 +242,7 @@
         "id": "reqllm.architecture.provider_specific_utilities",
         "priority": "should",
         "stability": "evolving",
-        "statement": "ReqLlmNext architecture may expose provider-scoped utility modules for non-canonical provider endpoints, but those utilities and provider-native helper shapes shall remain outside the top-level cross-provider facade and outside the core execution-plan layer stack except where a selected provider surface explicitly accepts them.",
+        "statement": "ReqLlmNext architecture may expose provider-scoped utility modules for non-canonical provider endpoints and provider-native helper shapes such as Anthropic web search, web fetch, code execution, MCP, computer use, token counting, files, and batches, but those utilities and helper shapes shall remain outside the top-level cross-provider facade and outside the core execution-plan layer stack except where a selected provider surface explicitly accepts them.",
         "subject_id": "reqllm.architecture"
       },
       {
@@ -458,7 +458,7 @@
         "id": "reqllm.layer_boundaries.no_cross_layer_skips",
         "priority": "must",
         "stability": "evolving",
-        "statement": "No execution layer shall skip across another layer's ownership boundary by choosing transports in semantic protocol code, reinterpreting semantic meaning in wire code, introducing model-specific behavior in provider or transport code, deriving provider-native request flags in shared executor code after planning, or performing session continuation derivation outside planner-owned session runtime seams.",
+        "statement": "No execution layer shall skip across another layer's ownership boundary by choosing transports in semantic protocol code, reinterpreting semantic meaning in wire code, introducing model-specific behavior in provider or transport code, deriving provider-native request flags in shared executor code after planning, or performing provider-surface dependency validation such as Anthropic `clear_thinking_20251015` requirements outside planner-owned surface-preparation seams or session continuation derivation outside planner-owned session runtime seams.",
         "subject_id": "reqllm.layer_boundaries"
       },
       {
@@ -538,7 +538,7 @@
         "id": "reqllm.model_compat.provider_native_surfaces",
         "priority": "should",
         "stability": "evolving",
-        "statement": "Provider coverage work may include provider-native utility surfaces and evaluation guides when those artifacts clarify how non-canonical provider endpoints fit the architecture without broadening the main public API contract.",
+        "statement": "Provider coverage work may include provider-native utility surfaces, server-tool feature probes such as Anthropic web search, web fetch, code execution, and context-management coverage, and evaluation guides when those artifacts clarify how non-canonical provider endpoints fit the architecture without broadening the main public API contract.",
         "subject_id": "reqllm.model_compat"
       },
       {
@@ -618,7 +618,7 @@
         "id": "reqllm.operation_planner.assembly_scope",
         "priority": "must",
         "stability": "evolving",
-        "statement": "The planner boundary shall own mode normalization, rule evaluation, compatibility-aware surface selection, parameter normalization, explicit transport and session preference handling, fallback planning, surface-specific parameter validation, provider-native helper acceptance or rejection, surface-owned request preparation, session planning, and adapter selection, including request-style media operations, OpenAI-compatible provider overrides such as DeepSeek chat families, and resolution of surface-preparation, session-runtime, and adapter seams from the compiled extension manifest rather than from global imperative registries.",
+        "statement": "The planner boundary shall own mode normalization, rule evaluation, compatibility-aware surface selection, parameter normalization, explicit transport and session preference handling, fallback planning, surface-specific parameter validation, documented provider-native dependency validation, provider-native helper acceptance or rejection, surface-owned request preparation, session planning, and adapter selection, including request-style media operations, OpenAI-compatible provider overrides such as DeepSeek chat families, Anthropic context-management validation such as `clear_thinking_20251015` requiring Anthropic thinking to be enabled, and resolution of surface-preparation, session-runtime, and adapter seams from the compiled extension manifest rather than from global imperative registries.",
         "subject_id": "reqllm.operation_planner"
       },
       {
@@ -706,7 +706,7 @@
         "id": "reqllm.package.provider_specific_utilities",
         "priority": "should",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall keep the top-level cross-provider facade narrow while exposing explicit provider-scoped utility modules for non-canonical provider endpoints such as Anthropic token counting, files, batches, and provider-native tool helpers.",
+        "statement": "ReqLlmNext shall keep the top-level cross-provider facade narrow while exposing explicit provider-scoped utility modules for non-canonical provider endpoints such as Anthropic token counting, files, batches, and provider-native tool helpers including web search, web fetch, code execution, MCP, and computer use.",
         "subject_id": "reqllm.package"
       },
       {
@@ -818,7 +818,7 @@
         "id": "reqllm.public_api.provider_scoped_utilities",
         "priority": "should",
         "stability": "evolving",
-        "statement": "Provider-scoped public helper modules such as `ReqLlmNext.Anthropic` may expose explicit provider-native utility surfaces outside the top-level facade, including Anthropic document helpers, file upload and download helpers, token counting, and message-batch lifecycle helpers such as create, get, list, cancel, delete, and results retrieval.",
+        "statement": "Provider-scoped public helper modules such as `ReqLlmNext.Anthropic` may expose explicit provider-native utility and helper surfaces outside the top-level facade, including Anthropic document helpers, provider-native tool helpers such as web search, web fetch, code execution, MCP, and computer use, file upload and download helpers, token counting, and message-batch lifecycle helpers such as create, get, list, cancel, delete, and results retrieval.",
         "subject_id": "reqllm.public_api"
       },
       {
@@ -850,7 +850,7 @@
         "id": "reqllm.semantic_protocol.provider_rich_events",
         "priority": "should",
         "stability": "evolving",
-        "statement": "Semantic protocol shall preserve rich provider-family semantics such as Anthropic citations, stop reasons, response identifiers, and server-tool result blocks by mapping them into canonical content or metadata rather than dropping them silently at the wire boundary.",
+        "statement": "Semantic protocol shall preserve rich provider-family semantics such as Anthropic citations, context-management metadata, compaction stop and provider-item blocks, response identifiers, and server-tool result blocks such as web fetch results or errors by mapping them into canonical content, provider items, or metadata rather than dropping them silently at the wire boundary.",
         "subject_id": "reqllm.semantic_protocol"
       },
       {
@@ -898,7 +898,7 @@
         "id": "reqllm.source_layout.concern_homes",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall keep model-boundary concerns, provider-scoped fact extraction, manifest-backed provider registration, family-owned or provider-owned surface catalog modules, profile construction, mode normalization, policy resolution, surface-owned request preparation, session-runtime modules, semantic protocol normalization, wire envelopes, transport mechanics, shared response output-item materialization, fixture replay, media input and output contracts, realtime commands and session state, and telemetry emission in distinct source locations that match the architecture, while co-locating concrete family implementations under `lib/req_llm_next/families/` and provider-owned implementations and utilities under `lib/req_llm_next/providers/`.",
+        "statement": "ReqLlmNext shall keep model-boundary concerns, provider-scoped fact extraction, manifest-backed provider registration, family-owned or provider-owned surface catalog modules, profile construction, mode normalization, policy resolution, surface-owned request preparation, session-runtime modules, semantic protocol normalization, wire envelopes, transport mechanics, shared response output-item materialization, fixture replay, provider-feature probes, media input and output contracts, realtime commands and session state, and telemetry emission in distinct source locations that match the architecture, while co-locating concrete family implementations under `lib/req_llm_next/families/` and provider-owned implementations and utilities under `lib/req_llm_next/providers/`.",
         "subject_id": "reqllm.source_layout"
       },
       {
@@ -922,7 +922,7 @@
         "id": "reqllm.source_layout.provider_utilities",
         "priority": "should",
         "stability": "evolving",
-        "statement": "Provider-specific non-canonical endpoints shall live in explicit provider-scoped utility modules rather than expanding the top-level package facade or collapsing utility flows into provider, wire, or transport modules.",
+        "statement": "Provider-specific non-canonical endpoints and provider-native helper builders such as Anthropic web search, web fetch, code execution, MCP, and computer use shall live in explicit provider-scoped utility modules rather than expanding the top-level package facade or collapsing utility flows into provider, wire, or transport modules.",
         "subject_id": "reqllm.source_layout"
       },
       {
@@ -1026,7 +1026,7 @@
         "id": "reqllm.wire_format.provider_feature_envelopes",
         "priority": "should",
         "stability": "evolving",
-        "statement": "Wire format may own provider-family feature envelopes such as Anthropic beta headers, native structured-output payloads, document references, context-management fields, and provider-native tool definitions when those details belong to the request shape of an existing execution surface, but foreign provider-native helper maps shall not be accepted through generic raw-map passthrough on other surfaces.",
+        "statement": "Wire format may own provider-family feature envelopes such as Anthropic beta headers, prompt-cache control, `output_config.effort`, native structured-output payloads, document references, context-management and compaction fields, and versioned provider-native tool definitions when those details belong to the request shape of an existing execution surface, but foreign provider-native helper maps shall not be accepted through generic raw-map passthrough on other surfaces.",
         "subject_id": "reqllm.wire_format"
       },
       {
@@ -1066,7 +1066,7 @@
         "id": "reqllm.workflow.provider_surface_guides",
         "priority": "should",
         "stability": "evolving",
-        "statement": "Provider expansion work shall keep provider surface-map and compatibility-evaluation guides in sync with code and subject specs so wide provider coverage remains explainable and reviewable.",
+        "statement": "Provider expansion work shall keep provider surface-map and compatibility-evaluation guides in sync with code and subject specs so wide provider coverage remains explainable and reviewable, including honest boundaries around Anthropic-native tool helpers, prompt-cache and effort handling, context-management and compaction support, and provider-feature proof depth.",
         "subject_id": "reqllm.workflow"
       },
       {
@@ -1347,7 +1347,9 @@
         "file": ".spec/specs/model_compat.spec.md",
         "id": "reqllm.model_compat",
         "meta": {
-          "decisions": null,
+          "decisions": [
+            "reqllm.decision.provider_surface_maps_in_guides"
+          ],
           "id": "reqllm.model_compat",
           "kind": "compat",
           "status": "active",
@@ -1685,7 +1687,8 @@
         "id": "reqllm.workflow",
         "meta": {
           "decisions": [
-            "reqllm.decision.zoi_backed_struct_contracts"
+            "reqllm.decision.zoi_backed_struct_contracts",
+            "reqllm.decision.provider_surface_maps_in_guides"
           ],
           "id": "reqllm.workflow",
           "kind": "workflow",
@@ -2123,6 +2126,16 @@
         "kind": "command",
         "subject_id": "reqllm.operation_planner",
         "target": "mix test test/operation_planner_test.exs"
+      },
+      {
+        "covers": [
+          "reqllm.operation_planner.assembly_scope"
+        ],
+        "execute": true,
+        "file": ".spec/specs/operation_planner.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.operation_planner",
+        "target": "mix test test/providers/anthropic/surface_preparation_messages_test.exs"
       },
       {
         "covers": [
@@ -2690,7 +2703,7 @@
     "requirements": 115,
     "scenarios": 0,
     "subjects": 24,
-    "verifications": 89
+    "verifications": 90
   },
   "verification": {
     "claims": [
@@ -3771,6 +3784,17 @@
         "subject_id": "reqllm.operation_planner",
         "target": "mix test test/operation_planner_test.exs",
         "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.operation_planner.assembly_scope",
+        "file": ".spec/specs/operation_planner.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.operation_planner",
+        "target": "mix test test/providers/anthropic/surface_preparation_messages_test.exs",
+        "verification_index": 2
       },
       {
         "cover_id": "reqllm.package.buffered_stream_metadata",
@@ -4943,7 +4967,7 @@
     "default_minimum_strength": "claimed",
     "strength_summary": {
       "claimed": 2,
-      "executed": 98,
+      "executed": 99,
       "linked": 104
     },
     "threshold_failures": 0

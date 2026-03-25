@@ -54,7 +54,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.package.provider_specific_utilities
-  statement: ReqLlmNext shall keep the top-level cross-provider facade narrow while exposing explicit provider-scoped utility modules for non-canonical provider endpoints such as Anthropic token counting, files, batches, and provider-native tool helpers.
+  statement: ReqLlmNext shall keep the top-level cross-provider facade narrow while exposing explicit provider-scoped utility modules for non-canonical provider endpoints such as Anthropic token counting, files, batches, and provider-native tool helpers including web search, web fetch, code execution, MCP, and computer use.
   priority: should
   stability: evolving
 

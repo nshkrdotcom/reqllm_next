@@ -40,7 +40,8 @@ defmodule ReqLlmNext.SemanticProtocols.AnthropicMessages do
       end
 
     meta_events =
-      stop_reason_meta(Map.get(event, "delta")) ++ context_management_meta(Map.get(event, "context_management"))
+      stop_reason_meta(Map.get(event, "delta")) ++
+        context_management_meta(Map.get(event, "context_management"))
 
     usage_events ++ meta_events
   end
@@ -205,9 +206,11 @@ defmodule ReqLlmNext.SemanticProtocols.AnthropicMessages do
 
   defp normalize_web_fetch_result(_result), do: []
 
-  defp normalize_web_fetch_document(%{
-         "content" => %{"type" => "document", "source" => source} = document
-       } = result)
+  defp normalize_web_fetch_document(
+         %{
+           "content" => %{"type" => "document", "source" => source} = document
+         } = result
+       )
        when is_map(source) do
     metadata =
       document
@@ -225,8 +228,11 @@ defmodule ReqLlmNext.SemanticProtocols.AnthropicMessages do
       %{"type" => "base64", "data" => data, "media_type" => media_type}
       when is_binary(data) and is_binary(media_type) ->
         case Base.decode64(data) do
-          {:ok, decoded} -> [{:content_part, ContentPart.document_binary(decoded, media_type, metadata)}]
-          :error -> []
+          {:ok, decoded} ->
+            [{:content_part, ContentPart.document_binary(decoded, media_type, metadata)}]
+
+          :error ->
+            []
         end
 
       _ ->
@@ -255,7 +261,10 @@ defmodule ReqLlmNext.SemanticProtocols.AnthropicMessages do
 
   defp context_management_meta(%{"applied_edits" => applied_edits} = context_management)
        when is_list(applied_edits) do
-    [{:meta, %{anthropic_context_management: context_management, anthropic_applied_edits: applied_edits}}]
+    [
+      {:meta,
+       %{anthropic_context_management: context_management, anthropic_applied_edits: applied_edits}}
+    ]
   end
 
   defp context_management_meta(context_management) when is_map(context_management) do

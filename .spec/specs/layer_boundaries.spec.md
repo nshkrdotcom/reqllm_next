@@ -42,7 +42,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.layer_boundaries.no_cross_layer_skips
-  statement: No execution layer shall skip across another layer's ownership boundary by choosing transports in semantic protocol code, reinterpreting semantic meaning in wire code, introducing model-specific behavior in provider or transport code, deriving provider-native request flags in shared executor code after planning, or performing session continuation derivation outside planner-owned session runtime seams.
+  statement: No execution layer shall skip across another layer's ownership boundary by choosing transports in semantic protocol code, reinterpreting semantic meaning in wire code, introducing model-specific behavior in provider or transport code, deriving provider-native request flags in shared executor code after planning, or performing provider-surface dependency validation such as Anthropic `clear_thinking_20251015` requirements outside planner-owned surface-preparation seams or session continuation derivation outside planner-owned session runtime seams.
   priority: must
   stability: evolving
 

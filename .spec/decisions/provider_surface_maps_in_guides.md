@@ -35,6 +35,8 @@ These guides may summarize:
 
 They are supporting guides, not current-truth subject specs.
 
+Surface maps should be kept honest about current-doc versioning and proof depth. When provider-native tool versions, beta-header policy, or live provider-feature boundaries change, the guide should say which parts are supported, partial, or intentionally unsupported instead of freezing the older story in prose.
+
 The `.spec/specs/` workspace remains the canonical contract layer. Subject specs may reference provider surface guides as supporting context, but the guides do not replace requirements, verification links, or ADRs.
 
 ## Consequences
@@ -44,3 +46,5 @@ Provider expansion work can start from a durable, shareable map instead of recon
 Compat and workflow subjects can point at the guide layer without forcing the README or a single subject spec to absorb the whole provider matrix.
 
 Provider research becomes easier to publish, update, and review while the stricter contract layer stays compact.
+
+Guide maintenance is part of the landing criteria for wide provider work, especially when native tool helpers, context-management semantics, or version-aware provider defaults shift faster than the stable top-level package API.

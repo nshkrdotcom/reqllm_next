@@ -22,6 +22,7 @@ surface:
   - mix.exs
 decisions:
   - reqllm.decision.zoi_backed_struct_contracts
+  - reqllm.decision.provider_surface_maps_in_guides
 ```
 
 ## Requirements
@@ -48,7 +49,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.workflow.provider_surface_guides
-  statement: Provider expansion work shall keep provider surface-map and compatibility-evaluation guides in sync with code and subject specs so wide provider coverage remains explainable and reviewable.
+  statement: Provider expansion work shall keep provider surface-map and compatibility-evaluation guides in sync with code and subject specs so wide provider coverage remains explainable and reviewable, including honest boundaries around Anthropic-native tool helpers, prompt-cache and effort handling, context-management and compaction support, and provider-feature proof depth.
   priority: should
   stability: evolving
 
