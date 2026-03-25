@@ -47,6 +47,7 @@ decisions:
   - reqllm.decision.runtime_telemetry_kernel
   - reqllm.decision.zoi_backed_struct_contracts
   - reqllm.decision.live_verifier_tests
+  - reqllm.decision.provider_expansion_strategy
 ```
 
 ## Requirements
@@ -73,7 +74,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.architecture.provider_specific_utilities
-  statement: ReqLlmNext architecture may expose provider-scoped utility modules for non-canonical provider endpoints and provider-native helper shapes such as Anthropic web search, web fetch, code execution, MCP, computer use, token counting, files, and batches, but those utilities and helper shapes shall remain outside the top-level cross-provider facade and outside the core execution-plan layer stack except where a selected provider surface explicitly accepts them.
+  statement: ReqLlmNext architecture may expose provider-scoped utility modules for non-canonical provider endpoints and provider-native helper shapes such as Anthropic web search, web fetch, code execution, MCP, computer use, token counting, files, and batches, but those utilities and helper shapes shall remain outside the top-level cross-provider facade and outside the core execution-plan layer stack except where a selected provider surface explicitly accepts them, and provider expansion shall prefer reusing existing execution families with provider-owned deltas before introducing new shared abstractions.
   priority: should
   stability: evolving
 ```

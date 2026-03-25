@@ -15,6 +15,7 @@ surface:
   - guides/openai_surface_map.md
   - guides/anthropic_openai_compatibility.md
   - guides/extension_architecture.md
+  - guides/provider_expansion_roadmap.md
   - lib/req_llm_next/support_matrix.ex
   - lib/req_llm_next/provider_test/comprehensive.ex
   - lib/mix/tasks/model_compat.ex
@@ -30,6 +31,7 @@ surface:
 decisions:
   - reqllm.decision.provider_surface_maps_in_guides
   - reqllm.decision.live_verifier_tests
+  - reqllm.decision.provider_expansion_strategy
 ```
 
 ## Requirements
@@ -72,6 +74,11 @@ decisions:
 
 - id: reqllm.model_compat.extension_pressure_tests
   statement: Compatibility expansion work shall keep at least one non-OpenAI OpenAI-compatible provider proof lane so family reuse, provider-specific semantic overrides, and wire-resolution fallbacks are tested before broad live coverage is claimed for that ecosystem.
+  priority: should
+  stability: evolving
+
+- id: reqllm.model_compat.provider_expansion_ordering
+  statement: Provider expansion work shall prefer providers that can ride existing families with provider-owned deltas before wrapper platforms or new family systems, shall treat cloud wrappers such as Azure, Google Vertex, and Amazon Bedrock as deferred architecture-heavy additions rather than early ports, and shall document the near-term provider queue in the provider-expansion roadmap so future provider work stays family-first and replay-first.
   priority: should
   stability: evolving
 ```
@@ -132,4 +139,9 @@ decisions:
   execute: true
   covers:
     - reqllm.model_compat.live_verifier_separation
+
+- kind: source_file
+  target: guides/provider_expansion_roadmap.md
+  covers:
+    - reqllm.model_compat.provider_expansion_ordering
 ```

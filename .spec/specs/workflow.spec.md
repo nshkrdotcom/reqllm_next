@@ -16,6 +16,7 @@ surface:
   - .spec/AGENTS.md
   - guides/extension_architecture.md
   - guides/package_thesis.md
+  - guides/provider_expansion_roadmap.md
   - guides/anthropic_surface_map.md
   - guides/openai_surface_map.md
   - guides/anthropic_openai_compatibility.md
@@ -24,6 +25,7 @@ decisions:
   - reqllm.decision.zoi_backed_struct_contracts
   - reqllm.decision.provider_surface_maps_in_guides
   - reqllm.decision.live_verifier_tests
+  - reqllm.decision.provider_expansion_strategy
 ```
 
 ## Requirements
@@ -55,7 +57,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.workflow.provider_surface_guides
-  statement: Provider expansion work shall keep provider surface-map and compatibility-evaluation guides in sync with code and subject specs so wide provider coverage remains explainable and reviewable, including honest boundaries around Anthropic-native tool helpers, prompt-cache and effort handling, context-management and compaction support, and provider-feature proof depth.
+  statement: Provider expansion work shall keep provider surface-map, compatibility-evaluation, and provider-expansion roadmap guides in sync with code and subject specs so wide provider coverage remains explainable and reviewable, including honest boundaries around Anthropic-native tool helpers, prompt-cache and effort handling, context-management and compaction support, provider-feature proof depth, and the family-first ordering that defers wrapper platforms such as Azure, Google Vertex, and Amazon Bedrock.
   priority: should
   stability: evolving
 

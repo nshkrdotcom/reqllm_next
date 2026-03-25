@@ -201,6 +201,19 @@ Without that structure, every failure becomes just "model failed," which does no
 
 `ReqLlmNext.Telemetry` is now the stable runtime emission boundary for those answers, `ReqLlmNext.Realtime` is the shared package-owned realtime core rather than an OpenAI-only utility experiment, and explicit result channels now sit on top of canonical output items so richer outputs do not have to be recovered from provider metadata.
 
+### 7. Provider Expansion Should Reuse Families First
+
+The package is now at the point where adding more providers should test the architecture instead of bypassing it.
+
+That means provider expansion should prefer:
+
+1. existing family reuse before new shared abstractions
+2. provider-owned deltas before shared branching
+3. replay-backed proof before broad live coverage
+4. cloud wrapper platforms after simpler provider additions
+
+This is why the next provider wave should be OpenAI-compatible providers such as Groq, OpenRouter, and vLLM before wrapper platforms such as Azure, Google Vertex, or Amazon Bedrock.
+
 ## The Role Of Agents
 
 The project is agent-assisted by design.

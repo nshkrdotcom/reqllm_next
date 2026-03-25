@@ -147,6 +147,21 @@
       },
       {
         "affects": [
+          "reqllm.architecture",
+          "reqllm.model_compat",
+          "reqllm.model_input",
+          "reqllm.telemetry",
+          "reqllm.workflow",
+          "reqllm.diagnostics"
+        ],
+        "date": "2026-03-25",
+        "file": ".spec/decisions/provider_expansion_strategy.md",
+        "id": "reqllm.decision.provider_expansion_strategy",
+        "status": "accepted",
+        "title": "Provider Expansion Strategy"
+      },
+      {
+        "affects": [
           "reqllm.package",
           "reqllm.provider",
           "reqllm.source_layout",
@@ -254,7 +269,7 @@
         "id": "reqllm.architecture.provider_specific_utilities",
         "priority": "should",
         "stability": "evolving",
-        "statement": "ReqLlmNext architecture may expose provider-scoped utility modules for non-canonical provider endpoints and provider-native helper shapes such as Anthropic web search, web fetch, code execution, MCP, computer use, token counting, files, and batches, but those utilities and helper shapes shall remain outside the top-level cross-provider facade and outside the core execution-plan layer stack except where a selected provider surface explicitly accepts them.",
+        "statement": "ReqLlmNext architecture may expose provider-scoped utility modules for non-canonical provider endpoints and provider-native helper shapes such as Anthropic web search, web fetch, code execution, MCP, computer use, token counting, files, and batches, but those utilities and helper shapes shall remain outside the top-level cross-provider facade and outside the core execution-plan layer stack except where a selected provider surface explicitly accepts them, and provider expansion shall prefer reusing existing execution families with provider-owned deltas before introducing new shared abstractions.",
         "subject_id": "reqllm.architecture"
       },
       {
@@ -270,7 +285,7 @@
         "id": "reqllm.diagnostics.compat_consumed",
         "priority": "must",
         "stability": "evolving",
-        "statement": "Runtime layers may emit diagnostics, but curated support-matrix compat runs, anomaly analyzers, issue-drafting tooling, and provider utility verification shall consume them outside the execution layers rather than patching runtime behavior in place.",
+        "statement": "Runtime layers may emit diagnostics, but curated support-matrix compat runs, anomaly analyzers, issue-drafting tooling, provider utility verification, and future provider expansion work shall consume them outside the execution layers rather than patching runtime behavior in place or introducing provider-specific diagnostic shortcuts.",
         "subject_id": "reqllm.diagnostics"
       },
       {
@@ -547,6 +562,14 @@
       },
       {
         "file": ".spec/specs/model_compat.spec.md",
+        "id": "reqllm.model_compat.provider_expansion_ordering",
+        "priority": "should",
+        "stability": "evolving",
+        "statement": "Provider expansion work shall prefer providers that can ride existing families with provider-owned deltas before wrapper platforms or new family systems, shall treat cloud wrappers such as Azure, Google Vertex, and Amazon Bedrock as deferred architecture-heavy additions rather than early ports, and shall document the near-term provider queue in the provider-expansion roadmap so future provider work stays family-first and replay-first.",
+        "subject_id": "reqllm.model_compat"
+      },
+      {
+        "file": ".spec/specs/model_compat.spec.md",
         "id": "reqllm.model_compat.provider_native_request_shapes",
         "priority": "should",
         "stability": "evolving",
@@ -582,7 +605,7 @@
         "id": "reqllm.model_input.accepted_forms",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext public runtime APIs shall accept model input only as an `LLMDB` `model_spec` string or a `%LLMDB.Model{}`, including handcrafted `%LLMDB.Model{}` values used for local iteration, unreleased models, and local providers, and that narrow boundary shall stay stable across the top-level text, object, media, and embedding facade plus the shared realtime core and sparse live verifier suites even as concrete provider and family implementations are co-located into internal slice homes.",
+        "statement": "ReqLlmNext public runtime APIs shall accept model input only as an `LLMDB` `model_spec` string or a `%LLMDB.Model{}`, including handcrafted `%LLMDB.Model{}` values used for local iteration, unreleased models, and local providers, and that narrow boundary shall stay stable across the top-level text, object, media, and embedding facade plus the shared realtime core and sparse live verifier suites even as concrete provider and family implementations are co-located into internal slice homes and the provider roster grows through family-first expansion.",
         "subject_id": "reqllm.model_input"
       },
       {
@@ -974,7 +997,7 @@
         "id": "reqllm.telemetry.canonical_measurements",
         "priority": "must",
         "stability": "evolving",
-        "statement": "Telemetry metadata and measurements shall remain stable across transports, operations, canonical realtime flows, and curated provider support-matrix lanes so application code and compat tooling do not need provider-specific parsing to interpret usage, reasoning, request summaries, or execution-stack selection.",
+        "statement": "Telemetry metadata and measurements shall remain stable across transports, operations, canonical realtime flows, curated provider support-matrix lanes, and future provider additions so application code and compat tooling do not need provider-specific parsing to interpret usage, reasoning, request summaries, or execution-stack selection.",
         "subject_id": "reqllm.telemetry"
       },
       {
@@ -1102,7 +1125,7 @@
         "id": "reqllm.workflow.provider_surface_guides",
         "priority": "should",
         "stability": "evolving",
-        "statement": "Provider expansion work shall keep provider surface-map and compatibility-evaluation guides in sync with code and subject specs so wide provider coverage remains explainable and reviewable, including honest boundaries around Anthropic-native tool helpers, prompt-cache and effort handling, context-management and compaction support, and provider-feature proof depth.",
+        "statement": "Provider expansion work shall keep provider surface-map, compatibility-evaluation, and provider-expansion roadmap guides in sync with code and subject specs so wide provider coverage remains explainable and reviewable, including honest boundaries around Anthropic-native tool helpers, prompt-cache and effort handling, context-management and compaction support, provider-feature proof depth, and the family-first ordering that defers wrapper platforms such as Azure, Google Vertex, and Amazon Bedrock.",
         "subject_id": "reqllm.workflow"
       },
       {
@@ -1190,7 +1213,8 @@
             "reqllm.decision.transport_agnostic_realtime_core",
             "reqllm.decision.runtime_telemetry_kernel",
             "reqllm.decision.zoi_backed_struct_contracts",
-            "reqllm.decision.live_verifier_tests"
+            "reqllm.decision.live_verifier_tests",
+            "reqllm.decision.provider_expansion_strategy"
           ],
           "id": "reqllm.architecture",
           "kind": "architecture",
@@ -1387,7 +1411,8 @@
         "meta": {
           "decisions": [
             "reqllm.decision.provider_surface_maps_in_guides",
-            "reqllm.decision.live_verifier_tests"
+            "reqllm.decision.live_verifier_tests",
+            "reqllm.decision.provider_expansion_strategy"
           ],
           "id": "reqllm.model_compat",
           "kind": "compat",
@@ -1399,6 +1424,7 @@
             "guides/openai_surface_map.md",
             "guides/anthropic_openai_compatibility.md",
             "guides/extension_architecture.md",
+            "guides/provider_expansion_roadmap.md",
             "lib/req_llm_next/support_matrix.ex",
             "lib/req_llm_next/provider_test/comprehensive.ex",
             "lib/mix/tasks/model_compat.ex",
@@ -1423,7 +1449,8 @@
           "decisions": [
             "reqllm.decision.model_input_boundary",
             "reqllm.decision.zoi_backed_struct_contracts",
-            "reqllm.decision.live_verifier_tests"
+            "reqllm.decision.live_verifier_tests",
+            "reqllm.decision.provider_expansion_strategy"
           ],
           "id": "reqllm.model_input",
           "kind": "model_input",
@@ -1732,7 +1759,8 @@
           "decisions": [
             "reqllm.decision.zoi_backed_struct_contracts",
             "reqllm.decision.provider_surface_maps_in_guides",
-            "reqllm.decision.live_verifier_tests"
+            "reqllm.decision.live_verifier_tests",
+            "reqllm.decision.provider_expansion_strategy"
           ],
           "id": "reqllm.workflow",
           "kind": "workflow",
@@ -1745,6 +1773,7 @@
             ".spec/AGENTS.md",
             "guides/extension_architecture.md",
             "guides/package_thesis.md",
+            "guides/provider_expansion_roadmap.md",
             "guides/anthropic_surface_map.md",
             "guides/openai_surface_map.md",
             "guides/anthropic_openai_compatibility.md",
@@ -2112,6 +2141,15 @@
         "kind": "command",
         "subject_id": "reqllm.model_compat",
         "target": "mix test.live_verifiers"
+      },
+      {
+        "covers": [
+          "reqllm.model_compat.provider_expansion_ordering"
+        ],
+        "file": ".spec/specs/model_compat.spec.md",
+        "kind": "source_file",
+        "subject_id": "reqllm.model_compat",
+        "target": "guides/provider_expansion_roadmap.md"
       },
       {
         "covers": [
@@ -2772,13 +2810,13 @@
   "specification_version": "1.0",
   "summary": {
     "decision_parse_errors": 0,
-    "decisions": 18,
+    "decisions": 19,
     "exceptions": 0,
     "findings": 0,
-    "requirements": 118,
+    "requirements": 119,
     "scenarios": 0,
     "subjects": 24,
-    "verifications": 93
+    "verifications": 94
   },
   "verification": {
     "claims": [
@@ -3683,6 +3721,17 @@
         "subject_id": "reqllm.model_compat",
         "target": "mix test.live_verifiers",
         "verification_index": 7
+      },
+      {
+        "cover_id": "reqllm.model_compat.provider_expansion_ordering",
+        "file": ".spec/specs/model_compat.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.model_compat",
+        "target": "guides/provider_expansion_roadmap.md",
+        "verification_index": 8
       },
       {
         "cover_id": "reqllm.model_input.accepted_forms",
@@ -5087,12 +5136,12 @@
     "strength_summary": {
       "claimed": 2,
       "executed": 103,
-      "linked": 104
+      "linked": 105
     },
     "threshold_failures": 0
   },
   "workspace": {
-    "decision_count": 18,
+    "decision_count": 19,
     "spec_count": 24
   }
 }
