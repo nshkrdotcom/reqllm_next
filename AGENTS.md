@@ -40,6 +40,7 @@ The short version is:
 `ReqLlmNext` is the hard public facade for the package.
 
 - Preserve the top-level ReqLLM-style API in `lib/req_llm_next.ex`.
+- Preserve the top-level ReqLLM-style API across text, object, streaming, media, and embedding entrypoints in `lib/req_llm_next.ex`.
 - Keep `ReqLlmNext` thin. Do not add provider, wire, transport, fixture, or utility branching logic to the facade.
 - Public runtime entrypoints accept only:
   1. an `LLMDB` `model_spec` string
@@ -67,7 +68,7 @@ ReqLlmNext facade
   -> Wire Format
   -> Transport
   -> Provider
-  -> canonical Response / StreamResponse
+  -> canonical Response / StreamResponse / media result contracts
 ```
 
 The key runtime rules are:
@@ -133,6 +134,7 @@ Fixtures are first-class evidence, not just mocks.
 
 - Record with `REQ_LLM_NEXT_FIXTURES_MODE=record`.
 - Replay should preserve the recorded execution surface even if the live planner would choose a newer surface today.
+- Request-style media fixtures should replay through the owning wire decoder just like streaming fixtures replay through their recorded stack.
 - Use live runs carefully and keep them curated.
 
 ## Commands

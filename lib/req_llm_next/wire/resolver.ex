@@ -16,7 +16,7 @@ defmodule ReqLlmNext.Wire.Resolver do
           wire_mod: module()
         }
 
-  @type operation :: :text | :object | :embed
+  @type operation :: :text | :object | :embed | :image | :transcription | :speech
 
   @spec resolve!(LLMDB.Model.t()) :: resolution()
   def resolve!(%LLMDB.Model{} = model) do
@@ -52,9 +52,6 @@ defmodule ReqLlmNext.Wire.Resolver do
     operation = default_operation!(model)
     wire_module_for_operation!(model, operation)
   end
-
-  @deprecated "Use wire_module!/1 instead"
-  def streaming_module!(model), do: wire_module!(model)
 
   defp resolve_for_operation!(%LLMDB.Model{} = model, operation) do
     with {:ok, wire_mod} <- wire_resolution(model, operation),
@@ -107,6 +104,9 @@ defmodule ReqLlmNext.Wire.Resolver do
           ModelProfile.supports_operation?(profile, :text) -> :text
           ModelProfile.supports_operation?(profile, :object) -> :object
           ModelProfile.supports_operation?(profile, :embed) -> :embed
+          ModelProfile.supports_operation?(profile, :image) -> :image
+          ModelProfile.supports_operation?(profile, :transcription) -> :transcription
+          ModelProfile.supports_operation?(profile, :speech) -> :speech
           true -> :text
         end
 

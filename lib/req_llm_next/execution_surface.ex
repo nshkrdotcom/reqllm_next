@@ -9,7 +9,7 @@ defmodule ReqLlmNext.ExecutionSurface do
             __MODULE__,
             %{
               id: Zoi.atom(),
-              operation: Zoi.enum([:text, :object, :embed]),
+              operation: Zoi.enum([:text, :object, :embed, :image, :transcription, :speech]),
               semantic_protocol: Zoi.atom(),
               wire_format: Zoi.atom(),
               transport: Zoi.atom(),
@@ -19,7 +19,7 @@ defmodule ReqLlmNext.ExecutionSurface do
             coerce: true
           )
 
-  @type operation :: :text | :object | :embed
+  @type operation :: :text | :object | :embed | :image | :transcription | :speech
 
   @type t :: %__MODULE__{
           id: atom(),

@@ -75,6 +75,30 @@ defmodule ReqLlmNext.Fixtures do
     end
   end
 
+  @spec maybe_replay_request(LLMDB.Model.t(), term(), keyword(), module()) ::
+          {:ok, term()} | :no_fixture
+  def maybe_replay_request(model, input, opts, wire_mod) do
+    case {mode(), Keyword.get(opts, :fixture)} do
+      {:replay, fixture_name} when is_binary(fixture_name) ->
+        fixture_path = path(model, fixture_name)
+
+        case File.read(fixture_path) do
+          {:ok, contents} ->
+            fixture = Jason.decode!(contents)
+            replay_request_fixture(fixture, wire_mod, model, input, opts)
+
+          {:error, _} ->
+            raise """
+            Fixture not found: #{fixture_path}
+            Run with REQ_LLM_NEXT_FIXTURES_MODE=record to create it.
+            """
+        end
+
+      _ ->
+        :no_fixture
+    end
+  end
+
   defp build_replay_stream(%{"chunks" => chunks} = fixture, runtime, model) do
     case request_transport(fixture) do
       "websocket" ->
@@ -355,10 +379,93 @@ defmodule ReqLlmNext.Fixtures do
     :ok
   end
 
+  @spec save_request_fixture(
+          LLMDB.Model.t(),
+          String.t(),
+          Finch.Request.t(),
+          map(),
+          Finch.Response.t()
+        ) ::
+          :ok
+  def save_request_fixture(
+        %LLMDB.Model{} = model,
+        fixture_name,
+        %Finch.Request{} = request,
+        execution,
+        %Finch.Response{} = response
+      ) do
+    fixture_path = path(model, fixture_name)
+    File.mkdir_p!(Path.dirname(fixture_path))
+
+    fixture = %{
+      "provider" => Atom.to_string(model.provider),
+      "model_id" => model.id,
+      "captured_at" => DateTime.utc_now() |> DateTime.to_iso8601(),
+      "request" => extract_request_info(request),
+      "execution" => normalize_execution_metadata(execution),
+      "response" => %{
+        "status" => response.status,
+        "headers" => redact_headers(response.headers),
+        "body" => normalize_body(response.body)
+      },
+      "chunks" => []
+    }
+
+    File.write!(fixture_path, Jason.encode!(fixture, pretty: true))
+    :ok
+  end
+
   defp request_transport(%{"request" => %{"transport" => transport}}) when is_binary(transport),
     do: transport
 
   defp request_transport(_fixture), do: "http_sse"
+
+  defp replay_request_fixture(%{"response" => response}, wire_mod, model, input, opts)
+       when is_map(response) do
+    status = Map.get(response, "status")
+    headers = response |> Map.get("headers", %{}) |> normalize_headers()
+    body = response |> Map.get("body", %{}) |> decode_replay_body()
+
+    finch_response = %Finch.Response{status: status, headers: headers, body: body}
+
+    decode_request_response(wire_mod, finch_response, model, input, opts)
+  end
+
+  defp replay_request_fixture(_fixture, _wire_mod, _model, _input, _opts), do: :no_fixture
+
+  defp decode_request_response(wire_mod, %Finch.Response{} = response, model, input, opts) do
+    if module_exports?(wire_mod, :decode_response, 4) do
+      wire_mod.decode_response(response, model, input, opts)
+    else
+      default_decode_request_response(response)
+    end
+  end
+
+  defp default_decode_request_response(%Finch.Response{body: response_body}) do
+    case Jason.decode(response_body) do
+      {:ok, decoded} ->
+        {:ok, decoded}
+
+      {:error, jason_error} ->
+        {:error,
+         ReqLlmNext.Error.API.JsonParse.exception(
+           message: "Failed to parse HTTP response: #{Exception.message(jason_error)}",
+           raw_json: response_body
+         )}
+    end
+  end
+
+  defp decode_replay_body(%{"b64" => encoded}) when is_binary(encoded),
+    do: Base.decode64!(encoded)
+
+  defp decode_replay_body(%{b64: encoded}) when is_binary(encoded), do: Base.decode64!(encoded)
+  defp decode_replay_body(binary) when is_binary(binary), do: binary
+  defp decode_replay_body(body) when is_map(body), do: Jason.encode!(body)
+  defp decode_replay_body(_body), do: ""
+
+  defp module_exports?(module, function_name, arity) when is_atom(module) do
+    Code.ensure_loaded?(module) and function_exported?(module, function_name, arity)
+  end
 
   defp runtime_from_model(model) do
     with {:ok, profile} <- ModelProfile.from_model(model),

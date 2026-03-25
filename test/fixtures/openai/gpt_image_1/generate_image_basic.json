@@ -1,0 +1,47 @@
+{
+  "provider": "openai",
+  "model_id": "gpt-image-1",
+  "captured_at": "2026-03-24T12:00:00Z",
+  "request": {
+    "method": "POST",
+    "url": "https://api.openai.com/v1/images/generations",
+    "transport": "http",
+    "headers": {
+      "authorization": "[REDACTED]",
+      "content-type": "application/json"
+    },
+    "body": {
+      "b64": "eyJtb2RlbCI6ImdwdC1pbWFnZS0xIiwicHJvbXB0IjoiQSBwYXBlciBraXRlIGZsb2F0aW5nIG92ZXIgYSBsYWtlIiwibiI6MX0=",
+      "canonical_json": {
+        "model": "gpt-image-1",
+        "prompt": "A paper kite floating over a lake",
+        "n": 1
+      }
+    }
+  },
+  "execution": {
+    "surface_id": "openai_images_image_http",
+    "semantic_protocol": "openai_images",
+    "wire_format": "openai_images_json",
+    "transport": "http"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json"
+    },
+    "body": {
+      "b64": "eyJjcmVhdGVkIjoxNzQxNjQzMjAwLCJkYXRhIjpbeyJiNjRfanNvbiI6IkFRSUQiLCJyZXZpc2VkX3Byb21wdCI6IkEgcGFwZXIga2l0ZSBmbG9hdGluZyBvdmVyIGEgbGFrZSJ9XX0=",
+      "canonical_json": {
+        "created": 1741643200,
+        "data": [
+          {
+            "b64_json": "AQID",
+            "revised_prompt": "A paper kite floating over a lake"
+          }
+        ]
+      }
+    }
+  },
+  "chunks": []
+}

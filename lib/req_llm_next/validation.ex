@@ -10,7 +10,7 @@ defmodule ReqLlmNext.Validation do
   alias ReqLlmNext.Error
   alias ReqLlmNext.ModelProfile
 
-  @type operation :: :text | :object | :embed
+  @type operation :: :text | :object | :embed | :image | :transcription | :speech
 
   @spec validate!(ModelProfile.t(), ExecutionMode.t()) :: :ok | no_return()
   def validate!(%ModelProfile{} = profile, %ExecutionMode{} = mode) do
@@ -66,6 +66,16 @@ defmodule ReqLlmNext.Validation do
          Error.Invalid.Capability.exception(
            message: "Model #{profile.model_id} does not support embeddings"
          )}
+
+      {_kind, operation} when operation in [:image, :transcription, :speech] ->
+        if ModelProfile.supports_operation?(profile, operation) do
+          :ok
+        else
+          {:error,
+           Error.Invalid.Capability.exception(
+             message: "Model #{profile.model_id} does not support #{operation}"
+           )}
+        end
 
       _ ->
         :ok

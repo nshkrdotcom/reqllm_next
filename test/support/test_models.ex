@@ -125,6 +125,60 @@ defmodule ReqLlmNext.TestModels do
   end
 
   @doc """
+  Creates an OpenAI image-generation model for testing.
+  """
+  def openai_image(overrides \\ %{}) do
+    base = %LLMDB.Model{
+      id: "gpt-image-1",
+      provider: :openai,
+      name: "Test Image Model",
+      family: "gpt-image",
+      capabilities: %{
+        chat: false,
+        embeddings: false,
+        reasoning: %{enabled: false},
+        tools: %{enabled: false},
+        json: %{native: false, schema: false, strict: false},
+        streaming: %{text: false, tool_calls: false}
+      },
+      modalities: %{input: [:text, :image], output: [:image]},
+      extra: %{api: "images"}
+    }
+
+    struct!(base, Map.to_list(overrides))
+  end
+
+  @doc """
+  Creates an OpenAI transcription model for testing.
+  """
+  def openai_transcription(overrides \\ %{}) do
+    base = %LLMDB.Model{
+      id: "gpt-4o-transcribe",
+      provider: :openai,
+      name: "Test Transcription Model",
+      capabilities: nil,
+      modalities: nil
+    }
+
+    struct!(base, Map.to_list(overrides))
+  end
+
+  @doc """
+  Creates an OpenAI speech model for testing.
+  """
+  def openai_speech(overrides \\ %{}) do
+    base = %LLMDB.Model{
+      id: "gpt-4o-mini-tts",
+      provider: :openai,
+      name: "Test Speech Model",
+      capabilities: nil,
+      modalities: nil
+    }
+
+    struct!(base, Map.to_list(overrides))
+  end
+
+  @doc """
   Creates an Anthropic model with thinking/extended thinking capability.
   """
   def anthropic_thinking(overrides \\ %{}) do

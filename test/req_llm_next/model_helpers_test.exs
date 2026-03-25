@@ -287,6 +287,36 @@ defmodule ReqLlmNext.ModelHelpersTest do
     end
   end
 
+  describe "supports_image_generation?/1" do
+    test "returns true for image-generation models" do
+      assert ModelHelpers.supports_image_generation?(TestModels.openai_image())
+    end
+
+    test "returns false for non-image models" do
+      refute ModelHelpers.supports_image_generation?(TestModels.openai())
+    end
+  end
+
+  describe "supports_transcription?/1" do
+    test "returns true for transcription models inferred through provider facts" do
+      assert ModelHelpers.supports_transcription?(TestModels.openai_transcription())
+    end
+
+    test "returns false for non-transcription models" do
+      refute ModelHelpers.supports_transcription?(TestModels.openai())
+    end
+  end
+
+  describe "supports_speech_generation?/1" do
+    test "returns true for speech models inferred through provider facts" do
+      assert ModelHelpers.supports_speech_generation?(TestModels.openai_speech())
+    end
+
+    test "returns false for non-speech models" do
+      refute ModelHelpers.supports_speech_generation?(TestModels.openai())
+    end
+  end
+
   describe "supports_audio_input?/1" do
     test "returns true when model supports audio input" do
       model = TestModels.openai(%{modalities: %{input: [:text, :audio], output: [:text]}})
@@ -360,6 +390,9 @@ defmodule ReqLlmNext.ModelHelpersTest do
                :reasoning_enabled?,
                :streaming_text?,
                :streaming_tool_calls?,
+               :supports_image_generation?,
+               :supports_speech_generation?,
+               :supports_transcription?,
                :tools_enabled?,
                :tools_parallel?,
                :tools_streaming?,

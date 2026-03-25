@@ -1,5 +1,5 @@
 defmodule ReqLlmNext.Scenarios.RegistryTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   alias ReqLlmNext.Scenarios
   alias ReqLlmNext.TestModels

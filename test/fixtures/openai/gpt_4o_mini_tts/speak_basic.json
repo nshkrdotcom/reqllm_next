@@ -1,0 +1,40 @@
+{
+  "provider": "openai",
+  "model_id": "gpt-4o-mini-tts",
+  "captured_at": "2026-03-24T12:00:00Z",
+  "request": {
+    "method": "POST",
+    "url": "https://api.openai.com/v1/audio/speech",
+    "transport": "http",
+    "headers": {
+      "authorization": "[REDACTED]",
+      "content-type": "application/json"
+    },
+    "body": {
+      "b64": "eyJtb2RlbCI6ImdwdC00by1taW5pLXR0cyIsImlucHV0IjoiSGVsbG8gZnJvbSBSZXFMbG1OZXh0Iiwidm9pY2UiOiJhbGxveSIsInJlc3BvbnNlX2Zvcm1hdCI6Im1wMyJ9",
+      "canonical_json": {
+        "model": "gpt-4o-mini-tts",
+        "input": "Hello from ReqLlmNext",
+        "voice": "alloy",
+        "response_format": "mp3"
+      }
+    }
+  },
+  "execution": {
+    "surface_id": "openai_speech_http",
+    "semantic_protocol": "openai_speech",
+    "wire_format": "openai_speech_json",
+    "transport": "http"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "audio/mpeg"
+    },
+    "body": {
+      "b64": "AAECAw==",
+      "canonical_json": null
+    }
+  },
+  "chunks": []
+}

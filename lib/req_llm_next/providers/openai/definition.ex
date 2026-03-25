@@ -18,6 +18,68 @@ defmodule ReqLlmNext.Extensions.Definitions.OpenAI do
   end
 
   families do
+    family :openai_images do
+      extends(:openai_chat_compatible)
+      priority(250)
+      description("OpenAI Images API family")
+
+      match do
+        facts(media_api: :images)
+      end
+
+      stack do
+        surface_catalog_module(ReqLlmNext.ModelProfile.SurfaceCatalog.OpenAIImages)
+
+        surface_preparation_modules(openai_images: ReqLlmNext.SurfacePreparation.OpenAIImages)
+
+        semantic_protocol_modules(openai_images: nil)
+
+        wire_modules(openai_images_json: ReqLlmNext.Wire.OpenAIImages)
+      end
+    end
+
+    family :openai_transcriptions do
+      extends(:openai_chat_compatible)
+      priority(250)
+      description("OpenAI Audio Transcriptions family")
+
+      match do
+        facts(media_api: :transcription)
+      end
+
+      stack do
+        surface_catalog_module(ReqLlmNext.ModelProfile.SurfaceCatalog.OpenAITranscriptions)
+
+        surface_preparation_modules(
+          openai_transcription: ReqLlmNext.SurfacePreparation.OpenAITranscriptions
+        )
+
+        semantic_protocol_modules(openai_transcription: nil)
+
+        wire_modules(openai_transcription_multipart: ReqLlmNext.Wire.OpenAITranscriptions)
+      end
+    end
+
+    family :openai_speech do
+      extends(:openai_chat_compatible)
+      priority(250)
+      description("OpenAI Audio Speech family")
+
+      match do
+        facts(media_api: :speech)
+      end
+
+      stack do
+        surface_catalog_module(ReqLlmNext.ModelProfile.SurfaceCatalog.OpenAISpeech)
+
+        surface_preparation_modules(openai_speech: ReqLlmNext.SurfacePreparation.OpenAISpeech)
+
+        semantic_protocol_modules(openai_speech: nil)
+
+        wire_modules(openai_speech_json: ReqLlmNext.Wire.OpenAISpeech)
+      end
+    end
+
     family :openai_responses_compatible do
       extends(:openai_chat_compatible)
       priority(200)

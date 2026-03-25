@@ -59,7 +59,7 @@ decisions:
     - reqllm.model_input.zoi_handoff_contracts
 
 - kind: command
-  target: mix test test/model_resolver_test.exs test/public_api/contract_test.exs test/public_api/text_generation_test.exs
+  target: mix test test/model_resolver_test.exs test/public_api/contract_test.exs test/public_api/text_generation_test.exs test/public_api/media_test.exs
   execute: true
   covers:
     - reqllm.model_input.accepted_forms

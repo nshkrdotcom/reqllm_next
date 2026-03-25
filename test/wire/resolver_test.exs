@@ -3,7 +3,16 @@ defmodule ReqLlmNext.Wire.ResolverTest do
 
   alias ReqLlmNext.{Error, Providers}
   alias ReqLlmNext.TestModels
-  alias ReqLlmNext.Wire.{Anthropic, OpenAIChat, OpenAIEmbeddings, Resolver}
+
+  alias ReqLlmNext.Wire.{
+    Anthropic,
+    OpenAIChat,
+    OpenAIEmbeddings,
+    OpenAIImages,
+    OpenAISpeech,
+    OpenAITranscriptions,
+    Resolver
+  }
 
   describe "resolve!/1" do
     test "returns provider and wire module for OpenAI model" do
@@ -69,20 +78,24 @@ defmodule ReqLlmNext.Wire.ResolverTest do
       assert Resolver.wire_module!(model) == Anthropic
     end
 
+    test "infers OpenAIImages for image-generation models" do
+      model = TestModels.openai_image()
+      assert Resolver.wire_module!(model) == OpenAIImages
+    end
+
+    test "infers OpenAITranscriptions for transcription models" do
+      model = TestModels.openai_transcription()
+      assert Resolver.wire_module!(model) == OpenAITranscriptions
+    end
+
+    test "infers OpenAISpeech for speech-generation models" do
+      model = TestModels.openai_speech()
+      assert Resolver.wire_module!(model) == OpenAISpeech
+    end
+
     test "defaults to OpenAIChat for unknown provider" do
       model = TestModels.minimal(%{provider: :some_other})
       assert Resolver.wire_module!(model) == OpenAIChat
-    end
-  end
-
-  describe "streaming_module!/1 (deprecated)" do
-    @tag :capture_log
-    test "delegates to wire_module!/1" do
-      model = TestModels.openai()
-
-      deprecated_result = Resolver.streaming_module!(model)
-      expected = Resolver.wire_module!(model)
-      assert deprecated_result == expected
     end
   end
 
@@ -109,6 +122,30 @@ defmodule ReqLlmNext.Wire.ResolverTest do
 
       assert result.provider_mod == Providers.OpenAI
       assert result.wire_mod == OpenAIChat
+    end
+
+    test "returns OpenAI images wire for image models" do
+      model = TestModels.openai_image()
+      result = Resolver.resolve!(model, :image)
+
+      assert result.provider_mod == Providers.OpenAI
+      assert result.wire_mod == OpenAIImages
+    end
+
+    test "returns OpenAI transcription wire for transcription models" do
+      model = TestModels.openai_transcription()
+      result = Resolver.resolve!(model, :transcription)
+
+      assert result.provider_mod == Providers.OpenAI
+      assert result.wire_mod == OpenAITranscriptions
+    end
+
+    test "returns OpenAI speech wire for speech models" do
+      model = TestModels.openai_speech()
+      result = Resolver.resolve!(model, :speech)
+
+      assert result.provider_mod == Providers.OpenAI
+      assert result.wire_mod == OpenAISpeech
     end
   end
 end

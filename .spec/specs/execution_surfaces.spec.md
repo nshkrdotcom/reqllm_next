@@ -12,6 +12,8 @@ summary: Explicit named execution surfaces as the support unit for endpoint styl
 surface:
   - lib/req_llm_next/execution_surface.ex
   - lib/req_llm_next/model_profile.ex
+  - lib/req_llm_next/families/**/*surface_catalog*.ex
+  - lib/req_llm_next/providers/**/*surface_catalog*.ex
   - lib/req_llm_next/operation_planner.ex
 decisions:
   - reqllm.decision.execution_surface_support_unit
@@ -21,7 +23,7 @@ decisions:
 
 ```spec-requirements
 - id: reqllm.execution_surfaces.support_unit
-  statement: ReqLlmNext shall represent each valid endpoint style as a named `ExecutionSurface` that bundles semantic protocol, wire format, transport, session compatibility, and feature tags for one operation family, including provider-native structured-output strategies, provider-native request-preparation rules, and any session-runtime seam selection implied by that semantic family.
+  statement: ReqLlmNext shall represent each valid endpoint style as a named `ExecutionSurface` that bundles semantic protocol, wire format, transport, session compatibility, and feature tags for one operation family, including provider-native structured-output strategies, provider-native request-preparation rules, any session-runtime seam selection implied by that semantic family, and request-style media surfaces when a provider exposes standalone image, transcription, or speech APIs.
   priority: must
   stability: evolving
 

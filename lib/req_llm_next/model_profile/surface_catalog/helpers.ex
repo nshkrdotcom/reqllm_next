@@ -44,6 +44,20 @@ defmodule ReqLlmNext.ModelProfile.SurfaceCatalog.Helpers do
     })
   end
 
+  @spec request_surface(atom(), ReqLlmNext.ModelProfile.operation(), atom(), atom(), map()) ::
+          ExecutionSurface.t()
+  def request_surface(id, operation, semantic_protocol, wire_format, features \\ %{}) do
+    ExecutionSurface.new!(%{
+      id: id,
+      operation: operation,
+      semantic_protocol: semantic_protocol,
+      wire_format: wire_format,
+      transport: :http,
+      features: Map.merge(%{streaming: false}, features),
+      fallback_ids: []
+    })
+  end
+
   @spec surface_id(atom(), atom(), atom()) :: atom()
   def surface_id(surface_prefix, operation, transport) do
     :"#{surface_prefix}_#{operation}_#{transport}"
@@ -74,7 +88,7 @@ defmodule ReqLlmNext.ModelProfile.SurfaceCatalog.Helpers do
   def object_strategy(model, provider_facts) do
     cond do
       native_structured_outputs?(model, provider_facts) -> :native_json_schema
-      chat_supported?(model) -> :prompt_and_parse
+      chat_supported?(model, provider_facts) -> :prompt_and_parse
       true -> false
     end
   end
@@ -88,6 +102,10 @@ defmodule ReqLlmNext.ModelProfile.SurfaceCatalog.Helpers do
   def chat_supported?(%LLMDB.Model{capabilities: nil}), do: true
   def chat_supported?(model), do: ModelHelpers.chat?(model)
 
+  @spec chat_supported?(LLMDB.Model.t(), map()) :: boolean()
+  def chat_supported?(_model, %{chat_supported?: value}) when is_boolean(value), do: value
+  def chat_supported?(model, _provider_facts), do: chat_supported?(model)
+
   @spec embeddings_supported?(LLMDB.Model.t()) :: boolean()
   def embeddings_supported?(%LLMDB.Model{capabilities: nil}), do: false
   def embeddings_supported?(model), do: ModelHelpers.embeddings?(model)
@@ -96,11 +114,29 @@ defmodule ReqLlmNext.ModelProfile.SurfaceCatalog.Helpers do
   def tools_supported?(%LLMDB.Model{capabilities: nil}), do: true
   def tools_supported?(model), do: ModelHelpers.tools_enabled?(model)
 
+  @spec tools_supported?(LLMDB.Model.t(), map()) :: boolean()
+  def tools_supported?(%LLMDB.Model{capabilities: nil} = model, provider_facts) do
+    chat_supported?(model, provider_facts)
+  end
+
+  def tools_supported?(model, _provider_facts), do: tools_supported?(model)
+
   @spec reasoning_supported?(LLMDB.Model.t()) :: boolean()
   def reasoning_supported?(%LLMDB.Model{capabilities: nil}), do: false
   def reasoning_supported?(model), do: ModelHelpers.reasoning_enabled?(model)
 
+  @spec reasoning_supported?(LLMDB.Model.t(), map()) :: boolean()
+  def reasoning_supported?(%LLMDB.Model{capabilities: nil}, _provider_facts), do: false
+  def reasoning_supported?(model, _provider_facts), do: reasoning_supported?(model)
+
   @spec streaming_text_supported?(LLMDB.Model.t()) :: boolean()
   def streaming_text_supported?(%LLMDB.Model{capabilities: nil}), do: true
   def streaming_text_supported?(model), do: ModelHelpers.streaming_text?(model)
+
+  @spec streaming_text_supported?(LLMDB.Model.t(), map()) :: boolean()
+  def streaming_text_supported?(%LLMDB.Model{capabilities: nil} = model, provider_facts) do
+    chat_supported?(model, provider_facts)
+  end
+
+  def streaming_text_supported?(model, _provider_facts), do: streaming_text_supported?(model)
 end

@@ -11,7 +11,9 @@ defmodule ReqLlmNext.Extensions.Criteria do
               provider_ids: Zoi.array(Zoi.atom()) |> Zoi.default([]),
               family_ids: Zoi.array(Zoi.atom()) |> Zoi.default([]),
               model_ids: Zoi.array(Zoi.string()) |> Zoi.default([]),
-              operations: Zoi.array(Zoi.enum([:text, :object, :embed])) |> Zoi.default([]),
+              operations:
+                Zoi.array(Zoi.enum([:text, :object, :embed, :image, :transcription, :speech]))
+                |> Zoi.default([]),
               transports: Zoi.array(Zoi.atom()) |> Zoi.default([]),
               semantic_protocols: Zoi.array(Zoi.atom()) |> Zoi.default([]),
               stream?: Zoi.boolean() |> Zoi.nullish() |> Zoi.default(nil),

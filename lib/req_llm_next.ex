@@ -121,9 +121,12 @@ defmodule ReqLlmNext do
     Providers,
     Response,
     Schema,
+    Speech,
     StreamResponse,
     Tool
   }
+
+  alias ReqLlmNext.Transcription
 
   @type model_spec :: String.t() | LLMDB.Model.t()
 
@@ -259,6 +262,86 @@ defmodule ReqLlmNext do
   # ===========================================================================
   # Configuration API
   # ===========================================================================
+
+  @doc """
+  Generate images from a model (non-streaming).
+
+  Preserves the ReqLLM media frontend API shape while routing through the
+  ReqLlmNext planner/runtime architecture.
+
+  ## Examples
+
+      {:ok, response} = ReqLlmNext.generate_image("openai:gpt-image-1", "A paper kite over a lake")
+      ReqLlmNext.Response.images(response)
+
+  """
+  @spec generate_image(model_spec(), String.t() | Context.t(), keyword()) ::
+          {:ok, Response.t()} | {:error, term()}
+  def generate_image(model_spec, prompt, opts \\ []) do
+    Executor.generate_image(model_spec, prompt, opts)
+  end
+
+  @doc """
+  Generate images from a model, raising on error.
+  """
+  @spec generate_image!(model_spec(), String.t() | Context.t(), keyword()) :: Response.t()
+  def generate_image!(model_spec, prompt, opts \\ []) do
+    case generate_image(model_spec, prompt, opts) do
+      {:ok, response} -> response
+      {:error, error} -> raise error
+    end
+  end
+
+  @doc """
+  Transcribe audio using a model.
+
+  Returns a dedicated transcription result contract rather than a text-generation response.
+  """
+  @spec transcribe(
+          model_spec(),
+          String.t() | {:binary, binary(), String.t()} | {:base64, String.t(), String.t()},
+          keyword()
+        ) :: {:ok, Transcription.Result.t()} | {:error, term()}
+  def transcribe(model_spec, audio, opts \\ []) do
+    Executor.transcribe(model_spec, audio, opts)
+  end
+
+  @doc """
+  Transcribe audio using a model, raising on error.
+  """
+  @spec transcribe!(
+          model_spec(),
+          String.t() | {:binary, binary(), String.t()} | {:base64, String.t(), String.t()},
+          keyword()
+        ) :: Transcription.Result.t()
+  def transcribe!(model_spec, audio, opts \\ []) do
+    case transcribe(model_spec, audio, opts) do
+      {:ok, result} -> result
+      {:error, error} -> raise error
+    end
+  end
+
+  @doc """
+  Generate speech audio from text using a model.
+
+  Returns a dedicated speech result contract rather than a text-generation response.
+  """
+  @spec speak(model_spec(), String.t(), keyword()) ::
+          {:ok, Speech.Result.t()} | {:error, term()}
+  def speak(model_spec, text, opts \\ []) do
+    Executor.speak(model_spec, text, opts)
+  end
+
+  @doc """
+  Generate speech audio from text using a model, raising on error.
+  """
+  @spec speak!(model_spec(), String.t(), keyword()) :: Speech.Result.t()
+  def speak!(model_spec, text, opts \\ []) do
+    case speak(model_spec, text, opts) do
+      {:ok, result} -> result
+      {:error, error} -> raise error
+    end
+  end
 
   @doc """
   Stores an API key in application configuration.

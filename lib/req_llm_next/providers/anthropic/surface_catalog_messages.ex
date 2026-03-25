@@ -17,7 +17,7 @@ defmodule ReqLlmNext.ModelProfile.SurfaceCatalog.AnthropicMessages do
   end
 
   defp text_surfaces(model, provider_facts) do
-    if Helpers.chat_supported?(model) do
+    if Helpers.chat_supported?(model, provider_facts) do
       [
         Helpers.chat_surface(
           :anthropic_messages,
@@ -35,7 +35,7 @@ defmodule ReqLlmNext.ModelProfile.SurfaceCatalog.AnthropicMessages do
   end
 
   defp object_surfaces(model, provider_facts) do
-    if Helpers.chat_supported?(model) do
+    if Helpers.chat_supported?(model, provider_facts) do
       [
         Helpers.chat_surface(
           :anthropic_messages,

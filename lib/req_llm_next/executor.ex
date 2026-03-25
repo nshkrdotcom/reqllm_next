@@ -25,8 +25,11 @@ defmodule ReqLlmNext.Executor do
     Response,
     Schema,
     SessionRuntime,
+    Speech,
     StreamResponse
   }
+
+  alias ReqLlmNext.Transcription
 
   @spec generate_text(ReqLlmNext.model_spec(), String.t() | Context.t(), keyword()) ::
           {:ok, Response.t()} | {:error, term()}
@@ -174,6 +177,58 @@ defmodule ReqLlmNext.Executor do
     end
   end
 
+  @spec generate_image(ReqLlmNext.model_spec(), String.t() | Context.t(), keyword()) ::
+          {:ok, Response.t()} | {:error, term()}
+  def generate_image(model_spec, prompt, opts \\ []) do
+    with {:ok, model} <- ModelResolver.resolve(model_spec),
+         {:ok, plan} <-
+           safe_plan(model, :image, prompt, model_spec, opts),
+         %{
+           provider_mod: provider_mod,
+           session_runtime_mod: session_runtime_mod,
+           wire_mod: wire_mod,
+           transport_mod: transport_mod
+         } <- ExecutionModules.resolve(plan),
+         {:ok, runtime_opts} <- runtime_opts(plan, model, opts, session_runtime_mod) do
+      transport_mod.request(provider_mod, wire_mod, model, prompt, runtime_opts)
+    end
+  end
+
+  @spec transcribe(
+          ReqLlmNext.model_spec(),
+          String.t() | {:binary, binary(), String.t()} | {:base64, String.t(), String.t()},
+          keyword()
+        ) :: {:ok, Transcription.Result.t()} | {:error, term()}
+  def transcribe(model_spec, audio, opts \\ []) do
+    with {:ok, model} <- ModelResolver.resolve(model_spec),
+         {:ok, plan} <- safe_plan(model, :transcription, audio, model_spec, opts),
+         %{
+           provider_mod: provider_mod,
+           session_runtime_mod: session_runtime_mod,
+           wire_mod: wire_mod,
+           transport_mod: transport_mod
+         } <- ExecutionModules.resolve(plan),
+         {:ok, runtime_opts} <- runtime_opts(plan, model, opts, session_runtime_mod) do
+      transport_mod.request(provider_mod, wire_mod, model, audio, runtime_opts)
+    end
+  end
+
+  @spec speak(ReqLlmNext.model_spec(), String.t(), keyword()) ::
+          {:ok, Speech.Result.t()} | {:error, term()}
+  def speak(model_spec, text, opts \\ []) do
+    with {:ok, model} <- ModelResolver.resolve(model_spec),
+         {:ok, plan} <- safe_plan(model, :speech, text, model_spec, opts),
+         %{
+           provider_mod: provider_mod,
+           session_runtime_mod: session_runtime_mod,
+           wire_mod: wire_mod,
+           transport_mod: transport_mod
+         } <- ExecutionModules.resolve(plan),
+         {:ok, runtime_opts} <- runtime_opts(plan, model, opts, session_runtime_mod) do
+      transport_mod.request(provider_mod, wire_mod, model, text, runtime_opts)
+    end
+  end
+
   defp build_object_response(model, object, context) do
     message = %Context.Message{
       role: :assistant,
@@ -236,7 +291,7 @@ defmodule ReqLlmNext.Executor do
            _execution_semantic_protocol: plan.semantic_protocol,
            _execution_wire_format: plan.wire_format,
            _execution_transport: plan.transport,
-           _structured_output_strategy: plan.surface.features.structured_output,
+           _structured_output_strategy: Map.get(plan.surface.features, :structured_output),
            _session_strategy: plan.session_strategy,
            _session_runtime: plan.session_runtime
          )}
@@ -258,6 +313,22 @@ defmodule ReqLlmNext.Executor do
 
   defp inspect_model_spec(model_spec) when is_binary(model_spec), do: model_spec
   defp inspect_model_spec(_), do: nil
+
+  defp safe_plan(model, operation, input, model_spec, opts) do
+    OperationPlanner.plan(
+      model,
+      operation,
+      input,
+      opts |> Keyword.put(:_model_spec, inspect_model_spec(model_spec))
+    )
+  rescue
+    error in [
+      Error.Invalid.Capability,
+      Error.Invalid.Parameter,
+      Error.Validation.Error
+    ] ->
+      {:error, error}
+  end
 
   defp validate_embedding_input("") do
     {:error, Error.Invalid.Parameter.exception(parameter: "input: cannot be empty")}

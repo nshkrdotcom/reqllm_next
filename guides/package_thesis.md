@@ -54,6 +54,12 @@ That plan then selects one deterministic implementation stack:
 
 Execution results are normalized back to the canonical ReqLlm API surface exposed from `ReqLlmNext`.
 
+That surface now includes dedicated media operations as first-class planner families rather than top-level imperative escapes:
+
+1. `generate_image` returns the canonical `Response` shape
+2. `transcribe` returns `ReqLlmNext.Transcription.Result`
+3. `speak` returns `ReqLlmNext.Speech.Result`
+
 The point of this structure is not abstraction for its own sake. It is how the library can support a wide range of provider styles and edge cases without leaking one model's quirks into unrelated models.
 
 ## Why The Model Boundary Matters
@@ -149,6 +155,8 @@ They are a first-class part of the package strategy:
 2. replay makes regression tests deterministic
 3. canonical normalization can be checked repeatedly without requiring live calls every test run
 4. drift becomes observable over time
+
+That replay model now applies to both streaming captures and request-style media fixtures, so non-stream image, speech, and transcription lanes stay inside the same execution architecture instead of becoming ad hoc test helpers.
 
 This matters because the library is only as good as its ability to normalize real, changing provider behavior into one consistent surface.
 

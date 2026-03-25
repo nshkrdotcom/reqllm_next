@@ -10,7 +10,7 @@ defmodule ReqLlmNext.ExecutionMode do
   @schema Zoi.struct(
             __MODULE__,
             %{
-              operation: Zoi.enum([:text, :object, :embed]),
+              operation: Zoi.enum([:text, :object, :embed, :image, :transcription, :speech]),
               stream?: Zoi.boolean() |> Zoi.default(false),
               tools?: Zoi.boolean() |> Zoi.default(false),
               structured_output?: Zoi.boolean() |> Zoi.default(false),
@@ -25,7 +25,7 @@ defmodule ReqLlmNext.ExecutionMode do
             coerce: true
           )
 
-  @type operation :: :text | :object | :embed
+  @type operation :: :text | :object | :embed | :image | :transcription | :speech
 
   @type t :: %__MODULE__{
           operation: operation(),
@@ -71,7 +71,7 @@ defmodule ReqLlmNext.ExecutionMode do
       latency_class: normalize_latency(opts),
       reasoning: normalize_reasoning(opts),
       conversation: normalize_conversation(prompt),
-      input_modalities: normalize_input_modalities(prompt)
+      input_modalities: normalize_input_modalities(operation, prompt)
     })
   end
 
@@ -136,7 +136,10 @@ defmodule ReqLlmNext.ExecutionMode do
   defp normalize_conversation(%Context{}), do: :single_turn
   defp normalize_conversation(_), do: :single_turn
 
-  defp normalize_input_modalities(%Context{messages: messages}) do
+  defp normalize_input_modalities(:transcription, _prompt), do: [:audio]
+  defp normalize_input_modalities(:speech, _prompt), do: [:text]
+
+  defp normalize_input_modalities(_operation, %Context{messages: messages}) do
     messages
     |> Enum.flat_map(fn message -> message.content || [] end)
     |> Enum.reduce(MapSet.new([:text]), fn part, acc ->
@@ -154,5 +157,5 @@ defmodule ReqLlmNext.ExecutionMode do
     |> Enum.sort()
   end
 
-  defp normalize_input_modalities(_), do: [:text]
+  defp normalize_input_modalities(_operation, _prompt), do: [:text]
 end

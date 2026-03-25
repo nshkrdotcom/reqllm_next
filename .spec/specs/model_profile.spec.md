@@ -13,6 +13,8 @@ surface:
   - lib/req_llm_next/model_profile.ex
   - lib/req_llm_next/model_profile/provider_facts.ex
   - lib/req_llm_next/model_profile/provider_facts/**/*.ex
+  - lib/req_llm_next/families/**/*surface_catalog*.ex
+  - lib/req_llm_next/providers/**/*surface_catalog*.ex
   - lib/req_llm_next/execution_surface.ex
   - lib/req_llm_next/operation_planner.ex
 decisions:
@@ -24,7 +26,7 @@ decisions:
 
 ```spec-requirements
 - id: reqllm.model_profile.descriptive_facts
-  statement: ReqLlmNext shall normalize resolved model metadata into a request-independent `ModelProfile` that describes operations, features, modalities, limits, parameter defaults, constraints metadata, and session capabilities without choosing concrete request behavior, including manifest-backed provider-scoped descriptive fact extraction for normalized features such as Anthropic structured outputs, citations, context management, and additional document input, plus the resolved extension family id selected by declarative criteria and provider or global fallback rules that owns surface-catalog construction and must declare the catalog module that builds the model's execution surfaces.
+  statement: ReqLlmNext shall normalize resolved model metadata into a request-independent `ModelProfile` that describes operations, features, modalities, limits, parameter defaults, constraints metadata, and session capabilities without choosing concrete request behavior, including manifest-backed provider-scoped descriptive fact extraction for normalized features such as Anthropic structured outputs, citations, context management, additional document input, and provider-owned media operation support, plus the resolved extension family id selected by declarative criteria and provider or global fallback rules that owns surface-catalog construction and must declare the catalog module that builds the model's execution surfaces.
   priority: must
   stability: evolving
 

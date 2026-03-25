@@ -13,6 +13,7 @@ surface:
   - test/**/*.exs
   - test/fixtures/**/*.json
 decisions:
+  - reqllm.decision.media_operation_families
   - reqllm.decision.zoi_backed_struct_contracts
 ```
 
@@ -20,12 +21,12 @@ decisions:
 
 ```spec-requirements
 - id: reqllm.package.multi_provider_api
-  statement: ReqLlmNext shall provide a unified public API for text generation, structured output, streaming, and embeddings across supported model providers using the same operations whether callers start from an `LLMDB` `model_spec` string or an `%LLMDB.Model{}`, including handcrafted structs used for local development.
+  statement: ReqLlmNext shall provide a unified public API for text generation, structured output, streaming, embeddings, and supported media operations across supported model providers using the same operations whether callers start from an `LLMDB` `model_spec` string or an `%LLMDB.Model{}`, including handcrafted structs used for local development.
   priority: must
   stability: evolving
 
 - id: reqllm.package.fixture_replay
-  statement: ReqLlmNext shall verify package behavior with deterministic automated tests that exercise provider scenarios and replay recorded fixtures by default, preserving the recorded execution surface when fixtures were captured against an older but still valid endpoint shape.
+  statement: ReqLlmNext shall verify package behavior with deterministic automated tests that exercise provider scenarios and replay recorded fixtures by default, preserving the recorded execution surface when fixtures were captured against an older but still valid endpoint shape, including request-style fixtures for non-stream image, transcription, and speech operations.
   priority: must
   stability: evolving
 
@@ -87,6 +88,13 @@ decisions:
   execute: true
   covers:
     - reqllm.package.multi_provider_api
+
+- kind: command
+  target: mix test test/public_api/media_test.exs test/providers/openai/wire_images_test.exs test/providers/openai/wire_transcriptions_test.exs test/providers/openai/wire_speech_test.exs test/transcription/audio_input_test.exs
+  execute: true
+  covers:
+    - reqllm.package.multi_provider_api
+    - reqllm.package.fixture_replay
 
 - kind: command
   target: mix test test/operation_planner_test.exs

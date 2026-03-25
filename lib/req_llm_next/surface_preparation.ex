@@ -35,12 +35,13 @@ defmodule ReqLlmNext.SurfacePreparation do
       opts
       |> Keyword.drop(@meta_opts)
       |> then(&Constraints.apply(model, &1))
+      |> Keyword.put(:_request_input, prompt)
 
     with {:ok, preparation_module, prepared_opts} <-
            prepare_surface(profile, mode, surface, prompt, normalized_opts),
          :ok <- validate_surface_inputs(preparation_module, surface, prepared_opts),
          :ok <- validate_surface_parameters(surface, prepared_opts) do
-      {:ok, Enum.into(prepared_opts, %{})}
+      {:ok, prepared_opts |> Keyword.delete(:_request_input) |> Enum.into(%{})}
     end
   end
 

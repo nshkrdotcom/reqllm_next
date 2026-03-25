@@ -10,7 +10,25 @@ defmodule ReqLlmNext.ModelProfile.ProviderFacts do
           citations_supported?: boolean(),
           context_management_supported?: boolean(),
           structured_outputs_native?: boolean(),
-          responses_api?: boolean()
+          responses_api?: boolean(),
+          media_api: :images | :transcription | :speech | nil,
+          image_generation_supported?: boolean(),
+          transcription_supported?: boolean(),
+          speech_supported?: boolean(),
+          chat_supported?: boolean() | nil
+        }
+
+  @type extracted_patch :: %{
+          optional(:additional_document_input?) => boolean(),
+          optional(:citations_supported?) => boolean(),
+          optional(:context_management_supported?) => boolean(),
+          optional(:structured_outputs_native?) => boolean(),
+          optional(:responses_api?) => boolean(),
+          optional(:media_api) => :images | :transcription | :speech | nil,
+          optional(:image_generation_supported?) => boolean(),
+          optional(:transcription_supported?) => boolean(),
+          optional(:speech_supported?) => boolean(),
+          optional(:chat_supported?) => boolean() | nil
         }
 
   @spec extract(LLMDB.Model.t()) :: extracted()
@@ -33,7 +51,12 @@ defmodule ReqLlmNext.ModelProfile.ProviderFacts do
       citations_supported?: false,
       context_management_supported?: false,
       structured_outputs_native?: false,
-      responses_api?: false
+      responses_api?: false,
+      media_api: nil,
+      image_generation_supported?: false,
+      transcription_supported?: false,
+      speech_supported?: false,
+      chat_supported?: nil
     }
   end
 end

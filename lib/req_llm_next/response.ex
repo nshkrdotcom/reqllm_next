@@ -65,6 +65,19 @@ defmodule ReqLlmNext.Response do
   @doc "Returns the Zoi schema for Response"
   def schema, do: @schema
 
+  @spec new(map()) :: {:ok, t()} | {:error, term()}
+  def new(attrs) when is_map(attrs) do
+    Zoi.parse(@schema, attrs)
+  end
+
+  @spec new!(map()) :: t()
+  def new!(attrs) when is_map(attrs) do
+    case new(attrs) do
+      {:ok, response} -> response
+      {:error, reason} -> raise ArgumentError, "Invalid response: #{inspect(reason)}"
+    end
+  end
+
   @doc """
   Extract text content from the response message.
 
@@ -84,6 +97,48 @@ defmodule ReqLlmNext.Response do
     content
     |> Enum.filter(&(&1.type == :text))
     |> Enum.map_join("", & &1.text)
+  end
+
+  @doc """
+  Extract image content parts from the response message.
+  """
+  @spec images(t()) :: [ContentPart.t()]
+  def images(%__MODULE__{message: nil}), do: []
+
+  def images(%__MODULE__{message: %Message{content: content}}) do
+    Enum.filter(content, &(&1.type in [:image, :image_url]))
+  end
+
+  @doc """
+  Returns the first image content part from the response, if present.
+  """
+  @spec image(t()) :: ContentPart.t() | nil
+  def image(%__MODULE__{} = response) do
+    response
+    |> images()
+    |> List.first()
+  end
+
+  @doc """
+  Returns the first generated binary image payload, if present.
+  """
+  @spec image_data(t()) :: binary() | nil
+  def image_data(%__MODULE__{} = response) do
+    case Enum.find(images(response), &(&1.type == :image)) do
+      nil -> nil
+      part -> part.data
+    end
+  end
+
+  @doc """
+  Returns the first generated image URL, if present.
+  """
+  @spec image_url(t()) :: String.t() | nil
+  def image_url(%__MODULE__{} = response) do
+    case Enum.find(images(response), &(&1.type == :image_url)) do
+      nil -> nil
+      part -> part.url
+    end
   end
 
   @doc """

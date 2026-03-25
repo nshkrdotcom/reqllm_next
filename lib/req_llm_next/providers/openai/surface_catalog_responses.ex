@@ -18,7 +18,7 @@ defmodule ReqLlmNext.ModelProfile.SurfaceCatalog.OpenAIResponses do
   end
 
   defp response_surfaces(model, operation, provider_facts) do
-    if Helpers.chat_supported?(model) do
+    if Helpers.chat_supported?(model, provider_facts) do
       [
         Helpers.chat_surface(
           :openai_responses,

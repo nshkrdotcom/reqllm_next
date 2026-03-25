@@ -31,7 +31,7 @@ defmodule ReqLlmNext.ModelProfile do
             coerce: true
           )
 
-  @type operation :: :text | :object | :embed
+  @type operation :: :text | :object | :embed | :image | :transcription | :speech
 
   @type t :: %__MODULE__{
           source: :llmdb,
@@ -120,9 +120,9 @@ defmodule ReqLlmNext.ModelProfile do
       model_id: model.id,
       family: surface_catalog.family,
       name: model.name,
-      operations: operation_facts(model),
+      operations: operation_facts(model, provider_facts),
       features: feature_facts(model, provider_facts),
-      modalities: model.modalities || %{input: [:text], output: [:text]},
+      modalities: normalize_modalities(model, provider_facts),
       limits: model.limits || %{},
       parameter_defaults: parameter_defaults(model),
       constraints: get_in(model, [Access.key(:extra, %{}), :constraints]) || %{},
@@ -131,27 +131,30 @@ defmodule ReqLlmNext.ModelProfile do
     }
   end
 
-  defp operation_facts(model) do
+  defp operation_facts(model, provider_facts) do
     %{
-      text: %{supported: chat_supported?(model)},
-      object: %{supported: chat_supported?(model)},
-      embed: %{supported: embeddings_supported?(model)}
+      text: %{supported: chat_supported?(model, provider_facts)},
+      object: %{supported: chat_supported?(model, provider_facts)},
+      embed: %{supported: embeddings_supported?(model)},
+      image: %{supported: ModelHelpers.supports_image_generation?(model)},
+      transcription: %{supported: ModelHelpers.supports_transcription?(model)},
+      speech: %{supported: ModelHelpers.supports_speech_generation?(model)}
     }
   end
 
   defp feature_facts(model, provider_facts) do
     %{
       tools: %{
-        supported: tools_supported?(model),
+        supported: tools_supported?(model, provider_facts),
         strict: tools_strict?(model),
         parallel: tools_parallel?(model)
       },
       structured_outputs: %{
-        supported: chat_supported?(model),
+        supported: chat_supported?(model, provider_facts),
         native: native_structured_outputs?(model, provider_facts),
         strategy: object_strategy(model, provider_facts)
       },
-      reasoning: %{supported: reasoning_supported?(model)},
+      reasoning: %{supported: reasoning_supported?(model, provider_facts)},
       citations: %{supported: provider_facts.citations_supported?},
       context_management: %{supported: provider_facts.context_management_supported?},
       document_input: %{
@@ -168,7 +171,7 @@ defmodule ReqLlmNext.ModelProfile do
   defp object_strategy(model, provider_facts) do
     cond do
       native_structured_outputs?(model, provider_facts) -> :native_json_schema
-      chat_supported?(model) -> :prompt_and_parse
+      chat_supported?(model, provider_facts) -> :prompt_and_parse
       true -> false
     end
   end
@@ -177,14 +180,18 @@ defmodule ReqLlmNext.ModelProfile do
     ModelHelpers.json_schema?(model) or provider_facts.structured_outputs_native?
   end
 
-  defp chat_supported?(%LLMDB.Model{capabilities: nil}), do: true
-  defp chat_supported?(model), do: ModelHelpers.chat?(model)
+  defp chat_supported?(_model, %{chat_supported?: value}) when is_boolean(value), do: value
+  defp chat_supported?(%LLMDB.Model{capabilities: nil}, _provider_facts), do: true
+  defp chat_supported?(model, _provider_facts), do: ModelHelpers.chat?(model)
 
   defp embeddings_supported?(%LLMDB.Model{capabilities: nil}), do: false
   defp embeddings_supported?(model), do: ModelHelpers.embeddings?(model)
 
-  defp tools_supported?(%LLMDB.Model{capabilities: nil}), do: true
-  defp tools_supported?(model), do: ModelHelpers.tools_enabled?(model)
+  defp tools_supported?(%LLMDB.Model{capabilities: nil} = model, provider_facts) do
+    chat_supported?(model, provider_facts)
+  end
+
+  defp tools_supported?(model, _provider_facts), do: ModelHelpers.tools_enabled?(model)
 
   defp tools_strict?(%LLMDB.Model{capabilities: nil}), do: false
   defp tools_strict?(model), do: ModelHelpers.tools_strict?(model)
@@ -192,6 +199,27 @@ defmodule ReqLlmNext.ModelProfile do
   defp tools_parallel?(%LLMDB.Model{capabilities: nil}), do: false
   defp tools_parallel?(model), do: ModelHelpers.tools_parallel?(model)
 
-  defp reasoning_supported?(%LLMDB.Model{capabilities: nil}), do: false
-  defp reasoning_supported?(model), do: ModelHelpers.reasoning_enabled?(model)
+  defp reasoning_supported?(%LLMDB.Model{capabilities: nil}, _provider_facts), do: false
+  defp reasoning_supported?(model, _provider_facts), do: ModelHelpers.reasoning_enabled?(model)
+
+  defp normalize_modalities(%LLMDB.Model{modalities: modalities}, _provider_facts)
+       when is_map(modalities) do
+    modalities
+  end
+
+  defp normalize_modalities(_model, %{media_api: :transcription}) do
+    %{input: [:audio], output: [:text]}
+  end
+
+  defp normalize_modalities(_model, %{media_api: :speech}) do
+    %{input: [:text], output: [:audio]}
+  end
+
+  defp normalize_modalities(_model, %{media_api: :images}) do
+    %{input: [:text], output: [:image]}
+  end
+
+  defp normalize_modalities(_model, _provider_facts) do
+    %{input: [:text], output: [:text]}
+  end
 end

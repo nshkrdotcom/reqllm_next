@@ -15,7 +15,7 @@ defmodule ReqLlmNext.OperationPlanner do
     Validation
   }
 
-  @type operation :: :text | :object | :embed
+  @type operation :: :text | :object | :embed | :image | :transcription | :speech
 
   @spec plan(LLMDB.Model.t(), operation(), term(), keyword()) ::
           {:ok, ExecutionPlan.t()} | {:error, term()}

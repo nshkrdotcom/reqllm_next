@@ -18,6 +18,15 @@ stream_resp.stream |> Enum.each(&IO.write/1)
 schema = [name: [type: :string, required: true], age: [type: :integer]]
 {:ok, resp} = ReqLlmNext.generate_object("openai:gpt-4o-mini", "Generate a person", schema)
 resp.object
+
+{:ok, image_resp} = ReqLlmNext.generate_image("openai:gpt-image-1", "A paper kite over a lake")
+ReqLlmNext.Response.image_data(image_resp)
+
+{:ok, transcript} = ReqLlmNext.transcribe("openai:gpt-4o-transcribe", "/tmp/audio.mp3")
+transcript.text
+
+{:ok, speech} = ReqLlmNext.speak("openai:gpt-4o-mini-tts", "Hello from ReqLlmNext")
+speech.audio
 ```
 
 ## Architecture
@@ -41,7 +50,7 @@ The core rules are:
 2. string model resolution stays delegated to `LLMDB`
 3. `ModelProfile` describes facts, `ExecutionMode` describes intent, and `ExecutionPlan` is the only prescriptive runtime object
 4. one resolved plan selects one deterministic stack of provider, session runtime, semantic protocol, wire format, transport, and plan adapters
-5. results are normalized back to the canonical ReqLlm API surface
+5. results are normalized back to the canonical ReqLlm API surface, including `Response`, `StreamResponse`, `ReqLlmNext.Transcription.Result`, and `ReqLlmNext.Speech.Result`
 
 Concrete provider and family implementation code is co-located in vertical slice homes under `lib/req_llm_next/families/` and `lib/req_llm_next/providers/`, while shared contracts and planning code stay central.
 

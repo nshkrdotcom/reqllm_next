@@ -28,7 +28,7 @@ decisions:
 
 ```spec-requirements
 - id: reqllm.layer_boundaries.separated_io
-  statement: ReqLlmNext shall keep provider, session runtime, transport, wire format, and semantic protocol responsibilities separated so no layer skips across another layer's ownership boundary and each resolved plan binds one deterministic layer stack including explicit provider, protocol, wire, and transport modules resolved from manifest-declared seams and the compiled runtime registry.
+  statement: ReqLlmNext shall keep provider, session runtime, transport, wire format, and semantic protocol responsibilities separated so no layer skips across another layer's ownership boundary and each resolved plan binds one deterministic layer stack including explicit provider, protocol, wire, and transport modules resolved from manifest-declared seams and the compiled runtime registry across both streaming execution and request-style HTTP media lanes.
   priority: must
   stability: evolving
 
@@ -43,7 +43,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.layer_boundaries.replay_uses_recorded_stack
-  statement: Fixture replay shall prefer the recorded or inferable surface from the fixture request itself over today's planned surface so replay keeps exercising the execution stack that originally produced the captured artifact.
+  statement: Fixture replay shall prefer the recorded or inferable surface from the fixture request itself over today's planned surface so replay keeps exercising the execution stack that originally produced the captured artifact, whether that artifact was a streaming capture or a request-style media response that must still route through the owning wire decoder.
   priority: must
   stability: evolving
 
@@ -78,6 +78,13 @@ decisions:
 
 - kind: command
   target: mix test test/executor/stream_state_test.exs test/fixtures_test.exs test/operation_planner_test.exs
+  execute: true
+  covers:
+    - reqllm.layer_boundaries.separated_io
+    - reqllm.layer_boundaries.replay_uses_recorded_stack
+
+- kind: command
+  target: mix test test/public_api/media_test.exs test/providers/openai/wire_images_test.exs test/providers/openai/wire_transcriptions_test.exs test/providers/openai/wire_speech_test.exs
   execute: true
   covers:
     - reqllm.layer_boundaries.separated_io

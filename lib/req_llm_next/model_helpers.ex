@@ -22,6 +22,8 @@ defmodule ReqLlmNext.ModelHelpers do
       ModelHelpers.streaming_text?(model)
   """
 
+  alias ReqLlmNext.ModelProfile.ProviderFacts
+
   @capability_checks [
     {:reasoning_enabled?, [:reasoning, :enabled]},
     {:json_native?, [:json, :native]},
@@ -107,6 +109,40 @@ defmodule ReqLlmNext.ModelHelpers do
   def supports_streaming_object_generation?(_), do: false
 
   @doc """
+  Check if model supports image generation.
+  """
+  @spec supports_image_generation?(LLMDB.Model.t()) :: boolean()
+  def supports_image_generation?(%LLMDB.Model{} = model) do
+    capability_enabled?(Map.get(model, :capabilities), [:images]) or
+      Map.get(model.modalities || %{}, :output, []) == [:image] or
+      ProviderFacts.extract(model).image_generation_supported?
+  end
+
+  def supports_image_generation?(_), do: false
+
+  @doc """
+  Check if model supports transcription.
+  """
+  @spec supports_transcription?(LLMDB.Model.t()) :: boolean()
+  def supports_transcription?(%LLMDB.Model{} = model) do
+    capability_enabled?(Map.get(model, :capabilities), [:transcription]) or
+      ProviderFacts.extract(model).transcription_supported?
+  end
+
+  def supports_transcription?(_), do: false
+
+  @doc """
+  Check if model supports speech generation.
+  """
+  @spec supports_speech_generation?(LLMDB.Model.t()) :: boolean()
+  def supports_speech_generation?(%LLMDB.Model{} = model) do
+    capability_enabled?(Map.get(model, :capabilities), [:speech]) or
+      ProviderFacts.extract(model).speech_supported?
+  end
+
+  def supports_speech_generation?(_), do: false
+
+  @doc """
   Check if model supports image input modality.
   """
   @spec supports_image_input?(LLMDB.Model.t()) :: boolean()
@@ -143,7 +179,13 @@ defmodule ReqLlmNext.ModelHelpers do
   def list_helpers do
     @capability_checks
     |> Enum.map(fn {name, _path} -> name end)
-    |> Kernel.++([:streaming_text?, :streaming_tool_calls?])
+    |> Kernel.++([
+      :streaming_text?,
+      :streaming_tool_calls?,
+      :supports_image_generation?,
+      :supports_transcription?,
+      :supports_speech_generation?
+    ])
     |> Enum.sort()
   end
 

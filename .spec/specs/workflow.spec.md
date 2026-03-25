@@ -33,12 +33,12 @@ decisions:
   stability: evolving
 
 - id: reqllm.workflow.specled_loop
-  statement: Contributor workflow shall keep `.spec/` as the canonical spec workspace and use `mix spec.prime`, `mix spec.next`, and `mix spec.check` to maintain the subject specs, ADRs, README, AGENTS, and package-thesis guide in sync with current truth.
+  statement: Contributor workflow shall keep `.spec/` as the canonical spec workspace and use `mix spec.prime`, `mix spec.next`, and `mix spec.check` to maintain the subject specs, ADRs, README, AGENTS, and package-thesis guide in sync with current truth, including top-level media API parity and request-fixture replay behavior when those package boundaries evolve.
   priority: must
   stability: evolving
 
 - id: reqllm.workflow.agent_instructions
-  statement: Repository agent instructions shall direct agents to run bw prime before work and mix spec.prime --base HEAD before editing current-truth package guidance, and they shall keep provider-native behavior behind planning, layer, and provider-utility boundaries instead of reintroducing shared executor shortcuts while standardizing package-owned structs on Zoi-backed schemas instead of plain `defstruct` declarations.
+  statement: Repository agent instructions shall direct agents to run bw prime before work and mix spec.prime --base HEAD before editing current-truth package guidance, and they shall keep provider-native behavior behind planning, layer, and provider-utility boundaries instead of reintroducing shared executor shortcuts while standardizing package-owned structs on Zoi-backed schemas instead of plain `defstruct` declarations and preserving the top-level ReqLLM-style text, object, media, and embedding facade.
   priority: must
   stability: evolving
 

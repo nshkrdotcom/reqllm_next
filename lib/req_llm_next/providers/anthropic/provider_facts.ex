@@ -3,7 +3,7 @@ defmodule ReqLlmNext.ModelProfile.ProviderFacts.Anthropic do
   Anthropic-specific descriptive fact extraction for ModelProfile construction.
   """
 
-  @spec extract(LLMDB.Model.t()) :: ReqLlmNext.ModelProfile.ProviderFacts.extracted()
+  @spec extract(LLMDB.Model.t()) :: ReqLlmNext.ModelProfile.ProviderFacts.extracted_patch()
   def extract(%LLMDB.Model{} = model) do
     %{
       additional_document_input?: capability_enabled?(model, [:code_execution, :supported]),

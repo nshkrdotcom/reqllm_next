@@ -6,7 +6,7 @@ Current-truth contract for the top-level `ReqLlmNext` facade.
 id: reqllm.public_api
 kind: api
 status: active
-summary: Hard package boundary for the top-level ReqLlmNext API, preserving the v1-style text, object, streaming, embedding, and helper surface while internals evolve.
+summary: Hard package boundary for the top-level ReqLlmNext API, preserving the v1-style text, object, media, streaming, embedding, and helper surface while internals evolve.
 surface:
   - lib/req_llm_next.ex
   - lib/req_llm_next/anthropic.ex
@@ -17,12 +17,12 @@ surface:
 
 ```spec-requirements
 - id: reqllm.public_api.hard_surface
-  statement: `ReqLlmNext` shall expose the hard package boundary at the top-level facade with `generate_text/3`, `generate_text!/3`, `stream_text/3`, `stream_object/4`, `generate_object/4`, `generate_object!/4`, `embed/3`, `embed!/3`, `model/1`, `provider/1`, `context/1`, `tool/1`, `json_schema/2`, `cosine_similarity/2`, `embedding_models/0`, `put_key/2`, and `get_key/1`, and the contract test lane shall load the facade module before asserting exported functions so the boundary check reflects the compiled public module rather than code-loading timing.
+  statement: `ReqLlmNext` shall expose the hard package boundary at the top-level facade with `generate_text/3`, `generate_text!/3`, `stream_text/3`, `stream_object/4`, `generate_object/4`, `generate_object!/4`, `generate_image/3`, `generate_image!/3`, `transcribe/3`, `transcribe!/3`, `speak/3`, `speak!/3`, `embed/3`, `embed!/3`, `model/1`, `provider/1`, `context/1`, `tool/1`, `json_schema/2`, `cosine_similarity/2`, `embedding_models/0`, `put_key/2`, and `get_key/1`, and the contract test lane shall load the facade module before asserting exported functions so the boundary check reflects the compiled public module rather than code-loading timing.
   priority: must
   stability: evolving
 
 - id: reqllm.public_api.canonical_shapes
-  statement: Top-level generation and embedding entrypoints shall accept the canonical public model inputs of `LLMDB` `model_spec` strings or `%LLMDB.Model{}` values, return canonical `Response` or `StreamResponse` values from non-bang forms, and raise from bang forms.
+  statement: Top-level generation, media, and embedding entrypoints shall accept the canonical public model inputs of `LLMDB` `model_spec` strings or `%LLMDB.Model{}` values, return canonical `Response`, `StreamResponse`, `ReqLlmNext.Transcription.Result`, or `ReqLlmNext.Speech.Result` values from non-bang forms as appropriate, and raise from bang forms.
   priority: must
   stability: evolving
 

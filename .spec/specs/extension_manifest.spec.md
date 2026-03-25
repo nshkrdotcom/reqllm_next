@@ -15,6 +15,8 @@ surface:
   - guides/extension_architecture.md
   - lib/req_llm_next/extensions.ex
   - lib/req_llm_next/extensions/**/*.ex
+  - lib/req_llm_next/families/**/definition.ex
+  - lib/req_llm_next/providers/**/definition.ex
   - test/req_llm_next/extensions/**/*.exs
 ```
 
@@ -37,7 +39,7 @@ surface:
   stability: evolving
 
 - id: reqllm.extension_manifest.narrow_seams
-  statement: Extension declarations shall only patch explicit seams such as provider registration, provider facts, surface catalog construction, surface preparation, session-runtime mapping, semantic protocol mapping, wire mapping, transport mapping, adapters, and provider-native utility homes, and shared runtime code shall consume those seams instead of branching on provider atoms directly.
+  statement: Extension declarations shall only patch explicit seams such as provider registration, provider facts, surface catalog construction, surface preparation, session-runtime mapping, semantic protocol mapping, wire mapping, transport mapping, adapters, and provider-native utility homes, including provider-owned media families and request-style media wires when needed, and shared runtime code shall consume those seams instead of branching on provider atoms directly.
   priority: must
   stability: evolving
 

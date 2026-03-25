@@ -18,7 +18,7 @@ surface:
 
 ```spec-requirements
 - id: reqllm.telemetry.request_lifecycle
-  statement: Every logical request shall emit one canonical request lifecycle that supports timing, finish classification, usage attribution, and runtime anomaly diagnosis across sync and streaming flows.
+  statement: Every logical request shall emit one canonical request lifecycle that supports timing, finish classification, usage attribution, and runtime anomaly diagnosis across sync, streaming, and request-style media flows.
   priority: must
   stability: evolving
 

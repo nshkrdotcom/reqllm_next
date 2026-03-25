@@ -40,7 +40,7 @@ surface:
   stability: evolving
 
 - id: reqllm.model_compat.curated_support_matrix
-  statement: Provider compatibility sweeps shall run against a curated support matrix of representative provider, model, and transport lanes so live verification stays cost-aware and stable while still pressure-testing the execution-plan architecture, while provider-native feature probes that do not fit the generic scenario system remain outside the matrix in focused provider-feature coverage.
+  statement: Provider compatibility sweeps shall run against a curated support matrix of representative provider, model, and transport lanes so live verification stays cost-aware and stable while still pressure-testing the execution-plan architecture, while provider-native feature probes and request-style media lanes that do not fit the generic scenario system remain outside the matrix in focused provider-feature coverage.
   priority: should
   stability: evolving
 
