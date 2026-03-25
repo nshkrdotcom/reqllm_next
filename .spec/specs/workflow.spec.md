@@ -23,6 +23,7 @@ surface:
 decisions:
   - reqllm.decision.zoi_backed_struct_contracts
   - reqllm.decision.provider_surface_maps_in_guides
+  - reqllm.decision.live_verifier_tests
 ```
 
 ## Requirements
@@ -34,7 +35,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.workflow.specled_loop
-  statement: Contributor workflow shall keep `.spec/` as the canonical spec workspace and use `mix spec.prime`, `mix spec.next`, and `mix spec.check` to maintain the subject specs, ADRs, README, AGENTS, and package-thesis guide in sync with current truth, including top-level media API parity, request-fixture replay behavior, runtime telemetry, canonical output items, explicit result channels, transport-agnostic realtime behavior, and utility-proof claims when those package boundaries evolve.
+  statement: Contributor workflow shall keep `.spec/` as the canonical spec workspace and use `mix spec.prime`, `mix spec.next`, and `mix spec.check` to maintain the subject specs, ADRs, README, AGENTS, and package-thesis guide in sync with current truth, including top-level media API parity, request-fixture replay behavior, sparse live verifier lanes, runtime telemetry, canonical output items, explicit result channels, transport-agnostic realtime behavior, and utility-proof claims when those package boundaries evolve.
   priority: must
   stability: evolving
 
@@ -44,7 +45,12 @@ decisions:
   stability: evolving
 
 - id: reqllm.workflow.starter_slice_verification
-  statement: Contributor workflow shall provide named verification entry points for the current starter-model slices and curated provider support-matrix lanes so replay-backed checks, live fixture refreshes, websocket coverage, and provider-feature probes use explicit shared paths.
+  statement: Contributor workflow shall provide named verification entry points for the current starter-model slices, curated provider support-matrix lanes, fixture-record refresh loops, websocket coverage, sparse live verifier suites, and provider-feature probes so replay-backed checks and opt-in live checks use explicit shared paths.
+  priority: should
+  stability: evolving
+
+- id: reqllm.workflow.live_verifier_commands
+  statement: Contributor workflow shall keep the sparse live verifier lane behind an explicit opt-in command path such as `REQ_LLM_NEXT_RUN_LIVE_VERIFIERS=1 mix test.live_verifiers` rather than folding live provider checks into the default `mix test` or replay-first starter-slice commands.
   priority: should
   stability: evolving
 
@@ -107,6 +113,13 @@ decisions:
   execute: true
   covers:
     - reqllm.workflow.starter_slice_verification
+
+- kind: command
+  target: mix test.live_verifiers
+  execute: true
+  covers:
+    - reqllm.workflow.starter_slice_verification
+    - reqllm.workflow.live_verifier_commands
 
 - kind: command
   target: mix test test/req_llm_next/extensions/dsl_test.exs

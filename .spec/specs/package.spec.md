@@ -18,6 +18,7 @@ decisions:
   - reqllm.decision.transport_agnostic_realtime_core
   - reqllm.decision.runtime_telemetry_kernel
   - reqllm.decision.zoi_backed_struct_contracts
+  - reqllm.decision.live_verifier_tests
 ```
 
 ## Requirements
@@ -29,7 +30,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.package.fixture_replay
-  statement: ReqLlmNext shall verify package behavior with deterministic automated tests that exercise provider scenarios and replay recorded fixtures by default, preserving the recorded execution surface when fixtures were captured against an older but still valid endpoint shape, including request-style fixtures for non-stream image, transcription, and speech operations.
+  statement: ReqLlmNext shall verify package behavior with deterministic automated tests that exercise provider scenarios and replay recorded fixtures by default, preserving the recorded execution surface when fixtures were captured against an older but still valid endpoint shape, including request-style fixtures for non-stream image, transcription, and speech operations, while keeping sparse live verifier tests as an explicit opt-in integration lane instead of broad live CI coverage.
   priority: must
   stability: evolving
 
@@ -75,6 +76,11 @@ decisions:
 
 - id: reqllm.package.utility_proof_depth
   statement: Provider-owned utility helpers shall keep representative request-execution proof lanes in addition to builder-level tests so files, batches, vector stores, background flows, and similar non-canonical utilities stay honest about their integration depth without pretending to be part of the cross-provider facade.
+  priority: should
+  stability: evolving
+
+- id: reqllm.package.live_verifier_lane
+  statement: ReqLlmNext shall keep a dedicated sparse live verifier lane for representative Anthropic and OpenAI integration checks so provider drift and fixture-refresh sanity can be exercised explicitly without expanding the replay-backed default suite or requiring live-provider access in normal CI.
   priority: should
   stability: evolving
 
@@ -195,6 +201,12 @@ decisions:
   covers:
     - reqllm.package.fixture_replay
     - reqllm.package.model_slice_verification
+
+- kind: command
+  target: mix test.live_verifiers
+  execute: true
+  covers:
+    - reqllm.package.live_verifier_lane
 
 - kind: command
   target: mix test test/env_test.exs

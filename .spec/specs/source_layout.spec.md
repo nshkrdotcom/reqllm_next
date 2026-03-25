@@ -19,13 +19,14 @@ surface:
   - test/**/*.exs
 decisions:
   - reqllm.decision.zoi_backed_struct_contracts
+  - reqllm.decision.live_verifier_tests
 ```
 
 ## Requirements
 
 ```spec-requirements
 - id: reqllm.source_layout.concern_homes
-  statement: ReqLlmNext shall keep model-boundary concerns, provider-scoped fact extraction, manifest-backed provider registration, family-owned or provider-owned surface catalog modules, profile construction, mode normalization, policy resolution, surface-owned request preparation, session-runtime modules, semantic protocol normalization, wire envelopes, transport mechanics, shared response output-item materialization, fixture replay, provider-feature probes, media input and output contracts, realtime commands and session state, and telemetry emission in distinct source locations that match the architecture, while co-locating concrete family implementations under `lib/req_llm_next/families/` and provider-owned implementations and utilities under `lib/req_llm_next/providers/`.
+  statement: ReqLlmNext shall keep model-boundary concerns, provider-scoped fact extraction, manifest-backed provider registration, family-owned or provider-owned surface catalog modules, profile construction, mode normalization, policy resolution, surface-owned request preparation, session-runtime modules, semantic protocol normalization, wire envelopes, transport mechanics, shared response output-item materialization, fixture replay, provider-feature probes, sparse live verifier probes, media input and output contracts, realtime commands and session state, and telemetry emission in distinct source locations that match the architecture, while co-locating concrete family implementations under `lib/req_llm_next/families/` and provider-owned implementations and utilities under `lib/req_llm_next/providers/`.
   priority: must
   stability: evolving
 
@@ -40,7 +41,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.source_layout.compat_outside_runtime
-  statement: Compat-only expectations, issue drafting, and drift analysis shall live in compat tooling rather than inside provider, planner, protocol, wire, transport, or session runtime modules.
+  statement: Compat-only expectations, issue drafting, drift analysis, and sparse opt-in live verifier suites shall live in dedicated test or compat homes rather than inside provider, planner, protocol, wire, transport, or session runtime modules.
   priority: must
   stability: evolving
 

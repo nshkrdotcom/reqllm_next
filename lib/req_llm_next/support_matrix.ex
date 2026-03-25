@@ -9,6 +9,9 @@ defmodule ReqLlmNext.SupportMatrix do
 
   Provider-native surfaces that do not fit the generic scenario system belong in
   focused `test/provider_features/` coverage instead of being forced into this matrix.
+
+  Sparse opt-in live verifier tests belong in `test/live_verifiers/` rather than
+  expanding this replay-first matrix into a live provider sweep.
   """
 
   @type group :: :coverage | :websocket

@@ -26,6 +26,7 @@ decisions:
   - reqllm.decision.transport_agnostic_realtime_core
   - reqllm.decision.runtime_telemetry_kernel
   - reqllm.decision.zoi_backed_struct_contracts
+  - reqllm.decision.live_verifier_tests
 ```
 
 ## Requirements
@@ -47,7 +48,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.layer_boundaries.replay_uses_recorded_stack
-  statement: Fixture replay shall prefer the recorded or inferable surface from the fixture request itself over today's planned surface so replay keeps exercising the execution stack that originally produced the captured artifact, whether that artifact was a streaming capture or a request-style media response that must still route through the owning wire decoder.
+  statement: Fixture replay shall prefer the recorded or inferable surface from the fixture request itself over today's planned surface so replay keeps exercising the execution stack that originally produced the captured artifact, whether that artifact was a streaming capture or a request-style media response that must still route through the owning wire decoder, while sparse live verifier suites above the runtime stack continue to use the same planner and execution layers rather than special-case provider shortcuts.
   priority: must
   stability: evolving
 

@@ -46,6 +46,7 @@ decisions:
   - reqllm.decision.transport_agnostic_realtime_core
   - reqllm.decision.runtime_telemetry_kernel
   - reqllm.decision.zoi_backed_struct_contracts
+  - reqllm.decision.live_verifier_tests
 ```
 
 ## Requirements
@@ -62,7 +63,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.architecture.execution_layers
-  statement: ReqLlmNext architecture shall separate realtime adapter, realtime session reduction, semantic protocol, wire format, transport, provider, session-runtime, and telemetry-kernel concerns so canonical request and event meaning, wire envelopes, persistent execution state, byte movement, and diagnostics can evolve independently, and canonical response normalization shall expose explicit result channels on top of output items so higher-level helpers do not have to recover those distinctions from provider metadata.
+  statement: ReqLlmNext architecture shall separate realtime adapter, realtime session reduction, semantic protocol, wire format, transport, provider, session-runtime, and telemetry-kernel concerns so canonical request and event meaning, wire envelopes, persistent execution state, byte movement, and diagnostics can evolve independently, and canonical response normalization shall expose explicit result channels on top of output items so higher-level helpers do not have to recover those distinctions from provider metadata while replay-backed suites and sparse live verifier suites continue to exercise the same execution spine rather than alternate ad hoc paths.
   priority: must
   stability: evolving
 

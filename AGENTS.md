@@ -135,6 +135,7 @@ The verification model is part of the architecture.
 - `test/model_slices/` holds a small curated set of anchor models, not a one-file-per-model matrix.
 - `lib/req_llm_next/support_matrix.ex` and `test/coverage/` define broader curated provider lanes.
 - `test/provider_features/` holds focused provider feature probes such as beta or transport-specific coverage.
+- `test/live_verifiers/` holds sparse opt-in live integration verifiers for provider drift checks and fixture refresh sanity checks.
 - `test/fixtures/` stores replay artifacts. Replay is the default test mode.
 
 Fixtures are first-class evidence, not just mocks.
@@ -142,7 +143,7 @@ Fixtures are first-class evidence, not just mocks.
 - Record with `REQ_LLM_NEXT_FIXTURES_MODE=record`.
 - Replay should preserve the recorded execution surface even if the live planner would choose a newer surface today.
 - Request-style media fixtures should replay through the owning wire decoder just like streaming fixtures replay through their recorded stack.
-- Use live runs carefully and keep them curated.
+- Keep live verifier tests sparse, opt-in, and out of normal CI paths.
 
 ## Commands
 
@@ -155,6 +156,7 @@ mix test
 mix test test/public_api
 mix test test/scenarios
 mix test.starter_slice
+mix test.live_verifiers
 mix spec.next
 mix spec.check --base HEAD
 ```
@@ -163,6 +165,12 @@ When live API keys are available and you need fresh fixtures:
 
 ```bash
 REQ_LLM_NEXT_FIXTURES_MODE=record mix test.starter_slice
+```
+
+When you want the sparse live verifier lane instead of replay:
+
+```bash
+REQ_LLM_NEXT_RUN_LIVE_VERIFIERS=1 mix test.live_verifiers
 ```
 
 ## Practical Rules

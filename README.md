@@ -121,3 +121,9 @@ When live API keys are available and you want to refresh fixtures for that slice
 ```bash
 REQ_LLM_NEXT_FIXTURES_MODE=record mix test.starter_slice
 ```
+
+Sparse live verifier tests exist for Anthropic and OpenAI drift checks, but they are intentionally separate from the replay-backed default suite and should not be treated as normal CI coverage:
+
+```bash
+REQ_LLM_NEXT_RUN_LIVE_VERIFIERS=1 mix test.live_verifiers
+```

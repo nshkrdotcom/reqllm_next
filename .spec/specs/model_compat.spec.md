@@ -24,10 +24,12 @@ surface:
   - test/coverage/openai_websocket_coverage_test.exs
   - test/provider_features/anthropic_beta_features_test.exs
   - test/provider_features/anthropic_advanced_messages_test.exs
+  - test/live_verifiers/**/*.exs
   - test/providers/deepseek/**/*.exs
   - test/providers/anthropic/**/*.exs
 decisions:
   - reqllm.decision.provider_surface_maps_in_guides
+  - reqllm.decision.live_verifier_tests
 ```
 
 ## Requirements
@@ -60,6 +62,11 @@ decisions:
 
 - id: reqllm.model_compat.provider_native_request_shapes
   statement: Provider-native utility coverage shall keep request-shape and representative request-execution proofs for supported non-canonical endpoints so batch, file, vector-store, background, and similar utility surfaces stay reconciled with the shared execution architecture without claiming top-level API support they do not provide.
+  priority: should
+  stability: evolving
+
+- id: reqllm.model_compat.live_verifier_separation
+  statement: Live provider drift checks shall live in a sparse explicit verifier lane rather than expanding the replay-backed support matrix or default coverage suite into a broad live-provider matrix.
   priority: should
   stability: evolving
 
@@ -119,4 +126,10 @@ decisions:
   execute: true
   covers:
     - reqllm.model_compat.extension_pressure_tests
+
+- kind: command
+  target: mix test.live_verifiers
+  execute: true
+  covers:
+    - reqllm.model_compat.live_verifier_separation
 ```
