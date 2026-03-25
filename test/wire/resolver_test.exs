@@ -6,6 +6,7 @@ defmodule ReqLlmNext.Wire.ResolverTest do
 
   alias ReqLlmNext.Wire.{
     Anthropic,
+    AlibabaChat,
     DeepSeekChat,
     GroqChat,
     OpenAIChat,
@@ -87,6 +88,11 @@ defmodule ReqLlmNext.Wire.ResolverTest do
     test "infers VeniceChat for venice provider" do
       model = TestModels.venice()
       assert Resolver.wire_module!(model) == VeniceChat
+    end
+
+    test "infers AlibabaChat for alibaba provider" do
+      model = TestModels.alibaba()
+      assert Resolver.wire_module!(model) == AlibabaChat
     end
 
     test "infers DeepSeekChat for deepseek provider" do

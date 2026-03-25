@@ -3,7 +3,18 @@ defmodule ReqLlmNext.ProvidersTest do
 
   alias ReqLlmNext.Provider
   alias ReqLlmNext.Providers
-  alias ReqLlmNext.Providers.{Anthropic, DeepSeek, Groq, OpenAI, OpenRouter, VLLM, Venice, XAI}
+
+  alias ReqLlmNext.Providers.{
+    Alibaba,
+    Anthropic,
+    DeepSeek,
+    Groq,
+    OpenAI,
+    OpenRouter,
+    VLLM,
+    Venice,
+    XAI
+  }
 
   describe "Providers.get/1" do
     test "returns OpenAI module for :openai" do
@@ -36,6 +47,10 @@ defmodule ReqLlmNext.ProvidersTest do
 
     test "returns Venice module for :venice" do
       assert Providers.get(:venice) == {:ok, Venice}
+    end
+
+    test "returns Alibaba module for :alibaba" do
+      assert Providers.get(:alibaba) == {:ok, Alibaba}
     end
 
     test "returns error for unknown provider" do
@@ -76,6 +91,10 @@ defmodule ReqLlmNext.ProvidersTest do
       assert Providers.get!(:venice) == Venice
     end
 
+    test "returns Alibaba module for :alibaba" do
+      assert Providers.get!(:alibaba) == Alibaba
+    end
+
     test "raises for unknown provider" do
       assert_raise RuntimeError, ~r/Provider error/, fn ->
         Providers.get!(:unknown)
@@ -95,6 +114,7 @@ defmodule ReqLlmNext.ProvidersTest do
       assert :vllm in providers
       assert :xai in providers
       assert :venice in providers
+      assert :alibaba in providers
     end
   end
 
@@ -229,6 +249,24 @@ defmodule ReqLlmNext.ProvidersTest do
 
     test "auth_headers returns Bearer token" do
       headers = Venice.auth_headers("test-key")
+      assert headers == [{"Authorization", "Bearer test-key"}]
+    end
+  end
+
+  describe "Providers.Alibaba" do
+    test "base_url returns DashScope international URL by default" do
+      System.delete_env("DASHSCOPE_BASE_URL")
+      System.delete_env("DASHSCOPE_REGION")
+
+      assert Alibaba.base_url() == "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
+    end
+
+    test "env_key returns DASHSCOPE_API_KEY" do
+      assert Alibaba.env_key() == "DASHSCOPE_API_KEY"
+    end
+
+    test "auth_headers returns Bearer token" do
+      headers = Alibaba.auth_headers("test-key")
       assert headers == [{"Authorization", "Bearer test-key"}]
     end
   end

@@ -149,6 +149,19 @@ defmodule ReqLlmNext.TestModelsTest do
     end
   end
 
+  describe "alibaba/1" do
+    test "creates Alibaba model" do
+      model = TestModels.alibaba()
+      assert model.provider == :alibaba
+      assert model.id == "qwen-plus"
+    end
+
+    test "applies overrides" do
+      model = TestModels.alibaba(%{id: "qwen-max"})
+      assert model.id == "qwen-max"
+    end
+  end
+
   describe "xai/1" do
     test "creates xAI model" do
       model = TestModels.xai()
