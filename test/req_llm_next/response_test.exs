@@ -2,6 +2,7 @@ defmodule ReqLlmNext.ResponseTest do
   use ExUnit.Case, async: true
 
   alias ReqLlmNext.Response
+  alias ReqLlmNext.Response.OutputItem
   alias ReqLlmNext.Context
   alias ReqLlmNext.Context.{Message, ContentPart}
   alias ReqLlmNext.ToolCall
@@ -193,6 +194,43 @@ defmodule ReqLlmNext.ResponseTest do
 
       response = build_response(%{message: message})
       assert Response.tool_calls(response) == []
+    end
+  end
+
+  describe "result channels" do
+    test "groups canonical output items by explicit channel" do
+      tool_call = ToolCall.new("call_1", "lookup", ~s({"city":"Austin"}))
+
+      response =
+        build_response(%{
+          output_items: [
+            OutputItem.text("Hello"),
+            OutputItem.thinking("Thinking"),
+            OutputItem.audio("YmFzZTY0"),
+            OutputItem.transcript("spoken"),
+            OutputItem.tool_call(tool_call),
+            OutputItem.annotation(%{source: "citation"}),
+            OutputItem.refusal("nope"),
+            OutputItem.provider_item(%{raw: true})
+          ]
+        })
+
+      assert Enum.map(Response.channel_items(response, :message), & &1.type) == [:text]
+      assert Enum.map(Response.channel_items(response, :reasoning), & &1.type) == [:thinking]
+      assert Enum.map(Response.channel_items(response, :tools), & &1.type) == [:tool_call]
+      assert Enum.map(Response.channel_items(response, :media), & &1.type) == [:audio, :transcript]
+      assert Enum.map(Response.channel_items(response, :annotations), & &1.type) == [:annotation]
+      assert Enum.map(Response.channel_items(response, :refusals), & &1.type) == [:refusal]
+      assert Enum.map(Response.channel_items(response, :provider), & &1.type) == [:provider_item]
+
+      channels = Response.channels(response)
+
+      assert Enum.sort(Map.keys(channels)) == Enum.sort(OutputItem.channels())
+      assert Response.audio_chunks(response) == ["YmFzZTY0"]
+      assert Response.transcripts(response) == ["spoken"]
+      assert Response.annotations(response) == [%{source: "citation"}]
+      assert Response.refusals(response) == ["nope"]
+      assert Response.provider_items(response) == [%{raw: true}]
     end
   end
 

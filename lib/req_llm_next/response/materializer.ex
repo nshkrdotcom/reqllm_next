@@ -75,6 +75,18 @@ defmodule ReqLlmNext.Response.Materializer do
     |> Enum.join("")
   end
 
+  @spec channel_items(t(), OutputItem.channel()) :: [OutputItem.t()]
+  def channel_items(%__MODULE__{output_items: output_items}, channel) when is_atom(channel) do
+    Enum.filter(output_items, &(OutputItem.channel(&1) == channel))
+  end
+
+  @spec channels(t()) :: %{optional(OutputItem.channel()) => [OutputItem.t()]}
+  def channels(%__MODULE__{} = materialized) do
+    Enum.into(OutputItem.channels(), %{}, fn channel ->
+      {channel, channel_items(materialized, channel)}
+    end)
+  end
+
   @spec tool_calls(t()) :: [ReqLlmNext.ToolCall.t()]
   def tool_calls(%__MODULE__{tool_acc: tool_acc}) do
     tool_acc
@@ -315,8 +327,10 @@ defmodule ReqLlmNext.Response.Materializer do
   end
 
   defp provider_items(output_items) do
-    Enum.flat_map(output_items, fn
-      %OutputItem{type: :provider_item, data: item} when is_map(item) -> [item]
+    output_items
+    |> Enum.filter(&(OutputItem.channel(&1) == :provider))
+    |> Enum.flat_map(fn
+      %OutputItem{data: item} when is_map(item) -> [item]
       _ -> []
     end)
   end

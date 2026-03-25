@@ -152,10 +152,22 @@ defmodule ReqLlmNext.Realtime.Session do
     |> Kernel.++(Enum.map(tool_calls(session), &OutputItem.tool_call/1))
   end
 
+  @spec channel_items(t(), OutputItem.channel()) :: [OutputItem.t()]
+  def channel_items(%__MODULE__{} = session, channel) when is_atom(channel) do
+    Enum.filter(output_items(session), &(OutputItem.channel(&1) == channel))
+  end
+
+  @spec channels(t()) :: %{optional(OutputItem.channel()) => [OutputItem.t()]}
+  def channels(%__MODULE__{} = session) do
+    Enum.into(OutputItem.channels(), %{}, fn channel ->
+      {channel, channel_items(session, channel)}
+    end)
+  end
+
   @spec text(t()) :: String.t()
   def text(%__MODULE__{} = session) do
     session
-    |> output_items()
+    |> channel_items(:message)
     |> Enum.flat_map(fn
       %OutputItem{type: :text, data: text} when is_binary(text) -> [text]
       _ -> []
@@ -166,7 +178,7 @@ defmodule ReqLlmNext.Realtime.Session do
   @spec thinking(t()) :: String.t()
   def thinking(%__MODULE__{} = session) do
     session
-    |> output_items()
+    |> channel_items(:reasoning)
     |> Enum.flat_map(fn
       %OutputItem{type: :thinking, data: text} when is_binary(text) -> [text]
       _ -> []
@@ -177,7 +189,7 @@ defmodule ReqLlmNext.Realtime.Session do
   @spec transcripts(t()) :: [String.t()]
   def transcripts(%__MODULE__{} = session) do
     session
-    |> output_items()
+    |> channel_items(:media)
     |> Enum.flat_map(fn
       %OutputItem{type: :transcript, data: text} when is_binary(text) -> [text]
       _ -> []
@@ -187,7 +199,7 @@ defmodule ReqLlmNext.Realtime.Session do
   @spec audio_chunks(t()) :: [binary()]
   def audio_chunks(%__MODULE__{} = session) do
     session
-    |> output_items()
+    |> channel_items(:media)
     |> Enum.flat_map(fn
       %OutputItem{type: :audio, data: data} when is_binary(data) -> [data]
       _ -> []

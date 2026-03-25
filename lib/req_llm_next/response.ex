@@ -198,6 +198,24 @@ defmodule ReqLlmNext.Response do
   end
 
   @doc """
+  Return canonical output items grouped by explicit result channel.
+  """
+  @spec channels(t()) :: %{optional(OutputItem.channel()) => [OutputItem.t()]}
+  def channels(%__MODULE__{output_items: output_items}) do
+    Enum.into(OutputItem.channels(), %{}, fn channel ->
+      {channel, Enum.filter(output_items, &(OutputItem.channel(&1) == channel))}
+    end)
+  end
+
+  @doc """
+  Return canonical output items for one result channel.
+  """
+  @spec channel_items(t(), OutputItem.channel()) :: [OutputItem.t()]
+  def channel_items(%__MODULE__{output_items: output_items}, channel) when is_atom(channel) do
+    Enum.filter(output_items, &(OutputItem.channel(&1) == channel))
+  end
+
+  @doc """
   Extract tool calls from the response message.
 
   Returns a list of tool calls if the message contains them, empty list otherwise.
@@ -224,6 +242,68 @@ defmodule ReqLlmNext.Response do
   end
 
   def tool_calls(%__MODULE__{message: %Message{tool_calls: nil}}), do: []
+
+  @doc """
+  Extract transcript fragments from the response output channels.
+  """
+  @spec transcripts(t()) :: [String.t()]
+  def transcripts(%__MODULE__{} = response) do
+    response
+    |> channel_items(:media)
+    |> Enum.flat_map(fn
+      %OutputItem{type: :transcript, data: text} when is_binary(text) -> [text]
+      _ -> []
+    end)
+  end
+
+  @doc """
+  Extract generated or streamed audio chunks from the response output channels.
+  """
+  @spec audio_chunks(t()) :: [binary()]
+  def audio_chunks(%__MODULE__{} = response) do
+    response
+    |> channel_items(:media)
+    |> Enum.flat_map(fn
+      %OutputItem{type: :audio, data: data} when is_binary(data) -> [data]
+      _ -> []
+    end)
+  end
+
+  @doc """
+  Extract refusal items from the response output channels.
+  """
+  @spec refusals(t()) :: [String.t()]
+  def refusals(%__MODULE__{} = response) do
+    response
+    |> channel_items(:refusals)
+    |> Enum.flat_map(fn
+      %OutputItem{data: text} when is_binary(text) -> [text]
+      _ -> []
+    end)
+  end
+
+  @doc """
+  Extract annotation payloads from the response output channels.
+  """
+  @spec annotations(t()) :: [term()]
+  def annotations(%__MODULE__{} = response) do
+    response
+    |> channel_items(:annotations)
+    |> Enum.map(& &1.data)
+  end
+
+  @doc """
+  Extract provider-native item payloads from the response output channels.
+  """
+  @spec provider_items(t()) :: [map()]
+  def provider_items(%__MODULE__{} = response) do
+    response
+    |> channel_items(:provider)
+    |> Enum.flat_map(fn
+      %OutputItem{data: item} when is_map(item) -> [item]
+      _ -> []
+    end)
+  end
 
   @doc """
   Get usage statistics for this response.

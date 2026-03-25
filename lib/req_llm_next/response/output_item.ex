@@ -43,6 +43,9 @@ defmodule ReqLlmNext.Response.OutputItem do
           metadata: map()
         }
 
+  @type channel ::
+          :message | :reasoning | :tools | :media | :annotations | :refusals | :provider
+
   @enforce_keys Zoi.Struct.enforce_keys(@schema)
   defstruct Zoi.Struct.struct_fields(@schema)
 
@@ -106,6 +109,22 @@ defmodule ReqLlmNext.Response.OutputItem do
     new!(%{type: :refusal, data: text, metadata: metadata})
   end
 
+  @spec channels() :: [channel()]
+  def channels do
+    [:message, :reasoning, :tools, :media, :annotations, :refusals, :provider]
+  end
+
+  @spec channel(t()) :: channel()
+  def channel(%__MODULE__{type: :text}), do: :message
+  def channel(%__MODULE__{type: :thinking}), do: :reasoning
+  def channel(%__MODULE__{type: :tool_call}), do: :tools
+  def channel(%__MODULE__{type: :audio}), do: :media
+  def channel(%__MODULE__{type: :transcript}), do: :media
+  def channel(%__MODULE__{type: :annotation}), do: :annotations
+  def channel(%__MODULE__{type: :refusal}), do: :refusals
+  def channel(%__MODULE__{type: :provider_item}), do: :provider
+  def channel(%__MODULE__{type: :content_part, data: %ContentPart{} = part}), do: content_part_channel(part)
+
   @spec from_content_part(ContentPart.t()) :: t()
   def from_content_part(%ContentPart{type: :text, text: text, metadata: metadata}) do
     text(text || "", metadata || %{})
@@ -118,4 +137,10 @@ defmodule ReqLlmNext.Response.OutputItem do
   def from_content_part(%ContentPart{} = part) do
     content_part(part)
   end
+
+  defp content_part_channel(%ContentPart{type: type}) when type in [:image, :image_url, :audio],
+    do: :media
+
+  defp content_part_channel(%ContentPart{type: :thinking}), do: :reasoning
+  defp content_part_channel(%ContentPart{}), do: :message
 end

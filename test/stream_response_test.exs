@@ -152,6 +152,29 @@ defmodule ReqLlmNext.StreamResponseTest do
     end
   end
 
+  describe "result channels" do
+    test "groups stream output items by explicit channel" do
+      stream = [
+        "Hello",
+        {:thinking, "Internal"},
+        {:audio, "YmFzZTY0"},
+        {:transcript, "spoken"},
+        {:provider_item, %{raw: true}}
+      ]
+
+      resp = %StreamResponse{stream: stream, model: mock_model()}
+      channels = StreamResponse.channels(resp)
+
+      assert Enum.map(StreamResponse.channel_items(resp, :message), & &1.type) == [:text]
+      assert Enum.map(StreamResponse.channel_items(resp, :reasoning), & &1.type) == [:thinking]
+      assert Enum.map(StreamResponse.channel_items(resp, :media), & &1.type) == [:audio, :transcript]
+      assert Enum.map(StreamResponse.channel_items(resp, :provider), & &1.type) == [:provider_item]
+      assert StreamResponse.audio_chunks(resp) == ["YmFzZTY0"]
+      assert StreamResponse.transcripts(resp) == ["spoken"]
+      assert Map.has_key?(channels, :annotations)
+    end
+  end
+
   describe "object/1" do
     test "parses JSON from text stream" do
       stream = [~s({"name":), ~s("John","age":30})]

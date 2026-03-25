@@ -142,4 +142,53 @@ defmodule ReqLlmNext.StreamResponse do
       {:error, _error} -> []
     end
   end
+
+  @doc """
+  Consume the stream and return canonical output items for one result channel.
+  """
+  @spec channel_items(t(), ReqLlmNext.Response.OutputItem.channel()) ::
+          [ReqLlmNext.Response.OutputItem.t()]
+  def channel_items(%__MODULE__{stream: stream}, channel) when is_atom(channel) do
+    case Materializer.collect(stream) do
+      {:ok, materialized} -> Materializer.channel_items(materialized, channel)
+      {:error, _error} -> []
+    end
+  end
+
+  @doc """
+  Consume the stream and return canonical output items grouped by result channel.
+  """
+  @spec channels(t()) :: %{optional(ReqLlmNext.Response.OutputItem.channel()) => [ReqLlmNext.Response.OutputItem.t()]}
+  def channels(%__MODULE__{stream: stream}) do
+    case Materializer.collect(stream) do
+      {:ok, materialized} -> Materializer.channels(materialized)
+      {:error, _error} -> %{}
+    end
+  end
+
+  @doc """
+  Consume the stream and return transcript fragments.
+  """
+  @spec transcripts(t()) :: [String.t()]
+  def transcripts(%__MODULE__{} = resp) do
+    resp
+    |> channel_items(:media)
+    |> Enum.flat_map(fn
+      %ReqLlmNext.Response.OutputItem{type: :transcript, data: text} when is_binary(text) -> [text]
+      _ -> []
+    end)
+  end
+
+  @doc """
+  Consume the stream and return audio chunks.
+  """
+  @spec audio_chunks(t()) :: [binary()]
+  def audio_chunks(%__MODULE__{} = resp) do
+    resp
+    |> channel_items(:media)
+    |> Enum.flat_map(fn
+      %ReqLlmNext.Response.OutputItem{type: :audio, data: data} when is_binary(data) -> [data]
+      _ -> []
+    end)
+  end
 end

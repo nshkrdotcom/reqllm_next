@@ -49,6 +49,11 @@ defmodule ReqLlmNext.RealtimeTest do
     assert Session.text(reduced) == "Hello"
     assert Session.transcripts(reduced) == ["spoken"]
     assert Session.audio_chunks(reduced) == ["YmFzZTY0"]
+    assert Enum.map(Session.channel_items(reduced, :message), & &1.type) == [:text]
+    assert Enum.map(Session.channel_items(reduced, :media), & &1.type) == [:audio, :transcript]
+    assert Enum.map(Session.channel_items(reduced, :tools), & &1.type) == [:tool_call]
+    assert Enum.sort(Map.keys(Session.channels(reduced))) ==
+             Enum.sort(ReqLlmNext.Response.OutputItem.channels())
     assert length(Session.tool_calls(reduced)) == 1
     assert reduced.usage == %{input_tokens: 10, output_tokens: 4, total_tokens: 14}
     assert reduced.finish_reason == :stop
