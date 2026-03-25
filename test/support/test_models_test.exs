@@ -148,6 +148,18 @@ defmodule ReqLlmNext.TestModelsTest do
     end
   end
 
+  describe "vllm/1" do
+    test "creates vLLM model" do
+      model = TestModels.vllm()
+      assert model.provider == :vllm
+    end
+
+    test "applies overrides" do
+      model = TestModels.vllm(%{id: "vllm-custom"})
+      assert model.id == "vllm-custom"
+    end
+  end
+
   describe "deepseek/1" do
     test "creates DeepSeek chat model" do
       model = TestModels.deepseek()

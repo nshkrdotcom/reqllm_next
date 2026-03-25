@@ -42,6 +42,13 @@ defmodule ReqLlmNext.ModelProfileTest do
     assert [%{id: :openai_chat_text_http_sse}] = ModelProfile.surfaces_for(profile, :text)
   end
 
+  test "uses the shared openai-compatible family for vLLM provider defaults" do
+    {:ok, profile} = ModelProfile.from_model(ReqLlmNext.TestModels.vllm())
+
+    assert profile.family == :openai_chat_compatible
+    assert [%{id: :openai_chat_text_http_sse}] = ModelProfile.surfaces_for(profile, :text)
+  end
+
   test "falls back to the global openai-compatible family for unregistered providers" do
     model =
       LLMDB.Model.new!(%{

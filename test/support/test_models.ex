@@ -348,6 +348,29 @@ defmodule ReqLlmNext.TestModels do
   end
 
   @doc """
+  Creates a vLLM model for testing.
+  """
+  def vllm(overrides \\ %{}) do
+    base = %LLMDB.Model{
+      id: "test-model",
+      provider: :vllm,
+      name: "Test vLLM Model",
+      capabilities: %{
+        chat: true,
+        embeddings: false,
+        reasoning: %{enabled: false},
+        tools: %{enabled: true, streaming: true, strict: false, parallel: true},
+        json: %{native: true, schema: false, strict: false},
+        streaming: %{text: true, tool_calls: true}
+      },
+      limits: %{context: 131_072, output: 8_192},
+      modalities: %{input: [:text], output: [:text]}
+    }
+
+    struct!(base, Map.to_list(overrides))
+  end
+
+  @doc """
   Creates a DeepSeek chat model for testing.
   """
   def deepseek(overrides \\ %{}) do

@@ -76,6 +76,11 @@ defmodule ReqLlmNext.Wire.ResolverTest do
       assert Resolver.wire_module!(model) == OpenAIChat
     end
 
+    test "infers OpenAIChat for vllm provider" do
+      model = TestModels.vllm()
+      assert Resolver.wire_module!(model) == OpenAIChat
+    end
+
     test "infers DeepSeekChat for deepseek provider" do
       model = TestModels.deepseek()
       assert Resolver.wire_module!(model) == DeepSeekChat

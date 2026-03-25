@@ -3,7 +3,7 @@ defmodule ReqLlmNext.ProvidersTest do
 
   alias ReqLlmNext.Provider
   alias ReqLlmNext.Providers
-  alias ReqLlmNext.Providers.{Anthropic, DeepSeek, Groq, OpenAI, OpenRouter}
+  alias ReqLlmNext.Providers.{Anthropic, DeepSeek, Groq, OpenAI, OpenRouter, VLLM}
 
   describe "Providers.get/1" do
     test "returns OpenAI module for :openai" do
@@ -24,6 +24,10 @@ defmodule ReqLlmNext.ProvidersTest do
 
     test "returns OpenRouter module for :openrouter" do
       assert Providers.get(:openrouter) == {:ok, OpenRouter}
+    end
+
+    test "returns vLLM module for :vllm" do
+      assert Providers.get(:vllm) == {:ok, VLLM}
     end
 
     test "returns error for unknown provider" do
@@ -52,6 +56,10 @@ defmodule ReqLlmNext.ProvidersTest do
       assert Providers.get!(:openrouter) == OpenRouter
     end
 
+    test "returns vLLM module for :vllm" do
+      assert Providers.get!(:vllm) == VLLM
+    end
+
     test "raises for unknown provider" do
       assert_raise RuntimeError, ~r/Provider error/, fn ->
         Providers.get!(:unknown)
@@ -68,6 +76,7 @@ defmodule ReqLlmNext.ProvidersTest do
       assert :deepseek in providers
       assert :groq in providers
       assert :openrouter in providers
+      assert :vllm in providers
     end
   end
 
@@ -161,6 +170,21 @@ defmodule ReqLlmNext.ProvidersTest do
     end
   end
 
+  describe "Providers.VLLM" do
+    test "base_url returns vLLM default URL" do
+      assert VLLM.base_url() == "http://localhost:8000/v1"
+    end
+
+    test "env_key returns OPENAI_API_KEY" do
+      assert VLLM.env_key() == "OPENAI_API_KEY"
+    end
+
+    test "auth_headers returns Bearer token" do
+      headers = VLLM.auth_headers("test-key")
+      assert headers == [{"Authorization", "Bearer test-key"}]
+    end
+  end
+
   describe "Provider.build_auth_headers/2" do
     test "builds bearer auth header" do
       headers = Provider.build_auth_headers(:bearer, "my-token")
@@ -195,6 +219,12 @@ defmodule ReqLlmNext.ProvidersTest do
     test "OpenRouter returns api_key from opts" do
       test_key = "test-key-openrouter"
       key = OpenRouter.get_api_key(api_key: test_key)
+      assert key == test_key
+    end
+
+    test "vLLM returns api_key from opts" do
+      test_key = "test-key-vllm"
+      key = VLLM.get_api_key(api_key: test_key)
       assert key == test_key
     end
 
