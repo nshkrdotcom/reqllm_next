@@ -169,7 +169,93 @@ defmodule ReqLlmNext.SemanticProtocols.AnthropicMessagesTest do
                },
                nil
              ) == [
-               {:provider_item, %{"anthropic_type" => "compaction", "summary" => "Conversation compacted", "type" => "compaction"}}
+               {:provider_item,
+                %{
+                  "anthropic_type" => "compaction",
+                  "summary" => "Conversation compacted",
+                  "type" => "compaction"
+                }}
+             ]
+    end
+
+    test "normalizes web fetch results into provider items and document parts" do
+      events =
+        AnthropicMessages.decode_event(
+          %{
+            "type" => "content_block_start",
+            "content_block" => %{
+              "type" => "web_fetch_tool_result",
+              "content" => %{
+                "type" => "web_fetch_result",
+                "url" => "https://example.com/article",
+                "retrieved_at" => "2026-03-25T12:00:00Z",
+                "content" => %{
+                  "type" => "document",
+                  "source" => %{
+                    "type" => "text",
+                    "media_type" => "text/plain",
+                    "data" => "Fetched article text"
+                  },
+                  "title" => "Article title",
+                  "citations" => %{"enabled" => true}
+                }
+              }
+            }
+          },
+          nil
+        )
+
+      assert [
+               {:provider_item,
+                %{
+                  "anthropic_type" => "web_fetch_result",
+                  "content" => %{
+                    "citations" => %{"enabled" => true},
+                    "source" => %{
+                      "data" => "Fetched article text",
+                      "media_type" => "text/plain",
+                      "type" => "text"
+                    },
+                    "title" => "Article title",
+                    "type" => "document"
+                  },
+                  "retrieved_at" => "2026-03-25T12:00:00Z",
+                  "type" => "web_fetch_result",
+                  "url" => "https://example.com/article"
+                }},
+               {:content_part, part}
+             ] = events
+
+      assert part.type == :document
+      assert part.data == "Fetched article text"
+      assert part.media_type == "text/plain"
+      assert part.metadata[:anthropic_type] == :web_fetch_result
+      assert part.metadata[:url] == "https://example.com/article"
+      assert part.metadata[:retrieved_at] == "2026-03-25T12:00:00Z"
+      assert Map.get(part.metadata, :citations) || Map.get(part.metadata, "citations") == %{"enabled" => true}
+      assert Map.get(part.metadata, :title) || Map.get(part.metadata, "title") == "Article title"
+    end
+
+    test "preserves web fetch tool errors as provider items" do
+      assert AnthropicMessages.decode_event(
+               %{
+                 "type" => "content_block_start",
+                 "content_block" => %{
+                   "type" => "web_fetch_tool_result",
+                   "content" => %{
+                     "type" => "web_fetch_tool_error",
+                     "error_code" => "url_not_accessible"
+                   }
+                 }
+               },
+               nil
+             ) == [
+               {:provider_item,
+                %{
+                  "anthropic_type" => "web_fetch_tool_error",
+                  "error_code" => "url_not_accessible",
+                  "type" => "web_fetch_tool_error"
+                }}
              ]
     end
   end

@@ -135,6 +135,17 @@ defmodule ReqLlmNext.SemanticProtocols.AnthropicMessages do
   def decode_event(
         %{
           "type" => "content_block_start",
+          "content_block" => %{"type" => "web_fetch_tool_result", "content" => content}
+        },
+        _model
+      )
+      when is_map(content) do
+    normalize_web_fetch_result(content)
+  end
+
+  def decode_event(
+        %{
+          "type" => "content_block_start",
           "content_block" => %{"type" => "web_search_tool_result", "content" => content}
         },
         _model
@@ -178,6 +189,52 @@ defmodule ReqLlmNext.SemanticProtocols.AnthropicMessages do
     do: [text]
 
   defp normalize_web_search_result(_result), do: []
+
+  defp normalize_web_fetch_result(%{"type" => "web_fetch_result"} = result) do
+    provider_item =
+      result
+      |> Map.put("anthropic_type", "web_fetch_result")
+      |> then(&[{:provider_item, &1}])
+
+    provider_item ++ normalize_web_fetch_document(result)
+  end
+
+  defp normalize_web_fetch_result(%{"type" => "web_fetch_tool_error"} = error) do
+    [{:provider_item, Map.put(error, "anthropic_type", "web_fetch_tool_error")}]
+  end
+
+  defp normalize_web_fetch_result(_result), do: []
+
+  defp normalize_web_fetch_document(%{
+         "content" => %{"type" => "document", "source" => source} = document
+       } = result)
+       when is_map(source) do
+    metadata =
+      document
+      |> Map.drop(["type", "source"])
+      |> Map.merge(%{
+        url: result["url"],
+        retrieved_at: result["retrieved_at"],
+        anthropic_type: :web_fetch_result
+      })
+
+    case source do
+      %{"type" => "text", "data" => data} when is_binary(data) ->
+        [{:content_part, ContentPart.document_text(data, metadata)}]
+
+      %{"type" => "base64", "data" => data, "media_type" => media_type}
+      when is_binary(data) and is_binary(media_type) ->
+        case Base.decode64(data) do
+          {:ok, decoded} -> [{:content_part, ContentPart.document_binary(decoded, media_type, metadata)}]
+          :error -> []
+        end
+
+      _ ->
+        []
+    end
+  end
+
+  defp normalize_web_fetch_document(_result), do: []
 
   defp citation_metadata(%{"citations" => citations}) when is_list(citations),
     do: %{citations: citations}

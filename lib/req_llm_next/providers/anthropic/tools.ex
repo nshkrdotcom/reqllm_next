@@ -29,6 +29,30 @@ defmodule ReqLlmNext.Anthropic.Tools do
     |> mark(:tool)
   end
 
+  @spec web_fetch(keyword()) :: map()
+  def web_fetch(opts \\ []) do
+    type =
+      Keyword.get_lazy(opts, :type, fn ->
+        if Keyword.get(opts, :dynamic_filtering, false) do
+          "web_fetch_20260209"
+        else
+          "web_fetch_20250910"
+        end
+      end)
+
+    %{
+      type: type,
+      name: Keyword.get(opts, :name, "web_fetch")
+    }
+    |> maybe_put(:max_uses, Keyword.get(opts, :max_uses))
+    |> maybe_put(:allowed_callers, Keyword.get(opts, :allowed_callers))
+    |> maybe_put(:allowed_domains, Keyword.get(opts, :allowed_domains))
+    |> maybe_put(:blocked_domains, Keyword.get(opts, :blocked_domains))
+    |> maybe_put(:citations, Keyword.get(opts, :citations))
+    |> maybe_put(:max_content_tokens, Keyword.get(opts, :max_content_tokens))
+    |> mark(:tool)
+  end
+
   @spec code_execution(keyword()) :: map()
   def code_execution(opts \\ []) do
     %{

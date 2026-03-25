@@ -36,6 +36,9 @@ defmodule ReqLlmNext.Anthropic do
   @spec web_search_tool(keyword()) :: map()
   def web_search_tool(opts \\ []), do: Tools.web_search(opts)
 
+  @spec web_fetch_tool(keyword()) :: map()
+  def web_fetch_tool(opts \\ []), do: Tools.web_fetch(opts)
+
   @spec code_execution_tool(keyword()) :: map()
   def code_execution_tool(opts \\ []), do: Tools.code_execution(opts)
 
