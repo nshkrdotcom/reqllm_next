@@ -63,7 +63,7 @@ defmodule ReqLlmNext.Provider do
   def request_url(provider_mod, %LLMDB.Model{} = model, path, opts) when is_binary(path) do
     if use_runtime_metadata?(opts) do
       with {:ok, runtime} <- fetch_runtime(opts),
-           {:ok, base_url} <- resolve_base_url(runtime, opts),
+           {:ok, base_url} <- resolve_base_url(runtime, model, opts),
            {:ok, resolved_path} <- resolve_path(path, model, opts),
            {:ok, query} <- request_query(runtime, opts) do
         {:ok, append_query(join_url(base_url, resolved_path), query)}
@@ -103,11 +103,18 @@ defmodule ReqLlmNext.Provider do
     end
   end
 
-  defp resolve_base_url(runtime, opts) do
-    base_url = Keyword.get(opts, :base_url) || Map.get(runtime, :base_url)
+  defp resolve_base_url(runtime, model, opts) do
+    execution_entry = Keyword.get(opts, :_model_execution_entry) || %{}
+
+    base_url =
+      Keyword.get(opts, :base_url) ||
+        Map.get(execution_entry, :base_url) ||
+        Map.get(runtime, :base_url)
 
     if is_binary(base_url) do
-      interpolate(base_url, opts)
+      base_url
+      |> replace_template("provider_model_id", provider_model_id(model, execution_entry))
+      |> interpolate(opts)
     else
       {:error, ReqLlmNext.Error.Invalid.Provider.exception(message: "Missing provider base URL")}
     end

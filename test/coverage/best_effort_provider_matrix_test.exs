@@ -39,7 +39,8 @@ defmodule ReqLlmNext.BestEffortProviderMatrixTest do
     %{
       id: :cloudflare_workers_ai,
       env: "CLOUDFLARE_API_KEY",
-      expected_url: "https://api.cloudflare.com/client/v4/accounts/test-account/ai/v1/chat/completions",
+      expected_url:
+        "https://api.cloudflare.com/client/v4/accounts/test-account/ai/v1/chat/completions",
       runtime_opts: [account_id: "test-account"]
     }
   ]
@@ -100,7 +101,9 @@ defmodule ReqLlmNext.BestEffortProviderMatrixTest do
       assert url == provider.expected_url
 
       assert {:ok, headers} =
-               Provider.request_headers(Generic, model, opts, [{"Content-Type", "application/json"}])
+               Provider.request_headers(Generic, model, opts, [
+                 {"Content-Type", "application/json"}
+               ])
 
       assert {"Authorization", "Bearer test-best-effort-key"} in headers
       assert {"Content-Type", "application/json"} in headers

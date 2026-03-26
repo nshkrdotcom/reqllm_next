@@ -54,6 +54,15 @@ through a generic provider path only when all of the following are true:
 3. that execution entry names a known canonical family that ReqLlmNext already
    knows how to execute
 
+When the generic provider path is active, the provider layer shall consume the
+typed runtime contract directly instead of reintroducing provider-name
+heuristics. That includes:
+
+1. auth styles such as bearer, x-api-key, query, header, and multi-header
+2. templated provider runtime configuration such as account-scoped base URLs
+3. operation-specific `base_url`, `path`, and `provider_model_id` overrides
+   declared on `LLMDB.Model.execution`
+
 Best-effort generic support is limited to canonical operations:
 
 1. text

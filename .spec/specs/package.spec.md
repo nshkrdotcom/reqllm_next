@@ -36,7 +36,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.package.execution_planning
-  statement: ReqLlmNext shall route supported requests through a deterministic planning path that normalizes model facts into `ModelProfile`, request intent into `ExecutionMode`, selects explicit `ExecutionSurface` support through compatibility-aware policy, validates surface-specific parameter compatibility, materializes an `ExecutionPlan`, and resolves an execution stack of provider, session runtime, semantic protocol, wire, and transport modules before runtime execution, with provider facts, runtime-module lookup, and surface catalog construction driven from the compiled extension manifest for first-class providers and from typed `LLMDB.Provider.runtime` plus `LLMDB.Model.execution` metadata for best-effort providers rather than from central provider branching.
+  statement: ReqLlmNext shall route supported requests through a deterministic planning path that normalizes model facts into `ModelProfile`, request intent into `ExecutionMode`, selects explicit `ExecutionSurface` support through compatibility-aware policy, validates surface-specific parameter compatibility, materializes an `ExecutionPlan`, and resolves an execution stack of provider, session runtime, semantic protocol, wire, and transport modules before runtime execution, with provider facts, runtime-module lookup, and surface catalog construction driven from the compiled extension manifest for first-class providers and from typed `LLMDB.Provider.runtime` plus `LLMDB.Model.execution` metadata for best-effort providers rather than from central provider branching, and the provider layer shall honor typed runtime auth styles, templated provider configuration, and per-operation `base_url`, `path`, and `provider_model_id` overrides declared by that upstream contract.
   priority: must
   stability: evolving
 
@@ -91,7 +91,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.package.support_tiers
-  statement: ReqLlmNext shall accept all `LLMDB` models as public inputs, report support through explicit `:first_class`, `:best_effort`, and `{:unsupported, reason}` tiers, execute packaged non-first-class models through canonical families only when typed `LLMDB` runtime metadata is complete enough to do so safely, and fail fast when packaged metadata is catalog-only, incomplete, or names an unknown execution family.
+  statement: ReqLlmNext shall accept all `LLMDB` models as public inputs, report support through explicit `:first_class`, `:best_effort`, and `{:unsupported, reason}` tiers, execute packaged non-first-class models through canonical families only when typed `LLMDB` runtime metadata is complete enough to do so safely, prove that path against a curated best-effort provider matrix instead of a single happy-path provider, and fail fast when packaged metadata is catalog-only, incomplete, or names an unknown execution family.
   priority: should
   stability: evolving
 ```
