@@ -5,6 +5,7 @@ defmodule ReqLlmNext.Wire.ElevenLabsTranscriptions do
 
   alias ReqLlmNext.Transcription
   alias ReqLlmNext.Transcription.AudioInput
+  alias ReqLlmNext.Provider
 
   @spec path() :: String.t()
   def path, do: "/v1/speech-to-text"
@@ -13,18 +14,22 @@ defmodule ReqLlmNext.Wire.ElevenLabsTranscriptions do
           {:ok, Finch.Request.t()} | {:error, term()}
   def build_request(provider_mod, model, input, opts) do
     with {:ok, audio} <- resolved_audio(input, opts) do
-      api_key = provider_mod.get_api_key(opts)
-      base_url = Keyword.get(opts, :base_url, provider_mod.base_url())
       boundary = multipart_boundary()
       query = query_string(Keyword.get(opts, :provider_options, []))
-      url = base_url <> path() <> query
-
-      headers =
-        provider_mod.auth_headers(api_key) ++
-          [{"Content-Type", "multipart/form-data; boundary=#{boundary}"}]
-
       body = multipart_body(model, audio, opts, boundary)
-      {:ok, Finch.build(:post, url, headers, body)}
+      request_path = path()
+      request_opts = Keyword.put(opts, :path, request_path)
+
+      with {:ok, url} <- Provider.request_url(provider_mod, model, request_path, request_opts),
+           {:ok, headers} <-
+             Provider.request_headers(
+               provider_mod,
+               model,
+               request_opts,
+               [{"Content-Type", "multipart/form-data; boundary=#{boundary}"}]
+             ) do
+        {:ok, Finch.build(:post, url <> query, headers, body)}
+      end
     end
   end
 

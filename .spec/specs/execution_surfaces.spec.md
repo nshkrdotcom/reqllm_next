@@ -12,6 +12,8 @@ summary: Explicit named execution surfaces as the support unit for endpoint styl
 surface:
   - lib/req_llm_next/execution_surface.ex
   - lib/req_llm_next/model_profile.ex
+  - lib/req_llm_next/model_profile/surface_catalog.ex
+  - lib/req_llm_next/model_profile/surface_catalog/**/*.ex
   - lib/req_llm_next/families/**/*surface_catalog*.ex
   - lib/req_llm_next/providers/**/*surface_catalog*.ex
   - lib/req_llm_next/operation_planner.ex
@@ -23,12 +25,12 @@ decisions:
 
 ```spec-requirements
 - id: reqllm.execution_surfaces.support_unit
-  statement: ReqLlmNext shall represent each valid endpoint style as a named `ExecutionSurface` that bundles semantic protocol, wire format, transport, session compatibility, and feature tags for one operation family, including provider-native structured-output strategies, provider-native request-preparation rules, any session-runtime seam selection implied by that semantic family, and request-style media surfaces when a provider exposes standalone image, transcription, or speech APIs, including provider-local responses-first surface ids such as xAI text and object Responses lanes and provider-local media-family overrides such as xAI image generation.
+  statement: ReqLlmNext shall represent each valid endpoint style as a named `ExecutionSurface` that bundles semantic protocol, wire format, transport, session compatibility, feature tags, and owning family id for one operation family, including provider-native structured-output strategies, provider-native request-preparation rules, any session-runtime seam selection implied by that semantic family, and request-style media surfaces when a provider exposes standalone image, transcription, or speech APIs, including provider-local responses-first surface ids such as xAI text and object Responses lanes, provider-local media-family overrides such as xAI image generation, and generic best-effort surfaces synthesized from typed `LLMDB.Model.execution` metadata for non-first-class providers.
   priority: must
   stability: evolving
 
 - id: reqllm.execution_surfaces.non_cartesian
-  statement: ReqLlmNext shall not infer endpoint support from a cartesian product of independent protocol, wire-format, and transport lists and shall instead resolve only declared execution surfaces through surface catalog modules selected by the compiled extension manifest and defined in explicit provider or family definition packs, while allowing one provider-owned catalog module to declare multiple closely related media surfaces when separate catalog files would add only low-value indirection.
+  statement: ReqLlmNext shall not infer endpoint support from a cartesian product of independent protocol, wire-format, and transport lists and shall instead resolve only declared execution surfaces through surface catalog modules selected by the compiled extension manifest and defined in explicit provider or family definition packs or through the typed `LLMDB.Model.execution` contract for non-first-class best-effort providers, while allowing one provider-owned catalog module to declare multiple closely related media surfaces when separate catalog files would add only low-value indirection.
   priority: must
   stability: evolving
 
@@ -66,4 +68,12 @@ decisions:
     - reqllm.execution_surfaces.surface_selection
     - reqllm.execution_surfaces.transport_variants
     - reqllm.execution_surfaces.realtime_outside_surface_catalog
+
+- kind: command
+  target: mix test test/best_effort_runtime_test.exs
+  execute: true
+  covers:
+    - reqllm.execution_surfaces.support_unit
+    - reqllm.execution_surfaces.non_cartesian
+    - reqllm.execution_surfaces.surface_selection
 ```

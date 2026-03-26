@@ -33,7 +33,7 @@ decisions:
 
 ```spec-requirements
 - id: reqllm.layer_boundaries.separated_io
-  statement: ReqLlmNext shall keep provider, session runtime, realtime adapter, realtime session reduction, transport, wire format, semantic protocol, and telemetry-kernel responsibilities separated so no layer skips across another layer's ownership boundary and each resolved plan binds one deterministic layer stack including explicit provider, protocol, wire, and transport modules resolved from manifest-declared seams and the compiled runtime registry across both streaming execution and request-style HTTP media lanes, allowing provider-local wire swaps and family overrides such as Groq chat and transcription support, OpenRouter routing-aware request shaping, or xAI Responses and image-family separation plus provider-local tool helper wires without mutating the shared family baseline, while also allowing simple providers such as vLLM to bind a provider module without adding unnecessary lower-layer indirection.
+  statement: ReqLlmNext shall keep provider, session runtime, realtime adapter, realtime session reduction, transport, wire format, semantic protocol, and telemetry-kernel responsibilities separated so no layer skips across another layer's ownership boundary and each resolved plan binds one deterministic layer stack including explicit provider, protocol, wire, and transport modules resolved from manifest-declared seams and the compiled runtime registry across both streaming execution and request-style HTTP media lanes, allowing provider-local wire swaps and family overrides such as Groq chat and transcription support, OpenRouter routing-aware request shaping, or xAI Responses and image-family separation plus provider-local tool helper wires without mutating the shared family baseline, while also allowing simple providers such as vLLM or generic best-effort packaged providers to bind a provider module without adding unnecessary lower-layer indirection.
   priority: must
   stability: evolving
 
@@ -43,7 +43,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.layer_boundaries.no_cross_layer_skips
-  statement: No execution layer shall skip across another layer's ownership boundary by choosing transports in semantic protocol code, reinterpreting semantic meaning in wire code, introducing model-specific behavior in provider or transport code, deriving provider-native request flags in shared executor code after planning, or performing provider-surface dependency validation such as Anthropic `clear_thinking_20251015` requirements or xAI built-in tool helper acceptance outside planner-owned surface-preparation seams, or session continuation derivation outside planner-owned session runtime seams.
+  statement: No execution layer shall skip across another layer's ownership boundary by choosing transports in semantic protocol code, reinterpreting semantic meaning in wire code, introducing model-specific behavior in provider or transport code, deriving provider-native request flags in shared executor code after planning, resolving auth or endpoint roots outside the provider layer when generic runtime metadata is in use, performing provider-surface dependency validation such as Anthropic `clear_thinking_20251015` requirements or xAI built-in tool helper acceptance outside planner-owned surface-preparation seams, or performing session continuation derivation outside planner-owned session runtime seams.
   priority: must
   stability: evolving
 
@@ -97,6 +97,13 @@ decisions:
 
 - kind: command
   target: mix test test/providers/xai/execution_stack_test.exs test/providers/xai/wire_responses_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/zenmux/wire_chat_test.exs test/providers/zenmux/wire_responses_test.exs test/providers/google/execution_stack_test.exs test/providers/google/wire_generate_content_test.exs test/providers/elevenlabs/execution_stack_test.exs test/providers/elevenlabs/wire_speech_test.exs test/providers/elevenlabs/wire_transcriptions_test.exs test/providers/cohere/execution_stack_test.exs test/providers/cohere/wire_chat_test.exs
+  execute: true
+  covers:
+    - reqllm.layer_boundaries.separated_io
+    - reqllm.layer_boundaries.no_cross_layer_skips
+
+- kind: command
+  target: mix test test/best_effort_runtime_test.exs
   execute: true
   covers:
     - reqllm.layer_boundaries.separated_io

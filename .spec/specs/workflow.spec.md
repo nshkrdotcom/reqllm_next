@@ -37,7 +37,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.workflow.specled_loop
-  statement: Contributor workflow shall keep `.spec/` as the canonical spec workspace and use `mix spec.prime`, `mix spec.next`, and `mix spec.check` to maintain the subject specs, ADRs, README, AGENTS, and package-thesis guide in sync with current truth, including top-level media API parity, request-fixture replay behavior, sparse live verifier lanes, runtime telemetry, canonical output items, explicit result channels, transport-agnostic realtime behavior, and utility-proof claims when those package boundaries evolve.
+  statement: Contributor workflow shall keep `.spec/` as the canonical spec workspace and use `mix spec.prime`, `mix spec.next`, and `mix spec.check` to maintain the subject specs, ADRs, README, AGENTS, and package-thesis guide in sync with current truth, including top-level media API parity, request-fixture replay behavior, sparse live verifier lanes, runtime telemetry, canonical output items, explicit result channels, transport-agnostic realtime behavior, typed `LLMDB` runtime-metadata consumption, and support-tier claims when those package boundaries evolve.
   priority: must
   stability: evolving
 

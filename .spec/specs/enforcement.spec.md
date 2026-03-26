@@ -25,7 +25,7 @@ surface:
   stability: evolving
 
 - id: reqllm.enforcement.runtime_hard_fail
-  statement: ReqLlmNext shall use runtime hard-fail validation for invalid model metadata, unsupported profile combinations, unsupported surface-parameter combinations, unsupported media operations, wrong-provider provider-native helper inputs, raw tool maps on non-owning surfaces, missing required continuation state, unknown keys, invalid enums, and unsafe source combinations rather than best-effort fallback behavior, while allowing only explicit manifest-declared provider-default and global-default family fallbacks and hard-failing compile-time extension manifests that violate duplicate-id, missing-reference, seam-ownership, or seam-module guarantees, without treating family-local semantic, wire, or transport seam overrides as invalid merely because a shared fallback registry already defines the same seam key.
+  statement: ReqLlmNext shall use runtime hard-fail validation for invalid model metadata, unsupported profile combinations, unsupported surface-parameter combinations, unsupported media operations, wrong-provider provider-native helper inputs, raw tool maps on non-owning surfaces, missing required continuation state, missing typed runtime metadata for best-effort providers, catalog-only packaged models, unknown execution families, unknown keys, invalid enums, and unsafe source combinations rather than best-effort fallback behavior, while allowing only explicit manifest-declared provider-default and global-default family fallbacks and hard-failing compile-time extension manifests that violate duplicate-id, missing-reference, seam-ownership, or seam-module guarantees, without treating family-local semantic, wire, or transport seam overrides as invalid merely because a shared fallback registry already defines the same seam key.
   priority: must
   stability: evolving
 
@@ -50,5 +50,11 @@ surface:
   execute: true
   covers:
     - reqllm.enforcement.raw_model_boundary
+    - reqllm.enforcement.runtime_hard_fail
+
+- kind: command
+  target: mix test test/public_api/support_status_test.exs test/best_effort_runtime_test.exs
+  execute: true
+  covers:
     - reqllm.enforcement.runtime_hard_fail
 ```

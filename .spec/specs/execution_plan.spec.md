@@ -29,12 +29,12 @@ decisions:
   stability: evolving
 
 - id: reqllm.execution_plan.surface_and_fallbacks
-  statement: `ExecutionPlan` shall record exactly one chosen primary execution surface plus any fallback surfaces, normalized parameter values, timeout policy, session strategy, selected session-runtime key, and adapter references for the request attempt, including provider-native request fields that are prepared only for and valid only on the selected surface and request-style non-stream media surfaces such as image generation, transcription, and speech.
+  statement: `ExecutionPlan` shall record exactly one chosen primary execution surface plus any fallback surfaces, normalized parameter values, timeout policy, session strategy, selected session-runtime key, and adapter references for the request attempt, including the selected surface family id, provider-native request fields that are prepared only for and valid only on the selected surface, request-style non-stream media surfaces such as image generation, transcription, and speech, and generic best-effort surfaces derived from typed `LLMDB.Model.execution` metadata when no first-class provider registration exists.
   priority: must
   stability: evolving
 
 - id: reqllm.execution_plan.deterministic_stack
-  statement: `ExecutionPlan` shall deterministically resolve one implementation stack of provider, session runtime mode, semantic protocol, wire format, transport, ordered plan adapters, and any selected realtime adapter seam for a given profile, mode, and policy input, with provider, protocol, wire, transport, and realtime modules read from resolved extension seams and the compiled runtime registry instead of rediscovered by provider branching.
+  statement: `ExecutionPlan` shall deterministically resolve one implementation stack of provider, session runtime mode, semantic protocol, wire format, transport, ordered plan adapters, and any selected realtime adapter seam for a given profile, mode, and policy input, with provider, protocol, wire, transport, and realtime modules read from resolved extension seams and the compiled runtime registry instead of rediscovered by provider branching, and generic providers may satisfy the provider layer by consuming typed `LLMDB.Provider.runtime` and `LLMDB.Model.execution` metadata rather than a bespoke provider slice.
   priority: must
   stability: evolving
 
@@ -68,4 +68,12 @@ decisions:
     - reqllm.execution_plan.prescriptive_object
     - reqllm.execution_plan.deterministic_stack
     - reqllm.execution_plan.planner_owns_assembly
+
+- kind: command
+  target: mix test test/operation_planner_test.exs test/best_effort_runtime_test.exs
+  execute: true
+  covers:
+    - reqllm.execution_plan.surface_and_fallbacks
+    - reqllm.execution_plan.deterministic_stack
+    - reqllm.execution_plan.no_downstream_rediscovery
 ```

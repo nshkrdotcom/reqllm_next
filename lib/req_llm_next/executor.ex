@@ -27,7 +27,8 @@ defmodule ReqLlmNext.Executor do
     SessionRuntime,
     Speech,
     StreamResponse,
-    Telemetry
+    Telemetry,
+    RuntimeMetadata
   }
 
   alias ReqLlmNext.Transcription
@@ -88,7 +89,7 @@ defmodule ReqLlmNext.Executor do
            transport_mod: transport_mod
          } <-
            ExecutionModules.resolve(plan),
-         {:ok, runtime_opts} <- runtime_opts(plan, model, opts, session_runtime_mod) do
+         {:ok, runtime_opts} <- runtime_opts(plan, model, opts, session_runtime_mod, provider_mod) do
       case Fixtures.maybe_replay_stream(model, prompt, runtime_opts) do
         {:ok, replay_stream} ->
           {:ok, stream_response(model, replay_stream, plan)}
@@ -136,7 +137,7 @@ defmodule ReqLlmNext.Executor do
            transport_mod: transport_mod
          } <-
            ExecutionModules.resolve(plan),
-         {:ok, runtime_opts} <- runtime_opts(plan, model, opts, session_runtime_mod) do
+         {:ok, runtime_opts} <- runtime_opts(plan, model, opts, session_runtime_mod, provider_mod) do
       case Fixtures.maybe_replay_stream(model, execution_prompt, runtime_opts) do
         {:ok, replay_stream} ->
           {:ok, stream_response(model, replay_stream, plan)}
@@ -207,7 +208,8 @@ defmodule ReqLlmNext.Executor do
              wire_mod: wire_mod,
              transport_mod: transport_mod
            } <- ExecutionModules.resolve(plan),
-           {:ok, runtime_opts} <- runtime_opts(plan, model, opts, session_runtime_mod) do
+           {:ok, runtime_opts} <-
+             runtime_opts(plan, model, opts, session_runtime_mod, provider_mod) do
         transport_mod.request(provider_mod, wire_mod, model, prompt, runtime_opts)
       end
     end)
@@ -228,7 +230,8 @@ defmodule ReqLlmNext.Executor do
              wire_mod: wire_mod,
              transport_mod: transport_mod
            } <- ExecutionModules.resolve(plan),
-           {:ok, runtime_opts} <- runtime_opts(plan, model, opts, session_runtime_mod) do
+           {:ok, runtime_opts} <-
+             runtime_opts(plan, model, opts, session_runtime_mod, provider_mod) do
         transport_mod.request(provider_mod, wire_mod, model, audio, runtime_opts)
       end
     end)
@@ -246,7 +249,8 @@ defmodule ReqLlmNext.Executor do
              wire_mod: wire_mod,
              transport_mod: transport_mod
            } <- ExecutionModules.resolve(plan),
-           {:ok, runtime_opts} <- runtime_opts(plan, model, opts, session_runtime_mod) do
+           {:ok, runtime_opts} <-
+             runtime_opts(plan, model, opts, session_runtime_mod, provider_mod) do
         transport_mod.request(provider_mod, wire_mod, model, text, runtime_opts)
       end
     end)
@@ -293,7 +297,8 @@ defmodule ReqLlmNext.Executor do
              wire_mod: wire_mod,
              transport_mod: transport_mod
            } <- ExecutionModules.resolve(plan),
-           {:ok, runtime_opts} <- runtime_opts(plan, model, opts, session_runtime_mod),
+           {:ok, runtime_opts} <-
+             runtime_opts(plan, model, opts, session_runtime_mod, provider_mod),
            {:ok, raw_response} <-
              transport_mod.request(provider_mod, wire_mod, model, input, runtime_opts) do
         wire_mod.extract_embeddings(raw_response, input)
@@ -301,12 +306,13 @@ defmodule ReqLlmNext.Executor do
     end)
   end
 
-  defp runtime_opts(plan, model, user_opts, session_runtime_mod) do
+  defp runtime_opts(plan, model, user_opts, session_runtime_mod, provider_mod) do
     plan.parameter_values
     |> Enum.into([])
     |> Keyword.drop([:transport])
     |> then(&AdapterPipeline.apply_modules(plan.plan_adapters, model, &1))
     |> SessionRuntime.prepare(session_runtime_mod, plan, user_opts)
+    |> then(&attach_runtime_metadata(&1, model, plan, provider_mod))
     |> case do
       {:ok, prepared_opts} ->
         {:ok,
@@ -323,6 +329,51 @@ defmodule ReqLlmNext.Executor do
 
       {:error, _} = error ->
         error
+    end
+  end
+
+  defp attach_runtime_metadata({:error, _} = error, _model, _plan, _provider_mod), do: error
+
+  defp attach_runtime_metadata({:ok, prepared_opts}, model, plan, provider_mod) do
+    execution_entry =
+      case RuntimeMetadata.execution_entry(model, plan.mode.operation) do
+        {:ok, entry} -> entry
+        {:error, _reason} -> nil
+      end
+
+    provider_runtime =
+      case RuntimeMetadata.provider_runtime(model) do
+        {:ok, runtime} -> runtime
+        {:error, _reason} -> nil
+      end
+
+    if provider_mod == ReqLlmNext.Providers.Generic do
+      cond do
+        is_nil(provider_runtime) ->
+          {:error,
+           Error.Invalid.Provider.exception(
+             provider: model.provider,
+             message: "Provider #{model.provider} is missing runtime metadata"
+           )}
+
+        is_nil(execution_entry) ->
+          {:error,
+           Error.Invalid.Capability.exception(
+             message:
+               "Model #{model.id} does not declare execution metadata for #{plan.mode.operation}"
+           )}
+
+        true ->
+          {:ok,
+           Keyword.merge(
+             prepared_opts,
+             _use_runtime_metadata: true,
+             _provider_runtime: provider_runtime,
+             _model_execution_entry: execution_entry
+           )}
+      end
+    else
+      {:ok, prepared_opts}
     end
   end
 

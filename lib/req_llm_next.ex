@@ -122,6 +122,7 @@ defmodule ReqLlmNext do
     Response,
     Schema,
     Speech,
+    Support,
     StreamResponse,
     Tool
   }
@@ -341,6 +342,15 @@ defmodule ReqLlmNext do
       {:ok, result} -> result
       {:error, error} -> raise error
     end
+  end
+
+  @doc """
+  Returns the package support tier for a model.
+  """
+  @spec support_status(model_spec()) ::
+          :first_class | :best_effort | {:unsupported, term()}
+  def support_status(model_spec) do
+    Support.support_status(model_spec)
   end
 
   @doc """

@@ -4,6 +4,7 @@ defmodule ReqLlmNext.Wire.ElevenLabsSpeech do
   """
 
   alias ReqLlmNext.Error
+  alias ReqLlmNext.Provider
   alias ReqLlmNext.Speech
 
   @default_voice "21m00Tcm4TlvDq8ikWAM"
@@ -26,13 +27,18 @@ defmodule ReqLlmNext.Wire.ElevenLabsSpeech do
           {:ok, Finch.Request.t()} | {:error, term()}
   def build_request(provider_mod, model, text, opts) when is_binary(text) do
     prepared_text = Keyword.get(opts, :_prepared_text, text)
-    api_key = provider_mod.get_api_key(opts)
-    base_url = Keyword.get(opts, :base_url, provider_mod.base_url())
     voice_id = Keyword.get(opts, :voice, @default_voice)
-    url = base_url <> path(voice_id) <> "?" <> URI.encode_query(output_query(opts))
-    headers = provider_mod.auth_headers(api_key) ++ [{"Content-Type", "application/json"}]
-    body = encode_body(model, prepared_text, opts) |> Jason.encode!()
-    {:ok, Finch.build(:post, url, headers, body)}
+    request_path = path(voice_id)
+    request_opts = Keyword.put(opts, :path, request_path)
+
+    with {:ok, url} <- Provider.request_url(provider_mod, model, request_path, request_opts),
+         {:ok, headers} <-
+           Provider.request_headers(provider_mod, model, request_opts, [
+             {"Content-Type", "application/json"}
+           ]) do
+      body = encode_body(model, prepared_text, opts) |> Jason.encode!()
+      {:ok, Finch.build(:post, append_output_query(url, opts), headers, body)}
+    end
   end
 
   def build_request(_provider_mod, _model, _text, _opts) do
@@ -69,6 +75,12 @@ defmodule ReqLlmNext.Wire.ElevenLabsSpeech do
 
   defp output_query(opts) do
     %{"output_format" => mapped_output_format(Keyword.get(opts, :output_format, :mp3))}
+  end
+
+  defp append_output_query(url, opts) do
+    uri = URI.parse(url)
+    query = Map.merge(URI.decode_query(uri.query || ""), output_query(opts))
+    %{uri | query: URI.encode_query(query)} |> URI.to_string()
   end
 
   defp requested_output_format(opts) do

@@ -9,7 +9,7 @@ defmodule ReqLlmNext.ModelProfile.SurfaceCatalog.Helpers do
   def maybe_put_surfaces(map, _operation, []), do: map
   def maybe_put_surfaces(map, operation, surfaces), do: Map.put(map, operation, surfaces)
 
-  @spec chat_surface(atom(), atom(), atom(), atom(), atom(), map(), [atom()]) ::
+  @spec chat_surface(atom(), atom(), atom(), atom(), atom(), map(), [atom()], atom() | nil) ::
           ExecutionSurface.t()
   def chat_surface(
         surface_prefix,
@@ -18,10 +18,12 @@ defmodule ReqLlmNext.ModelProfile.SurfaceCatalog.Helpers do
         wire_format,
         transport,
         features,
-        fallback_ids
+        fallback_ids,
+        family \\ nil
       ) do
     ExecutionSurface.new!(%{
       id: surface_id(surface_prefix, operation, transport),
+      family: family,
       operation: operation,
       semantic_protocol: semantic_protocol,
       wire_format: wire_format,
@@ -31,10 +33,11 @@ defmodule ReqLlmNext.ModelProfile.SurfaceCatalog.Helpers do
     })
   end
 
-  @spec embedding_surface() :: ExecutionSurface.t()
-  def embedding_surface do
+  @spec embedding_surface(atom() | nil) :: ExecutionSurface.t()
+  def embedding_surface(family \\ nil) do
     ExecutionSurface.new!(%{
       id: :openai_embeddings_embed_http,
+      family: family,
       operation: :embed,
       semantic_protocol: :openai_embeddings,
       wire_format: :openai_embeddings_json,
@@ -44,11 +47,26 @@ defmodule ReqLlmNext.ModelProfile.SurfaceCatalog.Helpers do
     })
   end
 
-  @spec request_surface(atom(), ReqLlmNext.ModelProfile.operation(), atom(), atom(), map()) ::
+  @spec request_surface(
+          atom(),
+          ReqLlmNext.ModelProfile.operation(),
+          atom(),
+          atom(),
+          map(),
+          atom() | nil
+        ) ::
           ExecutionSurface.t()
-  def request_surface(id, operation, semantic_protocol, wire_format, features \\ %{}) do
+  def request_surface(
+        id,
+        operation,
+        semantic_protocol,
+        wire_format,
+        features \\ %{},
+        family \\ nil
+      ) do
     ExecutionSurface.new!(%{
       id: id,
+      family: family,
       operation: operation,
       semantic_protocol: semantic_protocol,
       wire_format: wire_format,

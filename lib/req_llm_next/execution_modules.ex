@@ -18,7 +18,7 @@ defmodule ReqLlmNext.ExecutionModules do
     {:ok, %{seams: seams}} = Extensions.resolve_compiled(extension_context(plan))
 
     resolution = %{
-      provider_mod: provider_module_from_seams!(seams, plan.provider),
+      provider_mod: provider_module_from_seams!(seams, plan),
       session_runtime_mod: session_runtime_module_from_seams!(seams, plan.session_runtime),
       protocol_mod: protocol_module_from_seams!(seams, plan.semantic_protocol),
       wire_mod: wire_module_from_seams!(seams, plan.wire_format),
@@ -73,13 +73,15 @@ defmodule ReqLlmNext.ExecutionModules do
     end
   end
 
-  defp provider_module_from_seams!(%{provider_module: module}, _provider) when not is_nil(module),
+  defp provider_module_from_seams!(%{provider_module: module}, _plan) when not is_nil(module),
     do: module
 
-  defp provider_module_from_seams!(_seams, provider) do
+  defp provider_module_from_seams!(_seams, plan) do
+    provider = plan.provider
+
     case Map.fetch(Extensions.Compiled.runtime_registry().provider_modules, provider) do
       {:ok, module} -> module
-      :error -> raise("Unknown provider seam: #{inspect(provider)}")
+      :error -> ReqLlmNext.Providers.Generic
     end
   end
 
@@ -118,7 +120,7 @@ defmodule ReqLlmNext.ExecutionModules do
   defp extension_context(plan) do
     %{
       provider: plan.provider,
-      family: plan.model.family,
+      family: plan.surface.family || plan.model.family,
       model_id: plan.model.model_id,
       operation: plan.mode.operation,
       transport: plan.transport,

@@ -17,7 +17,7 @@ surface:
 
 ```spec-requirements
 - id: reqllm.public_api.hard_surface
-  statement: `ReqLlmNext` shall expose the hard package boundary at the top-level facade with `generate_text/3`, `generate_text!/3`, `stream_text/3`, `stream_object/4`, `generate_object/4`, `generate_object!/4`, `generate_image/3`, `generate_image!/3`, `transcribe/3`, `transcribe!/3`, `speak/3`, `speak!/3`, `embed/3`, `embed!/3`, `model/1`, `provider/1`, `context/1`, `tool/1`, `json_schema/2`, `cosine_similarity/2`, `embedding_models/0`, `put_key/2`, and `get_key/1`, and the contract test lane shall load the facade module before asserting exported functions so the boundary check reflects the compiled public module rather than code-loading timing.
+  statement: `ReqLlmNext` shall expose the hard package boundary at the top-level facade with `generate_text/3`, `generate_text!/3`, `stream_text/3`, `stream_object/4`, `generate_object/4`, `generate_object!/4`, `generate_image/3`, `generate_image!/3`, `transcribe/3`, `transcribe!/3`, `speak/3`, `speak!/3`, `embed/3`, `embed!/3`, `support_status/1`, `model/1`, `provider/1`, `context/1`, `tool/1`, `json_schema/2`, `cosine_similarity/2`, `embedding_models/0`, `put_key/2`, and `get_key/1`, and the contract test lane shall load the facade module before asserting exported functions so the boundary check reflects the compiled public module rather than code-loading timing.
   priority: must
   stability: evolving
 
@@ -35,6 +35,11 @@ surface:
   statement: Provider-scoped public helper modules such as `ReqLlmNext.Anthropic` may expose explicit provider-native utility and helper surfaces outside the top-level facade, including Anthropic document helpers, provider-native tool helpers such as web search, web fetch, code execution, MCP, and computer use, file upload and download helpers, token counting, and message-batch lifecycle helpers such as create, get, list, cancel, delete, and results retrieval.
   priority: should
   stability: evolving
+
+- id: reqllm.public_api.support_status
+  statement: `ReqLlmNext.support_status/1` shall accept the same canonical model inputs as the execution facade and return `:first_class`, `:best_effort`, or `{:unsupported, reason}` based on integrated provider slices, typed `LLMDB` runtime and execution metadata, and explicit fail-fast unsupported reasons such as `:catalog_only`, `:missing_provider_runtime`, or `:missing_execution_metadata`.
+  priority: should
+  stability: evolving
 ```
 
 ## Verification
@@ -47,6 +52,7 @@ surface:
     - reqllm.public_api.canonical_shapes
     - reqllm.public_api.thin_facade
     - reqllm.public_api.provider_scoped_utilities
+    - reqllm.public_api.support_status
 
 - kind: command
   target: mix test test/public_api
@@ -54,6 +60,7 @@ surface:
   covers:
     - reqllm.public_api.hard_surface
     - reqllm.public_api.canonical_shapes
+    - reqllm.public_api.support_status
 
 - kind: command
   target: mix test test/providers/anthropic

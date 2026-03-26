@@ -8,6 +8,7 @@ defmodule ReqLlmNext.Wire.GoogleGenerateContent do
   alias ReqLlmNext.Context
   alias ReqLlmNext.Context.ContentPart
   alias ReqLlmNext.Context.Message
+  alias ReqLlmNext.Provider
   alias ReqLlmNext.Tool
   alias ReqLlmNext.ToolCall
 
@@ -28,21 +29,35 @@ defmodule ReqLlmNext.Wire.GoogleGenerateContent do
 
   @impl ReqLlmNext.Wire.Streaming
   def build_request(provider_mod, model, prompt, opts) do
-    api_key = provider_mod.get_api_key(opts)
-    base_url = effective_base_url(provider_mod.base_url(), provider_options(opts))
-    url = "#{base_url}/models/#{model.id}:streamGenerateContent?alt=sse"
+    request_path = "/models/#{model.id}:streamGenerateContent"
 
-    headers =
-      provider_mod.auth_headers(api_key) ++
-        headers(opts) ++
-        [{"Accept", "text/event-stream"}]
+    request_opts =
+      if Keyword.get(opts, :_use_runtime_metadata, false) do
+        Keyword.put(opts, :path, request_path)
+      else
+        Keyword.put(
+          opts,
+          :base_url,
+          effective_base_url(provider_mod.base_url(), provider_options(opts))
+        )
+        |> Keyword.put(:path, request_path)
+      end
 
-    body =
-      model
-      |> encode_body(prompt, opts)
-      |> Jason.encode!()
+    with {:ok, url} <- Provider.request_url(provider_mod, model, request_path, request_opts),
+         {:ok, request_headers} <-
+           Provider.request_headers(
+             provider_mod,
+             model,
+             request_opts,
+             headers(opts) ++ [{"Accept", "text/event-stream"}]
+           ) do
+      body =
+        model
+        |> encode_body(prompt, opts)
+        |> Jason.encode!()
 
-    {:ok, Finch.build(:post, url, headers, body)}
+      {:ok, Finch.build(:post, append_alt_sse(url), request_headers, body)}
+    end
   end
 
   @impl ReqLlmNext.Wire.Streaming
@@ -123,6 +138,12 @@ defmodule ReqLlmNext.Wire.GoogleGenerateContent do
       "v1" -> base_url <> "/v1"
       _ -> base_url <> "/v1beta"
     end
+  end
+
+  defp append_alt_sse(url) do
+    uri = URI.parse(url)
+    query = Map.merge(URI.decode_query(uri.query || ""), %{"alt" => "sse"})
+    %{uri | query: URI.encode_query(query)} |> URI.to_string()
   end
 
   defp encode_prompt(prompt) when is_binary(prompt) do

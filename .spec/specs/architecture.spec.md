@@ -25,6 +25,8 @@ surface:
   - lib/req_llm_next/operation_planner.ex
   - lib/req_llm_next/policy_rules.ex
   - lib/req_llm_next/execution_modules.ex
+  - lib/req_llm_next/runtime_metadata.ex
+  - lib/req_llm_next/support.ex
   - lib/req_llm_next/realtime.ex
   - lib/req_llm_next/response/output_item.ex
   - lib/req_llm_next/telemetry.ex
@@ -48,6 +50,7 @@ decisions:
   - reqllm.decision.zoi_backed_struct_contracts
   - reqllm.decision.live_verifier_tests
   - reqllm.decision.provider_expansion_strategy
+  - reqllm.decision.llmdb_best_effort_runtime
 ```
 
 ## Requirements
@@ -59,7 +62,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.architecture.facts_mode_policy_plan
-  statement: ReqLlmNext architecture shall normalize model facts into `ModelProfile`, request intent into `ExecutionMode`, resolve compatibility-aware surface policy, run surface-owned request preparation, and materialize a single `ExecutionPlan` before downstream execution, including manifest-backed provider-scoped descriptive fact extraction, family-owned surface catalog resolution through declared seams, manifest-backed runtime-module lookup for provider, session-runtime, protocol, wire, and transport layers, honoring explicit transport and session intent when a matching surface exists, validating surface-specific parameter compatibility before wire encoding, preparing continuation state in session runtime before transport execution, and routing both streaming and request-style non-streaming HTTP execution through explicit transport modules across text, object, embedding, image, transcription, and speech operations.
+  statement: ReqLlmNext architecture shall normalize model facts into `ModelProfile`, request intent into `ExecutionMode`, resolve compatibility-aware surface policy, run surface-owned request preparation, and materialize a single `ExecutionPlan` before downstream execution, including manifest-backed provider-scoped descriptive fact extraction for first-class providers, typed `LLMDB.Provider.runtime` and `LLMDB.Model.execution` metadata as the upstream contract for best-effort providers without dedicated slice registrations, family-owned or metadata-driven surface catalog resolution before planning, manifest-backed or generic runtime-module lookup for provider, session-runtime, protocol, wire, and transport layers, honoring explicit transport and session intent when a matching surface exists, validating surface-specific parameter compatibility before wire encoding, preparing continuation state in session runtime before transport execution, and routing both streaming and request-style non-streaming HTTP execution through explicit transport modules across text, object, embedding, image, transcription, and speech operations.
   priority: must
   stability: evolving
 
@@ -114,4 +117,11 @@ decisions:
   target: .spec/specs/architecture.spec.md
   covers:
     - reqllm.architecture.provider_specific_utilities
+
+- kind: command
+  target: mix test test/best_effort_runtime_test.exs test/public_api/support_status_test.exs
+  execute: true
+  covers:
+    - reqllm.architecture.facts_mode_policy_plan
+    - reqllm.architecture.model_input_boundary
 ```

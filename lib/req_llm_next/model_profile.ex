@@ -7,6 +7,7 @@ defmodule ReqLlmNext.ModelProfile do
   alias ReqLlmNext.ModelHelpers
   alias ReqLlmNext.ModelProfile.ProviderFacts
   alias ReqLlmNext.ModelProfile.SurfaceCatalog
+  alias ReqLlmNext.RuntimeMetadata
 
   @derive Jason.Encoder
 
@@ -31,7 +32,7 @@ defmodule ReqLlmNext.ModelProfile do
             coerce: true
           )
 
-  @type operation :: :text | :object | :embed | :image | :transcription | :speech
+  @type operation :: :text | :object | :embed | :image | :transcription | :speech | :realtime
 
   @type t :: %__MODULE__{
           source: :llmdb,
@@ -120,8 +121,8 @@ defmodule ReqLlmNext.ModelProfile do
       model_id: model.id,
       family: surface_catalog.family,
       name: model.name,
-      operations: operation_facts(model, provider_facts),
-      features: feature_facts(model, provider_facts),
+      operations: operation_facts(model, surface_catalog),
+      features: feature_facts(model, provider_facts, surface_catalog),
       modalities: normalize_modalities(model, provider_facts),
       limits: model.limits || %{},
       parameter_defaults: parameter_defaults(model),
@@ -131,31 +132,38 @@ defmodule ReqLlmNext.ModelProfile do
     }
   end
 
-  defp operation_facts(model, provider_facts) do
+  defp operation_facts(model, surface_catalog) do
     %{
-      text: %{supported: chat_supported?(model, provider_facts)},
-      object: %{supported: chat_supported?(model, provider_facts)},
-      embed: %{supported: embeddings_supported?(model)},
-      image: %{supported: ModelHelpers.supports_image_generation?(model)},
-      transcription: %{supported: ModelHelpers.supports_transcription?(model)},
-      speech: %{supported: ModelHelpers.supports_speech_generation?(model)}
+      text: %{supported: surfaces_supported?(surface_catalog, :text)},
+      object: %{supported: surfaces_supported?(surface_catalog, :object)},
+      embed: %{supported: surfaces_supported?(surface_catalog, :embed)},
+      image: %{supported: surfaces_supported?(surface_catalog, :image)},
+      transcription: %{supported: surfaces_supported?(surface_catalog, :transcription)},
+      speech: %{supported: surfaces_supported?(surface_catalog, :speech)},
+      realtime: %{supported: execution_supported?(model, :realtime)}
     }
   end
 
-  defp feature_facts(model, provider_facts) do
+  defp feature_facts(model, provider_facts, surface_catalog) do
+    object_strategy = object_strategy(surface_catalog)
+
     %{
       tools: %{
-        supported: tools_supported?(model, provider_facts),
+        supported: surface_feature_supported?(surface_catalog, :tools),
         strict: tools_strict?(model),
         parallel: tools_parallel?(model)
       },
       structured_outputs: %{
-        supported: chat_supported?(model, provider_facts),
-        native: native_structured_outputs?(model, provider_facts),
-        strategy: object_strategy(model, provider_facts)
+        supported: object_strategy not in [false, nil],
+        native: object_strategy == :native_json_schema,
+        strategy: object_strategy
       },
-      reasoning: %{supported: reasoning_supported?(model, provider_facts)},
-      citations: %{supported: provider_facts.citations_supported?},
+      reasoning: %{supported: surface_feature_supported?(surface_catalog, :reasoning)},
+      citations: %{
+        supported:
+          provider_facts.citations_supported? or
+            surface_feature_supported?(surface_catalog, :citations)
+      },
       context_management: %{supported: provider_facts.context_management_supported?},
       document_input: %{
         supported:
@@ -168,39 +176,15 @@ defmodule ReqLlmNext.ModelProfile do
     %{}
   end
 
-  defp object_strategy(model, provider_facts) do
-    cond do
-      native_structured_outputs?(model, provider_facts) -> :native_json_schema
-      chat_supported?(model, provider_facts) -> :prompt_and_parse
-      true -> false
-    end
+  defp object_strategy(surface_catalog) do
+    surface_feature(surface_catalog, :object, :structured_output) || false
   end
-
-  defp native_structured_outputs?(model, provider_facts) do
-    ModelHelpers.json_schema?(model) or provider_facts.structured_outputs_native?
-  end
-
-  defp chat_supported?(_model, %{chat_supported?: value}) when is_boolean(value), do: value
-  defp chat_supported?(%LLMDB.Model{capabilities: nil}, _provider_facts), do: true
-  defp chat_supported?(model, _provider_facts), do: ModelHelpers.chat?(model)
-
-  defp embeddings_supported?(%LLMDB.Model{capabilities: nil}), do: false
-  defp embeddings_supported?(model), do: ModelHelpers.embeddings?(model)
-
-  defp tools_supported?(%LLMDB.Model{capabilities: nil} = model, provider_facts) do
-    chat_supported?(model, provider_facts)
-  end
-
-  defp tools_supported?(model, _provider_facts), do: ModelHelpers.tools_enabled?(model)
 
   defp tools_strict?(%LLMDB.Model{capabilities: nil}), do: false
   defp tools_strict?(model), do: ModelHelpers.tools_strict?(model)
 
   defp tools_parallel?(%LLMDB.Model{capabilities: nil}), do: false
   defp tools_parallel?(model), do: ModelHelpers.tools_parallel?(model)
-
-  defp reasoning_supported?(%LLMDB.Model{capabilities: nil}, _provider_facts), do: false
-  defp reasoning_supported?(model, _provider_facts), do: ModelHelpers.reasoning_enabled?(model)
 
   defp normalize_modalities(%LLMDB.Model{modalities: modalities}, _provider_facts)
        when is_map(modalities) do
@@ -219,7 +203,51 @@ defmodule ReqLlmNext.ModelProfile do
     %{input: [:text], output: [:image]}
   end
 
-  defp normalize_modalities(_model, _provider_facts) do
-    %{input: [:text], output: [:text]}
+  defp normalize_modalities(%LLMDB.Model{} = model, _provider_facts) do
+    cond do
+      execution_supported?(model, :transcription) ->
+        %{input: [:audio], output: [:text]}
+
+      execution_supported?(model, :speech) ->
+        %{input: [:text], output: [:audio]}
+
+      execution_supported?(model, :image) ->
+        %{input: [:text], output: [:image]}
+
+      execution_supported?(model, :embed) and not execution_supported?(model, :text) ->
+        %{input: [:text], output: [:embedding]}
+
+      true ->
+        %{input: [:text], output: [:text]}
+    end
+  end
+
+  defp surfaces_supported?(surface_catalog, operation) do
+    surface_catalog
+    |> Map.get(:surfaces, %{})
+    |> Map.get(operation, [])
+    |> case do
+      [] -> false
+      _surfaces -> true
+    end
+  end
+
+  defp surface_feature_supported?(surface_catalog, feature) do
+    surface_catalog
+    |> Map.get(:surfaces, %{})
+    |> Map.values()
+    |> List.flatten()
+    |> Enum.any?(&(Map.get(&1.features, feature) == true))
+  end
+
+  defp surface_feature(surface_catalog, operation, feature) do
+    surface_catalog
+    |> Map.get(:surfaces, %{})
+    |> Map.get(operation, [])
+    |> Enum.find_value(&Map.get(&1.features, feature))
+  end
+
+  defp execution_supported?(model, operation) do
+    match?({:ok, _entry}, RuntimeMetadata.execution_entry(model, operation))
   end
 end

@@ -19,13 +19,14 @@ decisions:
   - reqllm.decision.runtime_telemetry_kernel
   - reqllm.decision.zoi_backed_struct_contracts
   - reqllm.decision.live_verifier_tests
+  - reqllm.decision.llmdb_best_effort_runtime
 ```
 
 ## Requirements
 
 ```spec-requirements
 - id: reqllm.package.multi_provider_api
-  statement: ReqLlmNext shall provide a unified public API for text generation, structured output, streaming, embeddings, and supported media operations across supported model providers using the same operations whether callers start from an `LLMDB` `model_spec` string or an `%LLMDB.Model{}`, including handcrafted structs used for local development.
+  statement: ReqLlmNext shall provide a unified public API for text generation, structured output, streaming, embeddings, and supported media operations across supported model providers using the same operations whether callers start from an `LLMDB` `model_spec` string or an `%LLMDB.Model{}`, including handcrafted structs used for local development, while distinguishing first-class integrated providers from best-effort packaged providers whose execution is driven by typed `LLMDB` runtime metadata.
   priority: must
   stability: evolving
 
@@ -35,7 +36,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.package.execution_planning
-  statement: ReqLlmNext shall route supported requests through a deterministic planning path that normalizes model facts into `ModelProfile`, request intent into `ExecutionMode`, selects explicit `ExecutionSurface` support through compatibility-aware policy, validates surface-specific parameter compatibility, materializes an `ExecutionPlan`, and resolves an execution stack of provider, session runtime, semantic protocol, wire, and transport modules before runtime execution, with provider facts, runtime-module lookup, and surface catalog construction driven from the compiled extension manifest rather than central provider branching.
+  statement: ReqLlmNext shall route supported requests through a deterministic planning path that normalizes model facts into `ModelProfile`, request intent into `ExecutionMode`, selects explicit `ExecutionSurface` support through compatibility-aware policy, validates surface-specific parameter compatibility, materializes an `ExecutionPlan`, and resolves an execution stack of provider, session runtime, semantic protocol, wire, and transport modules before runtime execution, with provider facts, runtime-module lookup, and surface catalog construction driven from the compiled extension manifest for first-class providers and from typed `LLMDB.Provider.runtime` plus `LLMDB.Model.execution` metadata for best-effort providers rather than from central provider branching.
   priority: must
   stability: evolving
 
@@ -88,6 +89,11 @@ decisions:
   statement: ReqLlmNext shall standardize package-owned structs on Zoi-backed schemas rather than plain `defstruct` declarations so canonical package, planning, response, runtime-state, and extension-manifest contracts expose explicit schema metadata, enforced required keys, and stable defaults.
   priority: should
   stability: evolving
+
+- id: reqllm.package.support_tiers
+  statement: ReqLlmNext shall accept all `LLMDB` models as public inputs, report support through explicit `:first_class`, `:best_effort`, and `{:unsupported, reason}` tiers, execute packaged non-first-class models through canonical families only when typed `LLMDB` runtime metadata is complete enough to do so safely, and fail fast when packaged metadata is catalog-only, incomplete, or names an unknown execution family.
+  priority: should
+  stability: evolving
 ```
 
 ## Verification
@@ -102,12 +108,14 @@ decisions:
     - reqllm.package.execution_planning
     - reqllm.package.buffered_stream_metadata
     - reqllm.package.runtime_telemetry
+    - reqllm.package.support_tiers
 
 - kind: command
   target: mix test test/public_api
   execute: true
   covers:
     - reqllm.package.multi_provider_api
+    - reqllm.package.support_tiers
 
 - kind: command
   target: mix test test/public_api/media_test.exs test/providers/openai/wire_images_test.exs test/providers/openai/wire_transcriptions_test.exs test/providers/openai/wire_speech_test.exs test/transcription/audio_input_test.exs
@@ -128,6 +136,13 @@ decisions:
   covers:
     - reqllm.package.execution_planning
     - reqllm.package.compile_time_extensions
+
+- kind: command
+  target: mix test test/best_effort_runtime_test.exs test/public_api/support_status_test.exs
+  execute: true
+  covers:
+    - reqllm.package.execution_planning
+    - reqllm.package.support_tiers
 
 - kind: command
   target: mix test test/providers/cohere test/providers/deepseek test/providers/elevenlabs test/providers/groq test/providers/openrouter test/providers/vllm test/providers/xai test/providers/zenmux test/providers/google test/model_profile_test.exs test/wire/resolver_test.exs

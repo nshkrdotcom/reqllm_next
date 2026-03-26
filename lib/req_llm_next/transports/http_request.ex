@@ -3,6 +3,7 @@ defmodule ReqLlmNext.Transports.HTTPRequest do
 
   alias ReqLlmNext.Error
   alias ReqLlmNext.Fixtures
+  alias ReqLlmNext.Provider
   alias ReqLlmNext.Telemetry
 
   @spec request(module(), module(), LLMDB.Model.t(), term(), keyword()) ::
@@ -52,19 +53,15 @@ defmodule ReqLlmNext.Transports.HTTPRequest do
     if module_exports?(wire_mod, :build_request, 4) do
       wire_mod.build_request(provider_mod, model, input, opts)
     else
-      api_key = provider_mod.get_api_key(opts)
-      base_url = Keyword.get(opts, :base_url, provider_mod.base_url())
-      url = base_url <> wire_mod.path()
+      with {:ok, url} <- Provider.request_url(provider_mod, model, wire_mod.path(), opts),
+           {:ok, headers} <-
+             Provider.request_headers(provider_mod, model, opts, wire_headers(wire_mod, opts)) do
+        body =
+          wire_mod.encode_body(model, input, opts)
+          |> Jason.encode!()
 
-      headers =
-        provider_mod.auth_headers(api_key) ++
-          wire_headers(wire_mod, opts)
-
-      body =
-        wire_mod.encode_body(model, input, opts)
-        |> Jason.encode!()
-
-      {:ok, Finch.build(:post, url, headers, body)}
+        {:ok, Finch.build(:post, url, headers, body)}
+      end
     end
   end
 

@@ -5,6 +5,7 @@ defmodule ReqLlmNext.Wire.OpenAIImages do
 
   alias ReqLlmNext.Context
   alias ReqLlmNext.Context.ContentPart
+  alias ReqLlmNext.Provider
   alias ReqLlmNext.Response
   alias ReqLlmNext.SurfacePreparation.OpenAIImages, as: ImagePreparation
 
@@ -18,29 +19,32 @@ defmodule ReqLlmNext.Wire.OpenAIImages do
           {:ok, Finch.Request.t()} | {:error, term()}
   def build_request(provider_mod, model, prompt, opts) do
     with {:ok, text_prompt} <- prepared_prompt(prompt, opts) do
-      api_key = provider_mod.get_api_key(opts)
-      base_url = Keyword.get(opts, :base_url, provider_mod.base_url())
       edit? = image_edit?(opts)
 
-      {headers, body, path} =
+      {headers, body, path, request_opts} =
         if edit? do
           boundary = multipart_boundary()
 
           {
-            provider_mod.auth_headers(api_key) ++
-              [{"Content-Type", "multipart/form-data; boundary=#{boundary}"}],
+            [{"Content-Type", "multipart/form-data; boundary=#{boundary}"}],
             encode_edit_body(model, text_prompt, opts, boundary),
-            edit_path()
+            edit_path(),
+            Keyword.put(opts, :path, edit_path())
           }
         else
           {
-            provider_mod.auth_headers(api_key) ++ headers(opts),
+            headers(opts),
             encode_body(model, text_prompt, opts) |> Jason.encode!(),
-            path()
+            path(),
+            Keyword.put(opts, :path, path())
           }
         end
 
-      {:ok, Finch.build(:post, base_url <> path, headers, body)}
+      with {:ok, url} <- Provider.request_url(provider_mod, model, path, request_opts),
+           {:ok, request_headers} <-
+             Provider.request_headers(provider_mod, model, request_opts, headers) do
+        {:ok, Finch.build(:post, url, request_headers, body)}
+      end
     end
   end
 

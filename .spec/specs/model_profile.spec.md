@@ -11,6 +11,8 @@ status: active
 summary: Canonical descriptive model facts and execution-surface catalog.
 surface:
   - lib/req_llm_next/model_profile.ex
+  - lib/req_llm_next/model_profile/surface_catalog.ex
+  - lib/req_llm_next/model_profile/surface_catalog/**/*.ex
   - lib/req_llm_next/model_profile/provider_facts.ex
   - lib/req_llm_next/model_profile/provider_facts/**/*.ex
   - lib/req_llm_next/families/**/*surface_catalog*.ex
@@ -26,12 +28,12 @@ decisions:
 
 ```spec-requirements
 - id: reqllm.model_profile.descriptive_facts
-  statement: ReqLlmNext shall normalize resolved model metadata into a request-independent `ModelProfile` that describes operations, features, modalities, limits, parameter defaults, constraints metadata, and session capabilities without choosing concrete request behavior, including manifest-backed provider-scoped descriptive fact extraction for normalized features such as Anthropic structured outputs, citations, context management, additional document input, provider-owned media operation support, and OpenAI-compatible provider deltas such as DeepSeek chat or reasoning behavior, Groq transcription-media routing, OpenRouter routing-aware chat overrides, xAI responses-first versus image-media routing plus native-structured-output support by model generation, and self-hosted providers such as vLLM that intentionally ride the shared OpenAI-compatible family without custom wire or protocol overrides, plus the resolved extension family id selected by declarative criteria and provider or global fallback rules that owns surface-catalog construction and must declare the catalog module that builds the model's execution surfaces.
+  statement: ReqLlmNext shall normalize resolved model metadata into a request-independent `ModelProfile` that describes operations, features, modalities, limits, parameter defaults, constraints metadata, and session capabilities without choosing concrete request behavior, including manifest-backed provider-scoped descriptive fact extraction for normalized features such as Anthropic structured outputs, citations, context management, additional document input, provider-owned media operation support, and OpenAI-compatible provider deltas such as DeepSeek chat or reasoning behavior, Groq transcription-media routing, OpenRouter routing-aware chat overrides, xAI responses-first versus image-media routing plus native-structured-output support by model generation, and self-hosted providers such as vLLM that intentionally ride the shared OpenAI-compatible family without custom wire or protocol overrides, plus the resolved extension family id selected by declarative criteria and provider or global fallback rules or by typed `LLMDB.Model.execution` metadata for best-effort providers when no dedicated provider registration exists.
   priority: must
   stability: evolving
 
 - id: reqllm.model_profile.execution_surfaces_declared
-  statement: `ModelProfile` shall declare explicit named `ExecutionSurface` entries for supported endpoint styles instead of implying support from independent protocol, wire-format, and transport lists, including multiple transport variants for one semantic family when the provider truly supports them and allowing one provider-owned media catalog to emit several explicit media-operation surfaces when the provider facts already disambiguate which family is active.
+  statement: `ModelProfile` shall declare explicit named `ExecutionSurface` entries for supported endpoint styles instead of implying support from independent protocol, wire-format, and transport lists, including multiple transport variants for one semantic family when the provider truly supports them, allowing one provider-owned media catalog to emit several explicit media-operation surfaces when the provider facts already disambiguate which family is active, and carrying an explicit owning family id on each surface whether that surface came from an extension-backed catalog or the generic typed-metadata best-effort catalog.
   priority: must
   stability: evolving
 
@@ -53,6 +55,13 @@ decisions:
 
 - kind: command
   target: mix test test/model_profile_test.exs test/operation_planner_test.exs test/providers/xai/provider_facts_test.exs test/providers/xai/execution_stack_test.exs test/providers/zenmux/provider_facts_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/google/provider_facts_test.exs test/providers/google/execution_stack_test.exs test/providers/elevenlabs/provider_facts_test.exs test/providers/elevenlabs/execution_stack_test.exs test/providers/cohere/provider_facts_test.exs test/providers/cohere/execution_stack_test.exs
+  execute: true
+  covers:
+    - reqllm.model_profile.descriptive_facts
+    - reqllm.model_profile.execution_surfaces_declared
+
+- kind: command
+  target: mix test test/model_profile_test.exs test/best_effort_runtime_test.exs
   execute: true
   covers:
     - reqllm.model_profile.descriptive_facts

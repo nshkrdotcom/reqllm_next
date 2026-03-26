@@ -72,7 +72,7 @@ defmodule ReqLlmNext.MixProject do
       {:finch, "~> 0.19"},
       {:mint_web_socket, "~> 1.0"},
       {:server_sent_events, "~> 0.2"},
-      {:llm_db, "~> 2026.3"},
+      {:llm_db, github: "agentjido/llm_db", ref: "3f4ed85fe8f624179bb16f066830add104ff16ab"},
       {:zoi, "~> 0.17"},
       {:spark, "~> 2.6"},
       {:spec_led_ex,

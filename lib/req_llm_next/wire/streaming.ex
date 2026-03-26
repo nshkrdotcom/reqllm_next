@@ -6,6 +6,8 @@ defmodule ReqLlmNext.Wire.Streaming do
   Canonical response normalization belongs to semantic protocol modules.
   """
 
+  alias ReqLlmNext.Provider
+
   @type sse_event :: %{data: String.t(), event: String.t() | nil, id: String.t() | nil}
 
   @doc """
@@ -58,26 +60,22 @@ defmodule ReqLlmNext.Wire.Streaming do
     if function_exported?(wire_mod, :build_request, 4) do
       wire_mod.build_request(provider_mod, model, prompt, opts)
     else
-      api_key = provider_mod.get_api_key(opts)
-      base_url = Keyword.get(opts, :base_url, provider_mod.base_url())
-      endpoint = wire_mod.endpoint()
-      url = base_url <> endpoint
-
-      auth_headers = provider_mod.auth_headers(api_key)
       wire_headers = get_wire_headers(wire_mod, opts)
 
-      headers =
-        auth_headers ++
-          wire_headers ++
-          [
-            {"Accept", "text/event-stream"}
-          ]
+      with {:ok, url} <- Provider.request_url(provider_mod, model, wire_mod.endpoint(), opts),
+           {:ok, headers} <-
+             Provider.request_headers(
+               provider_mod,
+               model,
+               opts,
+               wire_headers ++ [{"Accept", "text/event-stream"}]
+             ) do
+        body =
+          wire_mod.encode_body(model, prompt, opts)
+          |> Jason.encode!()
 
-      body =
-        wire_mod.encode_body(model, prompt, opts)
-        |> Jason.encode!()
-
-      {:ok, Finch.build(:post, url, headers, body)}
+        {:ok, Finch.build(:post, url, headers, body)}
+      end
     end
   end
 

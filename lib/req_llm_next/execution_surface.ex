@@ -9,6 +9,7 @@ defmodule ReqLlmNext.ExecutionSurface do
             __MODULE__,
             %{
               id: Zoi.atom(),
+              family: Zoi.atom() |> Zoi.nullish(),
               operation: Zoi.enum([:text, :object, :embed, :image, :transcription, :speech]),
               semantic_protocol: Zoi.atom(),
               wire_format: Zoi.atom(),
@@ -23,6 +24,7 @@ defmodule ReqLlmNext.ExecutionSurface do
 
   @type t :: %__MODULE__{
           id: atom(),
+          family: atom() | nil,
           operation: operation(),
           semantic_protocol: atom(),
           wire_format: atom(),

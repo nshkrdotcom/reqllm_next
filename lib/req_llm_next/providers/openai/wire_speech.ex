@@ -4,6 +4,7 @@ defmodule ReqLlmNext.Wire.OpenAISpeech do
   """
 
   alias ReqLlmNext.Error
+  alias ReqLlmNext.Provider
   alias ReqLlmNext.Speech
 
   @spec path() :: String.t()
@@ -13,12 +14,16 @@ defmodule ReqLlmNext.Wire.OpenAISpeech do
           {:ok, Finch.Request.t()} | {:error, term()}
   def build_request(provider_mod, model, text, opts) when is_binary(text) do
     prepared_text = Keyword.get(opts, :_prepared_text, text)
-    api_key = provider_mod.get_api_key(opts)
-    base_url = Keyword.get(opts, :base_url, provider_mod.base_url())
-    url = base_url <> path()
-    headers = provider_mod.auth_headers(api_key) ++ [{"Content-Type", "application/json"}]
-    body = encode_body(model, prepared_text, opts) |> Jason.encode!()
-    {:ok, Finch.build(:post, url, headers, body)}
+
+    with {:ok, url} <-
+           Provider.request_url(provider_mod, model, path(), Keyword.put(opts, :path, path())),
+         {:ok, headers} <-
+           Provider.request_headers(provider_mod, model, opts, [
+             {"Content-Type", "application/json"}
+           ]) do
+      body = encode_body(model, prepared_text, opts) |> Jason.encode!()
+      {:ok, Finch.build(:post, url, headers, body)}
+    end
   end
 
   def build_request(_provider_mod, _model, _text, _opts) do

@@ -81,7 +81,7 @@ defmodule ReqLlmNext.OperationPlanner do
   defp extension_context(profile, mode, surface) do
     %{
       provider: profile.provider,
-      family: profile.family,
+      family: surface.family || profile.family,
       model_id: profile.model_id,
       operation: mode.operation,
       transport: surface.transport,
