@@ -112,6 +112,7 @@ defmodule ReqLlmNext.Extensions.DslTest do
                ReqLlmNext.Extensions.Definitions.Alibaba,
                ReqLlmNext.Extensions.Definitions.DeepSeek,
                ReqLlmNext.Extensions.Definitions.Cerebras,
+               ReqLlmNext.Extensions.Definitions.ElevenLabs,
                ReqLlmNext.Extensions.Definitions.Google,
                ReqLlmNext.Extensions.Definitions.Groq,
                ReqLlmNext.Extensions.Definitions.OpenRouter,
@@ -126,6 +127,7 @@ defmodule ReqLlmNext.Extensions.DslTest do
     assert Map.has_key?(manifest.providers, :anthropic)
     assert Map.has_key?(manifest.providers, :alibaba)
     assert Map.has_key?(manifest.providers, :cerebras)
+    assert Map.has_key?(manifest.providers, :elevenlabs)
     assert Map.has_key?(manifest.providers, :google)
     assert Map.has_key?(manifest.providers, :groq)
     assert Map.has_key?(manifest.providers, :openrouter)
@@ -139,6 +141,8 @@ defmodule ReqLlmNext.Extensions.DslTest do
     assert Enum.any?(manifest.families, &(&1.id == :anthropic_messages))
     assert Enum.any?(manifest.families, &(&1.id == :alibaba_chat_compatible))
     assert Enum.any?(manifest.families, &(&1.id == :cerebras_chat_compatible))
+    assert Enum.any?(manifest.families, &(&1.id == :elevenlabs_speech))
+    assert Enum.any?(manifest.families, &(&1.id == :elevenlabs_transcriptions))
     assert Enum.any?(manifest.families, &(&1.id == :google_generate_content))
     assert Enum.any?(manifest.families, &(&1.id == :groq_chat_compatible))
     assert Enum.any?(manifest.families, &(&1.id == :openrouter_chat_compatible))

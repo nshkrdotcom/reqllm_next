@@ -11,6 +11,8 @@ defmodule ReqLlmNext.Wire.ResolverTest do
     CerebrasChat,
     GoogleGenerateContent,
     GroqChat,
+    ElevenLabsSpeech,
+    ElevenLabsTranscriptions,
     OpenAIChat,
     OpenAIEmbeddings,
     OpenAIImages,
@@ -88,6 +90,16 @@ defmodule ReqLlmNext.Wire.ResolverTest do
     test "infers GoogleGenerateContent for google provider" do
       model = TestModels.google()
       assert Resolver.wire_module!(model) == GoogleGenerateContent
+    end
+
+    test "infers ElevenLabsSpeech for ElevenLabs speech models" do
+      model = TestModels.elevenlabs_speech()
+      assert Resolver.wire_module!(model) == ElevenLabsSpeech
+    end
+
+    test "infers ElevenLabsTranscriptions for ElevenLabs transcription models" do
+      model = TestModels.elevenlabs_transcription()
+      assert Resolver.wire_module!(model) == ElevenLabsTranscriptions
     end
 
     test "infers OpenAIChat for vllm provider" do
@@ -208,6 +220,22 @@ defmodule ReqLlmNext.Wire.ResolverTest do
 
       assert result.provider_mod == Providers.OpenAI
       assert result.wire_mod == OpenAISpeech
+    end
+
+    test "returns ElevenLabs transcription wire for transcription models" do
+      model = TestModels.elevenlabs_transcription()
+      result = Resolver.resolve!(model, :transcription)
+
+      assert result.provider_mod == Providers.ElevenLabs
+      assert result.wire_mod == ElevenLabsTranscriptions
+    end
+
+    test "returns ElevenLabs speech wire for speech models" do
+      model = TestModels.elevenlabs_speech()
+      result = Resolver.resolve!(model, :speech)
+
+      assert result.provider_mod == Providers.ElevenLabs
+      assert result.wire_mod == ElevenLabsSpeech
     end
   end
 end

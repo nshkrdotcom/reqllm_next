@@ -40,6 +40,22 @@ defmodule ReqLlmNext.ModelProfileTest do
              ModelProfile.surfaces_for(profile, :object)
   end
 
+  test "uses provider-specific ElevenLabs family for speech models" do
+    {:ok, profile} = ModelProfile.from_model(ReqLlmNext.TestModels.elevenlabs_speech())
+
+    assert profile.family == :elevenlabs_speech
+    assert [%{id: :elevenlabs_speech_http}] = ModelProfile.surfaces_for(profile, :speech)
+  end
+
+  test "uses provider-specific ElevenLabs family for transcription models" do
+    {:ok, profile} = ModelProfile.from_model(ReqLlmNext.TestModels.elevenlabs_transcription())
+
+    assert profile.family == :elevenlabs_transcriptions
+
+    assert [%{id: :elevenlabs_transcription_http}] =
+             ModelProfile.surfaces_for(profile, :transcription)
+  end
+
   test "uses provider-specific groq family over the shared openai-compatible base" do
     {:ok, profile} = ModelProfile.from_model(ReqLlmNext.TestModels.groq())
 

@@ -59,7 +59,7 @@ decisions:
     - reqllm.execution_surfaces.surface_selection
 
 - kind: command
-  target: mix test test/operation_planner_test.exs test/providers/xai/execution_stack_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/google/execution_stack_test.exs
+  target: mix test test/operation_planner_test.exs test/providers/xai/execution_stack_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/google/execution_stack_test.exs test/providers/elevenlabs/execution_stack_test.exs
   execute: true
   covers:
     - reqllm.execution_surfaces.support_unit

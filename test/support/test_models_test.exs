@@ -44,6 +44,34 @@ defmodule ReqLlmNext.TestModelsTest do
     end
   end
 
+  describe "elevenlabs_speech/1" do
+    test "creates ElevenLabs speech model with defaults" do
+      model = TestModels.elevenlabs_speech()
+      assert model.provider == :elevenlabs
+      assert model.id == "eleven_multilingual_v2"
+      assert model.extra.api == "text-to-speech"
+    end
+
+    test "applies overrides" do
+      model = TestModels.elevenlabs_speech(%{id: "eleven_flash_v2_5"})
+      assert model.id == "eleven_flash_v2_5"
+    end
+  end
+
+  describe "elevenlabs_transcription/1" do
+    test "creates ElevenLabs transcription model with defaults" do
+      model = TestModels.elevenlabs_transcription()
+      assert model.provider == :elevenlabs
+      assert model.id == "scribe_v2"
+      assert model.extra.api == "speech-to-text"
+    end
+
+    test "applies overrides" do
+      model = TestModels.elevenlabs_transcription(%{id: "scribe_v1"})
+      assert model.id == "scribe_v1"
+    end
+  end
+
   describe "openai_reasoning/1" do
     test "creates reasoning model with wire protocol" do
       model = TestModels.openai_reasoning()

@@ -179,6 +179,54 @@ defmodule ReqLlmNext.TestModels do
   end
 
   @doc """
+  Creates an ElevenLabs speech model for testing.
+  """
+  def elevenlabs_speech(overrides \\ %{}) do
+    base = %LLMDB.Model{
+      id: "eleven_multilingual_v2",
+      provider: :elevenlabs,
+      name: "Test ElevenLabs Speech Model",
+      capabilities: %{
+        chat: false,
+        embeddings: false,
+        speech: true,
+        reasoning: %{enabled: false},
+        tools: %{enabled: false, streaming: false, strict: false, parallel: false},
+        json: %{native: false, schema: false, strict: false},
+        streaming: %{text: false, tool_calls: false}
+      },
+      modalities: %{input: [:text], output: [:audio]},
+      extra: %{api: "text-to-speech"}
+    }
+
+    struct!(base, Map.to_list(overrides))
+  end
+
+  @doc """
+  Creates an ElevenLabs transcription model for testing.
+  """
+  def elevenlabs_transcription(overrides \\ %{}) do
+    base = %LLMDB.Model{
+      id: "scribe_v2",
+      provider: :elevenlabs,
+      name: "Test ElevenLabs Transcription Model",
+      capabilities: %{
+        chat: false,
+        embeddings: false,
+        transcription: true,
+        reasoning: %{enabled: false},
+        tools: %{enabled: false, streaming: false, strict: false, parallel: false},
+        json: %{native: false, schema: false, strict: false},
+        streaming: %{text: false, tool_calls: false}
+      },
+      modalities: %{input: [:audio], output: [:text]},
+      extra: %{api: "speech-to-text"}
+    }
+
+    struct!(base, Map.to_list(overrides))
+  end
+
+  @doc """
   Creates an Anthropic model with thinking/extended thinking capability.
   """
   def anthropic_thinking(overrides \\ %{}) do
@@ -590,6 +638,8 @@ defmodule ReqLlmNext.TestModels do
   Returns a model spec string for Google.
   """
   def google_spec, do: "google:test-model"
+  def elevenlabs_speech_spec, do: "elevenlabs:eleven_multilingual_v2"
+  def elevenlabs_transcription_spec, do: "elevenlabs:scribe_v2"
 
   @doc """
   Returns a model spec string for an embedding model.

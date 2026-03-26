@@ -9,6 +9,7 @@ defmodule ReqLlmNext.ProvidersTest do
     Anthropic,
     Cerebras,
     DeepSeek,
+    ElevenLabs,
     Google,
     Groq,
     OpenAI,
@@ -35,6 +36,10 @@ defmodule ReqLlmNext.ProvidersTest do
 
     test "returns Google module for :google" do
       assert Providers.get(:google) == {:ok, Google}
+    end
+
+    test "returns ElevenLabs module for :elevenlabs" do
+      assert Providers.get(:elevenlabs) == {:ok, ElevenLabs}
     end
 
     test "returns Groq module for :groq" do
@@ -95,6 +100,10 @@ defmodule ReqLlmNext.ProvidersTest do
       assert Providers.get!(:google) == Google
     end
 
+    test "returns ElevenLabs module for :elevenlabs" do
+      assert Providers.get!(:elevenlabs) == ElevenLabs
+    end
+
     test "returns Groq module for :groq" do
       assert Providers.get!(:groq) == Groq
     end
@@ -146,6 +155,7 @@ defmodule ReqLlmNext.ProvidersTest do
       assert :anthropic in providers
       assert :deepseek in providers
       assert :google in providers
+      assert :elevenlabs in providers
       assert :groq in providers
       assert :openrouter in providers
       assert :vllm in providers
@@ -444,6 +454,20 @@ defmodule ReqLlmNext.ProvidersTest do
     test "auth_headers returns Bearer token" do
       headers = Zenmux.auth_headers("test-key")
       assert headers == [{"Authorization", "Bearer test-key"}]
+    end
+  end
+
+  describe "Providers.ElevenLabs" do
+    test "base_url returns ElevenLabs API URL" do
+      assert ElevenLabs.base_url() == "https://api.elevenlabs.io"
+    end
+
+    test "env_key returns ELEVENLABS_API_KEY" do
+      assert ElevenLabs.env_key() == "ELEVENLABS_API_KEY"
+    end
+
+    test "auth_headers returns xi-api-key" do
+      assert ElevenLabs.auth_headers("test-key") == [{"xi-api-key", "test-key"}]
     end
   end
 end
