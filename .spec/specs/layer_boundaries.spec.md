@@ -96,7 +96,7 @@ decisions:
     - reqllm.layer_boundaries.replay_uses_recorded_stack
 
 - kind: command
-  target: mix test test/providers/xai/execution_stack_test.exs test/providers/xai/wire_responses_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/zenmux/wire_chat_test.exs test/providers/zenmux/wire_responses_test.exs test/providers/google/execution_stack_test.exs test/providers/google/wire_generate_content_test.exs test/providers/elevenlabs/execution_stack_test.exs test/providers/elevenlabs/wire_speech_test.exs test/providers/elevenlabs/wire_transcriptions_test.exs
+  target: mix test test/providers/xai/execution_stack_test.exs test/providers/xai/wire_responses_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/zenmux/wire_chat_test.exs test/providers/zenmux/wire_responses_test.exs test/providers/google/execution_stack_test.exs test/providers/google/wire_generate_content_test.exs test/providers/elevenlabs/execution_stack_test.exs test/providers/elevenlabs/wire_speech_test.exs test/providers/elevenlabs/wire_transcriptions_test.exs test/providers/cohere/execution_stack_test.exs test/providers/cohere/wire_chat_test.exs
   execute: true
   covers:
     - reqllm.layer_boundaries.separated_io

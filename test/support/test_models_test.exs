@@ -72,6 +72,20 @@ defmodule ReqLlmNext.TestModelsTest do
     end
   end
 
+  describe "cohere/1" do
+    test "creates Cohere model with defaults" do
+      model = TestModels.cohere()
+      assert model.provider == :cohere
+      assert model.id == "command-a-03-2025"
+      assert model.capabilities.chat == true
+    end
+
+    test "applies overrides" do
+      model = TestModels.cohere(%{id: "command-r-plus-08-2024"})
+      assert model.id == "command-r-plus-08-2024"
+    end
+  end
+
   describe "openai_reasoning/1" do
     test "creates reasoning model with wire protocol" do
       model = TestModels.openai_reasoning()

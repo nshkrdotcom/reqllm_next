@@ -8,6 +8,7 @@ defmodule ReqLlmNext.ProvidersTest do
     Alibaba,
     Anthropic,
     Cerebras,
+    Cohere,
     DeepSeek,
     ElevenLabs,
     Google,
@@ -40,6 +41,10 @@ defmodule ReqLlmNext.ProvidersTest do
 
     test "returns ElevenLabs module for :elevenlabs" do
       assert Providers.get(:elevenlabs) == {:ok, ElevenLabs}
+    end
+
+    test "returns Cohere module for :cohere" do
+      assert Providers.get(:cohere) == {:ok, Cohere}
     end
 
     test "returns Groq module for :groq" do
@@ -104,6 +109,10 @@ defmodule ReqLlmNext.ProvidersTest do
       assert Providers.get!(:elevenlabs) == ElevenLabs
     end
 
+    test "returns Cohere module for :cohere" do
+      assert Providers.get!(:cohere) == Cohere
+    end
+
     test "returns Groq module for :groq" do
       assert Providers.get!(:groq) == Groq
     end
@@ -156,6 +165,7 @@ defmodule ReqLlmNext.ProvidersTest do
       assert :deepseek in providers
       assert :google in providers
       assert :elevenlabs in providers
+      assert :cohere in providers
       assert :groq in providers
       assert :openrouter in providers
       assert :vllm in providers
@@ -468,6 +478,20 @@ defmodule ReqLlmNext.ProvidersTest do
 
     test "auth_headers returns xi-api-key" do
       assert ElevenLabs.auth_headers("test-key") == [{"xi-api-key", "test-key"}]
+    end
+  end
+
+  describe "Providers.Cohere" do
+    test "base_url returns Cohere API URL" do
+      assert Cohere.base_url() == "https://api.cohere.com"
+    end
+
+    test "env_key returns COHERE_API_KEY" do
+      assert Cohere.env_key() == "COHERE_API_KEY"
+    end
+
+    test "auth_headers returns Bearer token" do
+      assert Cohere.auth_headers("test-key") == [{"Authorization", "Bearer test-key"}]
     end
   end
 end

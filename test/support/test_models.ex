@@ -227,6 +227,29 @@ defmodule ReqLlmNext.TestModels do
   end
 
   @doc """
+  Creates a Cohere chat model for testing.
+  """
+  def cohere(overrides \\ %{}) do
+    base = %LLMDB.Model{
+      id: "command-a-03-2025",
+      provider: :cohere,
+      name: "Test Cohere Model",
+      capabilities: %{
+        chat: true,
+        embeddings: false,
+        reasoning: %{enabled: false},
+        tools: %{enabled: false, streaming: false, strict: false, parallel: false},
+        json: %{native: true, schema: true, strict: false},
+        streaming: %{text: true, tool_calls: false}
+      },
+      limits: %{context: 128_000, output: 8_192},
+      modalities: %{input: [:text], output: [:text]}
+    }
+
+    struct!(base, Map.to_list(overrides))
+  end
+
+  @doc """
   Creates an Anthropic model with thinking/extended thinking capability.
   """
   def anthropic_thinking(overrides \\ %{}) do
@@ -640,6 +663,7 @@ defmodule ReqLlmNext.TestModels do
   def google_spec, do: "google:test-model"
   def elevenlabs_speech_spec, do: "elevenlabs:eleven_multilingual_v2"
   def elevenlabs_transcription_spec, do: "elevenlabs:scribe_v2"
+  def cohere_spec, do: "cohere:command-a-03-2025"
 
   @doc """
   Returns a model spec string for an embedding model.

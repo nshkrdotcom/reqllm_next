@@ -56,6 +56,14 @@ defmodule ReqLlmNext.ModelProfileTest do
              ModelProfile.surfaces_for(profile, :transcription)
   end
 
+  test "uses provider-specific Cohere family with native chat surfaces" do
+    {:ok, profile} = ModelProfile.from_model(ReqLlmNext.TestModels.cohere())
+
+    assert profile.family == :cohere_chat
+    assert [%{id: :cohere_chat_text_http_sse}] = ModelProfile.surfaces_for(profile, :text)
+    assert [%{id: :cohere_chat_object_http_sse}] = ModelProfile.surfaces_for(profile, :object)
+  end
+
   test "uses provider-specific groq family over the shared openai-compatible base" do
     {:ok, profile} = ModelProfile.from_model(ReqLlmNext.TestModels.groq())
 

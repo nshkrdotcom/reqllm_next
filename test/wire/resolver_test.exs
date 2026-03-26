@@ -7,6 +7,7 @@ defmodule ReqLlmNext.Wire.ResolverTest do
   alias ReqLlmNext.Wire.{
     Anthropic,
     AlibabaChat,
+    CohereChat,
     DeepSeekChat,
     CerebrasChat,
     GoogleGenerateContent,
@@ -100,6 +101,11 @@ defmodule ReqLlmNext.Wire.ResolverTest do
     test "infers ElevenLabsTranscriptions for ElevenLabs transcription models" do
       model = TestModels.elevenlabs_transcription()
       assert Resolver.wire_module!(model) == ElevenLabsTranscriptions
+    end
+
+    test "infers CohereChat for Cohere models" do
+      model = TestModels.cohere()
+      assert Resolver.wire_module!(model) == CohereChat
     end
 
     test "infers OpenAIChat for vllm provider" do
