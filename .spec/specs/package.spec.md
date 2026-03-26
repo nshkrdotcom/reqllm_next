@@ -130,7 +130,7 @@ decisions:
     - reqllm.package.compile_time_extensions
 
 - kind: command
-  target: mix test test/providers/deepseek test/providers/groq test/providers/openrouter test/providers/vllm test/providers/xai test/providers/zenmux test/model_profile_test.exs test/wire/resolver_test.exs
+  target: mix test test/providers/deepseek test/providers/groq test/providers/openrouter test/providers/vllm test/providers/xai test/providers/zenmux test/providers/google test/model_profile_test.exs test/wire/resolver_test.exs
   execute: true
   covers:
     - reqllm.package.compile_time_extensions

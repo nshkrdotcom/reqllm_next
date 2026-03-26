@@ -124,7 +124,7 @@ decisions:
     - reqllm.workflow.live_verifier_commands
 
 - kind: command
-  target: mix test test/req_llm_next/extensions/dsl_test.exs test/providers/xai/execution_stack_test.exs test/providers/zenmux/execution_stack_test.exs
+  target: mix test test/req_llm_next/extensions/dsl_test.exs test/providers/xai/execution_stack_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/google/execution_stack_test.exs
   execute: true
   covers:
     - reqllm.workflow.extension_dsl_guidance

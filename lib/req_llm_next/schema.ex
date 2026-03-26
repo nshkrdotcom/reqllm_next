@@ -30,6 +30,20 @@ defmodule ReqLlmNext.Schema do
   end
 
   @doc """
+  Bang version of compile/1 that raises on invalid schema input.
+  """
+  @spec compile!(keyword() | map()) :: %{schema: keyword() | map(), compiled: term()}
+  def compile!(schema) do
+    case compile(schema) do
+      {:ok, compiled_schema} ->
+        compiled_schema
+
+      {:error, reason} ->
+        raise ArgumentError, "Invalid schema: #{inspect(reason)}"
+    end
+  end
+
+  @doc """
   Converts a keyword schema to JSON Schema format.
 
   Note: OpenAI's strict JSON schema mode requires ALL properties to be in the

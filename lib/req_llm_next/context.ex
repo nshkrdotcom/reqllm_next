@@ -48,6 +48,14 @@ defmodule ReqLlmNext.Context do
   @spec new([Message.t()]) :: t()
   def new(list \\ []), do: %__MODULE__{messages: list}
 
+  @doc "Bang version of new/1 that validates the resulting context."
+  @spec new!([Message.t()]) :: t()
+  def new!(list \\ []) do
+    list
+    |> new()
+    |> validate!()
+  end
+
   @doc "Return the underlying message list."
   @spec to_list(t()) :: [Message.t()]
   def to_list(%__MODULE__{messages: msgs}), do: msgs

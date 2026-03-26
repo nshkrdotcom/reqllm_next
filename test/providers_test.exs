@@ -9,6 +9,7 @@ defmodule ReqLlmNext.ProvidersTest do
     Anthropic,
     Cerebras,
     DeepSeek,
+    Google,
     Groq,
     OpenAI,
     OpenRouter,
@@ -30,6 +31,10 @@ defmodule ReqLlmNext.ProvidersTest do
 
     test "returns DeepSeek module for :deepseek" do
       assert Providers.get(:deepseek) == {:ok, DeepSeek}
+    end
+
+    test "returns Google module for :google" do
+      assert Providers.get(:google) == {:ok, Google}
     end
 
     test "returns Groq module for :groq" do
@@ -86,6 +91,10 @@ defmodule ReqLlmNext.ProvidersTest do
       assert Providers.get!(:deepseek) == DeepSeek
     end
 
+    test "returns Google module for :google" do
+      assert Providers.get!(:google) == Google
+    end
+
     test "returns Groq module for :groq" do
       assert Providers.get!(:groq) == Groq
     end
@@ -136,6 +145,7 @@ defmodule ReqLlmNext.ProvidersTest do
       assert :openai in providers
       assert :anthropic in providers
       assert :deepseek in providers
+      assert :google in providers
       assert :groq in providers
       assert :openrouter in providers
       assert :vllm in providers
@@ -205,6 +215,21 @@ defmodule ReqLlmNext.ProvidersTest do
     test "auth_headers returns Bearer token" do
       headers = DeepSeek.auth_headers("test-key")
       assert headers == [{"Authorization", "Bearer test-key"}]
+    end
+  end
+
+  describe "Providers.Google" do
+    test "base_url returns Google Generative Language root URL" do
+      assert Google.base_url() == "https://generativelanguage.googleapis.com"
+    end
+
+    test "env_key returns GOOGLE_API_KEY" do
+      assert Google.env_key() == "GOOGLE_API_KEY"
+    end
+
+    test "auth_headers returns x-goog-api-key" do
+      headers = Google.auth_headers("test-key")
+      assert headers == [{"x-goog-api-key", "test-key"}]
     end
   end
 

@@ -28,6 +28,18 @@ defmodule ReqLlmNext.ModelProfileTest do
     assert [%{id: :openai_chat_text_http_sse}] = ModelProfile.surfaces_for(profile, :text)
   end
 
+  test "uses provider-specific Google family with native generateContent surfaces" do
+    {:ok, profile} = ModelProfile.from_model(ReqLlmNext.TestModels.google())
+
+    assert profile.family == :google_generate_content
+
+    assert [%{id: :google_generate_content_text_http_sse}] =
+             ModelProfile.surfaces_for(profile, :text)
+
+    assert [%{id: :google_generate_content_object_http_sse}] =
+             ModelProfile.surfaces_for(profile, :object)
+  end
+
   test "uses provider-specific groq family over the shared openai-compatible base" do
     {:ok, profile} = ModelProfile.from_model(ReqLlmNext.TestModels.groq())
 

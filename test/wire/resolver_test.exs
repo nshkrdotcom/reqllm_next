@@ -9,6 +9,7 @@ defmodule ReqLlmNext.Wire.ResolverTest do
     AlibabaChat,
     DeepSeekChat,
     CerebrasChat,
+    GoogleGenerateContent,
     GroqChat,
     OpenAIChat,
     OpenAIEmbeddings,
@@ -82,6 +83,11 @@ defmodule ReqLlmNext.Wire.ResolverTest do
     test "infers OpenAIChat for xai provider" do
       model = TestModels.xai()
       assert Resolver.wire_module!(model) == XAIResponses
+    end
+
+    test "infers GoogleGenerateContent for google provider" do
+      model = TestModels.google()
+      assert Resolver.wire_module!(model) == GoogleGenerateContent
     end
 
     test "infers OpenAIChat for vllm provider" do
