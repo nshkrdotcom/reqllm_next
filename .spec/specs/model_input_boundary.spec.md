@@ -31,7 +31,7 @@ decisions:
 
 ```spec-requirements
 - id: reqllm.model_input.accepted_forms
-  statement: ReqLlmNext public runtime APIs shall accept model input only as an `LLMDB` `model_spec` string or a `%LLMDB.Model{}`, including handcrafted `%LLMDB.Model{}` values used for local iteration, unreleased models, and local providers, and that narrow boundary shall stay stable across the top-level text, object, media, embedding, and support-introspection facade plus the shared realtime core and sparse live verifier suites even as concrete provider and family implementations are co-located into internal slice homes and the provider roster grows through family-first expansion.
+  statement: ReqLlmNext public runtime APIs shall accept model input only as an `LLMDB` `model_spec` string or a `%LLMDB.Model{}`, including handcrafted `%LLMDB.Model{}` values used for local iteration, unreleased models, and local providers, and that narrow boundary shall stay stable across the top-level text, object, media, embedding, and support-introspection facade plus the shared realtime core and sparse live verifier suites even as concrete provider and family implementations are co-located into internal slice homes, the provider roster grows through family-first expansion, and packaged models resolve into first-class or best-effort support tiers.
   priority: must
   stability: evolving
 

@@ -79,6 +79,27 @@ It breaks the old coupling where trying a new model required landing catalog wor
 
 That flexibility is allowed only at the `%LLMDB.Model{}` boundary. ReqLlmNext still rejects tuples, ad hoc maps, and local descriptor shapes so the rest of the runtime can stay strict.
 
+## Why Support Tiers Matter
+
+ReqLlmNext can now make a larger promise than "only explicitly integrated providers work," but it needs to do that honestly.
+
+The package now treats support in three tiers:
+
+1. first-class
+   - dedicated provider slices, deeper provider-native validation, utilities, and stronger proof
+2. best-effort
+   - packaged `LLMDB` models that can execute safely through typed `LLMDB.Provider.runtime` and `LLMDB.Model.execution` metadata plus an existing canonical family
+3. unsupported
+   - catalog-only or under-specified models that should fail fast with an actionable reason
+
+That tiering matters because it lets ReqLlmNext accept all `LLMDB` models as inputs without pretending every packaged model has the same depth of provider-native support.
+
+It also keeps the architecture honest:
+
+1. first-class providers still justify their dedicated slices
+2. best-effort support stays limited to canonical operations and typed upstream metadata
+3. provider-native utilities do not get implied by generic execution
+
 ## Why The Execution Plan Matters
 
 The key runtime decision is that provider access is not discovered piecemeal at call time.

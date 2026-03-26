@@ -15,6 +15,8 @@ ReqLlmNext currently ships:
 
 Wrapper platforms such as Azure, Google Vertex, and Amazon Bedrock remain intentionally deferred.
 
+ReqLlmNext also accepts packaged `LLMDB` models outside those first-class slices on a best-effort basis when `LLMDB` publishes enough typed runtime metadata to execute them safely through an existing canonical family.
+
 ## Quick Start
 
 ```elixir
@@ -38,7 +40,30 @@ transcript.text
 
 {:ok, speech} = ReqLlmNext.speak("openai:gpt-4o-mini-tts", "Hello from ReqLlmNext")
 speech.audio
+
+ReqLlmNext.support_status("openai:gpt-4o-mini")
+#=> :first_class
+
+ReqLlmNext.support_status("mistral:pixtral-large-latest")
+#=> :best_effort
 ```
+
+## Support Tiers
+
+ReqLlmNext now exposes three support tiers through `support_status/1`:
+
+1. `:first_class`
+   - the provider has a dedicated slice with provider-owned validation, utilities, and deeper proof
+2. `:best_effort`
+   - the model is packaged in `LLMDB` and can execute safely through typed `LLMDB.Provider.runtime` and `LLMDB.Model.execution` metadata using an existing canonical family
+3. `{:unsupported, reason}`
+   - the model is catalog-only, missing required runtime metadata, or names an execution family ReqLlmNext does not know how to run
+
+Best-effort support is intentionally narrower than first-class support:
+
+1. it covers canonical operations such as text, object, embeddings, media, and realtime only when `LLMDB` declares them
+2. it does not imply provider-native utility endpoints
+3. it fails fast when required runtime configuration such as account-scoped base URL variables is missing
 
 ## Architecture
 
@@ -141,3 +166,5 @@ REQ_LLM_NEXT_RUN_LIVE_VERIFIERS=1 mix test.live_verifiers
 ```
 
 The broader provider expansion wave is currently verified through replay-backed provider-slice tests and focused unit or wire suites rather than by broad live matrices.
+
+Best-effort packaged provider coverage now also includes a curated replay-backed proof matrix for representative non-first-class providers such as Mistral, TogetherAI, GitHub Models, Perplexity, and Cloudflare Workers AI.

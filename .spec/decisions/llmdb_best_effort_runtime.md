@@ -106,3 +106,8 @@ Tradeoffs:
    to local runtime families
 3. support claims now need to distinguish first-class and best-effort execution
    tiers rather than flattening everything into one support word
+
+That support-tier distinction is part of the public package story, not just an
+internal implementation detail. README, package-thesis guidance, provider
+expansion guidance, and the public `support_status/1` API should all describe
+the same three-tier contract.

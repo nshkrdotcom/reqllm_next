@@ -52,7 +52,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.model_compat.curated_support_matrix
-  statement: Provider compatibility sweeps shall run against a curated support matrix of representative provider, model, and transport lanes so live verification stays cost-aware and stable while still pressure-testing the execution-plan architecture, while provider-native feature probes and request-style media lanes that do not fit the generic scenario system remain outside the matrix in focused provider-feature coverage.
+  statement: Provider compatibility sweeps shall run against a curated support matrix of representative provider, model, and transport lanes so live verification stays cost-aware and stable while still pressure-testing the execution-plan architecture, while provider-native feature probes, request-style media lanes that do not fit the generic scenario system, and curated replay-backed best-effort provider proof matrices for representative non-first-class providers remain outside the live matrix in focused coverage lanes.
   priority: should
   stability: evolving
 
@@ -82,7 +82,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.model_compat.provider_expansion_ordering
-  statement: Provider expansion work shall prefer providers that can ride existing families with provider-owned deltas before wrapper platforms or new family systems, shall treat cloud wrappers such as Azure, Google Vertex, and Amazon Bedrock as deferred architecture-heavy additions rather than early ports, and shall document the near-term provider queue in the provider-expansion roadmap so future provider work stays family-first and replay-first.
+  statement: Provider expansion work shall prefer providers that can ride existing families with provider-owned deltas before wrapper platforms or new family systems, shall treat cloud wrappers such as Azure, Google Vertex, and Amazon Bedrock as deferred architecture-heavy additions rather than early ports, and shall document the near-term provider queue plus first-class versus best-effort support boundaries in the provider-expansion roadmap so future provider work stays family-first and replay-first.
   priority: should
   stability: evolving
 ```
@@ -137,6 +137,13 @@ decisions:
   execute: true
   covers:
     - reqllm.model_compat.extension_pressure_tests
+
+- kind: command
+  target: mix test test/coverage/best_effort_provider_matrix_test.exs
+  execute: true
+  covers:
+    - reqllm.model_compat.curated_support_matrix
+    - reqllm.model_compat.provider_expansion_ordering
 
 - kind: command
   target: mix test.live_verifiers

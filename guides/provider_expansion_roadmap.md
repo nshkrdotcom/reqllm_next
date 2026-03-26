@@ -16,6 +16,12 @@ Record the practical provider-addition order for ReqLlmNext now that the package
 
 This guide is intentionally narrower than the package thesis. It exists to keep provider work aligned with the current architecture instead of re-importing the looser patterns from old `ReqLLM`.
 
+The roadmap now assumes three runtime support tiers:
+
+1. first-class providers with dedicated provider slices
+2. best-effort packaged providers executed through typed `LLMDB` runtime metadata and an existing canonical family
+3. unsupported or catalog-only models that should fail fast with an explicit reason
+
 ## Expansion Rules
 
 Add providers in this order:
@@ -81,8 +87,12 @@ The completed provider wave showed that:
 
 1. OpenAI-compatible growth can stay local to provider slices and manifest declarations
 2. new native families can land without reopening shared planner branching
-3. replay-backed provider-slice tests are a sustainable default proof system for expansion work
+3. replay-backed provider-slice tests plus a curated best-effort provider matrix are a sustainable default proof system for expansion work
 4. sparse live verifier coverage should remain curated around Anthropic and OpenAI anchor lanes instead of becoming a broad provider matrix
+
+It also means new provider work should ask one question up front:
+
+1. should this provider become first-class now, or is best-effort execution through typed `LLMDB` runtime metadata enough for the current promise
 
 ## Next Pressure
 
@@ -100,6 +110,8 @@ Every provider addition should land with:
 2. provider-specific unit and wire tests where request shaping matters
 3. fixture evidence for representative lanes when live keys are available
 4. guide and spec reconciliation
+
+Providers that stay best-effort should still be exercised by the curated metadata-driven proof matrix so the generic runtime path does not silently drift.
 
 Only representative lanes should become live verifier tests.
 

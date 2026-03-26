@@ -270,7 +270,7 @@
         "id": "reqllm.architecture.facts_mode_policy_plan",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext architecture shall normalize model facts into `ModelProfile`, request intent into `ExecutionMode`, resolve compatibility-aware surface policy, run surface-owned request preparation, and materialize a single `ExecutionPlan` before downstream execution, including manifest-backed provider-scoped descriptive fact extraction for first-class providers, typed `LLMDB.Provider.runtime` and `LLMDB.Model.execution` metadata as the upstream contract for best-effort providers without dedicated slice registrations, family-owned or metadata-driven surface catalog resolution before planning, manifest-backed or generic runtime-module lookup for provider, session-runtime, protocol, wire, and transport layers, honoring explicit transport and session intent when a matching surface exists, validating surface-specific parameter compatibility before wire encoding, preparing continuation state in session runtime before transport execution, and routing both streaming and request-style non-streaming HTTP execution through explicit transport modules across text, object, embedding, image, transcription, and speech operations.",
+        "statement": "ReqLlmNext architecture shall normalize model facts into `ModelProfile`, request intent into `ExecutionMode`, resolve compatibility-aware surface policy, run surface-owned request preparation, and materialize a single `ExecutionPlan` before downstream execution, including manifest-backed provider-scoped descriptive fact extraction for first-class providers, typed `LLMDB.Provider.runtime` and `LLMDB.Model.execution` metadata as the upstream contract for best-effort providers without dedicated slice registrations, family-owned or metadata-driven surface catalog resolution before planning, manifest-backed or generic runtime-module lookup for provider, session-runtime, protocol, wire, and transport layers, honoring explicit transport and session intent when a matching surface exists, validating surface-specific parameter compatibility before wire encoding, preparing continuation state in session runtime before transport execution, and routing both streaming and request-style non-streaming HTTP execution through explicit transport modules across text, object, embedding, image, transcription, and speech operations, while allowing public docs to distinguish first-class and best-effort support tiers without splitting the runtime into different planner architectures.",
         "subject_id": "reqllm.architecture"
       },
       {
@@ -302,7 +302,7 @@
         "id": "reqllm.diagnostics.compat_consumed",
         "priority": "must",
         "stability": "evolving",
-        "statement": "Runtime layers may emit diagnostics, but curated support-matrix compat runs, anomaly analyzers, issue-drafting tooling, provider utility verification, and future provider expansion work shall consume them outside the execution layers rather than patching runtime behavior in place or introducing provider-specific diagnostic shortcuts.",
+        "statement": "Runtime layers may emit diagnostics, but curated support-matrix compat runs, replay-backed best-effort provider proof matrices, anomaly analyzers, issue-drafting tooling, provider utility verification, and future provider expansion work shall consume them outside the execution layers rather than patching runtime behavior in place or introducing provider-specific diagnostic shortcuts.",
         "subject_id": "reqllm.diagnostics"
       },
       {
@@ -550,7 +550,7 @@
         "id": "reqllm.model_compat.curated_support_matrix",
         "priority": "should",
         "stability": "evolving",
-        "statement": "Provider compatibility sweeps shall run against a curated support matrix of representative provider, model, and transport lanes so live verification stays cost-aware and stable while still pressure-testing the execution-plan architecture, while provider-native feature probes and request-style media lanes that do not fit the generic scenario system remain outside the matrix in focused provider-feature coverage.",
+        "statement": "Provider compatibility sweeps shall run against a curated support matrix of representative provider, model, and transport lanes so live verification stays cost-aware and stable while still pressure-testing the execution-plan architecture, while provider-native feature probes, request-style media lanes that do not fit the generic scenario system, and curated replay-backed best-effort provider proof matrices for representative non-first-class providers remain outside the live matrix in focused coverage lanes.",
         "subject_id": "reqllm.model_compat"
       },
       {
@@ -582,7 +582,7 @@
         "id": "reqllm.model_compat.provider_expansion_ordering",
         "priority": "should",
         "stability": "evolving",
-        "statement": "Provider expansion work shall prefer providers that can ride existing families with provider-owned deltas before wrapper platforms or new family systems, shall treat cloud wrappers such as Azure, Google Vertex, and Amazon Bedrock as deferred architecture-heavy additions rather than early ports, and shall document the near-term provider queue in the provider-expansion roadmap so future provider work stays family-first and replay-first.",
+        "statement": "Provider expansion work shall prefer providers that can ride existing families with provider-owned deltas before wrapper platforms or new family systems, shall treat cloud wrappers such as Azure, Google Vertex, and Amazon Bedrock as deferred architecture-heavy additions rather than early ports, and shall document the near-term provider queue plus first-class versus best-effort support boundaries in the provider-expansion roadmap so future provider work stays family-first and replay-first.",
         "subject_id": "reqllm.model_compat"
       },
       {
@@ -622,7 +622,7 @@
         "id": "reqllm.model_input.accepted_forms",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext public runtime APIs shall accept model input only as an `LLMDB` `model_spec` string or a `%LLMDB.Model{}`, including handcrafted `%LLMDB.Model{}` values used for local iteration, unreleased models, and local providers, and that narrow boundary shall stay stable across the top-level text, object, media, embedding, and support-introspection facade plus the shared realtime core and sparse live verifier suites even as concrete provider and family implementations are co-located into internal slice homes and the provider roster grows through family-first expansion.",
+        "statement": "ReqLlmNext public runtime APIs shall accept model input only as an `LLMDB` `model_spec` string or a `%LLMDB.Model{}`, including handcrafted `%LLMDB.Model{}` values used for local iteration, unreleased models, and local providers, and that narrow boundary shall stay stable across the top-level text, object, media, embedding, and support-introspection facade plus the shared realtime core and sparse live verifier suites even as concrete provider and family implementations are co-located into internal slice homes, the provider roster grows through family-first expansion, and packaged models resolve into first-class or best-effort support tiers.",
         "subject_id": "reqllm.model_input"
       },
       {
@@ -1030,7 +1030,7 @@
         "id": "reqllm.telemetry.canonical_measurements",
         "priority": "must",
         "stability": "evolving",
-        "statement": "Telemetry metadata and measurements shall remain stable across transports, operations, canonical realtime flows, curated provider support-matrix lanes, and future provider additions so application code and compat tooling do not need provider-specific parsing to interpret usage, reasoning, request summaries, or execution-stack selection.",
+        "statement": "Telemetry metadata and measurements shall remain stable across transports, operations, canonical realtime flows, curated provider support-matrix lanes, replay-backed best-effort provider proof matrices, first-class and best-effort provider tiers, and future provider additions so application code and compat tooling do not need provider-specific parsing to interpret usage, reasoning, request summaries, or execution-stack selection.",
         "subject_id": "reqllm.telemetry"
       },
       {
@@ -1158,7 +1158,7 @@
         "id": "reqllm.workflow.provider_surface_guides",
         "priority": "should",
         "stability": "evolving",
-        "statement": "Provider expansion work shall keep provider surface-map, compatibility-evaluation, and provider-expansion roadmap guides in sync with code and subject specs so wide provider coverage remains explainable and reviewable, including honest boundaries around Anthropic-native tool helpers, prompt-cache and effort handling, context-management and compaction support, provider-feature proof depth, responses-first providers such as xAI that add provider-local tool helpers and media-family overrides, and the family-first ordering that defers wrapper platforms such as Azure, Google Vertex, and Amazon Bedrock.",
+        "statement": "Provider expansion work shall keep provider surface-map, compatibility-evaluation, and provider-expansion roadmap guides in sync with code and subject specs so wide provider coverage remains explainable and reviewable, including honest boundaries around Anthropic-native tool helpers, prompt-cache and effort handling, context-management and compaction support, provider-feature proof depth, explicit first-class versus best-effort support tiers, responses-first providers such as xAI that add provider-local tool helpers and media-family overrides, and the family-first ordering that defers wrapper platforms such as Azure, Google Vertex, and Amazon Bedrock.",
         "subject_id": "reqllm.workflow"
       },
       {
@@ -2246,6 +2246,17 @@
       },
       {
         "covers": [
+          "reqllm.model_compat.curated_support_matrix",
+          "reqllm.model_compat.provider_expansion_ordering"
+        ],
+        "execute": true,
+        "file": ".spec/specs/model_compat.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.model_compat",
+        "target": "mix test test/coverage/best_effort_provider_matrix_test.exs"
+      },
+      {
+        "covers": [
           "reqllm.model_compat.live_verifier_separation"
         ],
         "execute": true,
@@ -2998,7 +3009,7 @@
     "requirements": 121,
     "scenarios": 0,
     "subjects": 24,
-    "verifications": 106
+    "verifications": 107
   },
   "verification": {
     "claims": [
@@ -4037,6 +4048,28 @@
         "verification_index": 6
       },
       {
+        "cover_id": "reqllm.model_compat.curated_support_matrix",
+        "file": ".spec/specs/model_compat.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.model_compat",
+        "target": "mix test test/coverage/best_effort_provider_matrix_test.exs",
+        "verification_index": 7
+      },
+      {
+        "cover_id": "reqllm.model_compat.provider_expansion_ordering",
+        "file": ".spec/specs/model_compat.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.model_compat",
+        "target": "mix test test/coverage/best_effort_provider_matrix_test.exs",
+        "verification_index": 7
+      },
+      {
         "cover_id": "reqllm.model_compat.live_verifier_separation",
         "file": ".spec/specs/model_compat.spec.md",
         "kind": "command",
@@ -4045,7 +4078,7 @@
         "strength": "executed",
         "subject_id": "reqllm.model_compat",
         "target": "mix test.live_verifiers",
-        "verification_index": 7
+        "verification_index": 8
       },
       {
         "cover_id": "reqllm.model_compat.provider_expansion_ordering",
@@ -4056,7 +4089,7 @@
         "strength": "linked",
         "subject_id": "reqllm.model_compat",
         "target": "guides/provider_expansion_roadmap.md",
-        "verification_index": 8
+        "verification_index": 9
       },
       {
         "cover_id": "reqllm.model_input.accepted_forms",
@@ -5636,7 +5669,7 @@
     "default_minimum_strength": "claimed",
     "strength_summary": {
       "claimed": 2,
-      "executed": 131,
+      "executed": 133,
       "linked": 106
     },
     "threshold_failures": 0

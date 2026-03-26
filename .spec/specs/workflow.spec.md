@@ -57,7 +57,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.workflow.provider_surface_guides
-  statement: Provider expansion work shall keep provider surface-map, compatibility-evaluation, and provider-expansion roadmap guides in sync with code and subject specs so wide provider coverage remains explainable and reviewable, including honest boundaries around Anthropic-native tool helpers, prompt-cache and effort handling, context-management and compaction support, provider-feature proof depth, responses-first providers such as xAI that add provider-local tool helpers and media-family overrides, and the family-first ordering that defers wrapper platforms such as Azure, Google Vertex, and Amazon Bedrock.
+  statement: Provider expansion work shall keep provider surface-map, compatibility-evaluation, and provider-expansion roadmap guides in sync with code and subject specs so wide provider coverage remains explainable and reviewable, including honest boundaries around Anthropic-native tool helpers, prompt-cache and effort handling, context-management and compaction support, provider-feature proof depth, explicit first-class versus best-effort support tiers, responses-first providers such as xAI that add provider-local tool helpers and media-family overrides, and the family-first ordering that defers wrapper platforms such as Azure, Google Vertex, and Amazon Bedrock.
   priority: should
   stability: evolving
 
