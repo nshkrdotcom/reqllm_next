@@ -34,11 +34,11 @@ That ordering matters because ReqLlmNext is trying to prove that provider growth
 
 If a provider addition starts by touching shared planner logic, that should be treated as a warning sign.
 
-## Current Queue
+## Completed Expansion Wave
 
 ### First Wave: OpenAI-Compatible Reuse
 
-These should mostly reuse the existing OpenAI-compatible family with provider-owned deltas:
+These now ride the existing OpenAI-compatible family with provider-owned deltas:
 
 1. Groq
 2. OpenRouter
@@ -49,7 +49,7 @@ These should mostly reuse the existing OpenAI-compatible family with provider-ow
 
 ### Second Wave: Sharper OpenAI-Compatible Deltas
 
-These still fit the current execution model, but they bring more provider-specific shaping:
+These now fit the current execution model with sharper provider-specific shaping:
 
 1. Cerebras
 2. ZAI
@@ -57,13 +57,15 @@ These still fit the current execution model, but they bring more provider-specif
 
 ### Third Wave: New Families
 
-These add genuinely new family or operation pressure:
+These now provide the first native non-OpenAI-family pressure on the package:
 
 1. Google Gemini
 2. ElevenLabs
 3. Cohere
 
-### Deferred Wrapper Platforms
+## Current Deferred Queue
+
+### Wrapper Platforms
 
 These are explicitly deferred for now:
 
@@ -73,13 +75,30 @@ These are explicitly deferred for now:
 
 They should be treated as cloud wrapper platforms, not as simple provider ports.
 
+## What This Proved
+
+The completed provider wave showed that:
+
+1. OpenAI-compatible growth can stay local to provider slices and manifest declarations
+2. new native families can land without reopening shared planner branching
+3. replay-backed provider-slice tests are a sustainable default proof system for expansion work
+4. sparse live verifier coverage should remain curated around Anthropic and OpenAI anchor lanes instead of becoming a broad provider matrix
+
+## Next Pressure
+
+The next useful work after this wave is:
+
+1. deeper fixture and live-verifier proof for representative non-OpenAI providers when keys are available
+2. selective provider-native utility expansion where the public facade should stay unchanged
+3. eventual wrapper-platform design work for Azure, Google Vertex, and Amazon Bedrock
+
 ## Verification Expectations
 
 Every provider addition should land with:
 
 1. replay-backed public or provider-slice tests
 2. provider-specific unit and wire tests where request shaping matters
-3. fixture evidence for representative lanes
+3. fixture evidence for representative lanes when live keys are available
 4. guide and spec reconciliation
 
 Only representative lanes should become live verifier tests.

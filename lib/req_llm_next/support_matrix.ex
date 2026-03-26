@@ -12,6 +12,11 @@ defmodule ReqLlmNext.SupportMatrix do
 
   Sparse opt-in live verifier tests belong in `test/live_verifiers/` rather than
   expanding this replay-first matrix into a live provider sweep.
+
+  The support matrix intentionally stays anchored on Anthropic and OpenAI model
+  lanes even as broader provider expansion lands through replay-backed provider-slice
+  tests for Groq, OpenRouter, vLLM, xAI, Venice, Alibaba, Cerebras, Z.AI,
+  Zenmux, Google Gemini, ElevenLabs, and Cohere.
   """
 
   @type group :: :coverage | :websocket

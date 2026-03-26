@@ -4,6 +4,17 @@
 
 ReqLlmNext is a metadata-driven LLM client library for Elixir. The goal is to support a wide range of provider APIs behind one canonical ReqLlm-style surface, without letting one model's quirks leak into the rest of the system.
 
+## Current Provider Families
+
+ReqLlmNext currently ships:
+
+1. Anthropic native Messages support
+2. OpenAI native families for chat, Responses, realtime, embeddings, and media
+3. OpenAI-compatible provider slices for DeepSeek, Groq, OpenRouter, vLLM, xAI, Venice, Alibaba, Cerebras, Z.AI, and Zenmux
+4. Native new-family slices for Google Gemini, ElevenLabs media, and Cohere chat
+
+Wrapper platforms such as Azure, Google Vertex, and Amazon Bedrock remain intentionally deferred.
+
 ## Quick Start
 
 ```elixir
@@ -79,11 +90,12 @@ The longer explanation lives in [`guides/package_thesis.md`](./guides/package_th
 Start with:
 
 1. [`guides/package_thesis.md`](./guides/package_thesis.md) for the package thesis
-2. [`guides/openai_surface_map.md`](./guides/openai_surface_map.md) for the current OpenAI coverage boundary
-3. [`guides/anthropic_surface_map.md`](./guides/anthropic_surface_map.md) for the current Anthropic coverage boundary
-4. `.spec/README.md` for the canonical Spec Led workspace
-5. `.spec/specs/architecture.spec.md` for the runtime architecture contract
-6. `.spec/specs/package.spec.md` for the package runtime and verification contract
+2. [`guides/provider_expansion_roadmap.md`](./guides/provider_expansion_roadmap.md) for the current provider-family inventory and deferred queue
+3. [`guides/openai_surface_map.md`](./guides/openai_surface_map.md) for the current OpenAI coverage boundary
+4. [`guides/anthropic_surface_map.md`](./guides/anthropic_surface_map.md) for the current Anthropic coverage boundary
+5. `.spec/README.md` for the canonical Spec Led workspace
+6. `.spec/specs/architecture.spec.md` for the runtime architecture contract
+7. `.spec/specs/package.spec.md` for the package runtime and verification contract
 
 ## Contributor Workflow
 
@@ -127,3 +139,5 @@ Sparse live verifier tests exist for Anthropic and OpenAI drift checks, but they
 ```bash
 REQ_LLM_NEXT_RUN_LIVE_VERIFIERS=1 mix test.live_verifiers
 ```
+
+The broader provider expansion wave is currently verified through replay-backed provider-slice tests and focused unit or wire suites rather than by broad live matrices.

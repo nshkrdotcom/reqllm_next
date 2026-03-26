@@ -212,7 +212,7 @@ That means provider expansion should prefer:
 3. replay-backed proof before broad live coverage
 4. cloud wrapper platforms after simpler provider additions
 
-This is why the next provider wave should be OpenAI-compatible providers such as Groq, OpenRouter, and vLLM before wrapper platforms such as Azure, Google Vertex, or Amazon Bedrock.
+That provider wave has now landed as Groq, OpenRouter, vLLM, xAI, Venice, Alibaba, Cerebras, Z.AI, Zenmux, Google Gemini, ElevenLabs, and Cohere, while wrapper platforms such as Azure, Google Vertex, and Amazon Bedrock remain intentionally deferred.
 
 ## The Role Of Agents
 
