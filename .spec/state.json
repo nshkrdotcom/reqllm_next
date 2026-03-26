@@ -982,7 +982,7 @@
         "id": "reqllm.source_layout.concern_homes",
         "priority": "must",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall keep model-boundary concerns, support-tier introspection, typed runtime-metadata interpretation, provider-scoped fact extraction, manifest-backed provider registration, family-owned or provider-owned surface catalog modules, profile construction, mode normalization, policy resolution, surface-owned request preparation, session-runtime modules, semantic protocol normalization, wire envelopes, transport mechanics, shared response output-item materialization, fixture replay, provider-feature probes, sparse live verifier probes, media input and output contracts, realtime commands and session state, and telemetry emission in distinct source locations that match the architecture, while co-locating concrete family implementations under `lib/req_llm_next/families/` and provider-owned implementations and utilities under `lib/req_llm_next/providers/`, including provider-local chat and media variants such as the Groq, OpenRouter, and xAI slices, simple provider registrations such as the vLLM slice, native-family slices such as the Google Gemini generateContent, ElevenLabs media, and Cohere chat implementations, and central generic best-effort runtime helpers such as `runtime_metadata.ex`, `support.ex`, and `providers/generic.ex`.",
+        "statement": "ReqLlmNext shall keep model-boundary concerns, support-tier introspection, typed runtime-metadata interpretation, provider-scoped fact extraction, manifest-backed provider registration, family-owned or provider-owned surface catalog modules, profile construction, mode normalization, policy resolution, surface-owned request preparation, session-runtime modules, semantic protocol normalization, wire envelopes, transport mechanics, shared response output-item materialization, fixture replay, curated best-effort provider proof matrices, provider-feature probes, sparse live verifier probes, media input and output contracts, realtime commands and session state, and telemetry emission in distinct source locations that match the architecture, while co-locating concrete family implementations under `lib/req_llm_next/families/` and provider-owned implementations and utilities under `lib/req_llm_next/providers/`, including provider-local chat and media variants such as the Groq, OpenRouter, and xAI slices, simple provider registrations such as the vLLM slice, native-family slices such as the Google Gemini generateContent, ElevenLabs media, and Cohere chat implementations, and central generic best-effort runtime helpers such as `runtime_metadata.ex`, `support.ex`, and `providers/generic.ex`.",
         "subject_id": "reqllm.source_layout"
       },
       {
@@ -2456,6 +2456,17 @@
       },
       {
         "covers": [
+          "reqllm.package.execution_planning",
+          "reqllm.package.support_tiers"
+        ],
+        "execute": true,
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/best_effort_runtime_test.exs test/coverage/best_effort_provider_matrix_test.exs test/public_api/support_status_test.exs"
+      },
+      {
+        "covers": [
           "reqllm.package.compile_time_extensions"
         ],
         "execute": true,
@@ -2987,7 +2998,7 @@
     "requirements": 121,
     "scenarios": 0,
     "subjects": 24,
-    "verifications": 105
+    "verifications": 106
   },
   "verification": {
     "claims": [
@@ -4499,6 +4510,28 @@
         "verification_index": 5
       },
       {
+        "cover_id": "reqllm.package.execution_planning",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/best_effort_runtime_test.exs test/coverage/best_effort_provider_matrix_test.exs test/public_api/support_status_test.exs",
+        "verification_index": 6
+      },
+      {
+        "cover_id": "reqllm.package.support_tiers",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/best_effort_runtime_test.exs test/coverage/best_effort_provider_matrix_test.exs test/public_api/support_status_test.exs",
+        "verification_index": 6
+      },
+      {
         "cover_id": "reqllm.package.compile_time_extensions",
         "file": ".spec/specs/package.spec.md",
         "kind": "command",
@@ -4507,7 +4540,7 @@
         "strength": "executed",
         "subject_id": "reqllm.package",
         "target": "mix test test/providers/cohere test/providers/deepseek test/providers/elevenlabs test/providers/groq test/providers/openrouter test/providers/vllm test/providers/xai test/providers/zenmux test/providers/google test/model_profile_test.exs test/wire/resolver_test.exs",
-        "verification_index": 6
+        "verification_index": 7
       },
       {
         "cover_id": "reqllm.package.provider_specific_utilities",
@@ -4518,7 +4551,7 @@
         "strength": "executed",
         "subject_id": "reqllm.package",
         "target": "mix test test/providers/openai/client_test.exs test/providers/openai/background_test.exs test/providers/openai/files_test.exs test/providers/openai/vector_stores_test.exs test/providers/openai/batches_test.exs",
-        "verification_index": 7
+        "verification_index": 8
       },
       {
         "cover_id": "reqllm.package.utility_proof_depth",
@@ -4529,7 +4562,7 @@
         "strength": "executed",
         "subject_id": "reqllm.package",
         "target": "mix test test/providers/openai/client_test.exs test/providers/openai/background_test.exs test/providers/openai/files_test.exs test/providers/openai/vector_stores_test.exs test/providers/openai/batches_test.exs",
-        "verification_index": 7
+        "verification_index": 8
       },
       {
         "cover_id": "reqllm.package.buffered_stream_metadata",
@@ -4540,7 +4573,7 @@
         "strength": "executed",
         "subject_id": "reqllm.package",
         "target": "mix test test/req_llm_next/realtime_adapter_contract_test.exs test/req_llm_next/realtime_test.exs",
-        "verification_index": 8
+        "verification_index": 9
       },
       {
         "cover_id": "reqllm.package.execution_planning",
@@ -4551,17 +4584,6 @@
         "strength": "executed",
         "subject_id": "reqllm.package",
         "target": "mix test test/req_llm_next/realtime_adapter_contract_test.exs test/req_llm_next/realtime_test.exs",
-        "verification_index": 8
-      },
-      {
-        "cover_id": "reqllm.package.model_slice_verification",
-        "file": ".spec/specs/package.spec.md",
-        "kind": "command",
-        "meets_minimum": true,
-        "required_strength": "claimed",
-        "strength": "executed",
-        "subject_id": "reqllm.package",
-        "target": "mix test test/model_slices/anthropic_haiku_4_5_test.exs",
         "verification_index": 9
       },
       {
@@ -4572,7 +4594,7 @@
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.package",
-        "target": "mix test test/model_slices/openai_gpt_4o_mini_test.exs",
+        "target": "mix test test/model_slices/anthropic_haiku_4_5_test.exs",
         "verification_index": 10
       },
       {
@@ -4583,21 +4605,10 @@
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.package",
-        "target": "mix test.starter_slice",
+        "target": "mix test test/model_slices/openai_gpt_4o_mini_test.exs",
         "verification_index": 11
       },
       {
-        "cover_id": "reqllm.package.fixture_replay",
-        "file": ".spec/specs/package.spec.md",
-        "kind": "command",
-        "meets_minimum": true,
-        "required_strength": "claimed",
-        "strength": "executed",
-        "subject_id": "reqllm.package",
-        "target": "mix test test/coverage/anthropic_comprehensive_test.exs",
-        "verification_index": 12
-      },
-      {
         "cover_id": "reqllm.package.model_slice_verification",
         "file": ".spec/specs/package.spec.md",
         "kind": "command",
@@ -4605,7 +4616,7 @@
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.package",
-        "target": "mix test test/coverage/anthropic_comprehensive_test.exs",
+        "target": "mix test.starter_slice",
         "verification_index": 12
       },
       {
@@ -4616,7 +4627,7 @@
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.package",
-        "target": "mix test test/coverage/openai_comprehensive_test.exs",
+        "target": "mix test test/coverage/anthropic_comprehensive_test.exs",
         "verification_index": 13
       },
       {
@@ -4627,7 +4638,7 @@
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.package",
-        "target": "mix test test/coverage/openai_comprehensive_test.exs",
+        "target": "mix test test/coverage/anthropic_comprehensive_test.exs",
         "verification_index": 13
       },
       {
@@ -4638,7 +4649,7 @@
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.package",
-        "target": "mix test test/coverage/openai_websocket_coverage_test.exs",
+        "target": "mix test test/coverage/openai_comprehensive_test.exs",
         "verification_index": 14
       },
       {
@@ -4649,7 +4660,7 @@
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.package",
-        "target": "mix test test/coverage/openai_websocket_coverage_test.exs",
+        "target": "mix test test/coverage/openai_comprehensive_test.exs",
         "verification_index": 14
       },
       {
@@ -4660,7 +4671,7 @@
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.package",
-        "target": "mix test test/provider_features/anthropic_beta_features_test.exs",
+        "target": "mix test test/coverage/openai_websocket_coverage_test.exs",
         "verification_index": 15
       },
       {
@@ -4671,7 +4682,7 @@
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.package",
-        "target": "mix test test/provider_features/anthropic_beta_features_test.exs",
+        "target": "mix test test/coverage/openai_websocket_coverage_test.exs",
         "verification_index": 15
       },
       {
@@ -4682,7 +4693,7 @@
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.package",
-        "target": "mix test test/provider_features/anthropic_advanced_messages_test.exs",
+        "target": "mix test test/provider_features/anthropic_beta_features_test.exs",
         "verification_index": 16
       },
       {
@@ -4693,8 +4704,30 @@
         "required_strength": "claimed",
         "strength": "executed",
         "subject_id": "reqllm.package",
-        "target": "mix test test/provider_features/anthropic_advanced_messages_test.exs",
+        "target": "mix test test/provider_features/anthropic_beta_features_test.exs",
         "verification_index": 16
+      },
+      {
+        "cover_id": "reqllm.package.fixture_replay",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/provider_features/anthropic_advanced_messages_test.exs",
+        "verification_index": 17
+      },
+      {
+        "cover_id": "reqllm.package.model_slice_verification",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/provider_features/anthropic_advanced_messages_test.exs",
+        "verification_index": 17
       },
       {
         "cover_id": "reqllm.package.live_verifier_lane",
@@ -4705,7 +4738,7 @@
         "strength": "executed",
         "subject_id": "reqllm.package",
         "target": "mix test.live_verifiers",
-        "verification_index": 17
+        "verification_index": 18
       },
       {
         "cover_id": "reqllm.package.local_env_loading",
@@ -4716,7 +4749,7 @@
         "strength": "executed",
         "subject_id": "reqllm.package",
         "target": "mix test test/env_test.exs",
-        "verification_index": 18
+        "verification_index": 19
       },
       {
         "cover_id": "reqllm.package.provider_specific_utilities",
@@ -4727,7 +4760,7 @@
         "strength": "executed",
         "subject_id": "reqllm.package",
         "target": "mix test test/providers/anthropic",
-        "verification_index": 19
+        "verification_index": 20
       },
       {
         "cover_id": "reqllm.package.provider_native_input_isolation",
@@ -4738,7 +4771,7 @@
         "strength": "executed",
         "subject_id": "reqllm.package",
         "target": "mix test test/operation_planner_test.exs test/providers/anthropic/wire_messages_test.exs test/families/openai_compatible/wire_chat_test.exs test/providers/openai/wire_responses_request_test.exs",
-        "verification_index": 20
+        "verification_index": 21
       },
       {
         "cover_id": "reqllm.package.compile_time_extensions",
@@ -4749,7 +4782,7 @@
         "strength": "executed",
         "subject_id": "reqllm.package",
         "target": "mix test test/req_llm_next/extensions/manifest_test.exs test/req_llm_next/extensions/dsl_test.exs test/req_llm_next/extensions/manifest_verifier_test.exs",
-        "verification_index": 21
+        "verification_index": 22
       },
       {
         "cover_id": "reqllm.package.zoi_struct_contracts",
@@ -4760,7 +4793,7 @@
         "strength": "executed",
         "subject_id": "reqllm.package",
         "target": "mix test test/stream_response_test.exs test/executor/stream_state_test.exs test/req_llm_next/response/materializer_test.exs",
-        "verification_index": 22
+        "verification_index": 23
       },
       {
         "cover_id": "reqllm.policy_rules.allowed_patch_domains",
@@ -5603,7 +5636,7 @@
     "default_minimum_strength": "claimed",
     "strength_summary": {
       "claimed": 2,
-      "executed": 129,
+      "executed": 131,
       "linked": 106
     },
     "threshold_failures": 0

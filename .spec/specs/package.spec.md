@@ -145,6 +145,13 @@ decisions:
     - reqllm.package.support_tiers
 
 - kind: command
+  target: mix test test/best_effort_runtime_test.exs test/coverage/best_effort_provider_matrix_test.exs test/public_api/support_status_test.exs
+  execute: true
+  covers:
+    - reqllm.package.execution_planning
+    - reqllm.package.support_tiers
+
+- kind: command
   target: mix test test/providers/cohere test/providers/deepseek test/providers/elevenlabs test/providers/groq test/providers/openrouter test/providers/vllm test/providers/xai test/providers/zenmux test/providers/google test/model_profile_test.exs test/wire/resolver_test.exs
   execute: true
   covers:
