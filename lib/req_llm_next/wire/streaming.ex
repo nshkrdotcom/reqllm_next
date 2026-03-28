@@ -57,7 +57,7 @@ defmodule ReqLlmNext.Wire.Streaming do
   @spec build_request(module(), module(), LLMDB.Model.t(), String.t(), keyword()) ::
           {:ok, Finch.Request.t()} | {:error, term()}
   def build_request(provider_mod, wire_mod, model, prompt, opts) do
-    if function_exported?(wire_mod, :build_request, 4) do
+    if optional_callback?(wire_mod, :build_request, 4) do
       wire_mod.build_request(provider_mod, model, prompt, opts)
     else
       wire_headers = get_wire_headers(wire_mod, opts)
@@ -80,10 +80,14 @@ defmodule ReqLlmNext.Wire.Streaming do
   end
 
   defp get_wire_headers(wire_mod, opts) do
-    if function_exported?(wire_mod, :headers, 1) do
+    if optional_callback?(wire_mod, :headers, 1) do
       wire_mod.headers(opts)
     else
       [{"Content-Type", "application/json"}]
     end
+  end
+
+  defp optional_callback?(module, function_name, arity) do
+    Code.ensure_loaded?(module) and function_exported?(module, function_name, arity)
   end
 end

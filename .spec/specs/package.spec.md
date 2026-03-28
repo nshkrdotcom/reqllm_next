@@ -20,6 +20,7 @@ decisions:
   - reqllm.decision.zoi_backed_struct_contracts
   - reqllm.decision.live_verifier_tests
   - reqllm.decision.llmdb_best_effort_runtime
+  - reqllm.decision.loaded_optional_wire_callbacks
 ```
 
 ## Requirements
@@ -36,7 +37,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.package.execution_planning
-  statement: ReqLlmNext shall route supported requests through a deterministic planning path that normalizes model facts into `ModelProfile`, request intent into `ExecutionMode`, selects explicit `ExecutionSurface` support through compatibility-aware policy, validates surface-specific parameter compatibility, materializes an `ExecutionPlan`, and resolves an execution stack of provider, session runtime, semantic protocol, wire, and transport modules before runtime execution, with provider facts, runtime-module lookup, and surface catalog construction driven from the compiled extension manifest for first-class providers and from typed `LLMDB.Provider.runtime` plus `LLMDB.Model.execution` metadata for best-effort providers rather than from central provider branching, and the provider layer shall honor typed runtime auth styles, templated provider configuration, and per-operation `base_url`, `path`, and `provider_model_id` overrides declared by that upstream contract.
+  statement: ReqLlmNext shall route supported requests through a deterministic planning path that normalizes model facts into `ModelProfile`, request intent into `ExecutionMode`, selects explicit `ExecutionSurface` support through compatibility-aware policy, validates surface-specific parameter compatibility, materializes an `ExecutionPlan`, and resolves an execution stack of provider, session runtime, semantic protocol, wire, and transport modules before runtime execution, with provider facts, runtime-module lookup, and surface catalog construction driven from the compiled extension manifest for first-class providers and from typed `LLMDB.Provider.runtime` plus `LLMDB.Model.execution` metadata for best-effort providers rather than from central provider branching, and the provider layer shall honor typed runtime auth styles, templated provider configuration, and per-operation `base_url`, `path`, and `provider_model_id` overrides declared by that upstream contract while shared wire dispatch continues to honor provider-owned optional callbacks such as custom request builders and wire-specific headers even when those wire modules were not preloaded earlier in the VM lifetime.
   priority: must
   stability: evolving
 
@@ -126,6 +127,12 @@ decisions:
 
 - kind: command
   target: mix test test/operation_planner_test.exs
+  execute: true
+  covers:
+    - reqllm.package.execution_planning
+
+- kind: command
+  target: mix test test/wire/streaming_test.exs test/wire/streaming_optional_callbacks_test.exs
   execute: true
   covers:
     - reqllm.package.execution_planning
