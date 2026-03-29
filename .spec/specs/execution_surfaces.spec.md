@@ -25,7 +25,7 @@ decisions:
 
 ```spec-requirements
 - id: reqllm.execution_surfaces.support_unit
-  statement: ReqLlmNext shall represent each valid endpoint style as a named `ExecutionSurface` that bundles semantic protocol, wire format, transport, session compatibility, feature tags, and owning family id for one operation family, including provider-native structured-output strategies, provider-native request-preparation rules, any session-runtime seam selection implied by that semantic family, and request-style media surfaces when a provider exposes standalone image, transcription, or speech APIs, including provider-local responses-first surface ids such as xAI text and object Responses lanes, provider-local media-family overrides such as xAI image generation, and generic best-effort surfaces synthesized from typed `LLMDB.Model.execution` metadata for non-first-class providers.
+  statement: ReqLlmNext shall represent each valid endpoint style as a named `ExecutionSurface` that bundles semantic protocol, wire format, transport, session compatibility, feature tags, and owning family id for one operation family, including provider-native structured-output strategies, provider-native request-preparation rules, any session-runtime seam selection implied by that semantic family, and request-style media surfaces when a provider exposes standalone image, transcription, or speech APIs, including provider-local responses-first surface ids such as xAI text and object Responses lanes, Google embedding and image surfaces inside the native Google family, provider-local media-family overrides such as xAI image generation, and generic best-effort surfaces synthesized from typed `LLMDB.Model.execution` metadata for non-first-class providers.
   priority: must
   stability: evolving
 
@@ -61,7 +61,7 @@ decisions:
     - reqllm.execution_surfaces.surface_selection
 
 - kind: command
-  target: mix test test/operation_planner_test.exs test/providers/xai/execution_stack_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/google/execution_stack_test.exs test/providers/elevenlabs/execution_stack_test.exs test/providers/cohere/execution_stack_test.exs
+  target: mix test test/operation_planner_test.exs test/providers/xai/execution_stack_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/google/execution_stack_test.exs test/providers/google/wire_embeddings_test.exs test/providers/google/wire_images_test.exs test/providers/elevenlabs/execution_stack_test.exs test/providers/cohere/execution_stack_test.exs
   execute: true
   covers:
     - reqllm.execution_surfaces.support_unit

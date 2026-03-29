@@ -37,7 +37,7 @@ surface:
   stability: evolving
 
 - id: reqllm.public_api.support_status
-  statement: `ReqLlmNext.support_status/1` shall accept the same canonical model inputs as the execution facade and return `:first_class`, `:best_effort`, or `{:unsupported, reason}` based on integrated provider slices, typed `LLMDB` runtime and execution metadata, and explicit fail-fast unsupported reasons such as `:catalog_only`, `:missing_provider_runtime`, or `:missing_execution_metadata`.
+  statement: `ReqLlmNext.support_status/1` shall accept the same canonical model inputs as the execution facade and return `:first_class`, `:best_effort`, or `{:unsupported, reason}` based on integrated provider slices, typed `LLMDB` runtime and execution metadata, and explicit fail-fast unsupported reasons such as `:catalog_only`, `:missing_provider_runtime`, or `:missing_execution_metadata`, with first-class status reflecting actual provider-owned surfaces rather than provider registration alone so locally implemented Google embedding or image lanes can report `:first_class` even when upstream metadata still marks adjacent models as catalog-only.
   priority: should
   stability: evolving
 ```

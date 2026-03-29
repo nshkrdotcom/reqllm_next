@@ -65,7 +65,7 @@ These now fit the current execution model with sharper provider-specific shaping
 
 These now provide the first native non-OpenAI-family pressure on the package:
 
-1. Google Gemini
+1. Google Gemini, including provider-owned generateContent, embedding, and image lanes
 2. ElevenLabs
 3. Cohere
 

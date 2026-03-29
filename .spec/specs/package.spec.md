@@ -92,7 +92,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.package.support_tiers
-  statement: ReqLlmNext shall accept all `LLMDB` models as public inputs, report support through explicit `:first_class`, `:best_effort`, and `{:unsupported, reason}` tiers, execute packaged non-first-class models through canonical families only when typed `LLMDB` runtime metadata is complete enough to do so safely, prove that path against a curated best-effort provider matrix instead of a single happy-path provider, and fail fast when packaged metadata is catalog-only, incomplete, or names an unknown execution family.
+  statement: ReqLlmNext shall accept all `LLMDB` models as public inputs, report support through explicit `:first_class`, `:best_effort`, and `{:unsupported, reason}` tiers, treat first-class support as a function of actual provider-owned surfaces rather than provider registration alone, execute packaged non-first-class models through canonical families only when typed `LLMDB` runtime metadata is complete enough to do so safely, prove that path against a curated best-effort provider matrix instead of a single happy-path provider, and fail fast when packaged metadata is catalog-only, incomplete, or names an unknown execution family.
   priority: should
   stability: evolving
 ```

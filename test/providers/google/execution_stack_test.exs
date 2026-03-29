@@ -35,4 +35,48 @@ defmodule ReqLlmNext.Providers.Google.ExecutionStackTest do
     assert plan.surface.semantic_protocol == :google_generate_content
     assert plan.surface.features.structured_output == :native_json_schema
   end
+
+  test "plans Google embeddings through the provider-owned embedding wire" do
+    {:ok, plan} =
+      OperationPlanner.plan(
+        TestModels.google(%{
+          id: "gemini-embedding-001",
+          capabilities: %{chat: false, embeddings: true},
+          modalities: %{input: [:text], output: [:embedding]}
+        }),
+        :embed,
+        "hello"
+      )
+
+    resolution = ExecutionModules.resolve(plan)
+
+    assert plan.model.family == :google_generate_content
+    assert plan.surface.id == :google_embeddings_embed_http
+    assert plan.surface.semantic_protocol == :google_embeddings
+    assert plan.surface.wire_format == :google_embeddings_json
+    assert resolution.provider_mod == ReqLlmNext.Providers.Google
+    assert resolution.wire_mod == ReqLlmNext.Wire.GoogleEmbeddings
+  end
+
+  test "plans Google image models through the provider-owned image wire" do
+    {:ok, plan} =
+      OperationPlanner.plan(
+        TestModels.google(%{
+          id: "gemini-2.5-flash-image",
+          capabilities: %{chat: false, embeddings: false},
+          modalities: %{input: [:text, :image], output: [:text, :image]}
+        }),
+        :image,
+        "Draw a paper lantern at dusk"
+      )
+
+    resolution = ExecutionModules.resolve(plan)
+
+    assert plan.model.family == :google_generate_content
+    assert plan.surface.id == :google_images_image_http
+    assert plan.surface.semantic_protocol == :google_images
+    assert plan.surface.wire_format == :google_images_json
+    assert resolution.provider_mod == ReqLlmNext.Providers.Google
+    assert resolution.wire_mod == ReqLlmNext.Wire.GoogleImages
+  end
 end

@@ -19,6 +19,7 @@ surface:
   - guides/provider_expansion_roadmap.md
   - guides/anthropic_surface_map.md
   - guides/openai_surface_map.md
+  - guides/google_surface_map.md
   - guides/anthropic_openai_compatibility.md
   - mix.exs
 decisions:
@@ -57,7 +58,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.workflow.provider_surface_guides
-  statement: Provider expansion work shall keep provider surface-map, compatibility-evaluation, and provider-expansion roadmap guides in sync with code and subject specs so wide provider coverage remains explainable and reviewable, including honest boundaries around Anthropic-native tool helpers, prompt-cache and effort handling, context-management and compaction support, provider-feature proof depth, explicit first-class versus best-effort support tiers, responses-first providers such as xAI that add provider-local tool helpers and media-family overrides, and the family-first ordering that defers wrapper platforms such as Azure, Google Vertex, and Amazon Bedrock.
+  statement: Provider expansion work shall keep provider surface-map, compatibility-evaluation, and provider-expansion roadmap guides in sync with code and subject specs so wide provider coverage remains explainable and reviewable, including honest boundaries around Anthropic-native tool helpers, prompt-cache and effort handling, context-management and compaction support, Google generateContent versus embedding versus image boundaries plus long-tail unsupported families, provider-feature proof depth, explicit first-class versus best-effort support tiers, responses-first providers such as xAI that add provider-local tool helpers and media-family overrides, and the family-first ordering that defers wrapper platforms such as Azure, Google Vertex, and Amazon Bedrock.
   priority: should
   stability: evolving
 

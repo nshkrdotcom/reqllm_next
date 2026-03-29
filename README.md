@@ -11,7 +11,7 @@ ReqLlmNext currently ships:
 1. Anthropic native Messages support
 2. OpenAI native families for chat, Responses, realtime, embeddings, and media
 3. OpenAI-compatible provider slices for DeepSeek, Groq, OpenRouter, vLLM, xAI, Venice, Alibaba, Cerebras, Z.AI, and Zenmux
-4. Native new-family slices for Google Gemini, ElevenLabs media, and Cohere chat
+4. Native new-family slices for Google Gemini generateContent plus Google embeddings and image generation, ElevenLabs media, and Cohere chat
 
 Wrapper platforms such as Azure, Google Vertex, and Amazon Bedrock remain intentionally deferred.
 
@@ -118,9 +118,10 @@ Start with:
 2. [`guides/provider_expansion_roadmap.md`](./guides/provider_expansion_roadmap.md) for the current provider-family inventory and deferred queue
 3. [`guides/openai_surface_map.md`](./guides/openai_surface_map.md) for the current OpenAI coverage boundary
 4. [`guides/anthropic_surface_map.md`](./guides/anthropic_surface_map.md) for the current Anthropic coverage boundary
-5. `.spec/README.md` for the canonical Spec Led workspace
-6. `.spec/specs/architecture.spec.md` for the runtime architecture contract
-7. `.spec/specs/package.spec.md` for the package runtime and verification contract
+5. [`guides/google_surface_map.md`](./guides/google_surface_map.md) for the current Google coverage boundary
+6. `.spec/README.md` for the canonical Spec Led workspace
+7. `.spec/specs/architecture.spec.md` for the runtime architecture contract
+8. `.spec/specs/package.spec.md` for the package runtime and verification contract
 
 ## Contributor Workflow
 

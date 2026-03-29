@@ -30,14 +30,22 @@ defmodule ReqLlmNext.Extensions.Definitions.Google do
         surface_catalog_module(ReqLlmNext.ModelProfile.SurfaceCatalog.GoogleGenerateContent)
 
         surface_preparation_modules(
-          google_generate_content: ReqLlmNext.SurfacePreparation.GoogleGenerateContent
+          google_generate_content: ReqLlmNext.SurfacePreparation.GoogleGenerateContent,
+          google_embeddings: ReqLlmNext.SurfacePreparation.GoogleEmbeddings,
+          google_images: ReqLlmNext.SurfacePreparation.GoogleImages
         )
 
         semantic_protocol_modules(
-          google_generate_content: ReqLlmNext.SemanticProtocols.GoogleGenerateContent
+          google_generate_content: ReqLlmNext.SemanticProtocols.GoogleGenerateContent,
+          google_embeddings: ReqLlmNext.SemanticProtocols.GoogleGenerateContent,
+          google_images: ReqLlmNext.SemanticProtocols.GoogleGenerateContent
         )
 
-        wire_modules(google_generate_content_sse_json: ReqLlmNext.Wire.GoogleGenerateContent)
+        wire_modules(
+          google_generate_content_sse_json: ReqLlmNext.Wire.GoogleGenerateContent,
+          google_embeddings_json: ReqLlmNext.Wire.GoogleEmbeddings,
+          google_images_json: ReqLlmNext.Wire.GoogleImages
+        )
       end
     end
   end

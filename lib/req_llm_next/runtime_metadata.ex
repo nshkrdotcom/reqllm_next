@@ -104,11 +104,11 @@ defmodule ReqLlmNext.RuntimeMetadata do
   @spec support_status(LLMDB.Model.t()) :: :first_class | :best_effort | {:unsupported, atom()}
   def support_status(%LLMDB.Model{} = model) do
     cond do
-      registered_provider?(model.provider) ->
-        :first_class
-
       model.catalog_only == true ->
         {:unsupported, :catalog_only}
+
+      registered_provider?(model.provider) ->
+        :first_class
 
       not executable_execution?(model) ->
         {:unsupported, :missing_execution_metadata}

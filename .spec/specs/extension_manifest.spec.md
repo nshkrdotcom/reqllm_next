@@ -29,7 +29,7 @@ surface:
   stability: evolving
 
 - id: reqllm.extension_manifest.family_precedence
-  statement: Default execution families shall resolve deterministically from declarative criteria using explicit precedence, then fall back through provider-registered default families and finally global default families, so the happy path is stable and inspectable without reintroducing central provider branching, while allowing provider-local chat and media families such as OpenRouter routing overrides, Groq transcription support, or xAI image-generation overrides on top of a responses-first baseline to shadow provider baselines without mutating the shared family defaults, and allowing simple providers such as vLLM to register only provider seams and intentionally reuse the shared default family unchanged.
+  statement: Default execution families shall resolve deterministically from declarative criteria using explicit precedence, then fall back through provider-registered default families and finally global default families, so the happy path is stable and inspectable without reintroducing central provider branching, while allowing provider-local chat and media families such as OpenRouter routing overrides, Groq transcription support, Google embedding and image surfaces declared inside the native Google family stack, or xAI image-generation overrides on top of a responses-first baseline to shadow provider baselines without mutating the shared family defaults, and allowing simple providers such as vLLM to register only provider seams and intentionally reuse the shared default family unchanged.
   priority: must
   stability: evolving
 
@@ -82,7 +82,7 @@ surface:
     - reqllm.extension_manifest.compile_time_verification
 
 - kind: command
-  target: mix test test/providers/cohere/execution_stack_test.exs test/providers/deepseek/execution_stack_test.exs test/providers/elevenlabs/execution_stack_test.exs test/providers/groq/execution_stack_test.exs test/providers/openrouter/execution_stack_test.exs test/providers/vllm/execution_stack_test.exs test/providers/xai/execution_stack_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/google/execution_stack_test.exs test/model_profile_test.exs
+  target: mix test test/providers/cohere/execution_stack_test.exs test/providers/deepseek/execution_stack_test.exs test/providers/elevenlabs/execution_stack_test.exs test/providers/groq/execution_stack_test.exs test/providers/openrouter/execution_stack_test.exs test/providers/vllm/execution_stack_test.exs test/providers/xai/execution_stack_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/google/execution_stack_test.exs test/providers/google/wire_embeddings_test.exs test/providers/google/wire_images_test.exs test/model_profile_test.exs
   execute: true
   covers:
     - reqllm.extension_manifest.plain_runtime_contract

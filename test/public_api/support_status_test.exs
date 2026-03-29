@@ -43,4 +43,30 @@ defmodule ReqLlmNext.PublicApi.SupportStatusTest do
 
     assert ReqLlmNext.support_status(model) == {:unsupported, :missing_provider_runtime}
   end
+
+  test "returns first-class for provider-owned Google embedding surfaces" do
+    model =
+      %LLMDB.Model{
+        id: "gemini-embedding-001",
+        provider: :google,
+        catalog_only: true,
+        capabilities: %{chat: false, embeddings: true},
+        modalities: %{input: [:text], output: [:embedding]}
+      }
+
+    assert ReqLlmNext.support_status(model) == :first_class
+  end
+
+  test "returns unsupported for catalog-only Google models without supported surfaces" do
+    model =
+      %LLMDB.Model{
+        id: "veo-3.0-generate-preview",
+        provider: :google,
+        catalog_only: true,
+        capabilities: nil,
+        modalities: nil
+      }
+
+    assert ReqLlmNext.support_status(model) == {:unsupported, :catalog_only}
+  end
 end
