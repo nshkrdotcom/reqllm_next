@@ -1,0 +1,73 @@
+{
+  "captured_at": "2026-03-29T00:55:28.658968Z",
+  "chunks": [
+    "ZGF0YTogeyJjYW5kaWRhdGVzIjogW3siY29udGVudCI6IHsicGFydHMiOiBbeyJ0ZXh0IjogIntcImFuc3dlclwiOlwicmVhZHlcIn0ifV0sInJvbGUiOiAibW9kZWwifSwiZmluaXNoUmVhc29uIjogIlNUT1AiLCJpbmRleCI6IDB9XSwidXNhZ2VNZXRhZGF0YSI6IHsicHJvbXB0VG9rZW5Db3VudCI6IDEyLCJjYW5kaWRhdGVzVG9rZW5Db3VudCI6IDUsInRvdGFsVG9rZW5Db3VudCI6IDgwLCJwcm9tcHRUb2tlbnNEZXRhaWxzIjogW3sibW9kYWxpdHkiOiAiVEVYVCIsInRva2VuQ291bnQiOiAxMn1dLCJ0aG91Z2h0c1Rva2VuQ291bnQiOiA2M30sIm1vZGVsVmVyc2lvbiI6ICJnZW1pbmktMi41LWZsYXNoIiwicmVzcG9uc2VJZCI6ICJnSGpJYWFxVExmaWQxTWtQcE9McXFBcyJ9DQoNCg=="
+  ],
+  "execution": {
+    "semantic_protocol": "google_generate_content",
+    "surface_id": "google_generate_content_object_http_sse",
+    "transport": "http_sse",
+    "wire_format": "google_generate_content_sse_json"
+  },
+  "model_id": "gemini-2.5-flash",
+  "prompt": "Reply as JSON with an answer field set to ready.",
+  "provider": "google",
+  "request": {
+    "body": {
+      "b64": "eyJjb250ZW50cyI6W3sicGFydHMiOlt7InRleHQiOiJSZXBseSBhcyBKU09OIHdpdGggYW4gYW5zd2VyIGZpZWxkIHNldCB0byByZWFkeS4ifV0sInJvbGUiOiJ1c2VyIn1dLCJnZW5lcmF0aW9uQ29uZmlnIjp7Im1heE91dHB1dFRva2VucyI6MTI4LCJjYW5kaWRhdGVDb3VudCI6MSwicmVzcG9uc2VKc29uU2NoZW1hIjp7ImFkZGl0aW9uYWxQcm9wZXJ0aWVzIjpmYWxzZSwicHJvcGVydGllcyI6eyJhbnN3ZXIiOnsidHlwZSI6InN0cmluZyJ9fSwicmVxdWlyZWQiOlsiYW5zd2VyIl0sInR5cGUiOiJvYmplY3QifSwicmVzcG9uc2VNaW1lVHlwZSI6ImFwcGxpY2F0aW9uL2pzb24ifX0=",
+      "canonical_json": {
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Reply as JSON with an answer field set to ready."
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "generationConfig": {
+          "candidateCount": 1,
+          "maxOutputTokens": 128,
+          "responseJsonSchema": {
+            "additionalProperties": false,
+            "properties": {
+              "answer": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "answer"
+            ],
+            "type": "object"
+          },
+          "responseMimeType": "application/json"
+        }
+      }
+    },
+    "headers": {
+      "accept": "text/event-stream",
+      "content-type": "application/json",
+      "x-goog-api-key": "AIzaSyDy_Ii_3ZHruOWn5fQiH3EQx3qRqU-hEFo"
+    },
+    "method": "POST",
+    "transport": "http_sse",
+    "url": "https://generativelanguage.googleapis.com:443/v1beta/models/gemini-2.5-flash:streamGenerateContent"
+  },
+  "response": {
+    "headers": {
+      "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+      "content-disposition": "attachment",
+      "content-type": "text/event-stream",
+      "date": "Sun, 29 Mar 2026 00:55:29 GMT",
+      "server": "scaffolding on HTTPServer2",
+      "server-timing": "gfet4t7; dur=814",
+      "transfer-encoding": "chunked",
+      "vary": "Referer",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "SAMEORIGIN",
+      "x-xss-protection": "0"
+    },
+    "status": 200
+  }
+}

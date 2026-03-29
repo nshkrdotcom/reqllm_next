@@ -75,4 +75,10 @@ decisions:
     - reqllm.source_layout.provider_utilities
     - reqllm.source_layout.extension_contract_home
     - reqllm.source_layout.zoi_struct_contracts
+
+- kind: command
+  target: mix test test/provider_features/google_native_surfaces_test.exs test/live_verifiers/google_live_verifier_test.exs --include integration --include live --include live_verifier --exclude slow
+  execute: true
+  covers:
+    - reqllm.source_layout.compat_outside_runtime
 ```

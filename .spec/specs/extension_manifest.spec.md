@@ -82,7 +82,7 @@ surface:
     - reqllm.extension_manifest.compile_time_verification
 
 - kind: command
-  target: mix test test/providers/cohere/execution_stack_test.exs test/providers/deepseek/execution_stack_test.exs test/providers/elevenlabs/execution_stack_test.exs test/providers/groq/execution_stack_test.exs test/providers/openrouter/execution_stack_test.exs test/providers/vllm/execution_stack_test.exs test/providers/xai/execution_stack_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/google/execution_stack_test.exs test/providers/google/wire_embeddings_test.exs test/providers/google/wire_images_test.exs test/model_profile_test.exs
+  target: mix test test/providers/cohere/execution_stack_test.exs test/providers/deepseek/execution_stack_test.exs test/providers/elevenlabs/execution_stack_test.exs test/providers/groq/execution_stack_test.exs test/providers/openrouter/execution_stack_test.exs test/providers/vllm/execution_stack_test.exs test/providers/xai/execution_stack_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/google/execution_stack_test.exs test/providers/google/wire_embeddings_test.exs test/providers/google/wire_images_test.exs test/provider_features/google_native_surfaces_test.exs test/model_profile_test.exs
   execute: true
   covers:
     - reqllm.extension_manifest.plain_runtime_contract

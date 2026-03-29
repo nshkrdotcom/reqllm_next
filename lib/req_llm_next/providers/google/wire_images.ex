@@ -5,6 +5,7 @@ defmodule ReqLlmNext.Wire.GoogleImages do
 
   alias ReqLlmNext.Context
   alias ReqLlmNext.Context.ContentPart
+  alias ReqLlmNext.Error
   alias ReqLlmNext.Provider
   alias ReqLlmNext.Response
   alias ReqLlmNext.Wire.GoogleGenerateContent
@@ -28,7 +29,8 @@ defmodule ReqLlmNext.Wire.GoogleImages do
         |> Keyword.put(:path, request_path)
       end
 
-    with {:ok, url} <- Provider.request_url(provider_mod, model, request_path, request_opts),
+    with :ok <- validate_request_options(model, opts),
+         {:ok, url} <- Provider.request_url(provider_mod, model, request_path, request_opts),
          {:ok, headers} <-
            Provider.request_headers(
              provider_mod,
@@ -285,6 +287,19 @@ defmodule ReqLlmNext.Wire.GoogleImages do
     case provider_options[:google_api_version] do
       "v1" -> base_url <> "/v1"
       _ -> base_url <> "/v1beta"
+    end
+  end
+
+  defp validate_request_options(%LLMDB.Model{id: id}, opts) when is_binary(id) do
+    cond do
+      imagen_model_id?(id) and Keyword.has_key?(opts, :size) ->
+        {:error,
+         Error.Invalid.Parameter.exception(
+           parameter: "Google Imagen models do not support the :size option"
+         )}
+
+      true ->
+        :ok
     end
   end
 

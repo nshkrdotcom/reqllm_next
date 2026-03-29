@@ -48,7 +48,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.layer_boundaries.replay_uses_recorded_stack
-  statement: Fixture replay shall prefer the recorded or inferable surface from the fixture request itself over today's planned surface so replay keeps exercising the execution stack that originally produced the captured artifact, whether that artifact was a streaming capture or a request-style media response that must still route through the owning wire decoder, while sparse live verifier suites above the runtime stack continue to use the same planner and execution layers rather than special-case provider shortcuts.
+  statement: Fixture replay shall prefer the recorded or inferable surface from the fixture request itself over today's planned surface so replay keeps exercising the execution stack that originally produced the captured artifact, whether that artifact was a streaming capture or a request-style media response that must still route through the owning wire decoder, while sparse live verifier suites above the runtime stack continue to use the same planner and execution layers rather than special-case provider shortcuts, including replay-backed Google embedding and image fixtures plus opt-in Google live verifiers that exercise the same native provider stack.
   priority: must
   stability: evolving
 
@@ -90,6 +90,13 @@ decisions:
 
 - kind: command
   target: mix test test/public_api/media_test.exs test/providers/openai/wire_images_test.exs test/providers/openai/wire_transcriptions_test.exs test/providers/openai/wire_speech_test.exs
+  execute: true
+  covers:
+    - reqllm.layer_boundaries.separated_io
+    - reqllm.layer_boundaries.replay_uses_recorded_stack
+
+- kind: command
+  target: mix test test/providers/google/wire_images_test.exs test/provider_features/google_native_surfaces_test.exs
   execute: true
   covers:
     - reqllm.layer_boundaries.separated_io

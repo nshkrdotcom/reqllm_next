@@ -54,7 +54,7 @@ decisions:
     - reqllm.model_profile.request_independent
 
 - kind: command
-  target: mix test test/model_profile_test.exs test/operation_planner_test.exs test/providers/xai/provider_facts_test.exs test/providers/xai/execution_stack_test.exs test/providers/zenmux/provider_facts_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/google/provider_facts_test.exs test/providers/google/execution_stack_test.exs test/providers/google/wire_embeddings_test.exs test/providers/google/wire_images_test.exs test/providers/elevenlabs/provider_facts_test.exs test/providers/elevenlabs/execution_stack_test.exs test/providers/cohere/provider_facts_test.exs test/providers/cohere/execution_stack_test.exs
+  target: mix test test/model_profile_test.exs test/operation_planner_test.exs test/providers/xai/provider_facts_test.exs test/providers/xai/execution_stack_test.exs test/providers/zenmux/provider_facts_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/google/provider_facts_test.exs test/providers/google/execution_stack_test.exs test/providers/google/wire_embeddings_test.exs test/providers/google/wire_images_test.exs test/provider_features/google_native_surfaces_test.exs test/providers/elevenlabs/provider_facts_test.exs test/providers/elevenlabs/execution_stack_test.exs test/providers/cohere/provider_facts_test.exs test/providers/cohere/execution_stack_test.exs
   execute: true
   covers:
     - reqllm.model_profile.descriptive_facts

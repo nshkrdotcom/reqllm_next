@@ -1,0 +1,60 @@
+{
+  "captured_at": "2026-03-29T00:55:29.502474Z",
+  "chunks": [
+    "ZGF0YTogeyJjYW5kaWRhdGVzIjogW3siY29udGVudCI6IHsicGFydHMiOiBbeyJ0ZXh0IjogInJlYWR5In1dLCJyb2xlIjogIm1vZGVsIn0sImZpbmlzaFJlYXNvbiI6ICJTVE9QIiwiaW5kZXgiOiAwfV0sInVzYWdlTWV0YWRhdGEiOiB7InByb21wdFRva2VuQ291bnQiOiA4LCJjYW5kaWRhdGVzVG9rZW5Db3VudCI6IDEsInRvdGFsVG9rZW5Db3VudCI6IDI3LCJwcm9tcHRUb2tlbnNEZXRhaWxzIjogW3sibW9kYWxpdHkiOiAiVEVYVCIsInRva2VuQ291bnQiOiA4fV0sInRob3VnaHRzVG9rZW5Db3VudCI6IDE4fSwibW9kZWxWZXJzaW9uIjogImdlbWluaS0yLjUtZmxhc2giLCJyZXNwb25zZUlkIjogImdYaklhZjZqSk9XbDFNa1AwOVBJb0F3In0NCg0K"
+  ],
+  "execution": {
+    "semantic_protocol": "google_generate_content",
+    "surface_id": "google_generate_content_text_http_sse",
+    "transport": "http_sse",
+    "wire_format": "google_generate_content_sse_json"
+  },
+  "model_id": "gemini-2.5-flash",
+  "prompt": "Reply with the single word ready.",
+  "provider": "google",
+  "request": {
+    "body": {
+      "b64": "eyJjb250ZW50cyI6W3sicGFydHMiOlt7InRleHQiOiJSZXBseSB3aXRoIHRoZSBzaW5nbGUgd29yZCByZWFkeS4ifV0sInJvbGUiOiJ1c2VyIn1dLCJnZW5lcmF0aW9uQ29uZmlnIjp7Im1heE91dHB1dFRva2VucyI6MzIsImNhbmRpZGF0ZUNvdW50IjoxfX0=",
+      "canonical_json": {
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Reply with the single word ready."
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "generationConfig": {
+          "candidateCount": 1,
+          "maxOutputTokens": 32
+        }
+      }
+    },
+    "headers": {
+      "accept": "text/event-stream",
+      "content-type": "application/json",
+      "x-goog-api-key": "AIzaSyDy_Ii_3ZHruOWn5fQiH3EQx3qRqU-hEFo"
+    },
+    "method": "POST",
+    "transport": "http_sse",
+    "url": "https://generativelanguage.googleapis.com:443/v1beta/models/gemini-2.5-flash:streamGenerateContent"
+  },
+  "response": {
+    "headers": {
+      "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+      "content-disposition": "attachment",
+      "content-type": "text/event-stream",
+      "date": "Sun, 29 Mar 2026 00:55:30 GMT",
+      "server": "scaffolding on HTTPServer2",
+      "server-timing": "gfet4t7; dur=469",
+      "transfer-encoding": "chunked",
+      "vary": "Referer",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "SAMEORIGIN",
+      "x-xss-protection": "0"
+    },
+    "status": 200
+  }
+}

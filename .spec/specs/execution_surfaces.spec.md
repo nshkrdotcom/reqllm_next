@@ -61,7 +61,7 @@ decisions:
     - reqllm.execution_surfaces.surface_selection
 
 - kind: command
-  target: mix test test/operation_planner_test.exs test/providers/xai/execution_stack_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/google/execution_stack_test.exs test/providers/google/wire_embeddings_test.exs test/providers/google/wire_images_test.exs test/providers/elevenlabs/execution_stack_test.exs test/providers/cohere/execution_stack_test.exs
+  target: mix test test/operation_planner_test.exs test/providers/xai/execution_stack_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/google/execution_stack_test.exs test/providers/google/wire_embeddings_test.exs test/providers/google/wire_images_test.exs test/provider_features/google_native_surfaces_test.exs test/providers/elevenlabs/execution_stack_test.exs test/providers/cohere/execution_stack_test.exs
   execute: true
   covers:
     - reqllm.execution_surfaces.support_unit

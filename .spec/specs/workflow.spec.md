@@ -58,7 +58,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.workflow.provider_surface_guides
-  statement: Provider expansion work shall keep provider surface-map, compatibility-evaluation, and provider-expansion roadmap guides in sync with code and subject specs so wide provider coverage remains explainable and reviewable, including honest boundaries around Anthropic-native tool helpers, prompt-cache and effort handling, context-management and compaction support, Google generateContent versus embedding versus image boundaries plus long-tail unsupported families, provider-feature proof depth, explicit first-class versus best-effort support tiers, responses-first providers such as xAI that add provider-local tool helpers and media-family overrides, and the family-first ordering that defers wrapper platforms such as Azure, Google Vertex, and Amazon Bedrock.
+  statement: Provider expansion work shall keep provider surface-map, compatibility-evaluation, and provider-expansion roadmap guides in sync with code and subject specs so wide provider coverage remains explainable and reviewable, including honest boundaries around Anthropic-native tool helpers, prompt-cache and effort handling, context-management and compaction support, Google generateContent versus embedding versus image boundaries plus long-tail unsupported families, replay-backed provider-feature proof depth, sparse live-verifier depth, explicit first-class versus best-effort support tiers, responses-first providers such as xAI that add provider-local tool helpers and media-family overrides, and the family-first ordering that defers wrapper platforms such as Azure, Google Vertex, and Amazon Bedrock.
   priority: should
   stability: evolving
 
@@ -123,6 +123,13 @@ decisions:
   covers:
     - reqllm.workflow.starter_slice_verification
     - reqllm.workflow.live_verifier_commands
+
+- kind: command
+  target: mix test test/provider_features/google_native_surfaces_test.exs
+  execute: true
+  covers:
+    - reqllm.workflow.starter_slice_verification
+    - reqllm.workflow.provider_surface_guides
 
 - kind: command
   target: mix test test/req_llm_next/extensions/dsl_test.exs test/providers/xai/execution_stack_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/google/execution_stack_test.exs test/providers/elevenlabs/execution_stack_test.exs test/providers/cohere/execution_stack_test.exs

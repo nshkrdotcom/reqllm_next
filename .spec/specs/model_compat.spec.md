@@ -133,7 +133,7 @@ decisions:
     - reqllm.model_compat.provider_native_request_shapes
 
 - kind: command
-  target: mix test test/providers/cohere test/providers/deepseek test/providers/elevenlabs test/providers/groq test/providers/openrouter test/providers/vllm test/providers/zenmux test/providers/google
+  target: mix test test/providers/cohere test/providers/deepseek test/providers/elevenlabs test/providers/groq test/providers/openrouter test/providers/vllm test/providers/zenmux test/providers/google test/provider_features/google_native_surfaces_test.exs
   execute: true
   covers:
     - reqllm.model_compat.extension_pressure_tests

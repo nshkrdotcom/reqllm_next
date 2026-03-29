@@ -2,6 +2,7 @@ defmodule ReqLlmNext.Wire.GoogleImagesTest do
   use ExUnit.Case, async: true
 
   alias ReqLlmNext.Context
+  alias ReqLlmNext.Error
   alias ReqLlmNext.Response
   alias ReqLlmNext.TestModels
   alias ReqLlmNext.Wire.GoogleImages
@@ -36,8 +37,7 @@ defmodule ReqLlmNext.Wire.GoogleImagesTest do
         }),
         "Draw a paper lantern at dusk",
         api_key: "test-key",
-        output_format: :jpeg,
-        size: "1024x1024"
+        output_format: :jpeg
       )
 
     assert request.scheme == :https
@@ -47,10 +47,26 @@ defmodule ReqLlmNext.Wire.GoogleImagesTest do
     assert Jason.decode!(request.body) == %{
              "instances" => [%{"prompt" => "Draw a paper lantern at dusk"}],
              "parameters" => %{
-               "sampleImageSize" => "1K",
                "outputOptions" => %{"mimeType" => "image/jpeg"}
              }
            }
+  end
+
+  test "rejects adjustable size overrides for Imagen requests" do
+    assert {:error, %Error.Invalid.Parameter{} = error} =
+             GoogleImages.build_request(
+               ReqLlmNext.Providers.Google,
+               TestModels.google(%{
+                 id: "imagen-4.0-fast-generate-001",
+                 capabilities: %{chat: false, embeddings: false},
+                 modalities: %{input: [:text], output: [:image]}
+               }),
+               "Draw a paper lantern at dusk",
+               api_key: "test-key",
+               size: "1024x1024"
+             )
+
+    assert Exception.message(error) =~ ":size option"
   end
 
   test "decodes Gemini inline image responses into canonical image parts" do

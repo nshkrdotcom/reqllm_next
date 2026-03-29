@@ -21,7 +21,8 @@ reviewable. It is also the right default for CI.
 At the same time, a fixture-only posture is not enough for a package that is
 trying to stay honest about provider drift, beta flags, versioned tool
 surfaces, and native media behavior. The package still needs real provider
-checks somewhere.
+checks somewhere, and the representative providers in that sparse lane may grow
+as first-class families mature beyond the initial Anthropic and OpenAI focus.
 
 Running broad live suites in CI is not a good fit. Those runs are expensive,
 credential-dependent, rate-limit-sensitive, and prone to failing for reasons
@@ -38,9 +39,13 @@ The verifier lane should follow these rules:
 2. live verifier tests are intentionally sparse and high-signal
 3. live verifier tests exist to check provider drift, validate current
    integration behavior, and support deliberate fixture refresh work
-4. replay-backed coverage remains the default proof path for public API,
+4. representative first-class providers may be added to the sparse live
+   verifier lane when they have enough replay-backed proof to justify periodic
+   live drift checks, such as Google after native text, object, embedding, and
+   image lanes became replay-backed and live-smoke healthy
+5. replay-backed coverage remains the default proof path for public API,
    scenario, model-slice, coverage, and most provider-feature tests
-5. provider-owned utility endpoints may rely on request-execution harness proof
+6. provider-owned utility endpoints may rely on request-execution harness proof
    when live provider behavior is not the main risk
 
 ReqLlmNext should expose an explicit command path for the live verifier lane

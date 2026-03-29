@@ -81,7 +81,10 @@ Current live confidence is still narrower:
 
 1. text smoke is healthy
 2. object smoke is healthy
-3. no sparse live verifier or replay fixture lane exists yet for Google embeddings or image generation
+3. embedding smoke is healthy
+4. Gemini image-generation smoke is healthy
+5. Imagen generation is healthy when used without the unsupported `:size` override
+6. sparse live verifier and replay-backed provider-feature coverage now exist for Google baseline, embedding, and image lanes
 
 ## Current Honest Gaps
 

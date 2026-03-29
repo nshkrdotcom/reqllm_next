@@ -82,7 +82,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.package.live_verifier_lane
-  statement: ReqLlmNext shall keep a dedicated sparse live verifier lane for representative Anthropic and OpenAI integration checks so provider drift and fixture-refresh sanity can be exercised explicitly without expanding the replay-backed default suite or requiring live-provider access in normal CI.
+  statement: ReqLlmNext shall keep a dedicated sparse live verifier lane for representative Anthropic, OpenAI, and Google integration checks so provider drift and fixture-refresh sanity can be exercised explicitly without expanding the replay-backed default suite or requiring live-provider access in normal CI.
   priority: should
   stability: evolving
 
@@ -226,6 +226,13 @@ decisions:
 
 - kind: command
   target: mix test test/provider_features/anthropic_advanced_messages_test.exs
+  execute: true
+  covers:
+    - reqllm.package.fixture_replay
+    - reqllm.package.model_slice_verification
+
+- kind: command
+  target: mix test test/provider_features/google_native_surfaces_test.exs
   execute: true
   covers:
     - reqllm.package.fixture_replay
