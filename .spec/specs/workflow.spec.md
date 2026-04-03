@@ -58,7 +58,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.workflow.provider_surface_guides
-  statement: Provider expansion work shall keep provider surface-map, compatibility-evaluation, and provider-expansion roadmap guides in sync with code and subject specs so wide provider coverage remains explainable and reviewable, including honest boundaries around Anthropic-native tool helpers, prompt-cache and effort handling, context-management and compaction support, Google generateContent versus embedding versus image boundaries plus long-tail unsupported families, replay-backed provider-feature proof depth, sparse live-verifier depth, explicit first-class versus best-effort support tiers, responses-first providers such as xAI that add provider-local tool helpers and media-family overrides, and the family-first ordering that defers wrapper platforms such as Azure, Google Vertex, and Amazon Bedrock.
+  statement: Provider expansion work shall keep provider surface-map, compatibility-evaluation, and provider-expansion roadmap guides in sync with code, generated package-doc extras, and subject specs so wide provider coverage remains explainable and reviewable, including honest boundaries around Anthropic-native tool helpers, prompt-cache and effort handling, context-management and compaction support, Google generateContent versus embedding versus image boundaries plus long-tail unsupported families, replay-backed provider-feature proof depth, sparse live-verifier depth, explicit first-class versus best-effort support tiers, responses-first providers such as xAI that add provider-local tool helpers and media-family overrides, and the family-first ordering that defers wrapper platforms such as Azure, Google Vertex, and Amazon Bedrock.
   priority: should
   stability: evolving
 
@@ -92,6 +92,13 @@ decisions:
   covers:
     - reqllm.workflow.provider_surface_guides
     - reqllm.workflow.extension_dsl_guidance
+
+- kind: source_file
+  target: mix.exs
+  covers:
+    - reqllm.workflow.provider_surface_guides
+    - reqllm.workflow.starter_slice_verification
+    - reqllm.workflow.live_verifier_commands
 
 - kind: source_file
   target: .spec/AGENTS.md
