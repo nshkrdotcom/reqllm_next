@@ -100,8 +100,9 @@ For the covered Wave 3 minimal lane, unary request/response execution now
 compiles into `HttpExecutionIntent.v1` and delegates the lower HTTP hop through
 `execution_plane` via an internal execution-plane HTTP adapter. Provider planning,
 fixture replay, telemetry, response normalization, and the package-owned
-realtime core remain in `reqllm_next`. Realtime, SSE, and WebSocket transport
-convergence are later-wave work rather than part of this minimal lane prove-out.
+realtime core remain in `reqllm_next`. Wave 6 now also moves the lower SSE and
+WebSocket stream lifecycle onto `execution_plane`, while provider semantics,
+wire decoding, and realtime session reduction stay local to `reqllm_next`.
 
 ## Package Thesis
 

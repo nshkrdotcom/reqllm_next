@@ -47,7 +47,7 @@ defmodule ReqLlmNext.Fixtures do
 
   @doc """
   In replay mode with a fixture configured, returns a stream that replays
-  raw SSE chunks through ServerSentEvents.parse/1 and the wire module.
+  raw SSE chunks through `ExecutionPlane.SSE.parse/1` and the wire module.
   """
   @spec maybe_replay_stream(LLMDB.Model.t(), String.t(), keyword()) ::
           {:ok, Enumerable.t()} | :no_fixture
@@ -121,7 +121,7 @@ defmodule ReqLlmNext.Fixtures do
         {[b64_chunk | rest], buffer} ->
           raw_data = Base.decode64!(b64_chunk)
           new_buffer = buffer <> raw_data
-          {events, remaining} = ServerSentEvents.parse(new_buffer)
+          {events, remaining} = ExecutionPlane.SSE.parse(new_buffer)
 
           text_chunks =
             events

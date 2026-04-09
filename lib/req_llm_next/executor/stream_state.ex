@@ -1,6 +1,7 @@
 defmodule ReqLlmNext.Executor.StreamState do
   @moduledoc false
 
+  alias ExecutionPlane.SSE
   alias ReqLlmNext.Fixtures
 
   @schema Zoi.struct(
@@ -29,7 +30,11 @@ defmodule ReqLlmNext.Executor.StreamState do
           {:status, non_neg_integer()}
           | {:headers, list()}
           | {:data, binary()}
+          | {:sse, binary(), [map()]}
           | {:frame, binary()}
+          | {:transport_error, term()}
+          | {:close, non_neg_integer() | nil, binary() | nil}
+          | :transport_timeout
           | :done
 
   @type result ::
@@ -90,7 +95,7 @@ defmodule ReqLlmNext.Executor.StreamState do
   def handle_message({:data, data}, %__MODULE__{} = state) do
     new_recorder = Fixtures.record_chunk(state.recorder, data)
     new_buffer = state.buffer <> data
-    {events, remaining} = ServerSentEvents.parse(new_buffer)
+    {events, remaining} = SSE.parse(new_buffer)
     chunks = decode_events(events, state)
 
     new_state = %{state | buffer: remaining, recorder: new_recorder}
@@ -98,11 +103,35 @@ defmodule ReqLlmNext.Executor.StreamState do
     {:cont, chunks, new_state}
   end
 
+  def handle_message({:sse, data, events}, %__MODULE__{} = state) do
+    new_recorder = Fixtures.record_chunk(state.recorder, data)
+    chunks = decode_events(events, state)
+
+    {:cont, chunks, %{state | recorder: new_recorder}}
+  end
+
   def handle_message({:frame, data}, %__MODULE__{} = state) do
     new_recorder = Fixtures.record_chunk(state.recorder, data)
     chunks = decode_events([%{data: data}], state)
 
     {:cont, chunks, %{state | recorder: new_recorder}}
+  end
+
+  def handle_message({:transport_error, reason}, %__MODULE__{} = state) do
+    error_chunk =
+      {:error, %{message: "Transport failed: #{inspect(reason)}", type: "transport_error"}}
+
+    {:cont, [error_chunk], %{state | error: {:transport_error, reason}}}
+  end
+
+  def handle_message({:close, _code, _reason}, %__MODULE__{} = state) do
+    Fixtures.save_fixture(state.recorder)
+    {:halt, state}
+  end
+
+  def handle_message(:transport_timeout, %__MODULE__{} = state) do
+    Fixtures.save_fixture(state.recorder)
+    {:halt, %{state | error: :timeout}}
   end
 
   def handle_message(:done, %__MODULE__{} = state) do
