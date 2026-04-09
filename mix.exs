@@ -71,6 +71,7 @@ defmodule ReqLlmNext.MixProject do
 
   defp deps do
     [
+      {:execution_plane, path: "../execution_plane"},
       {:splode, "~> 0.2"},
       {:jason, "~> 1.4"},
       {:finch, "~> 0.19"},

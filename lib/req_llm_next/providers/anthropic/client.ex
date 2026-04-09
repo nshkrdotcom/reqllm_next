@@ -5,6 +5,7 @@ defmodule ReqLlmNext.Anthropic.Client do
 
   alias ReqLlmNext.Anthropic.Headers
   alias ReqLlmNext.Error
+  alias ReqLlmNext.ExecutionPlaneHTTP
   alias ReqLlmNext.Providers.Anthropic, as: AnthropicProvider
   alias ReqLlmNext.Telemetry
 
@@ -62,15 +63,18 @@ defmodule ReqLlmNext.Anthropic.Client do
         common_headers = common_headers(api_key, opts)
         request = Finch.build(method, url, common_headers ++ headers, body)
 
-        case Finch.request(request, ReqLlmNext.Finch,
+        case ExecutionPlaneHTTP.request(
+               request,
                receive_timeout: Keyword.get(opts, :receive_timeout, 30_000)
              ) do
           {:ok, %Finch.Response{} = response} ->
             {:ok, response}
 
-          {:error, reason} ->
+          {:error, failure, raw_payload} ->
             {:error,
-             Error.API.Request.exception(reason: "HTTP request failed: #{inspect(reason)}")}
+             Error.API.Request.exception(
+               reason: ExecutionPlaneHTTP.transport_reason(failure, raw_payload)
+             )}
         end
       end
     )

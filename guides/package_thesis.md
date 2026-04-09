@@ -220,7 +220,7 @@ Diagnostics and telemetry exist so the project can answer questions like:
 
 Without that structure, every failure becomes just "model failed," which does not scale.
 
-`ReqLlmNext.Telemetry` is now the stable runtime emission boundary for those answers, `ReqLlmNext.Realtime` is the shared package-owned realtime core rather than an OpenAI-only utility experiment, and explicit result channels now sit on top of canonical output items so richer outputs do not have to be recovered from provider metadata.
+`ReqLlmNext.Telemetry` is now the stable runtime emission boundary for those answers, `ReqLlmNext.Realtime` is the shared package-owned realtime core rather than an OpenAI-only utility experiment, and explicit result channels now sit on top of canonical output items so richer outputs do not have to be recovered from provider metadata. For the covered unary request/response lane, the raw HTTP hop now sits below the package in `execution_plane`, while diagnostics still preserve the difference between transport failures and provider-semantic failures.
 
 ### 7. Provider Expansion Should Reuse Families First
 

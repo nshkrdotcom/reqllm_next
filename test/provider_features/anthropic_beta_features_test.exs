@@ -17,7 +17,7 @@ defmodule ReqLlmNext.ProviderFeatures.AnthropicBetaFeaturesTest do
     assert String.length(Response.text(response)) > 0
 
     fixture =
-      "/Users/mhostetler/Source/ReqLLM/reqllm_next/test/fixtures/anthropic/claude_sonnet_4_6/basic_context_1m.json"
+      Path.expand("../fixtures/anthropic/claude_sonnet_4_6/basic_context_1m.json", __DIR__)
       |> File.read!()
       |> Jason.decode!()
 

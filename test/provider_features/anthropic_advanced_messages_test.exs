@@ -167,7 +167,7 @@ defmodule ReqLlmNext.ProviderFeatures.AnthropicAdvancedMessagesTest do
   end
 
   defp load_fixture(name) do
-    "/Users/mhostetler/Source/ReqLLM/reqllm_next/test/fixtures/anthropic/claude_sonnet_4_6/#{name}.json"
+    Path.expand("../fixtures/anthropic/claude_sonnet_4_6/#{name}.json", __DIR__)
     |> File.read!()
     |> Jason.decode!()
   end

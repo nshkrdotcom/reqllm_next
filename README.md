@@ -96,6 +96,13 @@ ReqLlmNext also now owns:
 1. `ReqLlmNext.Telemetry` as the stable runtime telemetry kernel
 2. `ReqLlmNext.Realtime` as a transport-agnostic realtime core with provider adapters and canonical session reduction
 
+For the covered Wave 3 minimal lane, unary request/response execution now
+compiles into `HttpExecutionIntent.v1` and delegates the lower HTTP hop through
+`execution_plane` via an internal execution-plane HTTP adapter. Provider planning,
+fixture replay, telemetry, response normalization, and the package-owned
+realtime core remain in `reqllm_next`. Realtime, SSE, and WebSocket transport
+convergence are later-wave work rather than part of this minimal lane prove-out.
+
 ## Package Thesis
 
 ReqLlmNext is agent-assisted, but it is not agent-governed.

@@ -2,6 +2,7 @@ defmodule ReqLlmNext.Transports.HTTPRequest do
   @moduledoc false
 
   alias ReqLlmNext.Error
+  alias ReqLlmNext.ExecutionPlaneHTTP
   alias ReqLlmNext.Fixtures
   alias ReqLlmNext.Provider
   alias ReqLlmNext.Telemetry
@@ -18,7 +19,7 @@ defmodule ReqLlmNext.Transports.HTTPRequest do
           provider_request_metadata(provider_mod, model, opts, wire_mod),
           fn ->
             with {:ok, request} <- build_request(provider_mod, wire_mod, model, input, opts),
-                 {:ok, response} <- Finch.request(request, ReqLlmNext.Finch),
+                 {:ok, response} <- ExecutionPlaneHTTP.request(request, opts),
                  :ok <- maybe_record_fixture(model, opts, request, response),
                  {:ok, decoded} <- decode_response(wire_mod, response, model, input, opts) do
               {:ok, decoded}
@@ -39,6 +40,12 @@ defmodule ReqLlmNext.Transports.HTTPRequest do
 
               {:error, %Error.API.Response{} = error} ->
                 {:error, error}
+
+              {:error, failure, raw_payload} ->
+                {:error,
+                 Error.API.Request.exception(
+                   reason: ExecutionPlaneHTTP.transport_reason(failure, raw_payload)
+                 )}
 
               {:error, reason} ->
                 {:error,

@@ -240,7 +240,7 @@ defmodule ReqLlmNext.Fixtures do
   defp extract_request_info(%Finch.Request{} = req) do
     body_binary = req.body || ""
     scheme = to_string(req.scheme)
-    url = "#{scheme}://#{req.host}:#{req.port}#{req.path}"
+    url = "#{scheme}://#{req.host}:#{req.port}#{Finch.Request.request_path(req)}"
 
     %{
       "method" => to_string(req.method) |> String.upcase(),

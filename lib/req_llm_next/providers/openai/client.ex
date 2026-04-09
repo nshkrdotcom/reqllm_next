@@ -4,6 +4,7 @@ defmodule ReqLlmNext.OpenAI.Client do
   """
 
   alias ReqLlmNext.Error
+  alias ReqLlmNext.ExecutionPlaneHTTP
   alias ReqLlmNext.Providers.OpenAI, as: OpenAIProvider
   alias ReqLlmNext.Telemetry
 
@@ -52,15 +53,18 @@ defmodule ReqLlmNext.OpenAI.Client do
         url = request_url(path, opts)
         request = Finch.build(method, url, OpenAIProvider.auth_headers(api_key) ++ headers, body)
 
-        case Finch.request(request, ReqLlmNext.Finch,
+        case ExecutionPlaneHTTP.request(
+               request,
                receive_timeout: Keyword.get(opts, :receive_timeout, 30_000)
              ) do
           {:ok, %Finch.Response{} = response} ->
             {:ok, response}
 
-          {:error, reason} ->
+          {:error, failure, raw_payload} ->
             {:error,
-             Error.API.Request.exception(reason: "HTTP request failed: #{inspect(reason)}")}
+             Error.API.Request.exception(
+               reason: ExecutionPlaneHTTP.transport_reason(failure, raw_payload)
+             )}
         end
       end
     )
