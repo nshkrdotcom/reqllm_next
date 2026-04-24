@@ -57,10 +57,9 @@ defmodule ReqLlmNext.ExecutionPlaneHTTP do
   end
 
   defp execution_lineage(%Finch.Request{} = request) do
-    case idempotency_key(request.headers) do
-      nil -> %{}
-      key -> %{idempotency_key: key}
-    end
+    %{
+      idempotency_key: idempotency_key(request.headers) || generated_idempotency_key(request)
+    }
   end
 
   defp idempotency_key(headers) when is_list(headers) do
@@ -69,5 +68,10 @@ defmodule ReqLlmNext.ExecutionPlaneHTTP do
         to_string(value)
       end
     end)
+  end
+
+  defp generated_idempotency_key(%Finch.Request{} = request) do
+    token = System.unique_integer([:positive, :monotonic])
+    "req-llm-next-http-#{request.method}-#{:erlang.phash2(finch_url(request))}-#{token}"
   end
 end

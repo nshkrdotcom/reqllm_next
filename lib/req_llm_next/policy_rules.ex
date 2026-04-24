@@ -216,7 +216,8 @@ defmodule ReqLlmNext.PolicyRules do
   defp timeout_class(%ExecutionMode{latency_class: :long_running}), do: :long_running
 
   defp timeout_class(%ExecutionMode{reasoning: reasoning})
-       when reasoning in [:on, :required], do: :long_running
+       when reasoning in [:on, :required],
+       do: :long_running
 
   defp timeout_class(%ExecutionMode{latency_class: latency_class}), do: latency_class
 
