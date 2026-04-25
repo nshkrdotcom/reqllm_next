@@ -145,6 +145,21 @@ Fixtures are first-class evidence, not just mocks.
 - Request-style media fixtures should replay through the owning wire decoder just like streaming fixtures replay through their recorded stack.
 - Keep live verifier tests sparse, opt-in, and out of normal CI paths.
 
+## Toolchain And Execution Plane Dependencies
+
+- `.tool-versions` pins Erlang `28.3.1` and Elixir `1.19.5-otp-28`; use that
+  repo-local ASDF toolchain instead of relying on a shell-global Elixir.
+- Local sibling development uses `../execution_plane/core/execution_plane` for
+  `:execution_plane`.
+- Realtime lane deps keep their package-home paths:
+  `../execution_plane/protocols/execution_plane_http`,
+  `../execution_plane/streaming/execution_plane_sse`, and
+  `../execution_plane/streaming/execution_plane_websocket`.
+- Do not point `:execution_plane` at the sibling repo root. That root is the
+  non-published Blitz workspace project, not the Hex package.
+- Release builds must keep the Hex version fallback for all Execution Plane
+  packages.
+
 ## Commands
 
 Common commands:
