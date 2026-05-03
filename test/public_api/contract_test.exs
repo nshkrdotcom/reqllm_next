@@ -60,9 +60,8 @@ defmodule ReqLlmNext.PublicAPI.ContractTest do
     end
 
     test "raises for non-atom keys" do
-      assert_raise ArgumentError, ~r/expects an atom key/, fn ->
-        ReqLlmNext.put_key("string_key", "value")
-      end
+      error = assert_raise ArgumentError, fn -> ReqLlmNext.put_key("string_key", "value") end
+      assert error.message =~ "expects an atom key"
     end
   end
 

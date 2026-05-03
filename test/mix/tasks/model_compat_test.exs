@@ -105,10 +105,9 @@ defmodule Mix.Tasks.ReqLlmNext.ModelCompatTest do
     test "unimplemented provider pattern is detected" do
       spec = "notreal:some-model"
       [provider_part, _model_part] = String.split(spec, ":", parts: 2)
-      provider = String.to_atom(provider_part)
       implemented = MapSet.new(ReqLlmNext.Providers.list())
 
-      refute MapSet.member?(implemented, provider)
+      refute Enum.any?(implemented, &(Atom.to_string(&1) == provider_part))
     end
   end
 

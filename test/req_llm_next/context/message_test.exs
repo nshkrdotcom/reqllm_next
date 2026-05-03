@@ -79,15 +79,17 @@ defmodule ReqLlmNext.Context.MessageTest do
     end
 
     test "raises ArgumentError for invalid attrs" do
-      assert_raise ArgumentError, ~r/Invalid message/, fn ->
-        Message.new!(%{role: :invalid_role})
-      end
+      error =
+        assert_raise ArgumentError, fn ->
+          Message.new!(%{role: :invalid_role})
+        end
+
+      assert error.message =~ "Invalid message"
     end
 
     test "raises ArgumentError for missing role" do
-      assert_raise ArgumentError, ~r/Invalid message/, fn ->
-        Message.new!(%{})
-      end
+      error = assert_raise ArgumentError, fn -> Message.new!(%{}) end
+      assert error.message =~ "Invalid message"
     end
   end
 

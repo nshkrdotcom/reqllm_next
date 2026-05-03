@@ -391,11 +391,12 @@ defmodule ReqLlmNext.Wire.AnthropicTest do
       model = TestModels.anthropic()
       raw_tool = %{name: "raw_tool", description: "A raw tool", input_schema: %{}}
 
-      assert_raise ArgumentError,
-                   ~r/ReqLlmNext.Anthropic helper constructors/,
-                   fn ->
-                     Anthropic.encode_body(model, "Hello", tools: [raw_tool])
-                   end
+      error =
+        assert_raise ArgumentError, fn ->
+          Anthropic.encode_body(model, "Hello", tools: [raw_tool])
+        end
+
+      assert error.message =~ "ReqLlmNext.Anthropic helper constructors"
     end
 
     test "encodes tool_choice" do

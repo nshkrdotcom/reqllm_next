@@ -76,9 +76,45 @@ defmodule ReqLlmNext.Scenarios.Reasoning do
   end
 
   defp extract_final_answer(text) do
-    case Regex.run(~r/FINAL_ANSWER:\s*\$?(\d+)/i, text) do
-      [_, num_str] -> {:ok, String.to_integer(num_str)}
-      nil -> :no_final_answer
+    with {:ok, tail} <- final_answer_tail(text),
+         {:ok, digits} <- leading_number(tail) do
+      {:ok, String.to_integer(digits)}
+    else
+      _ -> :no_final_answer
     end
+  end
+
+  defp final_answer_tail(text) do
+    lower = String.downcase(text)
+    marker = "final_answer:"
+
+    case :binary.match(lower, marker) do
+      {index, size} ->
+        {:ok, binary_part(text, index + size, byte_size(text) - index - size)}
+
+      :nomatch ->
+        :error
+    end
+  end
+
+  defp leading_number(text) do
+    text
+    |> String.trim_leading()
+    |> trim_leading_dollar()
+    |> String.trim_leading()
+    |> take_digits()
+  end
+
+  defp trim_leading_dollar("$" <> rest), do: rest
+  defp trim_leading_dollar(text), do: text
+
+  defp take_digits(text) do
+    digits =
+      text
+      |> :binary.bin_to_list()
+      |> Enum.take_while(&(&1 in ?0..?9))
+      |> IO.iodata_to_binary()
+
+    if digits == "", do: :error, else: {:ok, digits}
   end
 end

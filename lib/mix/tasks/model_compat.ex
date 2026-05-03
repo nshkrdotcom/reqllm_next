@@ -201,15 +201,14 @@ defmodule Mix.Tasks.ReqLlmNext.ModelCompat do
   defp filter_scenarios(model, nil), do: Scenarios.for_model(model)
 
   defp filter_scenarios(model, id) do
-    atom_id =
-      try do
-        String.to_existing_atom(id)
-      rescue
-        ArgumentError -> String.to_atom(id)
-      end
+    case scenario_id_from_string(id) do
+      nil ->
+        []
 
-    Scenarios.for_model(model)
-    |> Enum.filter(&(&1.id() == atom_id))
+      atom_id ->
+        Scenarios.for_model(model)
+        |> Enum.filter(&(&1.id() == atom_id))
+    end
   end
 
   defp expand_model_spec(spec) do
@@ -221,27 +220,29 @@ defmodule Mix.Tasks.ReqLlmNext.ModelCompat do
 
       String.contains?(spec, ":") ->
         [provider_part, model_part] = String.split(spec, ":", parts: 2)
-        provider = String.to_atom(provider_part)
 
-        cond do
-          not MapSet.member?(implemented, provider) ->
+        case provider_id_from_string(implemented, provider_part) do
+          nil ->
             Mix.shell().info(
               "  #{IO.ANSI.yellow()}Skipping #{provider_part}: provider not implemented#{IO.ANSI.reset()}"
             )
 
             []
 
-          model_part == "*" ->
-            models_for_provider(provider)
+          provider ->
+            cond do
+              model_part == "*" ->
+                models_for_provider(provider)
 
-          String.ends_with?(model_part, "*") ->
-            prefix = String.trim_trailing(model_part, "*")
+              String.ends_with?(model_part, "*") ->
+                prefix = String.trim_trailing(model_part, "*")
 
-            models_for_provider(provider)
-            |> Enum.filter(fn {_p, id} -> String.starts_with?(id, prefix) end)
+                models_for_provider(provider)
+                |> Enum.filter(fn {_p, id} -> String.starts_with?(id, prefix) end)
 
-          true ->
-            [{provider, model_part}]
+              true ->
+                [{provider, model_part}]
+            end
         end
 
       true ->
@@ -260,6 +261,14 @@ defmodule Mix.Tasks.ReqLlmNext.ModelCompat do
   defp models_for_provider(provider) do
     LLMDB.models(provider)
     |> Enum.map(fn model -> {provider, model.id} end)
+  end
+
+  defp provider_id_from_string(implemented, provider_part) do
+    Enum.find(implemented, &(Atom.to_string(&1) == provider_part))
+  end
+
+  defp scenario_id_from_string(id) do
+    Enum.find(Scenarios.ids(), &(Atom.to_string(&1) == id))
   end
 
   defp resolve_model(spec) do

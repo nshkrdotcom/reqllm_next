@@ -342,9 +342,12 @@ defmodule ReqLlmNext.Wire.OpenAIResponses.RequestTest do
       model = TestModels.openai_reasoning()
       raw_tool = %{type: "function", name: "raw", description: "Raw tool"}
 
-      assert_raise ArgumentError, ~r/ReqLlmNext.Tool values/, fn ->
-        OpenAIResponses.encode_body(model, "Hello", tools: [raw_tool])
-      end
+      error =
+        assert_raise ArgumentError, fn ->
+          OpenAIResponses.encode_body(model, "Hello", tools: [raw_tool])
+        end
+
+      assert error.message =~ "ReqLlmNext.Tool values"
     end
 
     test "does not add tools key when tools is empty list" do

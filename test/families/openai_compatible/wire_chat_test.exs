@@ -281,9 +281,12 @@ defmodule ReqLlmNext.Wire.OpenAIChatTest do
         }
       }
 
-      assert_raise ArgumentError, ~r/ReqLlmNext.Tool values/, fn ->
-        OpenAIChat.encode_body(model, "Hello", tools: [raw_tool])
-      end
+      error =
+        assert_raise ArgumentError, fn ->
+          OpenAIChat.encode_body(model, "Hello", tools: [raw_tool])
+        end
+
+      assert error.message =~ "ReqLlmNext.Tool values"
     end
 
     test "omits tools when empty list" do

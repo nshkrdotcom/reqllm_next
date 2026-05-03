@@ -5,6 +5,13 @@ defmodule ReqLlmNext.SemanticProtocols.DeepSeekChat do
 
   alias ReqLlmNext.Response.Usage
 
+  @finish_reasons %{
+    "stop" => :stop,
+    "length" => :length,
+    "content_filter" => :content_filter,
+    "tool_calls" => :tool_calls
+  }
+
   @impl ReqLlmNext.SemanticProtocol
   def decode_event(:done, _model), do: [nil]
 
@@ -52,9 +59,11 @@ defmodule ReqLlmNext.SemanticProtocols.DeepSeekChat do
     |> maybe_append_tool_calls(message["tool_calls"])
   end
 
-  defp maybe_finish_reason(%{"choices" => [%{"finish_reason" => reason} | _]})
-       when reason in ["stop", "length", "content_filter", "tool_calls"] do
-    [{:meta, %{finish_reason: String.to_atom(reason), terminal?: true}}]
+  defp maybe_finish_reason(%{"choices" => [%{"finish_reason" => reason} | _]}) do
+    case Map.fetch(@finish_reasons, reason) do
+      {:ok, finish_reason} -> [{:meta, %{finish_reason: finish_reason, terminal?: true}}]
+      :error -> []
+    end
   end
 
   defp maybe_finish_reason(_payload), do: []

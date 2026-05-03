@@ -232,9 +232,12 @@ defmodule ReqLlmNext.Context.ContentPartTest do
     end
 
     test "raises for invalid attributes" do
-      assert_raise ArgumentError, ~r/Invalid content part/, fn ->
-        ContentPart.new!(%{type: :unknown_type})
-      end
+      error =
+        assert_raise ArgumentError, fn ->
+          ContentPart.new!(%{type: :unknown_type})
+        end
+
+      assert error.message =~ "Invalid content part"
     end
   end
 

@@ -34,16 +34,51 @@ defmodule ReqLlmNext.ObjectDecoder do
   end
 
   defp strip_code_fences(text) do
-    case Regex.run(~r/\A```(?:json)?\s*(.*?)\s*```\z/s, text, capture: :all_but_first) do
-      [inner] -> inner
-      _ -> nil
+    if String.starts_with?(text, "```") and String.ends_with?(text, "```") do
+      text
+      |> framed_inner()
+      |> strip_optional_json_label()
     end
   end
 
   defp extract_braced_json(text) do
-    case Regex.run(~r/\{.*\}/s, text) do
-      [json] -> json
-      _ -> nil
+    case {:binary.match(text, "{"), last_match(text, "}")} do
+      {{open_index, 1}, {close_index, 1}} when close_index >= open_index ->
+        binary_part(text, open_index, close_index - open_index + 1)
+
+      _other ->
+        nil
     end
+  end
+
+  defp framed_inner(text) do
+    text
+    |> binary_part(3, byte_size(text) - 6)
+    |> String.trim()
+  end
+
+  defp strip_optional_json_label(inner) do
+    case first_line(inner) do
+      {"json", rest} -> String.trim(rest)
+      _other -> inner
+    end
+  end
+
+  defp first_line(text) do
+    case :binary.match(text, "\n") do
+      {index, 1} ->
+        line = binary_part(text, 0, index) |> String.trim()
+        rest = binary_part(text, index + 1, byte_size(text) - index - 1)
+        {line, rest}
+
+      :nomatch ->
+        {String.trim(text), ""}
+    end
+  end
+
+  defp last_match(text, token) do
+    text
+    |> :binary.matches(token)
+    |> List.last()
   end
 end

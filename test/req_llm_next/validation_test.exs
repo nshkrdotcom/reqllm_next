@@ -19,27 +19,27 @@ defmodule ReqLlmNext.ValidationTest do
       model = TestModels.openai_embedding()
       context = simple_context()
 
-      assert_raise ReqLlmNext.Error.Invalid.Capability, ~r/cannot generate text/, fn ->
+      assert_invalid_capability("cannot generate text", fn ->
         Validation.validate!(model, :text, context, [])
-      end
+      end)
     end
 
     test "raises for object operation on embedding model" do
       model = TestModels.openai_embedding()
       context = simple_context()
 
-      assert_raise ReqLlmNext.Error.Invalid.Capability, ~r/cannot generate objects/, fn ->
+      assert_invalid_capability("cannot generate objects", fn ->
         Validation.validate!(model, :object, context, [])
-      end
+      end)
     end
 
     test "raises for embed operation on chat model" do
       model = TestModels.openai()
       context = simple_context()
 
-      assert_raise ReqLlmNext.Error.Invalid.Capability, ~r/does not support embeddings/, fn ->
+      assert_invalid_capability("does not support embeddings", fn ->
         Validation.validate!(model, :embed, context, [])
-      end
+      end)
     end
 
     test "allows embed operation on embedding model" do
@@ -62,9 +62,9 @@ defmodule ReqLlmNext.ValidationTest do
       model = TestModels.openai()
       context = context_with_image()
 
-      assert_raise ReqLlmNext.Error.Invalid.Capability, ~r/does not support image/, fn ->
+      assert_invalid_capability("does not support image", fn ->
         Validation.validate!(model, :text, context, [])
-      end
+      end)
     end
 
     test "allows image content on vision model" do
@@ -100,18 +100,18 @@ defmodule ReqLlmNext.ValidationTest do
       model = TestModels.openai(%{capabilities: %{tools: %{enabled: false}}})
       context = simple_context()
 
-      assert_raise ReqLlmNext.Error.Invalid.Capability, ~r/does not support tool/, fn ->
+      assert_invalid_capability("does not support tool", fn ->
         Validation.validate!(model, :text, context, tools: [%{}])
-      end
+      end)
     end
 
     test "raises when streaming requested but model doesn't support" do
       model = TestModels.openai(%{capabilities: %{streaming: %{text: false}}})
       context = simple_context()
 
-      assert_raise ReqLlmNext.Error.Invalid.Capability, ~r/does not support streaming/, fn ->
+      assert_invalid_capability("does not support streaming", fn ->
         Validation.validate!(model, :text, context, stream: true)
-      end
+      end)
     end
 
     test "allows streaming on streaming-capable model" do
@@ -140,9 +140,9 @@ defmodule ReqLlmNext.ValidationTest do
       model = TestModels.openai()
       context = context_with_image()
 
-      assert_raise ReqLlmNext.Error.Invalid.Capability, ~r/does not support image/, fn ->
+      assert_invalid_capability("does not support image", fn ->
         Validation.validate_stream!(model, context, [])
-      end
+      end)
     end
 
     test "validates with integer prompt (treated as nil context)" do
@@ -213,9 +213,9 @@ defmodule ReqLlmNext.ValidationTest do
 
       context = simple_context()
 
-      assert_raise ReqLlmNext.Error.Invalid.Capability, ~r/cannot generate text/, fn ->
+      assert_invalid_capability("cannot generate text", fn ->
         Validation.validate!(model, :text, context, [])
-      end
+      end)
     end
 
     test "infers embedding kind from embeddings capability" do
@@ -229,9 +229,9 @@ defmodule ReqLlmNext.ValidationTest do
 
       context = simple_context()
 
-      assert_raise ReqLlmNext.Error.Invalid.Capability, ~r/cannot generate text/, fn ->
+      assert_invalid_capability("cannot generate text", fn ->
         Validation.validate!(model, :text, context, [])
-      end
+      end)
     end
 
     test "infers chat kind as default" do
@@ -307,9 +307,9 @@ defmodule ReqLlmNext.ValidationTest do
 
       context = simple_context()
 
-      assert_raise ReqLlmNext.Error.Invalid.Capability, ~r/cannot generate text/, fn ->
+      assert_invalid_capability("cannot generate text", fn ->
         Validation.validate!(model, :text, context, [])
-      end
+      end)
     end
 
     test "recognizes embeddings map format" do
@@ -322,9 +322,9 @@ defmodule ReqLlmNext.ValidationTest do
 
       context = simple_context()
 
-      assert_raise ReqLlmNext.Error.Invalid.Capability, ~r/cannot generate text/, fn ->
+      assert_invalid_capability("cannot generate text", fn ->
         Validation.validate!(model, :text, context, [])
-      end
+      end)
     end
 
     test "handles empty embeddings map as non-embedding" do
@@ -394,6 +394,11 @@ defmodule ReqLlmNext.ValidationTest do
 
       assert :ok = Validation.validate!(model, :text, context, [])
     end
+  end
+
+  defp assert_invalid_capability(message, fun) do
+    error = assert_raise ReqLlmNext.Error.Invalid.Capability, fun
+    assert Exception.message(error) =~ message
   end
 
   defp simple_context do

@@ -29,18 +29,8 @@ defmodule ReqLlmNext.Fixtures do
   def path(%LLMDB.Model{} = model, fixture_name) do
     provider = Atom.to_string(model.provider)
 
-    safe_model_id =
-      model.id
-      |> String.downcase()
-      |> String.replace(~r/[^a-z0-9]+/u, "_")
-      |> String.trim("_")
-
-    safe_name =
-      fixture_name
-      |> Path.basename()
-      |> String.downcase()
-      |> String.replace(~r/[^a-z0-9]+/u, "_")
-      |> String.trim("_")
+    safe_model_id = safe_slug(model.id)
+    safe_name = fixture_name |> Path.basename() |> safe_slug()
 
     Path.join([@root, provider, safe_model_id, "#{safe_name}.json"])
   end
@@ -166,8 +156,16 @@ defmodule ReqLlmNext.Fixtures do
   end
 
   defp fixture_runtime(%{"execution" => execution}) when is_map(execution) do
-    with {:ok, semantic_protocol} <- fetch_existing_atom(execution, "semantic_protocol"),
-         {:ok, wire_format} <- fetch_existing_atom(execution, "wire_format") do
+    registry = ReqLlmNext.Extensions.Compiled.runtime_registry()
+
+    with {:ok, semantic_protocol} <-
+           fetch_known_runtime_id(
+             execution,
+             "semantic_protocol",
+             Map.keys(registry.semantic_protocol_modules)
+           ),
+         {:ok, wire_format} <-
+           fetch_known_runtime_id(execution, "wire_format", Map.keys(registry.wire_modules)) do
       %{
         protocol_mod: ExecutionModules.protocol_module!(semantic_protocol),
         wire_mod: ExecutionModules.wire_module!(wire_format)
@@ -524,20 +522,44 @@ defmodule ReqLlmNext.Fixtures do
     |> Map.new()
   end
 
-  defp fetch_existing_atom(map, key) do
+  defp fetch_known_runtime_id(map, key, known_ids) do
     case Map.get(map, key) do
       value when is_binary(value) ->
-        try do
-          {:ok, String.to_existing_atom(value)}
-        rescue
-          ArgumentError -> :error
-        end
+        find_known_runtime_id(known_ids, value)
 
       value when is_atom(value) ->
-        {:ok, value}
+        if value in known_ids, do: {:ok, value}, else: :error
 
       _ ->
         :error
     end
   end
+
+  defp find_known_runtime_id(known_ids, value) do
+    case Enum.find(known_ids, &(Atom.to_string(&1) == value)) do
+      nil -> :error
+      known_id -> {:ok, known_id}
+    end
+  end
+
+  defp safe_slug(value) do
+    value
+    |> String.downcase()
+    |> String.to_charlist()
+    |> Enum.reduce({[], false}, &safe_slug_char/2)
+    |> elem(0)
+    |> Enum.reverse()
+    |> IO.iodata_to_binary()
+    |> String.trim("_")
+  end
+
+  defp safe_slug_char(char, {acc, _underscore?}) when char in ?a..?z,
+    do: {[char | acc], false}
+
+  defp safe_slug_char(char, {acc, _underscore?}) when char in ?0..?9,
+    do: {[char | acc], false}
+
+  defp safe_slug_char(_char, {[], _underscore?}), do: {[], true}
+  defp safe_slug_char(_char, {acc, true}), do: {acc, true}
+  defp safe_slug_char(_char, {acc, false}), do: {[?_ | acc], true}
 end

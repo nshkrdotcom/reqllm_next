@@ -251,8 +251,8 @@ defmodule ReqLlmNext.Provider do
   end
 
   defp interpolate(value, opts) when is_binary(value) do
-    Regex.scan(~r/\{([a-zA-Z0-9_]+)\}/, value, capture: :all_but_first)
-    |> List.flatten()
+    value
+    |> template_keys()
     |> Enum.uniq()
     |> Enum.reduce_while({:ok, value}, fn key, {:ok, current} ->
       case lookup_template_value(opts, key) do
@@ -272,6 +272,47 @@ defmodule ReqLlmNext.Provider do
   defp lookup_template_value(opts, key) do
     keyword_lookup_by_name(opts, key)
   end
+
+  defp template_keys(value), do: do_template_keys(value, [])
+
+  defp do_template_keys(value, acc) do
+    case :binary.match(value, "{") do
+      {open_index, 1} ->
+        after_open =
+          binary_part(value, open_index + 1, byte_size(value) - open_index - 1)
+
+        case :binary.match(after_open, "}") do
+          {close_index, 1} ->
+            key = binary_part(after_open, 0, close_index)
+
+            rest =
+              binary_part(after_open, close_index + 1, byte_size(after_open) - close_index - 1)
+
+            next_acc = if valid_template_key?(key), do: [key | acc], else: acc
+            do_template_keys(rest, next_acc)
+
+          :nomatch ->
+            Enum.reverse(acc)
+        end
+
+      :nomatch ->
+        Enum.reverse(acc)
+    end
+  end
+
+  defp valid_template_key?(<<>>), do: false
+
+  defp valid_template_key?(key) do
+    key
+    |> :binary.bin_to_list()
+    |> Enum.all?(&template_key_byte?/1)
+  end
+
+  defp template_key_byte?(byte) when byte in ?a..?z, do: true
+  defp template_key_byte?(byte) when byte in ?A..?Z, do: true
+  defp template_key_byte?(byte) when byte in ?0..?9, do: true
+  defp template_key_byte?(?_), do: true
+  defp template_key_byte?(_byte), do: false
 
   defp keyword_lookup_by_name(opts, name) when is_binary(name) do
     Enum.find_value(opts, fn

@@ -69,9 +69,8 @@ defmodule ReqLlmNext.ProviderTest do
     test "get_api_key/1 raises when no key available" do
       System.delete_env("EXAMPLE_API_KEY")
 
-      assert_raise RuntimeError, ~r/EXAMPLE_API_KEY not set/, fn ->
-        BearerProvider.get_api_key([])
-      end
+      error = assert_raise RuntimeError, fn -> BearerProvider.get_api_key([]) end
+      assert error.message =~ "EXAMPLE_API_KEY not set"
     end
   end
 

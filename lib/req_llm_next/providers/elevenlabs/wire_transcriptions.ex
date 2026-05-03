@@ -222,8 +222,6 @@ defmodule ReqLlmNext.Wire.ElevenLabsTranscriptions do
   defp maybe_put(segment, key, value), do: Map.put(segment, key, value)
 
   defp provider_meta(body) do
-    body
-    |> Map.drop(["text", "language", "language_code", "words", "transcripts", "duration"])
-    |> Enum.into(%{}, fn {key, value} -> {String.to_atom(key), value} end)
+    Map.drop(body, ["text", "language", "language_code", "words", "transcripts", "duration"])
   end
 end

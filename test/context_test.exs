@@ -134,9 +134,12 @@ defmodule ReqLlmNext.ContextTest do
     end
 
     test "raises on error" do
-      assert_raise ArgumentError, ~r/Failed to normalize/, fn ->
-        Context.normalize!(123)
-      end
+      error =
+        assert_raise ArgumentError, fn ->
+          Context.normalize!(123)
+        end
+
+      assert error.message =~ "Failed to normalize"
     end
   end
 
@@ -309,9 +312,8 @@ defmodule ReqLlmNext.ContextTest do
     test "raises on invalid context" do
       ctx = Context.new([Context.system("A"), Context.system("B")])
 
-      assert_raise ArgumentError, ~r/Invalid context/, fn ->
-        Context.validate!(ctx)
-      end
+      error = assert_raise ArgumentError, fn -> Context.validate!(ctx) end
+      assert error.message =~ "Invalid context"
     end
   end
 
@@ -599,9 +601,12 @@ defmodule ReqLlmNext.ContextTest do
     end
 
     test "raises for invalid tool_call format" do
-      assert_raise ArgumentError, ~r/invalid tool_call/, fn ->
-        Context.assistant("", tool_calls: [123])
-      end
+      error =
+        assert_raise ArgumentError, fn ->
+          Context.assistant("", tool_calls: [123])
+        end
+
+      assert error.message =~ "invalid tool_call"
     end
   end
 

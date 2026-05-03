@@ -61,9 +61,8 @@ defmodule ReqLlmNext.Wire.ResolverTest do
     test "raises for unknown provider" do
       model = TestModels.minimal(%{provider: :unknown_provider})
 
-      assert_raise ArgumentError, ~r/provider module/, fn ->
-        Resolver.provider_module!(model)
-      end
+      error = assert_raise ArgumentError, fn -> Resolver.provider_module!(model) end
+      assert error.message =~ "provider module"
     end
   end
 
@@ -191,9 +190,8 @@ defmodule ReqLlmNext.Wire.ResolverTest do
     test "raises for unsupported provider" do
       model = TestModels.anthropic()
 
-      assert_raise Error.Invalid.Capability, ~r/does not support embeddings/, fn ->
-        Resolver.resolve!(model, :embed)
-      end
+      error = assert_raise Error.Invalid.Capability, fn -> Resolver.resolve!(model, :embed) end
+      assert Exception.message(error) =~ "does not support embeddings"
     end
 
     test "resolve!/2 with non-embed operation delegates to resolve!/1" do

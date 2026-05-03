@@ -85,13 +85,49 @@ defmodule ReqLlmNext.Extensions.Definition do
   end
 
   defp extract_declared_module!(contents, path) do
-    case Regex.run(~r/defmodule\s+([A-Za-z0-9_.]+)/, contents, capture: :all_but_first) do
-      [module_name] ->
+    case declared_module_name(contents) do
+      {:ok, module_name} ->
         Module.concat([module_name])
 
-      _ ->
+      :error ->
         raise ArgumentError,
               "could not determine extension definition module from #{path}"
     end
   end
+
+  defp declared_module_name(contents) do
+    contents
+    |> String.split(["\n", "\r\n"])
+    |> Enum.find_value(:error, &declared_module_name_from_line/1)
+  end
+
+  defp declared_module_name_from_line(line) do
+    trimmed = String.trim_leading(line)
+    prefix = "defmodule "
+
+    if String.starts_with?(trimmed, prefix) do
+      module_name =
+        trimmed
+        |> binary_part(byte_size(prefix), byte_size(trimmed) - byte_size(prefix))
+        |> take_module_name()
+
+      if module_name == "", do: false, else: {:ok, module_name}
+    else
+      false
+    end
+  end
+
+  defp take_module_name(value) do
+    value
+    |> :binary.bin_to_list()
+    |> Enum.take_while(&module_name_byte?/1)
+    |> IO.iodata_to_binary()
+  end
+
+  defp module_name_byte?(byte) when byte in ?a..?z, do: true
+  defp module_name_byte?(byte) when byte in ?A..?Z, do: true
+  defp module_name_byte?(byte) when byte in ?0..?9, do: true
+  defp module_name_byte?(?_), do: true
+  defp module_name_byte?(?.), do: true
+  defp module_name_byte?(_byte), do: false
 end

@@ -243,7 +243,7 @@ defmodule ReqLlmNext.Tool do
   """
   @spec valid_name?(String.t()) :: boolean()
   def valid_name?(name) when is_binary(name) do
-    Regex.match?(~r/^[a-zA-Z_][a-zA-Z0-9_]*$/, name) and String.length(name) <= 64
+    String.length(name) in 1..64 and valid_identifier_bytes?(name)
   end
 
   def valid_name?(_), do: false
@@ -306,8 +306,8 @@ defmodule ReqLlmNext.Tool do
 
   defp validate_input(%__MODULE__{compiled: nil}, input), do: {:ok, input}
 
-  defp validate_input(%__MODULE__{compiled: schema}, input) do
-    normalized_input = normalize_input_keys(input)
+  defp validate_input(%__MODULE__{compiled: schema, parameter_schema: parameter_schema}, input) do
+    normalized_input = normalize_input_keys(input, parameter_schema_keys(parameter_schema))
 
     case NimbleOptions.validate(normalized_input, schema) do
       {:ok, validated_input} -> {:ok, validated_input}
@@ -315,19 +315,47 @@ defmodule ReqLlmNext.Tool do
     end
   end
 
-  defp normalize_input_keys(input) when is_map(input) do
+  defp normalize_input_keys(input, known_keys) when is_map(input) do
     Map.new(input, fn
       {key, value} when is_binary(key) ->
-        try do
-          {String.to_existing_atom(key), value}
-        rescue
-          ArgumentError -> {String.to_atom(key), value}
-        end
+        {known_parameter_key(known_keys, key) || key, value}
 
       {key, value} ->
         {key, value}
     end)
   end
+
+  defp parameter_schema_keys(schema) when is_list(schema) do
+    schema
+    |> Keyword.keys()
+    |> Enum.filter(&is_atom/1)
+  end
+
+  defp parameter_schema_keys(_schema), do: []
+
+  defp known_parameter_key(known_keys, key) do
+    Enum.find(known_keys, &(Atom.to_string(&1) == key))
+  end
+
+  defp valid_identifier_bytes?(name) do
+    bytes = :binary.bin_to_list(name)
+
+    case bytes do
+      [first | rest] -> identifier_start_byte?(first) and Enum.all?(rest, &identifier_byte?/1)
+      [] -> false
+    end
+  end
+
+  defp identifier_start_byte?(byte) when byte in ?a..?z, do: true
+  defp identifier_start_byte?(byte) when byte in ?A..?Z, do: true
+  defp identifier_start_byte?(?_), do: true
+  defp identifier_start_byte?(_byte), do: false
+
+  defp identifier_byte?(byte) when byte in ?a..?z, do: true
+  defp identifier_byte?(byte) when byte in ?A..?Z, do: true
+  defp identifier_byte?(byte) when byte in ?0..?9, do: true
+  defp identifier_byte?(?_), do: true
+  defp identifier_byte?(_byte), do: false
 
   defp call_callback({module, function}, input) do
     apply(module, function, [input])

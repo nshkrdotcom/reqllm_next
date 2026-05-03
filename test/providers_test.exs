@@ -150,9 +150,8 @@ defmodule ReqLlmNext.ProvidersTest do
     end
 
     test "raises for unknown provider" do
-      assert_raise RuntimeError, ~r/Provider error/, fn ->
-        Providers.get!(:unknown)
-      end
+      error = assert_raise RuntimeError, fn -> Providers.get!(:unknown) end
+      assert error.message =~ "Provider error"
     end
   end
 
@@ -430,9 +429,8 @@ defmodule ReqLlmNext.ProvidersTest do
       System.delete_env("OPENAI_API_KEY")
 
       try do
-        assert_raise RuntimeError, ~r/OPENAI_API_KEY not set/, fn ->
-          OpenAI.get_api_key([])
-        end
+        error = assert_raise RuntimeError, fn -> OpenAI.get_api_key([]) end
+        assert error.message =~ "OPENAI_API_KEY not set"
       after
         if original, do: System.put_env("OPENAI_API_KEY", original)
       end
@@ -443,9 +441,8 @@ defmodule ReqLlmNext.ProvidersTest do
       System.delete_env("ANTHROPIC_API_KEY")
 
       try do
-        assert_raise RuntimeError, ~r/ANTHROPIC_API_KEY not set/, fn ->
-          Anthropic.get_api_key([])
-        end
+        error = assert_raise RuntimeError, fn -> Anthropic.get_api_key([]) end
+        assert error.message =~ "ANTHROPIC_API_KEY not set"
       after
         if original, do: System.put_env("ANTHROPIC_API_KEY", original)
       end

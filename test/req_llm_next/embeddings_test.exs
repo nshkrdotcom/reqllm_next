@@ -88,15 +88,21 @@ defmodule ReqLlmNext.EmbeddingsTest do
 
   describe "embed/3 model validation" do
     test "raises for non-embedding model" do
-      assert_raise Error.Invalid.Capability, ~r/does not support embeddings/, fn ->
-        ReqLlmNext.embed!("openai:gpt-4o-mini", "Hello")
-      end
+      error =
+        assert_raise Error.Invalid.Capability, fn ->
+          ReqLlmNext.embed!("openai:gpt-4o-mini", "Hello")
+        end
+
+      assert Exception.message(error) =~ "does not support embeddings"
     end
 
     test "raises for unsupported provider embeddings" do
-      assert_raise Error.Invalid.Capability, ~r/does not support embeddings/, fn ->
-        ReqLlmNext.embed!("anthropic:claude-sonnet-4-5", "Hello")
-      end
+      error =
+        assert_raise Error.Invalid.Capability, fn ->
+          ReqLlmNext.embed!("anthropic:claude-sonnet-4-5", "Hello")
+        end
+
+      assert Exception.message(error) =~ "does not support embeddings"
     end
   end
 

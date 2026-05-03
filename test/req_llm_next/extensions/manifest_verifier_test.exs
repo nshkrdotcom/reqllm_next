@@ -17,9 +17,9 @@ defmodule ReqLlmNext.Extensions.ManifestVerifierTest do
         ]
       })
 
-    assert_raise ArgumentError, ~r/global default family/, fn ->
+    assert_argument_error("global default family", fn ->
       ManifestVerifier.verify!(manifest)
-    end
+    end)
   end
 
   test "requires provider defaults to reference known families" do
@@ -44,9 +44,9 @@ defmodule ReqLlmNext.Extensions.ManifestVerifierTest do
         ]
       })
 
-    assert_raise ArgumentError, ~r/unknown default family/, fn ->
+    assert_argument_error("unknown default family", fn ->
       ManifestVerifier.verify!(manifest)
-    end
+    end)
   end
 
   test "rejects duplicate family ids across definition manifests" do
@@ -63,9 +63,9 @@ defmodule ReqLlmNext.Extensions.ManifestVerifierTest do
       Manifest.new!(%{families: [family]})
     ]
 
-    assert_raise ArgumentError, ~r/duplicate family id/, fn ->
+    assert_argument_error("duplicate family id", fn ->
       ManifestVerifier.verify_merge!(manifests)
-    end
+    end)
   end
 
   test "rejects ambiguous family criteria at the same priority" do
@@ -92,9 +92,9 @@ defmodule ReqLlmNext.Extensions.ManifestVerifierTest do
         ]
       })
 
-    assert_raise ArgumentError, ~r/identical match criteria and priority/, fn ->
+    assert_argument_error("identical match criteria and priority", fn ->
       ManifestVerifier.verify!(manifest)
-    end
+    end)
   end
 
   test "enforces provider seam ownership boundaries" do
@@ -121,11 +121,9 @@ defmodule ReqLlmNext.Extensions.ManifestVerifierTest do
         ]
       })
 
-    assert_raise ArgumentError,
-                 ~r/may only declare provider, provider-facts, and utility seams/,
-                 fn ->
-                   ManifestVerifier.verify!(manifest)
-                 end
+    assert_argument_error("may only declare provider, provider-facts, and utility seams", fn ->
+      ManifestVerifier.verify!(manifest)
+    end)
   end
 
   test "enforces family and rule seam ownership boundaries" do
@@ -158,9 +156,9 @@ defmodule ReqLlmNext.Extensions.ManifestVerifierTest do
         ]
       })
 
-    assert_raise ArgumentError, ~r/may not declare provider or utility seams/, fn ->
+    assert_argument_error("may not declare provider or utility seams", fn ->
       ManifestVerifier.verify!(manifest)
-    end
+    end)
   end
 
   test "accepts the current compiled manifest" do
@@ -193,8 +191,13 @@ defmodule ReqLlmNext.Extensions.ManifestVerifierTest do
         ]
       })
 
-    assert_raise ArgumentError, ~r/references unknown module/, fn ->
+    assert_argument_error("references unknown module", fn ->
       ManifestVerifier.verify!(manifest)
-    end
+    end)
+  end
+
+  defp assert_argument_error(message, fun) do
+    error = assert_raise ArgumentError, fun
+    assert error.message =~ message
   end
 end

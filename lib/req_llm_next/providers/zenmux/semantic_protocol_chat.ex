@@ -5,6 +5,16 @@ defmodule ReqLlmNext.SemanticProtocols.ZenmuxChat do
 
   alias ReqLlmNext.Response.Usage
 
+  @finish_reasons %{
+    "stop" => :stop,
+    "length" => :length,
+    "content_filter" => :content_filter,
+    "tool_calls" => :tool_calls
+  }
+  @tool_begin "<｜tool▁call▁begin｜>"
+  @tool_sep "<｜tool▁sep｜>"
+  @tool_end "<｜tool▁call▁end｜>"
+
   @impl ReqLlmNext.SemanticProtocol
   def decode_event(:done, _model), do: [nil]
 
@@ -60,9 +70,11 @@ defmodule ReqLlmNext.SemanticProtocols.ZenmuxChat do
     |> maybe_append_reasoning_details(message["reasoning_details"])
   end
 
-  defp maybe_finish_reason(%{"choices" => [%{"finish_reason" => reason} | _]})
-       when reason in ["stop", "length", "content_filter", "tool_calls"] do
-    [{:meta, %{finish_reason: String.to_atom(reason), terminal?: true}}]
+  defp maybe_finish_reason(%{"choices" => [%{"finish_reason" => reason} | _]}) do
+    case Map.fetch(@finish_reasons, reason) do
+      {:ok, finish_reason} -> [{:meta, %{finish_reason: finish_reason, terminal?: true}}]
+      :error -> []
+    end
   end
 
   defp maybe_finish_reason(_payload), do: []
@@ -118,27 +130,71 @@ defmodule ReqLlmNext.SemanticProtocols.ZenmuxChat do
   defp maybe_append_reasoning_details(chunks, _details), do: chunks
 
   defp parse_deepseek_tool_calls(reasoning) when is_binary(reasoning) do
-    ~r/<｜tool▁call▁begin｜>([^<]+)<｜tool▁sep｜>(\{.*?\})<｜tool▁call▁end｜>/s
-    |> Regex.scan(reasoning, capture: :all_but_first)
-    |> Enum.with_index()
-    |> Enum.map(fn {[name, args_json], index} ->
-      %{
-        "id" => "call_#{index}",
-        "type" => "function",
-        "function" => %{"name" => name, "arguments" => args_json}
-      }
-    end)
+    parse_tool_calls(reasoning, 0, [])
   end
 
   defp parse_deepseek_tool_calls(_reasoning), do: []
 
   defp clean_reasoning_text(reasoning) when is_binary(reasoning) do
-    reasoning
-    |> String.replace(~r/<｜tool▁call▁begin｜>.*?<｜tool▁call▁end｜>/s, "")
-    |> String.trim()
+    reasoning |> remove_tool_call_segments([]) |> String.trim()
   end
 
   defp clean_reasoning_text(_reasoning), do: nil
+
+  defp parse_tool_calls(text, index, acc) do
+    with {:ok, after_begin} <- after_marker(text, @tool_begin),
+         {:ok, name, after_sep} <- take_until_marker(after_begin, @tool_sep),
+         {:ok, args_json, rest} <- take_until_marker(after_sep, @tool_end) do
+      tool_call = %{
+        "id" => "call_#{index}",
+        "type" => "function",
+        "function" => %{"name" => name, "arguments" => args_json}
+      }
+
+      parse_tool_calls(rest, index + 1, [tool_call | acc])
+    else
+      _ -> Enum.reverse(acc)
+    end
+  end
+
+  defp remove_tool_call_segments(text, acc) do
+    case split_around_marker(text, @tool_begin) do
+      {:ok, before_begin, after_begin} ->
+        case after_marker(after_begin, @tool_end) do
+          {:ok, rest} -> remove_tool_call_segments(rest, [before_begin | acc])
+          :error -> IO.iodata_to_binary(Enum.reverse([text | acc]))
+        end
+
+      :error ->
+        IO.iodata_to_binary(Enum.reverse([text | acc]))
+    end
+  end
+
+  defp after_marker(text, marker) do
+    case split_around_marker(text, marker) do
+      {:ok, _before_marker, after_marker_text} -> {:ok, after_marker_text}
+      :error -> :error
+    end
+  end
+
+  defp take_until_marker(text, marker) do
+    case split_around_marker(text, marker) do
+      {:ok, before_marker, after_marker_text} -> {:ok, before_marker, after_marker_text}
+      :error -> :error
+    end
+  end
+
+  defp split_around_marker(text, marker) do
+    case :binary.match(text, marker) do
+      {index, size} ->
+        before_marker = binary_part(text, 0, index)
+        after_marker_text = binary_part(text, index + size, byte_size(text) - index - size)
+        {:ok, before_marker, after_marker_text}
+
+      :nomatch ->
+        :error
+    end
+  end
 
   defp blank_text?(nil), do: true
   defp blank_text?(""), do: true

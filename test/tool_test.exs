@@ -482,9 +482,8 @@ defmodule ReqLlmNext.ToolTest do
           callback: fn _ -> {:ok, nil} end
         )
 
-      assert_raise ArgumentError, ~r/Unknown provider/, fn ->
-        Tool.to_schema(tool, :unknown_provider)
-      end
+      error = assert_raise ArgumentError, fn -> Tool.to_schema(tool, :unknown_provider) end
+      assert error.message =~ "Unknown provider"
     end
 
     test "handles empty parameter schema" do
