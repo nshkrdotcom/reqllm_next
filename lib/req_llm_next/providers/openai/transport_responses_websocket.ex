@@ -4,6 +4,7 @@ defmodule ReqLlmNext.Transports.OpenAIResponsesWebSocket do
   alias ExecutionPlane.WebSocket
   alias ReqLlmNext.Executor.StreamState
   alias ReqLlmNext.Fixtures
+  alias ReqLlmNext.Provider
   alias ReqLlmNext.Telemetry
 
   @default_stream_timeout Application.compile_env(:req_llm_next, :stream_timeout, 30_000)
@@ -47,21 +48,22 @@ defmodule ReqLlmNext.Transports.OpenAIResponsesWebSocket do
 
   defp build_request_info(provider_mod, wire_mod, model, prompt, opts) do
     payload = wire_mod.encode_websocket_event(model, prompt, opts)
-    api_key = provider_mod.get_api_key(opts)
-    auth_headers = provider_mod.auth_headers(api_key)
-    base_url = provider_mod.base_url()
     ws_path = wire_mod.path()
-    ws_url = base_url |> String.replace_prefix("https://", "wss://") |> Kernel.<>(ws_path)
 
-    request_info = %{
-      "method" => "WEBSOCKET",
-      "url" => ws_url,
-      "transport" => "websocket",
-      "headers" => auth_headers,
-      "body" => payload
-    }
+    with {:ok, request_url} <- Provider.request_url(provider_mod, model, ws_path, opts),
+         {:ok, auth_headers} <- Provider.request_headers(provider_mod, model, opts) do
+      ws_url = to_websocket_url(request_url)
 
-    {:ok, request_info, payload, auth_headers, ws_path}
+      request_info = %{
+        "method" => "WEBSOCKET",
+        "url" => ws_url,
+        "transport" => "websocket",
+        "headers" => auth_headers,
+        "body" => payload
+      }
+
+      {:ok, request_info, payload, auth_headers, ws_url}
+    end
   end
 
   defp maybe_start_recorder(model, prompt, request_info, opts) do
@@ -80,12 +82,7 @@ defmodule ReqLlmNext.Transports.OpenAIResponsesWebSocket do
     end
   end
 
-  defp open_connection(provider_mod, auth_headers, ws_path, payload, timeout) do
-    uri = URI.parse(provider_mod.base_url())
-
-    ws_url =
-      "#{uri.scheme |> to_ws_scheme()}://#{uri.host}:#{uri.port || default_port(uri.scheme)}#{ws_path}"
-
+  defp open_connection(_provider_mod, auth_headers, ws_url, payload, timeout) do
     WebSocket.stream(ws_url, auth_headers, [Jason.encode!(payload)], receive_timeout: timeout)
   end
 
@@ -119,10 +116,9 @@ defmodule ReqLlmNext.Transports.OpenAIResponsesWebSocket do
     :ok
   end
 
-  defp default_port("https"), do: 443
-  defp default_port("http"), do: 80
-  defp to_ws_scheme("https"), do: "wss"
-  defp to_ws_scheme("http"), do: "ws"
+  defp to_websocket_url("https://" <> rest), do: "wss://" <> rest
+  defp to_websocket_url("http://" <> rest), do: "ws://" <> rest
+  defp to_websocket_url(url), do: url
 
   defp execution_metadata(opts) do
     %{

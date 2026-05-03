@@ -15,6 +15,7 @@ surface:
 decisions:
   - reqllm.decision.execution_layers
   - reqllm.decision.provider_specific_endpoint_utilities
+  - reqllm.decision.governed_authority_boundary
 ```
 
 ## Requirements
@@ -39,6 +40,11 @@ decisions:
   statement: Provider-specific utility endpoints may reuse provider auth and root configuration, but those endpoints shall remain outside the canonical cross-provider facade and outside wire or semantic-protocol ownership.
   priority: should
   stability: evolving
+
+- id: reqllm.provider.governed_authority
+  statement: In governed mode, provider auth and route roots shall come only from `ReqLlmNext.GovernedAuthority`; direct provider keys, direct base URLs, direct URLs, headers, realtime tokens, organization or project identifiers, account or model-account identifiers, and runtime-metadata env credential fallbacks shall be rejected as unmanaged authority while HTTP, streaming, media, embedding, OpenAI realtime, OpenAI Responses WebSocket, runtime metadata, and provider-owned utility request paths reuse governed base URL, headers, query, and template values.
+  priority: must
+  stability: evolving
 ```
 
 ## Verification
@@ -51,4 +57,14 @@ decisions:
     - reqllm.provider.route_ownership
     - reqllm.provider.no_model_behavior
     - reqllm.provider.utility_roots
+    - reqllm.provider.governed_authority
+
+- kind: command
+  target: mix test test/req_llm_next/governed_authority_test.exs test/providers/openai/client_test.exs test/providers/anthropic/client_test.exs test/providers/google/wire_embeddings_test.exs test/providers/google/wire_images_test.exs
+  execute: true
+  covers:
+    - reqllm.provider.auth_and_roots
+    - reqllm.provider.route_ownership
+    - reqllm.provider.utility_roots
+    - reqllm.provider.governed_authority
 ```

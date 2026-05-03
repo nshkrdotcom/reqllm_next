@@ -33,6 +33,11 @@ surface:
   statement: Runtime layers may emit diagnostics, but curated support-matrix compat runs, replay-backed best-effort provider proof matrices, anomaly analyzers, issue-drafting tooling, provider utility verification, and future provider expansion work shall consume them outside the execution layers rather than patching runtime behavior in place or introducing provider-specific diagnostic shortcuts.
   priority: must
   stability: evolving
+
+- id: reqllm.diagnostics.governed_authority_observable
+  statement: Governed authority behavior shall remain observable through the existing provider-request diagnostics and fixture evidence without emitting raw governed credential values, unmanaged direct credential options, or env-derived secrets.
+  priority: must
+  stability: evolving
 ```
 
 ## Verification
@@ -44,12 +49,14 @@ surface:
     - reqllm.diagnostics.observational
     - reqllm.diagnostics.layer_attributed
     - reqllm.diagnostics.compat_consumed
+    - reqllm.diagnostics.governed_authority_observable
 
 - kind: command
-  target: mix test test/req_llm_next/telemetry_test.exs test/providers/openai/client_test.exs
+  target: mix test test/req_llm_next/telemetry_test.exs test/providers/openai/client_test.exs test/req_llm_next/governed_authority_test.exs
   execute: true
   covers:
     - reqllm.diagnostics.observational
     - reqllm.diagnostics.layer_attributed
+    - reqllm.diagnostics.governed_authority_observable
 
 ```

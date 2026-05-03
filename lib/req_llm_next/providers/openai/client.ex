@@ -5,6 +5,7 @@ defmodule ReqLlmNext.OpenAI.Client do
 
   alias ReqLlmNext.Error
   alias ReqLlmNext.ExecutionPlaneHTTP
+  alias ReqLlmNext.Provider
   alias ReqLlmNext.Providers.OpenAI, as: OpenAIProvider
   alias ReqLlmNext.Telemetry
 
@@ -49,22 +50,24 @@ defmodule ReqLlmNext.OpenAI.Client do
     Telemetry.span_provider_request(
       provider_request_metadata(method, path, opts),
       fn ->
-        api_key = OpenAIProvider.get_api_key(opts)
-        url = request_url(path, opts)
-        request = Finch.build(method, url, OpenAIProvider.auth_headers(api_key) ++ headers, body)
-
-        case ExecutionPlaneHTTP.request(
-               request,
-               receive_timeout: Keyword.get(opts, :receive_timeout, 30_000)
-             ) do
-          {:ok, %Finch.Response{} = response} ->
-            {:ok, response}
-
+        with {:ok, url} <- Provider.utility_url(OpenAIProvider, path, opts),
+             {:ok, request_headers} <- Provider.utility_headers(OpenAIProvider, opts, headers),
+             request <- Finch.build(method, url, request_headers, body),
+             {:ok, %Finch.Response{} = response} <-
+               ExecutionPlaneHTTP.request(
+                 request,
+                 receive_timeout: Keyword.get(opts, :receive_timeout, 30_000)
+               ) do
+          {:ok, response}
+        else
           {:error, failure, raw_payload} ->
             {:error,
              Error.API.Request.exception(
                reason: ExecutionPlaneHTTP.transport_reason(failure, raw_payload)
              )}
+
+          {:error, _reason} = error ->
+            error
         end
       end
     )
@@ -143,12 +146,6 @@ defmodule ReqLlmNext.OpenAI.Client do
       decode_json_response(response)
     end
   end
-
-  defp request_url("http://" <> _rest = path, _opts), do: path
-  defp request_url("https://" <> _rest = path, _opts), do: path
-
-  defp request_url(path, opts),
-    do: Keyword.get(opts, :base_url, OpenAIProvider.base_url()) <> path
 
   defp encode_body(nil), do: nil
   defp encode_body(body) when is_binary(body), do: body

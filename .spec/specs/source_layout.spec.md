@@ -21,6 +21,7 @@ decisions:
   - reqllm.decision.zoi_backed_struct_contracts
   - reqllm.decision.live_verifier_tests
   - reqllm.decision.loaded_optional_wire_callbacks
+  - reqllm.decision.governed_authority_boundary
 ```
 
 ## Requirements
@@ -60,6 +61,11 @@ decisions:
   statement: Package-owned structs under `lib/req_llm_next/` shall use Zoi-backed schemas when they model canonical package contracts, planning objects, runtime state, response materialization state, or compiled extension-manifest data, so struct shape, defaults, and required fields remain explicit and introspectable.
   priority: should
   stability: evolving
+
+- id: reqllm.source_layout.governed_authority_home
+  statement: The governed authority contract shall live in the central package/provider layer under `lib/req_llm_next/`, while provider slices, wire modules, realtime adapters, and provider utility clients shall call that shared provider-layer contract instead of defining per-provider authority structs or env bypasses.
+  priority: must
+  stability: evolving
 ```
 
 ## Verification
@@ -75,10 +81,18 @@ decisions:
     - reqllm.source_layout.provider_utilities
     - reqllm.source_layout.extension_contract_home
     - reqllm.source_layout.zoi_struct_contracts
+    - reqllm.source_layout.governed_authority_home
 
 - kind: command
   target: mix test test/provider_features/google_native_surfaces_test.exs test/live_verifiers/google_live_verifier_test.exs --include integration --include live --include live_verifier --exclude slow
   execute: true
   covers:
     - reqllm.source_layout.compat_outside_runtime
+
+- kind: command
+  target: mix test test/req_llm_next/governed_authority_test.exs
+  execute: true
+  covers:
+    - reqllm.source_layout.concern_homes
+    - reqllm.source_layout.governed_authority_home
 ```

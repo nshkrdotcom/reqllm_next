@@ -65,6 +65,21 @@ Best-effort support is intentionally narrower than first-class support:
 2. it does not imply provider-native utility endpoints
 3. it fails fast when required runtime configuration such as account-scoped base URL variables is missing
 
+## Credential Modes
+
+ReqLlmNext has two credential modes:
+
+1. standalone mode
+   - local application code may pass `:api_key` or provider-specific options directly, and provider modules may read local environment variables such as `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`
+   - `.env` loading exists only for local development, replay, and opt-in live verification ergonomics
+2. governed mode
+   - callers pass `:governed_authority` with an externally issued `ReqLlmNext.GovernedAuthority`
+   - provider keys, base URLs, direct URLs, headers, realtime tokens, account ids, model-account ids, organization ids, project ids, and runtime metadata env credential fallbacks are rejected as unmanaged request authority
+   - canonical HTTP, streaming, OpenAI Responses WebSocket, OpenAI realtime, media, embedding, runtime-metadata, and provider-owned utility requests take their base URL, headers, query, and template values from the governed authority
+   - fixture capture and replay redact governed credential headers the same way they redact standalone provider credentials
+
+Standalone env behavior is not a governance path. Governed callers must provide authority through the explicit contract and must not rely on machine environment state.
+
 ## Architecture
 
 <!-- covers: reqllm.architecture.model_input_boundary reqllm.architecture.facts_mode_policy_plan reqllm.architecture.execution_layers -->

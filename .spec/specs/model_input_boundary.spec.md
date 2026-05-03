@@ -25,6 +25,7 @@ decisions:
   - reqllm.decision.zoi_backed_struct_contracts
   - reqllm.decision.live_verifier_tests
   - reqllm.decision.provider_expansion_strategy
+  - reqllm.decision.governed_authority_boundary
 ```
 
 ## Requirements
@@ -49,6 +50,11 @@ decisions:
   statement: Accepted model input shall hand off into Zoi-backed internal package contracts such as `ModelProfile`, `ExecutionMode`, `ExecutionPlan`, `Response`, `StreamResponse`, and realtime command or event or session state rather than into plain ad hoc structs so the public boundary feeds explicit internal schemas, and realtime adapter behavior above that boundary shall continue to operate on resolved models instead of inventing alternate model descriptor inputs.
   priority: should
   stability: evolving
+
+- id: reqllm.model_input.governed_authority_separate
+  statement: Governed authority shall not expand the model-input boundary or carry alternate model descriptors; it is a provider-layer credential and route authority consumed after model resolution while model input remains limited to `LLMDB` model specs and `%LLMDB.Model{}` values.
+  priority: must
+  stability: evolving
 ```
 
 ## Verification
@@ -61,6 +67,7 @@ decisions:
     - reqllm.model_input.llmdb_resolution
     - reqllm.model_input.fail_fast
     - reqllm.model_input.zoi_handoff_contracts
+    - reqllm.model_input.governed_authority_separate
 
 - kind: command
   target: mix test test/model_resolver_test.exs test/public_api/contract_test.exs test/public_api/text_generation_test.exs test/public_api/media_test.exs test/req_llm_next/realtime_test.exs
@@ -77,4 +84,11 @@ decisions:
     - reqllm.model_input.accepted_forms
     - reqllm.model_input.llmdb_resolution
     - reqllm.model_input.fail_fast
+
+- kind: command
+  target: mix test test/req_llm_next/governed_authority_test.exs test/model_resolver_test.exs
+  execute: true
+  covers:
+    - reqllm.model_input.accepted_forms
+    - reqllm.model_input.governed_authority_separate
 ```

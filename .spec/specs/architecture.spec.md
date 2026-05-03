@@ -51,6 +51,7 @@ decisions:
   - reqllm.decision.live_verifier_tests
   - reqllm.decision.provider_expansion_strategy
   - reqllm.decision.llmdb_best_effort_runtime
+  - reqllm.decision.governed_authority_boundary
 ```
 
 ## Requirements
@@ -80,6 +81,11 @@ decisions:
   statement: ReqLlmNext architecture may expose provider-scoped utility modules for non-canonical provider endpoints and provider-native helper shapes such as Anthropic web search, web fetch, code execution, MCP, computer use, token counting, files, and batches, but those utilities and helper shapes shall remain outside the top-level cross-provider facade and outside the core execution-plan layer stack except where a selected provider surface explicitly accepts them, and provider expansion shall prefer reusing existing execution families with provider-owned deltas before introducing new shared abstractions.
   priority: should
   stability: evolving
+
+- id: reqllm.architecture.governed_authority_boundary
+  statement: ReqLlmNext architecture shall treat governed credentials and endpoint authority as an explicit provider-layer contract separate from model input, planning intent, semantic protocol, wire payloads, and transport mechanics, so standalone env or option fallbacks never become implicit governance and provider-owned utility paths obey the same governed authority boundary as canonical generation, realtime, media, embedding, and best-effort runtime-metadata requests.
+  priority: must
+  stability: evolving
 ```
 
 ## Verification
@@ -106,6 +112,7 @@ decisions:
     - reqllm.architecture.facts_mode_policy_plan
     - reqllm.architecture.execution_layers
     - reqllm.architecture.zoi_struct_contracts
+    - reqllm.architecture.governed_authority_boundary
 
 - kind: command
   target: mix test test/model_resolver_test.exs test/public_api
@@ -124,4 +131,12 @@ decisions:
   covers:
     - reqllm.architecture.facts_mode_policy_plan
     - reqllm.architecture.model_input_boundary
+
+- kind: command
+  target: mix test test/req_llm_next/governed_authority_test.exs test/providers/openai/client_test.exs test/providers/anthropic/client_test.exs
+  execute: true
+  covers:
+    - reqllm.architecture.execution_layers
+    - reqllm.architecture.provider_specific_utilities
+    - reqllm.architecture.governed_authority_boundary
 ```

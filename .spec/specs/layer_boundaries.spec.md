@@ -27,6 +27,7 @@ decisions:
   - reqllm.decision.runtime_telemetry_kernel
   - reqllm.decision.zoi_backed_struct_contracts
   - reqllm.decision.live_verifier_tests
+  - reqllm.decision.governed_authority_boundary
 ```
 
 ## Requirements
@@ -43,7 +44,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.layer_boundaries.no_cross_layer_skips
-  statement: No execution layer shall skip across another layer's ownership boundary by choosing transports in semantic protocol code, reinterpreting semantic meaning in wire code, introducing model-specific behavior in provider or transport code, deriving provider-native request flags in shared executor code after planning, resolving auth or endpoint roots outside the provider layer when generic runtime metadata is in use, performing provider-surface dependency validation such as Anthropic `clear_thinking_20251015` requirements or xAI built-in tool helper acceptance outside planner-owned surface-preparation seams, or performing session continuation derivation outside planner-owned session runtime seams.
+  statement: No execution layer shall skip across another layer's ownership boundary by choosing transports in semantic protocol code, reinterpreting semantic meaning in wire code, introducing model-specific behavior in provider or transport code, deriving provider-native request flags in shared executor code after planning, resolving auth or endpoint roots outside the provider layer when generic runtime metadata or governed authority is in use, performing provider-surface dependency validation such as Anthropic `clear_thinking_20251015` requirements or xAI built-in tool helper acceptance outside planner-owned surface-preparation seams, or performing session continuation derivation outside planner-owned session runtime seams.
   priority: must
   stability: evolving
 
@@ -108,6 +109,14 @@ decisions:
   covers:
     - reqllm.layer_boundaries.separated_io
     - reqllm.layer_boundaries.no_cross_layer_skips
+
+- kind: command
+  target: mix test test/req_llm_next/governed_authority_test.exs
+  execute: true
+  covers:
+    - reqllm.layer_boundaries.separated_io
+    - reqllm.layer_boundaries.no_cross_layer_skips
+    - reqllm.layer_boundaries.provider_utilities_outside_stack
 
 - kind: command
   target: mix test test/best_effort_runtime_test.exs

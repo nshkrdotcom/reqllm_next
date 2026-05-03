@@ -8,6 +8,7 @@ defmodule ReqLlmNext.Wire.GoogleGenerateContent do
   alias ReqLlmNext.Context
   alias ReqLlmNext.Context.ContentPart
   alias ReqLlmNext.Context.Message
+  alias ReqLlmNext.GovernedAuthority
   alias ReqLlmNext.Provider
   alias ReqLlmNext.Tool
   alias ReqLlmNext.ToolCall
@@ -32,7 +33,7 @@ defmodule ReqLlmNext.Wire.GoogleGenerateContent do
     request_path = "/models/#{model.id}:streamGenerateContent"
 
     request_opts =
-      if Keyword.get(opts, :_use_runtime_metadata, false) do
+      if Keyword.get(opts, :_use_runtime_metadata, false) or GovernedAuthority.governed?(opts) do
         Keyword.put(opts, :path, request_path)
       else
         Keyword.put(

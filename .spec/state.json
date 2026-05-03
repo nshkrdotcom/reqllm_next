@@ -89,6 +89,20 @@
       {
         "affects": [
           "reqllm.architecture",
+          "reqllm.provider",
+          "reqllm.package",
+          "reqllm.layer_boundaries",
+          "reqllm.source_layout"
+        ],
+        "date": "2026-05-03",
+        "file": ".spec/decisions/governed_authority_boundary.md",
+        "id": "reqllm.decision.governed_authority_boundary",
+        "status": "accepted",
+        "title": "Governed Authority Boundary"
+      },
+      {
+        "affects": [
+          "reqllm.architecture",
           "reqllm.policy_rules",
           "reqllm.layer_boundaries"
         ],
@@ -264,7 +278,36 @@
       }
     ]
   },
-  "findings": [],
+  "findings": [
+    {
+      "code": "verification_command_failed",
+      "entity_id": "reqllm.workflow",
+      "file": ".spec/specs/workflow.spec.md",
+      "level": "error",
+      "message": "Verification command failed: bw prime\n/usr/bin/sh: 1: bw: not found"
+    },
+    {
+      "code": "verification_target_missing_reference",
+      "entity_id": "reqllm.workflow",
+      "file": ".spec/specs/workflow.spec.md",
+      "level": "warning",
+      "message": "Verification target mix.exs does not reference covered requirement: reqllm.workflow.live_verifier_commands"
+    },
+    {
+      "code": "verification_target_missing_reference",
+      "entity_id": "reqllm.workflow",
+      "file": ".spec/specs/workflow.spec.md",
+      "level": "warning",
+      "message": "Verification target mix.exs does not reference covered requirement: reqllm.workflow.provider_surface_guides"
+    },
+    {
+      "code": "verification_target_missing_reference",
+      "entity_id": "reqllm.workflow",
+      "file": ".spec/specs/workflow.spec.md",
+      "level": "warning",
+      "message": "Verification target mix.exs does not reference covered requirement: reqllm.workflow.starter_slice_verification"
+    }
+  ],
   "index": {
     "exceptions": [],
     "requirements": [
@@ -282,6 +325,14 @@
         "priority": "must",
         "stability": "evolving",
         "statement": "ReqLlmNext architecture shall normalize model facts into `ModelProfile`, request intent into `ExecutionMode`, resolve compatibility-aware surface policy, run surface-owned request preparation, and materialize a single `ExecutionPlan` before downstream execution, including manifest-backed provider-scoped descriptive fact extraction for first-class providers, typed `LLMDB.Provider.runtime` and `LLMDB.Model.execution` metadata as the upstream contract for best-effort providers without dedicated slice registrations, family-owned or metadata-driven surface catalog resolution before planning, manifest-backed or generic runtime-module lookup for provider, session-runtime, protocol, wire, and transport layers, honoring explicit transport and session intent when a matching surface exists, validating surface-specific parameter compatibility before wire encoding, preparing continuation state in session runtime before transport execution, and routing both streaming and request-style non-streaming HTTP execution through explicit transport modules across text, object, embedding, image, transcription, and speech operations, including provider-owned Google embedding and image lanes inside the native Google family, while allowing public docs to distinguish first-class and best-effort support tiers without splitting the runtime into different planner architectures.",
+        "subject_id": "reqllm.architecture"
+      },
+      {
+        "file": ".spec/specs/architecture.spec.md",
+        "id": "reqllm.architecture.governed_authority_boundary",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "ReqLlmNext architecture shall treat governed credentials and endpoint authority as an explicit provider-layer contract separate from model input, planning intent, semantic protocol, wire payloads, and transport mechanics, so standalone env or option fallbacks never become implicit governance and provider-owned utility paths obey the same governed authority boundary as canonical generation, realtime, media, embedding, and best-effort runtime-metadata requests.",
         "subject_id": "reqllm.architecture"
       },
       {
@@ -314,6 +365,14 @@
         "priority": "must",
         "stability": "evolving",
         "statement": "Runtime layers may emit diagnostics, but curated support-matrix compat runs, replay-backed best-effort provider proof matrices, anomaly analyzers, issue-drafting tooling, provider utility verification, and future provider expansion work shall consume them outside the execution layers rather than patching runtime behavior in place or introducing provider-specific diagnostic shortcuts.",
+        "subject_id": "reqllm.diagnostics"
+      },
+      {
+        "file": ".spec/specs/diagnostics.spec.md",
+        "id": "reqllm.diagnostics.governed_authority_observable",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "Governed authority behavior shall remain observable through the existing provider-request diagnostics and fixture evidence without emitting raw governed credential values, unmanaged direct credential options, or env-derived secrets.",
         "subject_id": "reqllm.diagnostics"
       },
       {
@@ -513,7 +572,7 @@
         "id": "reqllm.layer_boundaries.no_cross_layer_skips",
         "priority": "must",
         "stability": "evolving",
-        "statement": "No execution layer shall skip across another layer's ownership boundary by choosing transports in semantic protocol code, reinterpreting semantic meaning in wire code, introducing model-specific behavior in provider or transport code, deriving provider-native request flags in shared executor code after planning, resolving auth or endpoint roots outside the provider layer when generic runtime metadata is in use, performing provider-surface dependency validation such as Anthropic `clear_thinking_20251015` requirements or xAI built-in tool helper acceptance outside planner-owned surface-preparation seams, or performing session continuation derivation outside planner-owned session runtime seams.",
+        "statement": "No execution layer shall skip across another layer's ownership boundary by choosing transports in semantic protocol code, reinterpreting semantic meaning in wire code, introducing model-specific behavior in provider or transport code, deriving provider-native request flags in shared executor code after planning, resolving auth or endpoint roots outside the provider layer when generic runtime metadata or governed authority is in use, performing provider-surface dependency validation such as Anthropic `clear_thinking_20251015` requirements or xAI built-in tool helper acceptance outside planner-owned surface-preparation seams, or performing session continuation derivation outside planner-owned session runtime seams.",
         "subject_id": "reqllm.layer_boundaries"
       },
       {
@@ -601,7 +660,7 @@
         "id": "reqllm.model_compat.provider_native_request_shapes",
         "priority": "should",
         "stability": "evolving",
-        "statement": "Provider-native utility coverage shall keep request-shape and representative request-execution proofs for supported non-canonical endpoints so batch, file, vector-store, background, and similar utility surfaces stay reconciled with the shared execution architecture without claiming top-level API support they do not provide.",
+        "statement": "Provider-native utility coverage shall keep request-shape and representative request-execution proofs for supported non-canonical endpoints so batch, file, vector-store, background, and similar utility surfaces stay reconciled with the shared execution architecture without claiming top-level API support they do not provide, including governed authority proof that utility clients do not bypass provider-layer credential and route governance.",
         "subject_id": "reqllm.model_compat"
       },
       {
@@ -642,6 +701,14 @@
         "priority": "must",
         "stability": "evolving",
         "statement": "The model boundary shall fail fast on tuples, ad hoc maps, unsupported types, or invalid model metadata and shall not let raw unvalidated model input continue into execution, while leaving later provider-native helper validation and surface-specific request validation to the planning boundary rather than reintroducing raw model checks downstream, and the public contract lane shall load the top-level facade before export assertions so model-boundary contract coverage is checking the real compiled API surface.",
+        "subject_id": "reqllm.model_input"
+      },
+      {
+        "file": ".spec/specs/model_input_boundary.spec.md",
+        "id": "reqllm.model_input.governed_authority_separate",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "Governed authority shall not expand the model-input boundary or carry alternate model descriptors; it is a provider-layer credential and route authority consumed after model resolution while model input remains limited to `LLMDB` model specs and `%LLMDB.Model{}` values.",
         "subject_id": "reqllm.model_input"
       },
       {
@@ -742,6 +809,14 @@
       },
       {
         "file": ".spec/specs/package.spec.md",
+        "id": "reqllm.package.governed_authority",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "ReqLlmNext shall accept an explicit `ReqLlmNext.GovernedAuthority` for governed execution and shall keep governed credential, route, query, account, project, realtime-session, policy, lease, and redaction references out of unmanaged env or option fallbacks across canonical requests, realtime transports, provider-owned media and embedding wires, runtime metadata execution, fixture capture, replay, and provider utility clients.",
+        "subject_id": "reqllm.package"
+      },
+      {
+        "file": ".spec/specs/package.spec.md",
         "id": "reqllm.package.live_verifier_lane",
         "priority": "should",
         "stability": "evolving",
@@ -753,7 +828,7 @@
         "id": "reqllm.package.local_env_loading",
         "priority": "should",
         "stability": "evolving",
-        "statement": "ReqLlmNext shall support local development and replay or live verification by loading a local `.env` file without overriding shell-provided environment variables, so API keys can be supplied for tests and compatibility runs without being committed.",
+        "statement": "ReqLlmNext shall support standalone local development and replay or live verification by loading a local `.env` file without overriding shell-provided environment variables, so API keys can be supplied for tests and compatibility runs without being committed; this local env path shall not be treated as governed credential authority.",
         "subject_id": "reqllm.package"
       },
       {
@@ -858,6 +933,14 @@
         "priority": "must",
         "stability": "evolving",
         "statement": "Provider shall own provider identity, API-key lookup, auth strategy, provider headers, and endpoint roots by transport family.",
+        "subject_id": "reqllm.provider"
+      },
+      {
+        "file": ".spec/specs/provider.spec.md",
+        "id": "reqllm.provider.governed_authority",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "In governed mode, provider auth and route roots shall come only from `ReqLlmNext.GovernedAuthority`; direct provider keys, direct base URLs, direct URLs, headers, realtime tokens, organization or project identifiers, account or model-account identifiers, and runtime-metadata env credential fallbacks shall be rejected as unmanaged authority while HTTP, streaming, media, embedding, OpenAI realtime, OpenAI Responses WebSocket, runtime metadata, and provider-owned utility request paths reuse governed base URL, headers, query, and template values.",
         "subject_id": "reqllm.provider"
       },
       {
@@ -1006,6 +1089,14 @@
       },
       {
         "file": ".spec/specs/source_layout.spec.md",
+        "id": "reqllm.source_layout.governed_authority_home",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "The governed authority contract shall live in the central package/provider layer under `lib/req_llm_next/`, while provider slices, wire modules, realtime adapters, and provider utility clients shall call that shared provider-layer contract instead of defining per-provider authority structs or env bypasses.",
+        "subject_id": "reqllm.source_layout"
+      },
+      {
+        "file": ".spec/specs/source_layout.spec.md",
         "id": "reqllm.source_layout.layer_scoped_quirks",
         "priority": "must",
         "stability": "evolving",
@@ -1042,6 +1133,14 @@
         "priority": "must",
         "stability": "evolving",
         "statement": "Telemetry metadata and measurements shall remain stable across transports, operations, canonical realtime flows, curated provider support-matrix lanes, replay-backed best-effort provider proof matrices, first-class and best-effort provider tiers, and future provider additions so application code and compat tooling do not need provider-specific parsing to interpret usage, reasoning, request summaries, or execution-stack selection.",
+        "subject_id": "reqllm.telemetry"
+      },
+      {
+        "file": ".spec/specs/telemetry.spec.md",
+        "id": "reqllm.telemetry.governed_authority_redaction",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "Governed authority use shall preserve provider-request telemetry and fixture evidence without exposing governed credential header values, env-derived secrets, direct authority override values, or raw replay credentials.",
         "subject_id": "reqllm.telemetry"
       },
       {
@@ -1158,6 +1257,14 @@
       },
       {
         "file": ".spec/specs/workflow.spec.md",
+        "id": "reqllm.workflow.governed_authority_verification",
+        "priority": "must",
+        "stability": "evolving",
+        "statement": "Contributor workflow shall keep governed authority changes paired with Spec Led subject updates, an ADR when the boundary changes, focused governed tests, and the standard package QC loop so standalone env ergonomics cannot quietly become a governed runtime path.",
+        "subject_id": "reqllm.workflow"
+      },
+      {
+        "file": ".spec/specs/workflow.spec.md",
         "id": "reqllm.workflow.live_verifier_commands",
         "priority": "should",
         "stability": "evolving",
@@ -1177,7 +1284,7 @@
         "id": "reqllm.workflow.specled_loop",
         "priority": "must",
         "stability": "evolving",
-        "statement": "Contributor workflow shall keep `.spec/` as the canonical spec workspace and use `mix spec.prime`, `mix spec.next`, and `mix spec.check` to maintain the subject specs, ADRs, README, AGENTS, and package-thesis guide in sync with current truth, including top-level media API parity, request-fixture replay behavior, sparse live verifier lanes, runtime telemetry, canonical output items, explicit result channels, transport-agnostic realtime behavior, typed `LLMDB` runtime-metadata consumption, and support-tier claims when those package boundaries evolve.",
+        "statement": "Contributor workflow shall keep `.spec/` as the canonical spec workspace and use `mix spec.prime`, `mix spec.next`, and `mix spec.check` to maintain the subject specs, ADRs, README, AGENTS, and package-thesis guide in sync with current truth, including top-level media API parity, request-fixture replay behavior, sparse live verifier lanes, runtime telemetry, canonical output items, explicit result channels, transport-agnostic realtime behavior, typed `LLMDB` runtime-metadata consumption, governed authority boundaries, and support-tier claims when those package boundaries evolve.",
         "subject_id": "reqllm.workflow"
       },
       {
@@ -1259,7 +1366,8 @@
             "reqllm.decision.zoi_backed_struct_contracts",
             "reqllm.decision.live_verifier_tests",
             "reqllm.decision.provider_expansion_strategy",
-            "reqllm.decision.llmdb_best_effort_runtime"
+            "reqllm.decision.llmdb_best_effort_runtime",
+            "reqllm.decision.governed_authority_boundary"
           ],
           "id": "reqllm.architecture",
           "kind": "architecture",
@@ -1433,7 +1541,8 @@
             "reqllm.decision.transport_agnostic_realtime_core",
             "reqllm.decision.runtime_telemetry_kernel",
             "reqllm.decision.zoi_backed_struct_contracts",
-            "reqllm.decision.live_verifier_tests"
+            "reqllm.decision.live_verifier_tests",
+            "reqllm.decision.governed_authority_boundary"
           ],
           "id": "reqllm.layer_boundaries",
           "kind": "layer_boundaries",
@@ -1461,7 +1570,8 @@
           "decisions": [
             "reqllm.decision.provider_surface_maps_in_guides",
             "reqllm.decision.live_verifier_tests",
-            "reqllm.decision.provider_expansion_strategy"
+            "reqllm.decision.provider_expansion_strategy",
+            "reqllm.decision.governed_authority_boundary"
           ],
           "id": "reqllm.model_compat",
           "kind": "compat",
@@ -1503,7 +1613,8 @@
             "reqllm.decision.model_input_boundary",
             "reqllm.decision.zoi_backed_struct_contracts",
             "reqllm.decision.live_verifier_tests",
-            "reqllm.decision.provider_expansion_strategy"
+            "reqllm.decision.provider_expansion_strategy",
+            "reqllm.decision.governed_authority_boundary"
           ],
           "id": "reqllm.model_input",
           "kind": "model_input",
@@ -1590,7 +1701,8 @@
             "reqllm.decision.zoi_backed_struct_contracts",
             "reqllm.decision.live_verifier_tests",
             "reqllm.decision.llmdb_best_effort_runtime",
-            "reqllm.decision.loaded_optional_wire_callbacks"
+            "reqllm.decision.loaded_optional_wire_callbacks",
+            "reqllm.decision.governed_authority_boundary"
           ],
           "id": "reqllm.package",
           "kind": "package",
@@ -1632,7 +1744,8 @@
         "meta": {
           "decisions": [
             "reqllm.decision.execution_layers",
-            "reqllm.decision.provider_specific_endpoint_utilities"
+            "reqllm.decision.provider_specific_endpoint_utilities",
+            "reqllm.decision.governed_authority_boundary"
           ],
           "id": "reqllm.provider",
           "kind": "provider",
@@ -1713,7 +1826,8 @@
           "decisions": [
             "reqllm.decision.zoi_backed_struct_contracts",
             "reqllm.decision.live_verifier_tests",
-            "reqllm.decision.loaded_optional_wire_callbacks"
+            "reqllm.decision.loaded_optional_wire_callbacks",
+            "reqllm.decision.governed_authority_boundary"
           ],
           "id": "reqllm.source_layout",
           "kind": "source_layout",
@@ -1818,7 +1932,8 @@
             "reqllm.decision.zoi_backed_struct_contracts",
             "reqllm.decision.provider_surface_maps_in_guides",
             "reqllm.decision.live_verifier_tests",
-            "reqllm.decision.provider_expansion_strategy"
+            "reqllm.decision.provider_expansion_strategy",
+            "reqllm.decision.governed_authority_boundary"
           ],
           "id": "reqllm.workflow",
           "kind": "workflow",
@@ -1871,7 +1986,8 @@
           "reqllm.architecture.model_input_boundary",
           "reqllm.architecture.facts_mode_policy_plan",
           "reqllm.architecture.execution_layers",
-          "reqllm.architecture.zoi_struct_contracts"
+          "reqllm.architecture.zoi_struct_contracts",
+          "reqllm.architecture.governed_authority_boundary"
         ],
         "file": ".spec/specs/architecture.spec.md",
         "kind": "source_file",
@@ -1910,9 +2026,22 @@
       },
       {
         "covers": [
+          "reqllm.architecture.execution_layers",
+          "reqllm.architecture.provider_specific_utilities",
+          "reqllm.architecture.governed_authority_boundary"
+        ],
+        "execute": true,
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.architecture",
+        "target": "mix test test/req_llm_next/governed_authority_test.exs test/providers/openai/client_test.exs test/providers/anthropic/client_test.exs"
+      },
+      {
+        "covers": [
           "reqllm.diagnostics.observational",
           "reqllm.diagnostics.layer_attributed",
-          "reqllm.diagnostics.compat_consumed"
+          "reqllm.diagnostics.compat_consumed",
+          "reqllm.diagnostics.governed_authority_observable"
         ],
         "file": ".spec/specs/diagnostics.spec.md",
         "kind": "source_file",
@@ -1922,13 +2051,14 @@
       {
         "covers": [
           "reqllm.diagnostics.observational",
-          "reqllm.diagnostics.layer_attributed"
+          "reqllm.diagnostics.layer_attributed",
+          "reqllm.diagnostics.governed_authority_observable"
         ],
         "execute": true,
         "file": ".spec/specs/diagnostics.spec.md",
         "kind": "command",
         "subject_id": "reqllm.diagnostics",
-        "target": "mix test test/req_llm_next/telemetry_test.exs test/providers/openai/client_test.exs"
+        "target": "mix test test/req_llm_next/telemetry_test.exs test/providers/openai/client_test.exs test/req_llm_next/governed_authority_test.exs"
       },
       {
         "covers": [
@@ -2175,6 +2305,18 @@
       {
         "covers": [
           "reqllm.layer_boundaries.separated_io",
+          "reqllm.layer_boundaries.no_cross_layer_skips",
+          "reqllm.layer_boundaries.provider_utilities_outside_stack"
+        ],
+        "execute": true,
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "mix test test/req_llm_next/governed_authority_test.exs"
+      },
+      {
+        "covers": [
+          "reqllm.layer_boundaries.separated_io",
           "reqllm.layer_boundaries.no_cross_layer_skips"
         ],
         "execute": true,
@@ -2257,7 +2399,7 @@
         "file": ".spec/specs/model_compat.spec.md",
         "kind": "command",
         "subject_id": "reqllm.model_compat",
-        "target": "mix test test/providers/openai/client_test.exs test/providers/openai/background_test.exs test/providers/openai/files_test.exs test/providers/openai/vector_stores_test.exs test/providers/openai/batches_test.exs"
+        "target": "mix test test/providers/openai/client_test.exs test/providers/anthropic/client_test.exs test/providers/openai/background_test.exs test/providers/openai/files_test.exs test/providers/openai/vector_stores_test.exs test/providers/openai/batches_test.exs"
       },
       {
         "covers": [
@@ -2304,7 +2446,8 @@
           "reqllm.model_input.accepted_forms",
           "reqllm.model_input.llmdb_resolution",
           "reqllm.model_input.fail_fast",
-          "reqllm.model_input.zoi_handoff_contracts"
+          "reqllm.model_input.zoi_handoff_contracts",
+          "reqllm.model_input.governed_authority_separate"
         ],
         "file": ".spec/specs/model_input_boundary.spec.md",
         "kind": "source_file",
@@ -2334,6 +2477,17 @@
         "kind": "command",
         "subject_id": "reqllm.model_input",
         "target": "mix test test/public_api/support_status_test.exs"
+      },
+      {
+        "covers": [
+          "reqllm.model_input.accepted_forms",
+          "reqllm.model_input.governed_authority_separate"
+        ],
+        "execute": true,
+        "file": ".spec/specs/model_input_boundary.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.model_input",
+        "target": "mix test test/req_llm_next/governed_authority_test.exs test/model_resolver_test.exs"
       },
       {
         "covers": [
@@ -2428,7 +2582,8 @@
           "reqllm.package.execution_planning",
           "reqllm.package.buffered_stream_metadata",
           "reqllm.package.runtime_telemetry",
-          "reqllm.package.support_tiers"
+          "reqllm.package.support_tiers",
+          "reqllm.package.governed_authority"
         ],
         "execute": true,
         "file": ".spec/specs/package.spec.md",
@@ -2661,6 +2816,18 @@
       },
       {
         "covers": [
+          "reqllm.package.governed_authority",
+          "reqllm.package.provider_specific_utilities",
+          "reqllm.package.utility_proof_depth"
+        ],
+        "execute": true,
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/req_llm_next/governed_authority_test.exs test/providers/openai/client_test.exs test/providers/anthropic/client_test.exs"
+      },
+      {
+        "covers": [
           "reqllm.package.provider_specific_utilities"
         ],
         "execute": true,
@@ -2727,12 +2894,26 @@
           "reqllm.provider.auth_and_roots",
           "reqllm.provider.route_ownership",
           "reqllm.provider.no_model_behavior",
-          "reqllm.provider.utility_roots"
+          "reqllm.provider.utility_roots",
+          "reqllm.provider.governed_authority"
         ],
         "file": ".spec/specs/provider.spec.md",
         "kind": "source_file",
         "subject_id": "reqllm.provider",
         "target": ".spec/specs/provider.spec.md"
+      },
+      {
+        "covers": [
+          "reqllm.provider.auth_and_roots",
+          "reqllm.provider.route_ownership",
+          "reqllm.provider.utility_roots",
+          "reqllm.provider.governed_authority"
+        ],
+        "execute": true,
+        "file": ".spec/specs/provider.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.provider",
+        "target": "mix test test/req_llm_next/governed_authority_test.exs test/providers/openai/client_test.exs test/providers/anthropic/client_test.exs test/providers/google/wire_embeddings_test.exs test/providers/google/wire_images_test.exs"
       },
       {
         "covers": [
@@ -2822,7 +3003,8 @@
           "reqllm.source_layout.compat_outside_runtime",
           "reqllm.source_layout.provider_utilities",
           "reqllm.source_layout.extension_contract_home",
-          "reqllm.source_layout.zoi_struct_contracts"
+          "reqllm.source_layout.zoi_struct_contracts",
+          "reqllm.source_layout.governed_authority_home"
         ],
         "file": ".spec/specs/source_layout.spec.md",
         "kind": "source_file",
@@ -2841,10 +3023,22 @@
       },
       {
         "covers": [
+          "reqllm.source_layout.concern_homes",
+          "reqllm.source_layout.governed_authority_home"
+        ],
+        "execute": true,
+        "file": ".spec/specs/source_layout.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.source_layout",
+        "target": "mix test test/req_llm_next/governed_authority_test.exs"
+      },
+      {
+        "covers": [
           "reqllm.telemetry.request_lifecycle",
           "reqllm.telemetry.canonical_measurements",
           "reqllm.telemetry.sanitized_payloads",
-          "reqllm.telemetry.kernel_boundary"
+          "reqllm.telemetry.kernel_boundary",
+          "reqllm.telemetry.governed_authority_redaction"
         ],
         "file": ".spec/specs/telemetry.spec.md",
         "kind": "source_file",
@@ -2855,13 +3049,14 @@
         "covers": [
           "reqllm.telemetry.request_lifecycle",
           "reqllm.telemetry.canonical_measurements",
-          "reqllm.telemetry.kernel_boundary"
+          "reqllm.telemetry.kernel_boundary",
+          "reqllm.telemetry.governed_authority_redaction"
         ],
         "execute": true,
         "file": ".spec/specs/telemetry.spec.md",
         "kind": "command",
         "subject_id": "reqllm.telemetry",
-        "target": "mix test test/req_llm_next/telemetry_test.exs test/providers/openai/client_test.exs"
+        "target": "mix test test/req_llm_next/telemetry_test.exs test/providers/openai/client_test.exs test/req_llm_next/governed_authority_test.exs"
       },
       {
         "covers": [
@@ -2927,7 +3122,8 @@
       {
         "covers": [
           "reqllm.workflow.provider_surface_guides",
-          "reqllm.workflow.extension_dsl_guidance"
+          "reqllm.workflow.extension_dsl_guidance",
+          "reqllm.workflow.governed_authority_verification"
         ],
         "file": ".spec/specs/workflow.spec.md",
         "kind": "source_file",
@@ -3020,6 +3216,17 @@
       {
         "covers": [
           "reqllm.workflow.specled_loop",
+          "reqllm.workflow.governed_authority_verification"
+        ],
+        "execute": true,
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "command",
+        "subject_id": "reqllm.workflow",
+        "target": "mix test test/req_llm_next/governed_authority_test.exs test/providers/openai/client_test.exs test/providers/anthropic/client_test.exs"
+      },
+      {
+        "covers": [
+          "reqllm.workflow.specled_loop",
           "reqllm.workflow.agent_instructions",
           "reqllm.workflow.extension_dsl_guidance"
         ],
@@ -3081,16 +3288,3119 @@
   "specification_version": "1.0",
   "summary": {
     "decision_parse_errors": 0,
-    "decisions": 21,
+    "decisions": 22,
     "exceptions": 0,
-    "findings": 0,
-    "requirements": 121,
+    "findings": 4,
+    "requirements": 129,
     "scenarios": 0,
     "subjects": 24,
-    "verifications": 113
+    "verifications": 120
+  },
+  "verification": {
+    "claims": [
+      {
+        "cover_id": "reqllm.architecture.execution_layers",
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.architecture",
+        "target": "README.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.architecture.facts_mode_policy_plan",
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.architecture",
+        "target": "README.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.architecture.model_input_boundary",
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.architecture",
+        "target": "README.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.architecture.execution_layers",
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.architecture",
+        "target": "AGENTS.md",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.architecture.facts_mode_policy_plan",
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.architecture",
+        "target": "AGENTS.md",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.architecture.model_input_boundary",
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.architecture",
+        "target": "AGENTS.md",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.architecture.execution_layers",
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.architecture",
+        "target": ".spec/specs/architecture.spec.md",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.architecture.facts_mode_policy_plan",
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.architecture",
+        "target": ".spec/specs/architecture.spec.md",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.architecture.governed_authority_boundary",
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.architecture",
+        "target": ".spec/specs/architecture.spec.md",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.architecture.model_input_boundary",
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.architecture",
+        "target": ".spec/specs/architecture.spec.md",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.architecture.zoi_struct_contracts",
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.architecture",
+        "target": ".spec/specs/architecture.spec.md",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.architecture.model_input_boundary",
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.architecture",
+        "target": "mix test test/model_resolver_test.exs test/public_api",
+        "verification_index": 3
+      },
+      {
+        "cover_id": "reqllm.architecture.provider_specific_utilities",
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.architecture",
+        "target": ".spec/specs/architecture.spec.md",
+        "verification_index": 4
+      },
+      {
+        "cover_id": "reqllm.architecture.facts_mode_policy_plan",
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.architecture",
+        "target": "mix test test/best_effort_runtime_test.exs test/public_api/support_status_test.exs",
+        "verification_index": 5
+      },
+      {
+        "cover_id": "reqllm.architecture.model_input_boundary",
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.architecture",
+        "target": "mix test test/best_effort_runtime_test.exs test/public_api/support_status_test.exs",
+        "verification_index": 5
+      },
+      {
+        "cover_id": "reqllm.architecture.execution_layers",
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.architecture",
+        "target": "mix test test/req_llm_next/governed_authority_test.exs test/providers/openai/client_test.exs test/providers/anthropic/client_test.exs",
+        "verification_index": 6
+      },
+      {
+        "cover_id": "reqllm.architecture.governed_authority_boundary",
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.architecture",
+        "target": "mix test test/req_llm_next/governed_authority_test.exs test/providers/openai/client_test.exs test/providers/anthropic/client_test.exs",
+        "verification_index": 6
+      },
+      {
+        "cover_id": "reqllm.architecture.provider_specific_utilities",
+        "file": ".spec/specs/architecture.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.architecture",
+        "target": "mix test test/req_llm_next/governed_authority_test.exs test/providers/openai/client_test.exs test/providers/anthropic/client_test.exs",
+        "verification_index": 6
+      },
+      {
+        "cover_id": "reqllm.diagnostics.compat_consumed",
+        "file": ".spec/specs/diagnostics.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.diagnostics",
+        "target": ".spec/specs/diagnostics.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.diagnostics.governed_authority_observable",
+        "file": ".spec/specs/diagnostics.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.diagnostics",
+        "target": ".spec/specs/diagnostics.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.diagnostics.layer_attributed",
+        "file": ".spec/specs/diagnostics.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.diagnostics",
+        "target": ".spec/specs/diagnostics.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.diagnostics.observational",
+        "file": ".spec/specs/diagnostics.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.diagnostics",
+        "target": ".spec/specs/diagnostics.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.diagnostics.governed_authority_observable",
+        "file": ".spec/specs/diagnostics.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.diagnostics",
+        "target": "mix test test/req_llm_next/telemetry_test.exs test/providers/openai/client_test.exs test/req_llm_next/governed_authority_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.diagnostics.layer_attributed",
+        "file": ".spec/specs/diagnostics.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.diagnostics",
+        "target": "mix test test/req_llm_next/telemetry_test.exs test/providers/openai/client_test.exs test/req_llm_next/governed_authority_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.diagnostics.observational",
+        "file": ".spec/specs/diagnostics.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.diagnostics",
+        "target": "mix test test/req_llm_next/telemetry_test.exs test/providers/openai/client_test.exs test/req_llm_next/governed_authority_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.enforcement.raw_model_boundary",
+        "file": ".spec/specs/enforcement.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.enforcement",
+        "target": ".spec/specs/enforcement.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.enforcement.runtime_hard_fail",
+        "file": ".spec/specs/enforcement.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.enforcement",
+        "target": ".spec/specs/enforcement.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.enforcement.zoi_for_facts",
+        "file": ".spec/specs/enforcement.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.enforcement",
+        "target": ".spec/specs/enforcement.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.enforcement.raw_model_boundary",
+        "file": ".spec/specs/enforcement.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.enforcement",
+        "target": "mix test test/model_resolver_test.exs test/public_api/contract_test.exs test/public_api/media_test.exs test/req_llm_next/validation_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.enforcement.runtime_hard_fail",
+        "file": ".spec/specs/enforcement.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.enforcement",
+        "target": "mix test test/model_resolver_test.exs test/public_api/contract_test.exs test/public_api/media_test.exs test/req_llm_next/validation_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.enforcement.runtime_hard_fail",
+        "file": ".spec/specs/enforcement.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.enforcement",
+        "target": "mix test test/public_api/support_status_test.exs test/best_effort_runtime_test.exs",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.execution_mode.mode_hints_before_policy",
+        "file": ".spec/specs/execution_mode.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.execution_mode",
+        "target": ".spec/specs/execution_mode.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.execution_mode.normalized_shape",
+        "file": ".spec/specs/execution_mode.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.execution_mode",
+        "target": ".spec/specs/execution_mode.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.execution_mode.provider_agnostic",
+        "file": ".spec/specs/execution_mode.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.execution_mode",
+        "target": ".spec/specs/execution_mode.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.execution_mode.mode_hints_before_policy",
+        "file": ".spec/specs/execution_mode.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.execution_mode",
+        "target": "mix test test/operation_planner_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.execution_mode.normalized_shape",
+        "file": ".spec/specs/execution_mode.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.execution_mode",
+        "target": "mix test test/operation_planner_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.execution_plan.deterministic_stack",
+        "file": ".spec/specs/execution_plan.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.execution_plan",
+        "target": ".spec/specs/execution_plan.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.execution_plan.no_downstream_rediscovery",
+        "file": ".spec/specs/execution_plan.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.execution_plan",
+        "target": ".spec/specs/execution_plan.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.execution_plan.planner_owns_assembly",
+        "file": ".spec/specs/execution_plan.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.execution_plan",
+        "target": ".spec/specs/execution_plan.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.execution_plan.prescriptive_object",
+        "file": ".spec/specs/execution_plan.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.execution_plan",
+        "target": ".spec/specs/execution_plan.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.execution_plan.surface_and_fallbacks",
+        "file": ".spec/specs/execution_plan.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.execution_plan",
+        "target": ".spec/specs/execution_plan.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.execution_plan.deterministic_stack",
+        "file": ".spec/specs/execution_plan.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.execution_plan",
+        "target": "mix test test/operation_planner_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.execution_plan.planner_owns_assembly",
+        "file": ".spec/specs/execution_plan.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.execution_plan",
+        "target": "mix test test/operation_planner_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.execution_plan.prescriptive_object",
+        "file": ".spec/specs/execution_plan.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.execution_plan",
+        "target": "mix test test/operation_planner_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.execution_plan.deterministic_stack",
+        "file": ".spec/specs/execution_plan.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.execution_plan",
+        "target": "mix test test/operation_planner_test.exs test/best_effort_runtime_test.exs",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.execution_plan.no_downstream_rediscovery",
+        "file": ".spec/specs/execution_plan.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.execution_plan",
+        "target": "mix test test/operation_planner_test.exs test/best_effort_runtime_test.exs",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.execution_plan.surface_and_fallbacks",
+        "file": ".spec/specs/execution_plan.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.execution_plan",
+        "target": "mix test test/operation_planner_test.exs test/best_effort_runtime_test.exs",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.execution_surfaces.non_cartesian",
+        "file": ".spec/specs/execution_surfaces.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.execution_surfaces",
+        "target": ".spec/specs/execution_surfaces.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.execution_surfaces.support_unit",
+        "file": ".spec/specs/execution_surfaces.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.execution_surfaces",
+        "target": ".spec/specs/execution_surfaces.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.execution_surfaces.surface_selection",
+        "file": ".spec/specs/execution_surfaces.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.execution_surfaces",
+        "target": ".spec/specs/execution_surfaces.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.execution_surfaces.realtime_outside_surface_catalog",
+        "file": ".spec/specs/execution_surfaces.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.execution_surfaces",
+        "target": "mix test test/operation_planner_test.exs test/providers/xai/execution_stack_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/google/execution_stack_test.exs test/providers/google/wire_embeddings_test.exs test/providers/google/wire_images_test.exs test/provider_features/google_native_surfaces_test.exs test/providers/elevenlabs/execution_stack_test.exs test/providers/cohere/execution_stack_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.execution_surfaces.support_unit",
+        "file": ".spec/specs/execution_surfaces.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.execution_surfaces",
+        "target": "mix test test/operation_planner_test.exs test/providers/xai/execution_stack_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/google/execution_stack_test.exs test/providers/google/wire_embeddings_test.exs test/providers/google/wire_images_test.exs test/provider_features/google_native_surfaces_test.exs test/providers/elevenlabs/execution_stack_test.exs test/providers/cohere/execution_stack_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.execution_surfaces.surface_selection",
+        "file": ".spec/specs/execution_surfaces.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.execution_surfaces",
+        "target": "mix test test/operation_planner_test.exs test/providers/xai/execution_stack_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/google/execution_stack_test.exs test/providers/google/wire_embeddings_test.exs test/providers/google/wire_images_test.exs test/provider_features/google_native_surfaces_test.exs test/providers/elevenlabs/execution_stack_test.exs test/providers/cohere/execution_stack_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.execution_surfaces.transport_variants",
+        "file": ".spec/specs/execution_surfaces.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.execution_surfaces",
+        "target": "mix test test/operation_planner_test.exs test/providers/xai/execution_stack_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/google/execution_stack_test.exs test/providers/google/wire_embeddings_test.exs test/providers/google/wire_images_test.exs test/provider_features/google_native_surfaces_test.exs test/providers/elevenlabs/execution_stack_test.exs test/providers/cohere/execution_stack_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.execution_surfaces.non_cartesian",
+        "file": ".spec/specs/execution_surfaces.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.execution_surfaces",
+        "target": "mix test test/best_effort_runtime_test.exs",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.execution_surfaces.support_unit",
+        "file": ".spec/specs/execution_surfaces.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.execution_surfaces",
+        "target": "mix test test/best_effort_runtime_test.exs",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.execution_surfaces.surface_selection",
+        "file": ".spec/specs/execution_surfaces.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.execution_surfaces",
+        "target": "mix test test/best_effort_runtime_test.exs",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.extension_manifest.family_precedence",
+        "file": ".spec/specs/extension_manifest.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.extension_manifest",
+        "target": ".spec/specs/extension_manifest.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.extension_manifest.narrow_seams",
+        "file": ".spec/specs/extension_manifest.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.extension_manifest",
+        "target": ".spec/specs/extension_manifest.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.extension_manifest.plain_runtime_contract",
+        "file": ".spec/specs/extension_manifest.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.extension_manifest",
+        "target": ".spec/specs/extension_manifest.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.extension_manifest.rule_precedence",
+        "file": ".spec/specs/extension_manifest.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.extension_manifest",
+        "target": ".spec/specs/extension_manifest.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.extension_manifest.spark_authoring_layer",
+        "file": ".spec/specs/extension_manifest.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.extension_manifest",
+        "target": ".spec/specs/extension_manifest.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.extension_manifest.family_precedence",
+        "file": ".spec/specs/extension_manifest.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.extension_manifest",
+        "target": "mix test test/req_llm_next/extensions/manifest_test.exs test/req_llm_next/extensions/dsl_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.extension_manifest.plain_runtime_contract",
+        "file": ".spec/specs/extension_manifest.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.extension_manifest",
+        "target": "mix test test/req_llm_next/extensions/manifest_test.exs test/req_llm_next/extensions/dsl_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.extension_manifest.rule_precedence",
+        "file": ".spec/specs/extension_manifest.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.extension_manifest",
+        "target": "mix test test/req_llm_next/extensions/manifest_test.exs test/req_llm_next/extensions/dsl_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.extension_manifest.spark_authoring_layer",
+        "file": ".spec/specs/extension_manifest.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.extension_manifest",
+        "target": "mix test test/req_llm_next/extensions/manifest_test.exs test/req_llm_next/extensions/dsl_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.extension_manifest.compile_time_verification",
+        "file": ".spec/specs/extension_manifest.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.extension_manifest",
+        "target": "mix test test/req_llm_next/extensions/manifest_verifier_test.exs",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.extension_manifest.family_precedence",
+        "file": ".spec/specs/extension_manifest.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.extension_manifest",
+        "target": "mix test test/providers/cohere/execution_stack_test.exs test/providers/deepseek/execution_stack_test.exs test/providers/elevenlabs/execution_stack_test.exs test/providers/groq/execution_stack_test.exs test/providers/openrouter/execution_stack_test.exs test/providers/vllm/execution_stack_test.exs test/providers/xai/execution_stack_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/google/execution_stack_test.exs test/providers/google/wire_embeddings_test.exs test/providers/google/wire_images_test.exs test/provider_features/google_native_surfaces_test.exs test/model_profile_test.exs",
+        "verification_index": 3
+      },
+      {
+        "cover_id": "reqllm.extension_manifest.narrow_seams",
+        "file": ".spec/specs/extension_manifest.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.extension_manifest",
+        "target": "mix test test/providers/cohere/execution_stack_test.exs test/providers/deepseek/execution_stack_test.exs test/providers/elevenlabs/execution_stack_test.exs test/providers/groq/execution_stack_test.exs test/providers/openrouter/execution_stack_test.exs test/providers/vllm/execution_stack_test.exs test/providers/xai/execution_stack_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/google/execution_stack_test.exs test/providers/google/wire_embeddings_test.exs test/providers/google/wire_images_test.exs test/provider_features/google_native_surfaces_test.exs test/model_profile_test.exs",
+        "verification_index": 3
+      },
+      {
+        "cover_id": "reqllm.extension_manifest.plain_runtime_contract",
+        "file": ".spec/specs/extension_manifest.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.extension_manifest",
+        "target": "mix test test/providers/cohere/execution_stack_test.exs test/providers/deepseek/execution_stack_test.exs test/providers/elevenlabs/execution_stack_test.exs test/providers/groq/execution_stack_test.exs test/providers/openrouter/execution_stack_test.exs test/providers/vllm/execution_stack_test.exs test/providers/xai/execution_stack_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/google/execution_stack_test.exs test/providers/google/wire_embeddings_test.exs test/providers/google/wire_images_test.exs test/provider_features/google_native_surfaces_test.exs test/model_profile_test.exs",
+        "verification_index": 3
+      },
+      {
+        "cover_id": "reqllm.layer_boundaries.no_cross_layer_skips",
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": ".spec/specs/layer_boundaries.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.layer_boundaries.plan_aware_adapters",
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": ".spec/specs/layer_boundaries.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.layer_boundaries.provider_utilities_outside_stack",
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": ".spec/specs/layer_boundaries.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.layer_boundaries.replay_uses_recorded_stack",
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": ".spec/specs/layer_boundaries.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.layer_boundaries.separated_io",
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": ".spec/specs/layer_boundaries.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.layer_boundaries.zoi_runtime_state",
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": ".spec/specs/layer_boundaries.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.layer_boundaries.plan_aware_adapters",
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "AGENTS.md",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.layer_boundaries.replay_uses_recorded_stack",
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "mix test test/executor/stream_state_test.exs test/fixtures_test.exs test/operation_planner_test.exs",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.layer_boundaries.separated_io",
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "mix test test/executor/stream_state_test.exs test/fixtures_test.exs test/operation_planner_test.exs",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.layer_boundaries.replay_uses_recorded_stack",
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "mix test test/public_api/media_test.exs test/providers/openai/wire_images_test.exs test/providers/openai/wire_transcriptions_test.exs test/providers/openai/wire_speech_test.exs",
+        "verification_index": 3
+      },
+      {
+        "cover_id": "reqllm.layer_boundaries.separated_io",
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "mix test test/public_api/media_test.exs test/providers/openai/wire_images_test.exs test/providers/openai/wire_transcriptions_test.exs test/providers/openai/wire_speech_test.exs",
+        "verification_index": 3
+      },
+      {
+        "cover_id": "reqllm.layer_boundaries.replay_uses_recorded_stack",
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "mix test test/providers/google/wire_images_test.exs test/provider_features/google_native_surfaces_test.exs",
+        "verification_index": 4
+      },
+      {
+        "cover_id": "reqllm.layer_boundaries.separated_io",
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "mix test test/providers/google/wire_images_test.exs test/provider_features/google_native_surfaces_test.exs",
+        "verification_index": 4
+      },
+      {
+        "cover_id": "reqllm.layer_boundaries.no_cross_layer_skips",
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "mix test test/providers/xai/execution_stack_test.exs test/providers/xai/wire_responses_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/zenmux/wire_chat_test.exs test/providers/zenmux/wire_responses_test.exs test/providers/google/execution_stack_test.exs test/providers/google/wire_generate_content_test.exs test/providers/google/wire_embeddings_test.exs test/providers/google/wire_images_test.exs test/providers/elevenlabs/execution_stack_test.exs test/providers/elevenlabs/wire_speech_test.exs test/providers/elevenlabs/wire_transcriptions_test.exs test/providers/cohere/execution_stack_test.exs test/providers/cohere/wire_chat_test.exs",
+        "verification_index": 5
+      },
+      {
+        "cover_id": "reqllm.layer_boundaries.separated_io",
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "mix test test/providers/xai/execution_stack_test.exs test/providers/xai/wire_responses_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/zenmux/wire_chat_test.exs test/providers/zenmux/wire_responses_test.exs test/providers/google/execution_stack_test.exs test/providers/google/wire_generate_content_test.exs test/providers/google/wire_embeddings_test.exs test/providers/google/wire_images_test.exs test/providers/elevenlabs/execution_stack_test.exs test/providers/elevenlabs/wire_speech_test.exs test/providers/elevenlabs/wire_transcriptions_test.exs test/providers/cohere/execution_stack_test.exs test/providers/cohere/wire_chat_test.exs",
+        "verification_index": 5
+      },
+      {
+        "cover_id": "reqllm.layer_boundaries.no_cross_layer_skips",
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "mix test test/req_llm_next/governed_authority_test.exs",
+        "verification_index": 6
+      },
+      {
+        "cover_id": "reqllm.layer_boundaries.provider_utilities_outside_stack",
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "mix test test/req_llm_next/governed_authority_test.exs",
+        "verification_index": 6
+      },
+      {
+        "cover_id": "reqllm.layer_boundaries.separated_io",
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "mix test test/req_llm_next/governed_authority_test.exs",
+        "verification_index": 6
+      },
+      {
+        "cover_id": "reqllm.layer_boundaries.no_cross_layer_skips",
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "mix test test/best_effort_runtime_test.exs",
+        "verification_index": 7
+      },
+      {
+        "cover_id": "reqllm.layer_boundaries.separated_io",
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "mix test test/best_effort_runtime_test.exs",
+        "verification_index": 7
+      },
+      {
+        "cover_id": "reqllm.layer_boundaries.zoi_runtime_state",
+        "file": ".spec/specs/layer_boundaries.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.layer_boundaries",
+        "target": "mix test test/stream_response_test.exs test/executor/stream_state_test.exs test/req_llm_next/response/materializer_test.exs",
+        "verification_index": 8
+      },
+      {
+        "cover_id": "reqllm.model_compat.curated_support_matrix",
+        "file": ".spec/specs/model_compat.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.model_compat",
+        "target": ".spec/specs/model_compat.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.model_compat.layer_attribution",
+        "file": ".spec/specs/model_compat.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.model_compat",
+        "target": ".spec/specs/model_compat.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.model_compat.provider_native_surfaces",
+        "file": ".spec/specs/model_compat.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.model_compat",
+        "target": ".spec/specs/model_compat.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.model_compat.real_runtime",
+        "file": ".spec/specs/model_compat.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.model_compat",
+        "target": ".spec/specs/model_compat.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.model_compat.shared_scenarios",
+        "file": ".spec/specs/model_compat.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.model_compat",
+        "target": ".spec/specs/model_compat.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.model_compat.layer_attribution",
+        "file": ".spec/specs/model_compat.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.model_compat",
+        "target": "mix test test/mix/tasks/model_compat_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.model_compat.real_runtime",
+        "file": ".spec/specs/model_compat.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.model_compat",
+        "target": "mix test test/mix/tasks/model_compat_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.model_compat.curated_support_matrix",
+        "file": ".spec/specs/model_compat.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.model_compat",
+        "target": "mix test test/coverage/anthropic_comprehensive_test.exs test/coverage/openai_comprehensive_test.exs test/coverage/openai_websocket_coverage_test.exs test/provider_features/anthropic_beta_features_test.exs test/provider_features/anthropic_advanced_messages_test.exs",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.model_compat.shared_scenarios",
+        "file": ".spec/specs/model_compat.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.model_compat",
+        "target": "mix test test/coverage/anthropic_comprehensive_test.exs test/coverage/openai_comprehensive_test.exs test/coverage/openai_websocket_coverage_test.exs test/provider_features/anthropic_beta_features_test.exs test/provider_features/anthropic_advanced_messages_test.exs",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.model_compat.provider_native_surfaces",
+        "file": ".spec/specs/model_compat.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.model_compat",
+        "target": "mix test test/providers/anthropic",
+        "verification_index": 3
+      },
+      {
+        "cover_id": "reqllm.model_compat.provider_native_request_shapes",
+        "file": ".spec/specs/model_compat.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.model_compat",
+        "target": "mix test test/providers/anthropic/message_batches_test.exs",
+        "verification_index": 4
+      },
+      {
+        "cover_id": "reqllm.model_compat.provider_native_request_shapes",
+        "file": ".spec/specs/model_compat.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.model_compat",
+        "target": "mix test test/providers/openai/client_test.exs test/providers/anthropic/client_test.exs test/providers/openai/background_test.exs test/providers/openai/files_test.exs test/providers/openai/vector_stores_test.exs test/providers/openai/batches_test.exs",
+        "verification_index": 5
+      },
+      {
+        "cover_id": "reqllm.model_compat.provider_native_surfaces",
+        "file": ".spec/specs/model_compat.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.model_compat",
+        "target": "mix test test/providers/openai/client_test.exs test/providers/anthropic/client_test.exs test/providers/openai/background_test.exs test/providers/openai/files_test.exs test/providers/openai/vector_stores_test.exs test/providers/openai/batches_test.exs",
+        "verification_index": 5
+      },
+      {
+        "cover_id": "reqllm.model_compat.extension_pressure_tests",
+        "file": ".spec/specs/model_compat.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.model_compat",
+        "target": "mix test test/providers/cohere test/providers/deepseek test/providers/elevenlabs test/providers/groq test/providers/openrouter test/providers/vllm test/providers/zenmux test/providers/google test/provider_features/google_native_surfaces_test.exs",
+        "verification_index": 6
+      },
+      {
+        "cover_id": "reqllm.model_compat.curated_support_matrix",
+        "file": ".spec/specs/model_compat.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.model_compat",
+        "target": "mix test test/coverage/best_effort_provider_matrix_test.exs",
+        "verification_index": 7
+      },
+      {
+        "cover_id": "reqllm.model_compat.provider_expansion_ordering",
+        "file": ".spec/specs/model_compat.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.model_compat",
+        "target": "mix test test/coverage/best_effort_provider_matrix_test.exs",
+        "verification_index": 7
+      },
+      {
+        "cover_id": "reqllm.model_compat.live_verifier_separation",
+        "file": ".spec/specs/model_compat.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.model_compat",
+        "target": "mix test.live_verifiers",
+        "verification_index": 8
+      },
+      {
+        "cover_id": "reqllm.model_compat.provider_expansion_ordering",
+        "file": ".spec/specs/model_compat.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.model_compat",
+        "target": "guides/provider_expansion_roadmap.md",
+        "verification_index": 9
+      },
+      {
+        "cover_id": "reqllm.model_input.accepted_forms",
+        "file": ".spec/specs/model_input_boundary.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.model_input",
+        "target": ".spec/specs/model_input_boundary.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.model_input.fail_fast",
+        "file": ".spec/specs/model_input_boundary.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.model_input",
+        "target": ".spec/specs/model_input_boundary.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.model_input.governed_authority_separate",
+        "file": ".spec/specs/model_input_boundary.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.model_input",
+        "target": ".spec/specs/model_input_boundary.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.model_input.llmdb_resolution",
+        "file": ".spec/specs/model_input_boundary.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.model_input",
+        "target": ".spec/specs/model_input_boundary.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.model_input.zoi_handoff_contracts",
+        "file": ".spec/specs/model_input_boundary.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.model_input",
+        "target": ".spec/specs/model_input_boundary.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.model_input.accepted_forms",
+        "file": ".spec/specs/model_input_boundary.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.model_input",
+        "target": "mix test test/model_resolver_test.exs test/public_api/contract_test.exs test/public_api/text_generation_test.exs test/public_api/media_test.exs test/req_llm_next/realtime_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.model_input.fail_fast",
+        "file": ".spec/specs/model_input_boundary.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.model_input",
+        "target": "mix test test/model_resolver_test.exs test/public_api/contract_test.exs test/public_api/text_generation_test.exs test/public_api/media_test.exs test/req_llm_next/realtime_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.model_input.llmdb_resolution",
+        "file": ".spec/specs/model_input_boundary.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.model_input",
+        "target": "mix test test/model_resolver_test.exs test/public_api/contract_test.exs test/public_api/text_generation_test.exs test/public_api/media_test.exs test/req_llm_next/realtime_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.model_input.accepted_forms",
+        "file": ".spec/specs/model_input_boundary.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.model_input",
+        "target": "mix test test/public_api/support_status_test.exs",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.model_input.fail_fast",
+        "file": ".spec/specs/model_input_boundary.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.model_input",
+        "target": "mix test test/public_api/support_status_test.exs",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.model_input.llmdb_resolution",
+        "file": ".spec/specs/model_input_boundary.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.model_input",
+        "target": "mix test test/public_api/support_status_test.exs",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.model_input.accepted_forms",
+        "file": ".spec/specs/model_input_boundary.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.model_input",
+        "target": "mix test test/req_llm_next/governed_authority_test.exs test/model_resolver_test.exs",
+        "verification_index": 3
+      },
+      {
+        "cover_id": "reqllm.model_input.governed_authority_separate",
+        "file": ".spec/specs/model_input_boundary.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.model_input",
+        "target": "mix test test/req_llm_next/governed_authority_test.exs test/model_resolver_test.exs",
+        "verification_index": 3
+      },
+      {
+        "cover_id": "reqllm.model_profile.descriptive_facts",
+        "file": ".spec/specs/model_profile.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.model_profile",
+        "target": ".spec/specs/model_profile.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.model_profile.execution_surfaces_declared",
+        "file": ".spec/specs/model_profile.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.model_profile",
+        "target": ".spec/specs/model_profile.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.model_profile.request_independent",
+        "file": ".spec/specs/model_profile.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.model_profile",
+        "target": ".spec/specs/model_profile.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.model_profile.descriptive_facts",
+        "file": ".spec/specs/model_profile.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.model_profile",
+        "target": "mix test test/model_profile_test.exs test/operation_planner_test.exs test/providers/xai/provider_facts_test.exs test/providers/xai/execution_stack_test.exs test/providers/zenmux/provider_facts_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/google/provider_facts_test.exs test/providers/google/execution_stack_test.exs test/providers/google/wire_embeddings_test.exs test/providers/google/wire_images_test.exs test/provider_features/google_native_surfaces_test.exs test/providers/elevenlabs/provider_facts_test.exs test/providers/elevenlabs/execution_stack_test.exs test/providers/cohere/provider_facts_test.exs test/providers/cohere/execution_stack_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.model_profile.execution_surfaces_declared",
+        "file": ".spec/specs/model_profile.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.model_profile",
+        "target": "mix test test/model_profile_test.exs test/operation_planner_test.exs test/providers/xai/provider_facts_test.exs test/providers/xai/execution_stack_test.exs test/providers/zenmux/provider_facts_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/google/provider_facts_test.exs test/providers/google/execution_stack_test.exs test/providers/google/wire_embeddings_test.exs test/providers/google/wire_images_test.exs test/provider_features/google_native_surfaces_test.exs test/providers/elevenlabs/provider_facts_test.exs test/providers/elevenlabs/execution_stack_test.exs test/providers/cohere/provider_facts_test.exs test/providers/cohere/execution_stack_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.model_profile.descriptive_facts",
+        "file": ".spec/specs/model_profile.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.model_profile",
+        "target": "mix test test/model_profile_test.exs test/best_effort_runtime_test.exs",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.model_profile.execution_surfaces_declared",
+        "file": ".spec/specs/model_profile.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.model_profile",
+        "target": "mix test test/model_profile_test.exs test/best_effort_runtime_test.exs",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.operation_planner.assembly_scope",
+        "file": ".spec/specs/operation_planner.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.operation_planner",
+        "target": ".spec/specs/operation_planner.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.operation_planner.no_io",
+        "file": ".spec/specs/operation_planner.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.operation_planner",
+        "target": ".spec/specs/operation_planner.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.operation_planner.planner_boundary",
+        "file": ".spec/specs/operation_planner.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.operation_planner",
+        "target": ".spec/specs/operation_planner.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.operation_planner.assembly_scope",
+        "file": ".spec/specs/operation_planner.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.operation_planner",
+        "target": "mix test test/operation_planner_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.operation_planner.planner_boundary",
+        "file": ".spec/specs/operation_planner.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.operation_planner",
+        "target": "mix test test/operation_planner_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.operation_planner.assembly_scope",
+        "file": ".spec/specs/operation_planner.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.operation_planner",
+        "target": "mix test test/providers/anthropic/surface_preparation_messages_test.exs",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.operation_planner.assembly_scope",
+        "file": ".spec/specs/operation_planner.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.operation_planner",
+        "target": "mix test test/providers/xai/execution_stack_test.exs test/providers/xai/wire_responses_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/zenmux/wire_responses_test.exs test/providers/google/execution_stack_test.exs test/providers/google/wire_embeddings_test.exs test/providers/google/wire_images_test.exs test/provider_features/google_native_surfaces_test.exs",
+        "verification_index": 3
+      },
+      {
+        "cover_id": "reqllm.operation_planner.assembly_scope",
+        "file": ".spec/specs/operation_planner.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.operation_planner",
+        "target": "mix test test/operation_planner_test.exs test/best_effort_runtime_test.exs",
+        "verification_index": 4
+      },
+      {
+        "cover_id": "reqllm.operation_planner.planner_boundary",
+        "file": ".spec/specs/operation_planner.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.operation_planner",
+        "target": "mix test test/operation_planner_test.exs test/best_effort_runtime_test.exs",
+        "verification_index": 4
+      },
+      {
+        "cover_id": "reqllm.package.buffered_stream_metadata",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.package.execution_planning",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.package.fixture_replay",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.package.governed_authority",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.package.multi_provider_api",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.package.runtime_telemetry",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.package.support_tiers",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.package.multi_provider_api",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/public_api",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.package.support_tiers",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/public_api",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.package.fixture_replay",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/public_api/media_test.exs test/providers/openai/wire_images_test.exs test/providers/openai/wire_transcriptions_test.exs test/providers/openai/wire_speech_test.exs test/transcription/audio_input_test.exs",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.package.multi_provider_api",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/public_api/media_test.exs test/providers/openai/wire_images_test.exs test/providers/openai/wire_transcriptions_test.exs test/providers/openai/wire_speech_test.exs test/transcription/audio_input_test.exs",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.package.execution_planning",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/operation_planner_test.exs",
+        "verification_index": 3
+      },
+      {
+        "cover_id": "reqllm.package.execution_planning",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/wire/streaming_test.exs test/wire/streaming_optional_callbacks_test.exs",
+        "verification_index": 4
+      },
+      {
+        "cover_id": "reqllm.package.compile_time_extensions",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/model_profile_test.exs",
+        "verification_index": 5
+      },
+      {
+        "cover_id": "reqllm.package.execution_planning",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/model_profile_test.exs",
+        "verification_index": 5
+      },
+      {
+        "cover_id": "reqllm.package.execution_planning",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/best_effort_runtime_test.exs test/public_api/support_status_test.exs",
+        "verification_index": 6
+      },
+      {
+        "cover_id": "reqllm.package.support_tiers",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/best_effort_runtime_test.exs test/public_api/support_status_test.exs",
+        "verification_index": 6
+      },
+      {
+        "cover_id": "reqllm.package.execution_planning",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/best_effort_runtime_test.exs test/coverage/best_effort_provider_matrix_test.exs test/public_api/support_status_test.exs",
+        "verification_index": 7
+      },
+      {
+        "cover_id": "reqllm.package.support_tiers",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/best_effort_runtime_test.exs test/coverage/best_effort_provider_matrix_test.exs test/public_api/support_status_test.exs",
+        "verification_index": 7
+      },
+      {
+        "cover_id": "reqllm.package.compile_time_extensions",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/providers/cohere test/providers/deepseek test/providers/elevenlabs test/providers/groq test/providers/openrouter test/providers/vllm test/providers/xai test/providers/zenmux test/providers/google test/model_profile_test.exs test/wire/resolver_test.exs",
+        "verification_index": 8
+      },
+      {
+        "cover_id": "reqllm.package.provider_specific_utilities",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/providers/openai/client_test.exs test/providers/openai/background_test.exs test/providers/openai/files_test.exs test/providers/openai/vector_stores_test.exs test/providers/openai/batches_test.exs",
+        "verification_index": 9
+      },
+      {
+        "cover_id": "reqllm.package.utility_proof_depth",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/providers/openai/client_test.exs test/providers/openai/background_test.exs test/providers/openai/files_test.exs test/providers/openai/vector_stores_test.exs test/providers/openai/batches_test.exs",
+        "verification_index": 9
+      },
+      {
+        "cover_id": "reqllm.package.buffered_stream_metadata",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/req_llm_next/realtime_adapter_contract_test.exs test/req_llm_next/realtime_test.exs",
+        "verification_index": 10
+      },
+      {
+        "cover_id": "reqllm.package.execution_planning",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/req_llm_next/realtime_adapter_contract_test.exs test/req_llm_next/realtime_test.exs",
+        "verification_index": 10
+      },
+      {
+        "cover_id": "reqllm.package.model_slice_verification",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/model_slices/anthropic_haiku_4_5_test.exs",
+        "verification_index": 11
+      },
+      {
+        "cover_id": "reqllm.package.model_slice_verification",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/model_slices/openai_gpt_4o_mini_test.exs",
+        "verification_index": 12
+      },
+      {
+        "cover_id": "reqllm.package.model_slice_verification",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test.starter_slice",
+        "verification_index": 13
+      },
+      {
+        "cover_id": "reqllm.package.fixture_replay",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/coverage/anthropic_comprehensive_test.exs",
+        "verification_index": 14
+      },
+      {
+        "cover_id": "reqllm.package.model_slice_verification",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/coverage/anthropic_comprehensive_test.exs",
+        "verification_index": 14
+      },
+      {
+        "cover_id": "reqllm.package.fixture_replay",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/coverage/openai_comprehensive_test.exs",
+        "verification_index": 15
+      },
+      {
+        "cover_id": "reqllm.package.model_slice_verification",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/coverage/openai_comprehensive_test.exs",
+        "verification_index": 15
+      },
+      {
+        "cover_id": "reqllm.package.fixture_replay",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/coverage/openai_websocket_coverage_test.exs",
+        "verification_index": 16
+      },
+      {
+        "cover_id": "reqllm.package.model_slice_verification",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/coverage/openai_websocket_coverage_test.exs",
+        "verification_index": 16
+      },
+      {
+        "cover_id": "reqllm.package.fixture_replay",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/provider_features/anthropic_beta_features_test.exs",
+        "verification_index": 17
+      },
+      {
+        "cover_id": "reqllm.package.model_slice_verification",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/provider_features/anthropic_beta_features_test.exs",
+        "verification_index": 17
+      },
+      {
+        "cover_id": "reqllm.package.fixture_replay",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/provider_features/anthropic_advanced_messages_test.exs",
+        "verification_index": 18
+      },
+      {
+        "cover_id": "reqllm.package.model_slice_verification",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/provider_features/anthropic_advanced_messages_test.exs",
+        "verification_index": 18
+      },
+      {
+        "cover_id": "reqllm.package.fixture_replay",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/provider_features/google_native_surfaces_test.exs",
+        "verification_index": 19
+      },
+      {
+        "cover_id": "reqllm.package.model_slice_verification",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/provider_features/google_native_surfaces_test.exs",
+        "verification_index": 19
+      },
+      {
+        "cover_id": "reqllm.package.live_verifier_lane",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test.live_verifiers",
+        "verification_index": 20
+      },
+      {
+        "cover_id": "reqllm.package.local_env_loading",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/env_test.exs",
+        "verification_index": 21
+      },
+      {
+        "cover_id": "reqllm.package.governed_authority",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/req_llm_next/governed_authority_test.exs test/providers/openai/client_test.exs test/providers/anthropic/client_test.exs",
+        "verification_index": 22
+      },
+      {
+        "cover_id": "reqllm.package.provider_specific_utilities",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/req_llm_next/governed_authority_test.exs test/providers/openai/client_test.exs test/providers/anthropic/client_test.exs",
+        "verification_index": 22
+      },
+      {
+        "cover_id": "reqllm.package.utility_proof_depth",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/req_llm_next/governed_authority_test.exs test/providers/openai/client_test.exs test/providers/anthropic/client_test.exs",
+        "verification_index": 22
+      },
+      {
+        "cover_id": "reqllm.package.provider_specific_utilities",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/providers/anthropic",
+        "verification_index": 23
+      },
+      {
+        "cover_id": "reqllm.package.provider_native_input_isolation",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/operation_planner_test.exs test/providers/anthropic/wire_messages_test.exs test/families/openai_compatible/wire_chat_test.exs test/providers/openai/wire_responses_request_test.exs",
+        "verification_index": 24
+      },
+      {
+        "cover_id": "reqllm.package.compile_time_extensions",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/req_llm_next/extensions/manifest_test.exs test/req_llm_next/extensions/dsl_test.exs test/req_llm_next/extensions/manifest_verifier_test.exs",
+        "verification_index": 25
+      },
+      {
+        "cover_id": "reqllm.package.zoi_struct_contracts",
+        "file": ".spec/specs/package.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.package",
+        "target": "mix test test/stream_response_test.exs test/executor/stream_state_test.exs test/req_llm_next/response/materializer_test.exs",
+        "verification_index": 26
+      },
+      {
+        "cover_id": "reqllm.policy_rules.allowed_patch_domains",
+        "file": ".spec/specs/policy_rules.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.policy_rules",
+        "target": ".spec/specs/policy_rules.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.policy_rules.capability_safe",
+        "file": ".spec/specs/policy_rules.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.policy_rules",
+        "target": ".spec/specs/policy_rules.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.policy_rules.five_scopes",
+        "file": ".spec/specs/policy_rules.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.policy_rules",
+        "target": ".spec/specs/policy_rules.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.policy_rules.match_patch",
+        "file": ".spec/specs/policy_rules.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.policy_rules",
+        "target": ".spec/specs/policy_rules.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.policy_rules.five_scopes",
+        "file": ".spec/specs/policy_rules.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.policy_rules",
+        "target": "mix test test/operation_planner_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.policy_rules.match_patch",
+        "file": ".spec/specs/policy_rules.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.policy_rules",
+        "target": "mix test test/operation_planner_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.provider.auth_and_roots",
+        "file": ".spec/specs/provider.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.provider",
+        "target": ".spec/specs/provider.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.provider.governed_authority",
+        "file": ".spec/specs/provider.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.provider",
+        "target": ".spec/specs/provider.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.provider.no_model_behavior",
+        "file": ".spec/specs/provider.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.provider",
+        "target": ".spec/specs/provider.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.provider.route_ownership",
+        "file": ".spec/specs/provider.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.provider",
+        "target": ".spec/specs/provider.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.provider.utility_roots",
+        "file": ".spec/specs/provider.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.provider",
+        "target": ".spec/specs/provider.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.provider.auth_and_roots",
+        "file": ".spec/specs/provider.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.provider",
+        "target": "mix test test/req_llm_next/governed_authority_test.exs test/providers/openai/client_test.exs test/providers/anthropic/client_test.exs test/providers/google/wire_embeddings_test.exs test/providers/google/wire_images_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.provider.governed_authority",
+        "file": ".spec/specs/provider.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.provider",
+        "target": "mix test test/req_llm_next/governed_authority_test.exs test/providers/openai/client_test.exs test/providers/anthropic/client_test.exs test/providers/google/wire_embeddings_test.exs test/providers/google/wire_images_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.provider.route_ownership",
+        "file": ".spec/specs/provider.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.provider",
+        "target": "mix test test/req_llm_next/governed_authority_test.exs test/providers/openai/client_test.exs test/providers/anthropic/client_test.exs test/providers/google/wire_embeddings_test.exs test/providers/google/wire_images_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.provider.utility_roots",
+        "file": ".spec/specs/provider.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.provider",
+        "target": "mix test test/req_llm_next/governed_authority_test.exs test/providers/openai/client_test.exs test/providers/anthropic/client_test.exs test/providers/google/wire_embeddings_test.exs test/providers/google/wire_images_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.public_api.canonical_shapes",
+        "file": ".spec/specs/public_api.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.public_api",
+        "target": ".spec/specs/public_api.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.public_api.hard_surface",
+        "file": ".spec/specs/public_api.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.public_api",
+        "target": ".spec/specs/public_api.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.public_api.provider_scoped_utilities",
+        "file": ".spec/specs/public_api.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.public_api",
+        "target": ".spec/specs/public_api.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.public_api.support_status",
+        "file": ".spec/specs/public_api.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.public_api",
+        "target": ".spec/specs/public_api.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.public_api.thin_facade",
+        "file": ".spec/specs/public_api.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.public_api",
+        "target": ".spec/specs/public_api.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.public_api.canonical_shapes",
+        "file": ".spec/specs/public_api.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.public_api",
+        "target": "mix test test/public_api",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.public_api.hard_surface",
+        "file": ".spec/specs/public_api.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.public_api",
+        "target": "mix test test/public_api",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.public_api.support_status",
+        "file": ".spec/specs/public_api.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.public_api",
+        "target": "mix test test/public_api",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.public_api.provider_scoped_utilities",
+        "file": ".spec/specs/public_api.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.public_api",
+        "target": "mix test test/providers/anthropic",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.semantic_protocol.canonical_chunks",
+        "file": ".spec/specs/semantic_protocol.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.semantic_protocol",
+        "target": ".spec/specs/semantic_protocol.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.semantic_protocol.family_meaning",
+        "file": ".spec/specs/semantic_protocol.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.semantic_protocol",
+        "target": ".spec/specs/semantic_protocol.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.semantic_protocol.provider_rich_events",
+        "file": ".spec/specs/semantic_protocol.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.semantic_protocol",
+        "target": ".spec/specs/semantic_protocol.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.semantic_protocol.transport_separation",
+        "file": ".spec/specs/semantic_protocol.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.semantic_protocol",
+        "target": ".spec/specs/semantic_protocol.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.semantic_protocol.provider_rich_events",
+        "file": ".spec/specs/semantic_protocol.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.semantic_protocol",
+        "target": "mix test test/providers/anthropic/semantic_protocol_messages_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.session_runtime.fallback_and_diagnostics",
+        "file": ".spec/specs/session_runtime.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.session_runtime",
+        "target": ".spec/specs/session_runtime.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.session_runtime.persistence_owner",
+        "file": ".spec/specs/session_runtime.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.session_runtime",
+        "target": ".spec/specs/session_runtime.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.session_runtime.runtime_state",
+        "file": ".spec/specs/session_runtime.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.session_runtime",
+        "target": ".spec/specs/session_runtime.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.session_runtime.fallback_and_diagnostics",
+        "file": ".spec/specs/session_runtime.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.session_runtime",
+        "target": "mix test test/providers/openai/session_runtime_responses_test.exs test/operation_planner_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.session_runtime.persistence_owner",
+        "file": ".spec/specs/session_runtime.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.session_runtime",
+        "target": "mix test test/providers/openai/session_runtime_responses_test.exs test/operation_planner_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.session_runtime.runtime_state",
+        "file": ".spec/specs/session_runtime.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.session_runtime",
+        "target": "mix test test/providers/openai/session_runtime_responses_test.exs test/operation_planner_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.source_layout.compat_outside_runtime",
+        "file": ".spec/specs/source_layout.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.source_layout",
+        "target": ".spec/specs/source_layout.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.source_layout.concern_homes",
+        "file": ".spec/specs/source_layout.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.source_layout",
+        "target": ".spec/specs/source_layout.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.source_layout.extension_contract_home",
+        "file": ".spec/specs/source_layout.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.source_layout",
+        "target": ".spec/specs/source_layout.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.source_layout.governed_authority_home",
+        "file": ".spec/specs/source_layout.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.source_layout",
+        "target": ".spec/specs/source_layout.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.source_layout.layer_scoped_quirks",
+        "file": ".spec/specs/source_layout.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.source_layout",
+        "target": ".spec/specs/source_layout.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.source_layout.provider_utilities",
+        "file": ".spec/specs/source_layout.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.source_layout",
+        "target": ".spec/specs/source_layout.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.source_layout.public_contract_home",
+        "file": ".spec/specs/source_layout.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.source_layout",
+        "target": ".spec/specs/source_layout.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.source_layout.zoi_struct_contracts",
+        "file": ".spec/specs/source_layout.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.source_layout",
+        "target": ".spec/specs/source_layout.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.source_layout.compat_outside_runtime",
+        "file": ".spec/specs/source_layout.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.source_layout",
+        "target": "mix test test/provider_features/google_native_surfaces_test.exs test/live_verifiers/google_live_verifier_test.exs --include integration --include live --include live_verifier --exclude slow",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.source_layout.concern_homes",
+        "file": ".spec/specs/source_layout.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.source_layout",
+        "target": "mix test test/req_llm_next/governed_authority_test.exs",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.source_layout.governed_authority_home",
+        "file": ".spec/specs/source_layout.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.source_layout",
+        "target": "mix test test/req_llm_next/governed_authority_test.exs",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.telemetry.canonical_measurements",
+        "file": ".spec/specs/telemetry.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.telemetry",
+        "target": ".spec/specs/telemetry.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.telemetry.governed_authority_redaction",
+        "file": ".spec/specs/telemetry.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.telemetry",
+        "target": ".spec/specs/telemetry.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.telemetry.kernel_boundary",
+        "file": ".spec/specs/telemetry.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.telemetry",
+        "target": ".spec/specs/telemetry.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.telemetry.request_lifecycle",
+        "file": ".spec/specs/telemetry.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.telemetry",
+        "target": ".spec/specs/telemetry.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.telemetry.sanitized_payloads",
+        "file": ".spec/specs/telemetry.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.telemetry",
+        "target": ".spec/specs/telemetry.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.telemetry.canonical_measurements",
+        "file": ".spec/specs/telemetry.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.telemetry",
+        "target": "mix test test/req_llm_next/telemetry_test.exs test/providers/openai/client_test.exs test/req_llm_next/governed_authority_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.telemetry.governed_authority_redaction",
+        "file": ".spec/specs/telemetry.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.telemetry",
+        "target": "mix test test/req_llm_next/telemetry_test.exs test/providers/openai/client_test.exs test/req_llm_next/governed_authority_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.telemetry.kernel_boundary",
+        "file": ".spec/specs/telemetry.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.telemetry",
+        "target": "mix test test/req_llm_next/telemetry_test.exs test/providers/openai/client_test.exs test/req_llm_next/governed_authority_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.telemetry.request_lifecycle",
+        "file": ".spec/specs/telemetry.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.telemetry",
+        "target": "mix test test/req_llm_next/telemetry_test.exs test/providers/openai/client_test.exs test/req_llm_next/governed_authority_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.transport.byte_movement",
+        "file": ".spec/specs/transport.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.transport",
+        "target": ".spec/specs/transport.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.transport.semantic_separation",
+        "file": ".spec/specs/transport.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.transport",
+        "target": ".spec/specs/transport.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.transport.supported_modes",
+        "file": ".spec/specs/transport.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.transport",
+        "target": ".spec/specs/transport.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.transport.fixture_replay_parity",
+        "file": ".spec/specs/transport.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.transport",
+        "target": "mix test test/fixtures_test.exs test/req_llm_next_test.exs",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.wire_format.envelope_ownership",
+        "file": ".spec/specs/wire_format.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.wire_format",
+        "target": ".spec/specs/wire_format.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.wire_format.frame_decode",
+        "file": ".spec/specs/wire_format.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.wire_format",
+        "target": ".spec/specs/wire_format.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.wire_format.provider_feature_envelopes",
+        "file": ".spec/specs/wire_format.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.wire_format",
+        "target": ".spec/specs/wire_format.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.wire_format.transport_separation",
+        "file": ".spec/specs/wire_format.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.wire_format",
+        "target": ".spec/specs/wire_format.spec.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.workflow.beadwork_primed",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.workflow",
+        "target": "README.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.workflow.specled_loop",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.workflow",
+        "target": "README.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "reqllm.workflow.agent_instructions",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.workflow",
+        "target": "AGENTS.md",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "reqllm.workflow.specled_loop",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.workflow",
+        "target": ".spec/README.md",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "reqllm.workflow.extension_dsl_guidance",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.workflow",
+        "target": ".spec/specs/workflow.spec.md",
+        "verification_index": 3
+      },
+      {
+        "cover_id": "reqllm.workflow.governed_authority_verification",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.workflow",
+        "target": ".spec/specs/workflow.spec.md",
+        "verification_index": 3
+      },
+      {
+        "cover_id": "reqllm.workflow.provider_surface_guides",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.workflow",
+        "target": ".spec/specs/workflow.spec.md",
+        "verification_index": 3
+      },
+      {
+        "cover_id": "reqllm.workflow.live_verifier_commands",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "claimed",
+        "subject_id": "reqllm.workflow",
+        "target": "mix.exs",
+        "verification_index": 4
+      },
+      {
+        "cover_id": "reqllm.workflow.provider_surface_guides",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "claimed",
+        "subject_id": "reqllm.workflow",
+        "target": "mix.exs",
+        "verification_index": 4
+      },
+      {
+        "cover_id": "reqllm.workflow.starter_slice_verification",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "claimed",
+        "subject_id": "reqllm.workflow",
+        "target": "mix.exs",
+        "verification_index": 4
+      },
+      {
+        "cover_id": "reqllm.workflow.agent_instructions",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "reqllm.workflow",
+        "target": ".spec/AGENTS.md",
+        "verification_index": 5
+      },
+      {
+        "cover_id": "reqllm.workflow.beadwork_primed",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "claimed",
+        "subject_id": "reqllm.workflow",
+        "target": "bw prime",
+        "verification_index": 6
+      },
+      {
+        "cover_id": "reqllm.workflow.agent_instructions",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.workflow",
+        "target": "mix spec.prime --base HEAD",
+        "verification_index": 7
+      },
+      {
+        "cover_id": "reqllm.workflow.specled_loop",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.workflow",
+        "target": "mix spec.prime --base HEAD",
+        "verification_index": 7
+      },
+      {
+        "cover_id": "reqllm.workflow.starter_slice_verification",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.workflow",
+        "target": "mix test.starter_slice",
+        "verification_index": 8
+      },
+      {
+        "cover_id": "reqllm.workflow.live_verifier_commands",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.workflow",
+        "target": "mix test.live_verifiers",
+        "verification_index": 9
+      },
+      {
+        "cover_id": "reqllm.workflow.starter_slice_verification",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.workflow",
+        "target": "mix test.live_verifiers",
+        "verification_index": 9
+      },
+      {
+        "cover_id": "reqllm.workflow.provider_surface_guides",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.workflow",
+        "target": "mix test test/provider_features/google_native_surfaces_test.exs",
+        "verification_index": 10
+      },
+      {
+        "cover_id": "reqllm.workflow.starter_slice_verification",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.workflow",
+        "target": "mix test test/provider_features/google_native_surfaces_test.exs",
+        "verification_index": 10
+      },
+      {
+        "cover_id": "reqllm.workflow.extension_dsl_guidance",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.workflow",
+        "target": "mix test test/req_llm_next/extensions/dsl_test.exs test/providers/xai/execution_stack_test.exs test/providers/zenmux/execution_stack_test.exs test/providers/google/execution_stack_test.exs test/providers/elevenlabs/execution_stack_test.exs test/providers/cohere/execution_stack_test.exs",
+        "verification_index": 11
+      },
+      {
+        "cover_id": "reqllm.workflow.governed_authority_verification",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.workflow",
+        "target": "mix test test/req_llm_next/governed_authority_test.exs test/providers/openai/client_test.exs test/providers/anthropic/client_test.exs",
+        "verification_index": 12
+      },
+      {
+        "cover_id": "reqllm.workflow.specled_loop",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.workflow",
+        "target": "mix test test/req_llm_next/governed_authority_test.exs test/providers/openai/client_test.exs test/providers/anthropic/client_test.exs",
+        "verification_index": 12
+      },
+      {
+        "cover_id": "reqllm.workflow.agent_instructions",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.workflow",
+        "target": "mix test test/req_llm_next/telemetry_test.exs test/req_llm_next/realtime_test.exs test/providers/deepseek",
+        "verification_index": 13
+      },
+      {
+        "cover_id": "reqllm.workflow.extension_dsl_guidance",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.workflow",
+        "target": "mix test test/req_llm_next/telemetry_test.exs test/req_llm_next/realtime_test.exs test/providers/deepseek",
+        "verification_index": 13
+      },
+      {
+        "cover_id": "reqllm.workflow.specled_loop",
+        "file": ".spec/specs/workflow.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "executed",
+        "subject_id": "reqllm.workflow",
+        "target": "mix test test/req_llm_next/telemetry_test.exs test/req_llm_next/realtime_test.exs test/providers/deepseek",
+        "verification_index": 13
+      },
+      {
+        "cover_id": "spec.workspace.readme_present",
+        "file": ".spec/specs/spec_system.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "spec.system",
+        "target": ".spec/README.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "spec.workspace.single_home",
+        "file": ".spec/specs/spec_system.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "spec.system",
+        "target": ".spec/README.md",
+        "verification_index": 0
+      },
+      {
+        "cover_id": "spec.workspace.agent_prime_context",
+        "file": ".spec/specs/spec_system.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "spec.system",
+        "target": ".spec/AGENTS.md",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "spec.workspace.agents_present",
+        "file": ".spec/specs/spec_system.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "spec.system",
+        "target": ".spec/AGENTS.md",
+        "verification_index": 1
+      },
+      {
+        "cover_id": "spec.workspace.decisions_readme_present",
+        "file": ".spec/specs/spec_system.spec.md",
+        "kind": "source_file",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "linked",
+        "subject_id": "spec.system",
+        "target": ".spec/decisions/README.md",
+        "verification_index": 2
+      },
+      {
+        "cover_id": "spec.workspace.state_generated",
+        "file": ".spec/specs/spec_system.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "claimed",
+        "subject_id": "spec.system",
+        "target": "mix spec.index",
+        "verification_index": 3
+      },
+      {
+        "cover_id": "spec.workspace.state_generated",
+        "file": ".spec/specs/spec_system.spec.md",
+        "kind": "command",
+        "meets_minimum": true,
+        "required_strength": "claimed",
+        "strength": "claimed",
+        "subject_id": "spec.system",
+        "target": "mix spec.validate",
+        "verification_index": 4
+      }
+    ],
+    "cli_minimum_strength": null,
+    "default_minimum_strength": "claimed",
+    "strength_summary": {
+      "claimed": 6,
+      "executed": 162,
+      "linked": 113
+    },
+    "threshold_failures": 0
   },
   "workspace": {
-    "decision_count": 21,
+    "decision_count": 22,
     "spec_count": 24
   }
 }

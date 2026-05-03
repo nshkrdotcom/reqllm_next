@@ -6,6 +6,7 @@ defmodule ReqLlmNext.Wire.GoogleImages do
   alias ReqLlmNext.Context
   alias ReqLlmNext.Context.ContentPart
   alias ReqLlmNext.Error
+  alias ReqLlmNext.GovernedAuthority
   alias ReqLlmNext.Provider
   alias ReqLlmNext.Response
   alias ReqLlmNext.Wire.GoogleGenerateContent
@@ -18,7 +19,7 @@ defmodule ReqLlmNext.Wire.GoogleImages do
     request_path = request_path(model)
 
     request_opts =
-      if Keyword.get(opts, :_use_runtime_metadata, false) do
+      if Keyword.get(opts, :_use_runtime_metadata, false) or GovernedAuthority.governed?(opts) do
         Keyword.put(opts, :path, request_path)
       else
         Keyword.put(

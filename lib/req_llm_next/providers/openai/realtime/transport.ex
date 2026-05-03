@@ -5,6 +5,7 @@ defmodule ReqLlmNext.OpenAI.Realtime.Transport do
   alias ReqLlmNext.Executor.StreamState
   alias ReqLlmNext.Fixtures
   alias ReqLlmNext.OpenAI.Realtime.Wire
+  alias ReqLlmNext.Provider
   alias ReqLlmNext.Telemetry
 
   @default_stream_timeout Application.compile_env(:req_llm_next, :stream_timeout, 30_000)
@@ -16,37 +17,13 @@ defmodule ReqLlmNext.OpenAI.Realtime.Transport do
       provider_request_metadata(provider_mod, model, opts, wire_mod, protocol_mod),
       fn ->
         timeout = Keyword.get(opts, :receive_timeout, @default_stream_timeout)
-        ws_url = Wire.websocket_url(provider_mod.base_url(), model, opts)
-        auth_headers = provider_mod.auth_headers(provider_mod.get_api_key(opts))
         payloads = Enum.map(client_events, &Jason.encode!(wire_mod.encode_client_event(&1)))
 
-        recorder =
-          case {Fixtures.mode(), Keyword.get(opts, :fixture)} do
-            {:record, fixture_name} when is_binary(fixture_name) ->
-              Fixtures.start_recorder(
-                model,
-                fixture_name,
-                client_events,
-                %{
-                  "method" => "WEBSOCKET",
-                  "url" => ws_url,
-                  "transport" => "websocket",
-                  "headers" => auth_headers,
-                  "body" => client_events
-                },
-                %{
-                  surface_id: :openai_realtime,
-                  semantic_protocol: :openai_realtime,
-                  wire_format: :openai_realtime_json,
-                  transport: :websocket
-                }
-              )
-
-            _ ->
-              nil
-          end
-
-        with {:ok, %{status: status, headers: headers, stream: websocket_stream}} <-
+        with {:ok, base_url} <- Provider.base_url(provider_mod, opts),
+             {:ok, auth_headers} <- Provider.request_headers(provider_mod, model, opts),
+             ws_url <- Wire.websocket_url(base_url, model, opts),
+             recorder <- maybe_start_recorder(model, client_events, ws_url, auth_headers, opts),
+             {:ok, %{status: status, headers: headers, stream: websocket_stream}} <-
                WebSocket.stream(ws_url, auth_headers, payloads, receive_timeout: timeout) do
           recorder =
             recorder
@@ -63,6 +40,33 @@ defmodule ReqLlmNext.OpenAI.Realtime.Transport do
         end
       end
     )
+  end
+
+  defp maybe_start_recorder(model, client_events, ws_url, auth_headers, opts) do
+    case {Fixtures.mode(), Keyword.get(opts, :fixture)} do
+      {:record, fixture_name} when is_binary(fixture_name) ->
+        Fixtures.start_recorder(
+          model,
+          fixture_name,
+          client_events,
+          %{
+            "method" => "WEBSOCKET",
+            "url" => ws_url,
+            "transport" => "websocket",
+            "headers" => auth_headers,
+            "body" => client_events
+          },
+          %{
+            surface_id: :openai_realtime,
+            semantic_protocol: :openai_realtime,
+            wire_format: :openai_realtime_json,
+            transport: :websocket
+          }
+        )
+
+      _ ->
+        nil
+    end
   end
 
   defp handle_stream_item({:frame, {:text, payload}}, stream_state) do

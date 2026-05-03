@@ -6,6 +6,7 @@ defmodule ReqLlmNext.Anthropic.Client do
   alias ReqLlmNext.Anthropic.Headers
   alias ReqLlmNext.Error
   alias ReqLlmNext.ExecutionPlaneHTTP
+  alias ReqLlmNext.Provider
   alias ReqLlmNext.Providers.Anthropic, as: AnthropicProvider
   alias ReqLlmNext.Telemetry
 
@@ -58,23 +59,29 @@ defmodule ReqLlmNext.Anthropic.Client do
     Telemetry.span_provider_request(
       provider_request_metadata(method, path, opts),
       fn ->
-        api_key = AnthropicProvider.get_api_key(opts)
-        url = request_url(path, opts)
-        common_headers = common_headers(api_key, opts)
-        request = Finch.build(method, url, common_headers ++ headers, body)
-
-        case ExecutionPlaneHTTP.request(
-               request,
-               receive_timeout: Keyword.get(opts, :receive_timeout, 30_000)
-             ) do
-          {:ok, %Finch.Response{} = response} ->
-            {:ok, response}
-
+        with {:ok, url} <- Provider.utility_url(AnthropicProvider, path, opts),
+             {:ok, request_headers} <-
+               Provider.utility_headers(
+                 AnthropicProvider,
+                 opts,
+                 Headers.common_headers(opts) ++ headers
+               ),
+             request <- Finch.build(method, url, request_headers, body),
+             {:ok, %Finch.Response{} = response} <-
+               ExecutionPlaneHTTP.request(
+                 request,
+                 receive_timeout: Keyword.get(opts, :receive_timeout, 30_000)
+               ) do
+          {:ok, response}
+        else
           {:error, failure, raw_payload} ->
             {:error,
              Error.API.Request.exception(
                reason: ExecutionPlaneHTTP.transport_reason(failure, raw_payload)
              )}
+
+          {:error, _reason} = error ->
+            error
         end
       end
     )
@@ -152,17 +159,6 @@ defmodule ReqLlmNext.Anthropic.Client do
     with {:ok, %Finch.Response{} = response} <- raw_request(method, path, headers, body, opts) do
       decode_json_response(response)
     end
-  end
-
-  defp request_url("http://" <> _rest = path, _opts), do: path
-  defp request_url("https://" <> _rest = path, _opts), do: path
-
-  defp request_url(path, opts) do
-    Keyword.get(opts, :base_url, AnthropicProvider.base_url()) <> path
-  end
-
-  defp common_headers(api_key, opts) do
-    AnthropicProvider.auth_headers(api_key) ++ Headers.common_headers(opts)
   end
 
   defp encode_body(nil), do: nil

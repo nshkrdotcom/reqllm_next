@@ -4,6 +4,7 @@ defmodule ReqLlmNext.Wire.GoogleEmbeddings do
   """
 
   alias ReqLlmNext.Error
+  alias ReqLlmNext.GovernedAuthority
   alias ReqLlmNext.Provider
 
   @provider_option_keys [:google_api_version, :dimensions, :task_type]
@@ -14,7 +15,7 @@ defmodule ReqLlmNext.Wire.GoogleEmbeddings do
     request_path = request_path(model, input)
 
     request_opts =
-      if Keyword.get(opts, :_use_runtime_metadata, false) do
+      if Keyword.get(opts, :_use_runtime_metadata, false) or GovernedAuthority.governed?(opts) do
         Keyword.put(opts, :path, request_path)
       else
         Keyword.put(

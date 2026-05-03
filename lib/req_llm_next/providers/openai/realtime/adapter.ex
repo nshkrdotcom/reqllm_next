@@ -5,6 +5,7 @@ defmodule ReqLlmNext.Providers.OpenAI.Realtime.Adapter do
 
   alias ReqLlmNext.OpenAI.Realtime.Transport
   alias ReqLlmNext.OpenAI.Realtime.Wire
+  alias ReqLlmNext.Provider
   alias ReqLlmNext.Providers.OpenAI
   alias ReqLlmNext.Providers.OpenAI.Realtime.SemanticProtocolEvents
   alias ReqLlmNext.Realtime.Command
@@ -56,7 +57,10 @@ defmodule ReqLlmNext.Providers.OpenAI.Realtime.Adapter do
   @impl ReqLlmNext.Realtime.Adapter
   @spec websocket_url(LLMDB.Model.t(), keyword()) :: String.t()
   def websocket_url(model, opts \\ []) do
-    Wire.websocket_url(OpenAI.base_url(), model, opts)
+    case Provider.base_url(OpenAI, opts) do
+      {:ok, base_url} -> Wire.websocket_url(base_url, model, opts)
+      {:error, reason} -> raise reason
+    end
   end
 
   @impl ReqLlmNext.Realtime.Adapter

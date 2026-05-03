@@ -2,6 +2,7 @@ defmodule ReqLlmNext.OpenAI.ClientTest do
   use ExUnit.Case, async: false
 
   alias ReqLlmNext.OpenAI.Client
+  alias ReqLlmNext.GovernedAuthority
   alias ReqLlmNext.TestSupport.OpenAIUtilityHarness
 
   setup do
@@ -89,6 +90,36 @@ defmodule ReqLlmNext.OpenAI.ClientTest do
     assert response.content_type == "audio/mpeg"
   end
 
+  test "json_request uses governed authority for utility URLs and headers" do
+    original_key = System.get_env("OPENAI_API_KEY")
+    System.put_env("OPENAI_API_KEY", "env-openai-key")
+
+    on_exit(fn -> restore_env("OPENAI_API_KEY", original_key) end)
+
+    {:ok, server} =
+      OpenAIUtilityHarness.start_server(self(), [
+        fn _request ->
+          OpenAIUtilityHarness.json_response(200, %{"id" => "batch_456", "status" => "queued"})
+        end
+      ])
+
+    on_exit(fn -> OpenAIUtilityHarness.stop_server(server) end)
+
+    assert {:ok, %{"id" => "batch_456", "status" => "queued"}} =
+             Client.json_request(
+               :post,
+               "/v1/batches",
+               %{hello: "governed"},
+               governed_authority:
+                 authority(base_url: server.base_url, query: %{"lease" => "governed-query"})
+             )
+
+    assert_receive {:utility_request, 1, request}
+    assert request.request_line == "POST /v1/batches?lease=governed-query HTTP/1.1"
+    assert request.headers["authorization"] == "governed-credential"
+    refute request.headers["authorization"] == "Bearer env-openai-key"
+  end
+
   test "parse_jsonl returns a structured parse error for invalid lines" do
     assert {:error, error} =
              Client.parse_jsonl("""
@@ -98,4 +129,25 @@ defmodule ReqLlmNext.OpenAI.ClientTest do
 
     assert Exception.message(error) =~ "Failed to parse OpenAI JSONL response"
   end
+
+  defp authority(overrides) do
+    defaults = [
+      base_url: "https://governed.example",
+      credential_ref: "credential://reqllm/openai/default",
+      credential_lease_ref: "lease://reqllm/openai/default",
+      target_ref: "target://reqllm/openai/default",
+      operation_policy_ref: "operation-policy://reqllm/openai/read",
+      redaction_ref: "redaction://reqllm/default",
+      headers: [{"authorization", "governed-credential"}],
+      query: %{},
+      template_values: %{}
+    ]
+
+    defaults
+    |> Keyword.merge(overrides)
+    |> GovernedAuthority.new!()
+  end
+
+  defp restore_env(key, nil), do: System.delete_env(key)
+  defp restore_env(key, value), do: System.put_env(key, value)
 end

@@ -27,6 +27,7 @@ decisions:
   - reqllm.decision.provider_surface_maps_in_guides
   - reqllm.decision.live_verifier_tests
   - reqllm.decision.provider_expansion_strategy
+  - reqllm.decision.governed_authority_boundary
 ```
 
 ## Requirements
@@ -38,7 +39,7 @@ decisions:
   stability: evolving
 
 - id: reqllm.workflow.specled_loop
-  statement: Contributor workflow shall keep `.spec/` as the canonical spec workspace and use `mix spec.prime`, `mix spec.next`, and `mix spec.check` to maintain the subject specs, ADRs, README, AGENTS, and package-thesis guide in sync with current truth, including top-level media API parity, request-fixture replay behavior, sparse live verifier lanes, runtime telemetry, canonical output items, explicit result channels, transport-agnostic realtime behavior, typed `LLMDB` runtime-metadata consumption, and support-tier claims when those package boundaries evolve.
+  statement: Contributor workflow shall keep `.spec/` as the canonical spec workspace and use `mix spec.prime`, `mix spec.next`, and `mix spec.check` to maintain the subject specs, ADRs, README, AGENTS, and package-thesis guide in sync with current truth, including top-level media API parity, request-fixture replay behavior, sparse live verifier lanes, runtime telemetry, canonical output items, explicit result channels, transport-agnostic realtime behavior, typed `LLMDB` runtime-metadata consumption, governed authority boundaries, and support-tier claims when those package boundaries evolve.
   priority: must
   stability: evolving
 
@@ -66,6 +67,11 @@ decisions:
   statement: Contributor workflow shall keep the extension-architecture guide, Spark dependency, compile-time manifest proof, definition-pack layout, discovery of built-in definitions from co-located family and provider slice homes, match or stack or patch authoring surface, inheritance behavior, manifest-backed provider fallback and verification behavior, and concrete OpenAI-compatible provider proof lanes such as DeepSeek, Groq, OpenRouter, vLLM, and xAI in sync so contributors add edge-case support through declared extension rules instead of editing shared imperative branching directly.
   priority: should
   stability: evolving
+
+- id: reqllm.workflow.governed_authority_verification
+  statement: Contributor workflow shall keep governed authority changes paired with Spec Led subject updates, an ADR when the boundary changes, focused governed tests, and the standard package QC loop so standalone env ergonomics cannot quietly become a governed runtime path.
+  priority: must
+  stability: evolving
 ```
 
 ## Verification
@@ -92,6 +98,7 @@ decisions:
   covers:
     - reqllm.workflow.provider_surface_guides
     - reqllm.workflow.extension_dsl_guidance
+    - reqllm.workflow.governed_authority_verification
 
 - kind: source_file
   target: mix.exs
@@ -143,6 +150,13 @@ decisions:
   execute: true
   covers:
     - reqllm.workflow.extension_dsl_guidance
+
+- kind: command
+  target: mix test test/req_llm_next/governed_authority_test.exs test/providers/openai/client_test.exs test/providers/anthropic/client_test.exs
+  execute: true
+  covers:
+    - reqllm.workflow.specled_loop
+    - reqllm.workflow.governed_authority_verification
 
 - kind: command
   target: mix test test/req_llm_next/telemetry_test.exs test/req_llm_next/realtime_test.exs test/providers/deepseek

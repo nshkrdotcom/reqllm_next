@@ -21,6 +21,7 @@ decisions:
   - reqllm.decision.live_verifier_tests
   - reqllm.decision.llmdb_best_effort_runtime
   - reqllm.decision.loaded_optional_wire_callbacks
+  - reqllm.decision.governed_authority_boundary
 ```
 
 ## Requirements
@@ -52,8 +53,13 @@ decisions:
   stability: evolving
 
 - id: reqllm.package.local_env_loading
-  statement: ReqLlmNext shall support local development and replay or live verification by loading a local `.env` file without overriding shell-provided environment variables, so API keys can be supplied for tests and compatibility runs without being committed.
+  statement: ReqLlmNext shall support standalone local development and replay or live verification by loading a local `.env` file without overriding shell-provided environment variables, so API keys can be supplied for tests and compatibility runs without being committed; this local env path shall not be treated as governed credential authority.
   priority: should
+  stability: evolving
+
+- id: reqllm.package.governed_authority
+  statement: ReqLlmNext shall accept an explicit `ReqLlmNext.GovernedAuthority` for governed execution and shall keep governed credential, route, query, account, project, realtime-session, policy, lease, and redaction references out of unmanaged env or option fallbacks across canonical requests, realtime transports, provider-owned media and embedding wires, runtime metadata execution, fixture capture, replay, and provider utility clients.
+  priority: must
   stability: evolving
 
 - id: reqllm.package.provider_specific_utilities
@@ -110,6 +116,7 @@ decisions:
     - reqllm.package.buffered_stream_metadata
     - reqllm.package.runtime_telemetry
     - reqllm.package.support_tiers
+    - reqllm.package.governed_authority
 
 - kind: command
   target: mix test test/public_api
@@ -249,6 +256,14 @@ decisions:
   execute: true
   covers:
     - reqllm.package.local_env_loading
+
+- kind: command
+  target: mix test test/req_llm_next/governed_authority_test.exs test/providers/openai/client_test.exs test/providers/anthropic/client_test.exs
+  execute: true
+  covers:
+    - reqllm.package.governed_authority
+    - reqllm.package.provider_specific_utilities
+    - reqllm.package.utility_proof_depth
 
 - kind: command
   target: mix test test/providers/anthropic

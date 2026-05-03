@@ -38,6 +38,11 @@ surface:
   statement: Package-level runtime telemetry shall emit through `ReqLlmNext.Telemetry` rather than ad hoc direct `:telemetry` calls from runtime layers so event names, request spans, provider-request spans, stream instrumentation, utility-request instrumentation, and metadata redaction remain stable.
   priority: should
   stability: evolving
+
+- id: reqllm.telemetry.governed_authority_redaction
+  statement: Governed authority use shall preserve provider-request telemetry and fixture evidence without exposing governed credential header values, env-derived secrets, direct authority override values, or raw replay credentials.
+  priority: must
+  stability: evolving
 ```
 
 ## Verification
@@ -50,13 +55,15 @@ surface:
     - reqllm.telemetry.canonical_measurements
     - reqllm.telemetry.sanitized_payloads
     - reqllm.telemetry.kernel_boundary
+    - reqllm.telemetry.governed_authority_redaction
 
 - kind: command
-  target: mix test test/req_llm_next/telemetry_test.exs test/providers/openai/client_test.exs
+  target: mix test test/req_llm_next/telemetry_test.exs test/providers/openai/client_test.exs test/req_llm_next/governed_authority_test.exs
   execute: true
   covers:
     - reqllm.telemetry.request_lifecycle
     - reqllm.telemetry.canonical_measurements
     - reqllm.telemetry.kernel_boundary
+    - reqllm.telemetry.governed_authority_redaction
 
 ```

@@ -20,6 +20,8 @@ defmodule ReqLlmNext.Provider do
 
   @optional_callbacks []
 
+  alias ReqLlmNext.GovernedAuthority
+
   defmacro __using__(opts) do
     base_url = Keyword.fetch!(opts, :base_url)
     env_key = Keyword.fetch!(opts, :env_key)
@@ -41,9 +43,18 @@ defmodule ReqLlmNext.Provider do
 
       @impl ReqLlmNext.Provider
       def get_api_key(opts) do
-        Keyword.get(opts, :api_key) ||
-          System.get_env(env_key()) ||
-          raise "#{env_key()} not set"
+        case ReqLlmNext.GovernedAuthority.fetch(opts) do
+          {:ok, _authority} ->
+            raise ReqLlmNext.GovernedAuthority.unmanaged_error(:api_key)
+
+          {:error, reason} ->
+            raise reason
+
+          :error ->
+            Keyword.get(opts, :api_key) ||
+              System.get_env(env_key()) ||
+              raise "#{env_key()} not set"
+        end
       end
 
       defoverridable base_url: 0, env_key: 0, auth_headers: 1, get_api_key: 1
@@ -58,9 +69,96 @@ defmodule ReqLlmNext.Provider do
     [{"x-api-key", api_key}]
   end
 
+  @spec base_url(module(), keyword()) :: {:ok, String.t()} | request_error()
+  def base_url(provider_mod, opts) do
+    case GovernedAuthority.fetch(opts) do
+      {:ok, authority} ->
+        with :ok <- GovernedAuthority.reject_unmanaged_opts(opts) do
+          authority
+          |> GovernedAuthority.base_url()
+          |> interpolate_values(GovernedAuthority.template_values(authority))
+        end
+
+      {:error, _reason} = error ->
+        error
+
+      :error ->
+        {:ok, Keyword.get(opts, :base_url, provider_mod.base_url())}
+    end
+  end
+
   @spec request_url(module(), LLMDB.Model.t(), String.t(), keyword()) ::
           {:ok, String.t()} | request_error()
   def request_url(provider_mod, %LLMDB.Model{} = model, path, opts) when is_binary(path) do
+    case GovernedAuthority.fetch(opts) do
+      {:ok, authority} ->
+        governed_request_url(authority, model, path, opts)
+
+      {:error, _reason} = error ->
+        error
+
+      :error ->
+        standalone_request_url(provider_mod, model, path, opts)
+    end
+  end
+
+  @spec request_headers(module(), LLMDB.Model.t(), keyword(), [auth_header()]) ::
+          {:ok, [auth_header()]} | request_error()
+  def request_headers(provider_mod, %LLMDB.Model{} = _model, opts, extra_headers \\ []) do
+    case GovernedAuthority.fetch(opts) do
+      {:ok, authority} ->
+        governed_request_headers(authority, opts, extra_headers)
+
+      {:error, _reason} = error ->
+        error
+
+      :error ->
+        standalone_request_headers(provider_mod, opts, extra_headers)
+    end
+  end
+
+  @spec utility_url(module(), String.t(), keyword()) :: {:ok, String.t()} | request_error()
+  def utility_url(provider_mod, path, opts) when is_binary(path) do
+    case GovernedAuthority.fetch(opts) do
+      {:ok, authority} ->
+        with :ok <- reject_absolute_url(path),
+             :ok <- GovernedAuthority.reject_unmanaged_opts(opts),
+             {:ok, base_url} <-
+               authority
+               |> GovernedAuthority.base_url()
+               |> interpolate_values(GovernedAuthority.template_values(authority)),
+             {:ok, resolved_path} <-
+               interpolate_values(path, GovernedAuthority.template_values(authority)) do
+          {:ok,
+           append_query(join_url(base_url, resolved_path), GovernedAuthority.query(authority))}
+        end
+
+      {:error, _reason} = error ->
+        error
+
+      :error ->
+        {:ok, standalone_utility_url(provider_mod, path, opts)}
+    end
+  end
+
+  @spec utility_headers(module(), keyword(), [auth_header()]) ::
+          {:ok, [auth_header()]} | request_error()
+  def utility_headers(provider_mod, opts, extra_headers \\ []) do
+    case GovernedAuthority.fetch(opts) do
+      {:ok, authority} ->
+        with :ok <- GovernedAuthority.reject_unmanaged_opts(opts) do
+          {:ok, GovernedAuthority.headers(authority) ++ extra_headers}
+        end
+
+      {:error, _reason} = error ->
+        error
+
+      :error ->
+        {:ok, provider_mod.auth_headers(provider_mod.get_api_key(opts)) ++ extra_headers}
+    end
+  end
+
+  defp standalone_request_url(provider_mod, model, path, opts) do
     if use_runtime_metadata?(opts) do
       with {:ok, runtime} <- fetch_runtime(opts),
            {:ok, base_url} <- resolve_base_url(runtime, model, opts),
@@ -73,9 +171,20 @@ defmodule ReqLlmNext.Provider do
     end
   end
 
-  @spec request_headers(module(), LLMDB.Model.t(), keyword(), [auth_header()]) ::
-          {:ok, [auth_header()]} | request_error()
-  def request_headers(provider_mod, %LLMDB.Model{} = _model, opts, extra_headers \\ []) do
+  defp governed_request_url(authority, model, path, opts) do
+    with :ok <- GovernedAuthority.reject_unmanaged_opts(opts),
+         {:ok, runtime} <- maybe_fetch_runtime(opts),
+         {:ok, base_url} <-
+           authority
+           |> GovernedAuthority.base_url()
+           |> interpolate_values(GovernedAuthority.template_values(authority)),
+         {:ok, resolved_path} <- resolve_path(path, model, opts, authority),
+         {:ok, query} <- governed_request_query(runtime, authority) do
+      {:ok, append_query(join_url(base_url, resolved_path), query)}
+    end
+  end
+
+  defp standalone_request_headers(provider_mod, opts, extra_headers) do
     if use_runtime_metadata?(opts) do
       with {:ok, runtime} <- fetch_runtime(opts),
            {:ok, auth_headers} <- auth_headers_from_runtime(runtime, opts) do
@@ -86,6 +195,50 @@ defmodule ReqLlmNext.Provider do
       api_key = provider_mod.get_api_key(opts)
       {:ok, provider_mod.auth_headers(api_key) ++ extra_headers}
     end
+  end
+
+  defp governed_request_headers(authority, opts, extra_headers) do
+    with :ok <- GovernedAuthority.reject_unmanaged_opts(opts),
+         {:ok, runtime} <- maybe_fetch_runtime(opts) do
+      default_headers =
+        runtime
+        |> Map.get(:default_headers, %{})
+        |> map_headers()
+
+      {:ok, GovernedAuthority.headers(authority) ++ default_headers ++ extra_headers}
+    end
+  end
+
+  defp maybe_fetch_runtime(opts) do
+    if use_runtime_metadata?(opts), do: fetch_runtime(opts), else: {:ok, %{}}
+  end
+
+  defp governed_request_query(runtime, authority) do
+    default_query =
+      runtime
+      |> Map.get(:default_query, %{})
+      |> stringify_map()
+
+    {:ok, Map.merge(default_query, GovernedAuthority.query(authority))}
+  end
+
+  defp reject_absolute_url(path) do
+    if absolute_url?(path) do
+      {:error, GovernedAuthority.unmanaged_error(:url)}
+    else
+      :ok
+    end
+  end
+
+  defp absolute_url?(path) do
+    String.starts_with?(path, "http://") or String.starts_with?(path, "https://")
+  end
+
+  defp standalone_utility_url(_provider_mod, "http://" <> _rest = path, _opts), do: path
+  defp standalone_utility_url(_provider_mod, "https://" <> _rest = path, _opts), do: path
+
+  defp standalone_utility_url(provider_mod, path, opts) do
+    Keyword.get(opts, :base_url, provider_mod.base_url()) <> path
   end
 
   defp use_runtime_metadata?(opts) do
@@ -127,6 +280,15 @@ defmodule ReqLlmNext.Provider do
     effective_path
     |> replace_template("provider_model_id", provider_model_id(model, execution_entry))
     |> interpolate(opts)
+  end
+
+  defp resolve_path(path, model, opts, %GovernedAuthority{} = authority) do
+    execution_entry = Keyword.get(opts, :_model_execution_entry) || %{}
+    effective_path = Keyword.get(opts, :path) || Map.get(execution_entry, :path) || path
+
+    effective_path
+    |> replace_template("provider_model_id", provider_model_id(model, execution_entry))
+    |> interpolate_values(GovernedAuthority.template_values(authority))
   end
 
   defp request_query(runtime, opts) do
@@ -256,6 +418,25 @@ defmodule ReqLlmNext.Provider do
     |> Enum.uniq()
     |> Enum.reduce_while({:ok, value}, fn key, {:ok, current} ->
       case lookup_template_value(opts, key) do
+        nil ->
+          {:halt,
+           {:error,
+            ReqLlmNext.Error.Invalid.Provider.exception(
+              message: "Missing provider runtime configuration for #{key}"
+            )}}
+
+        replacement ->
+          {:cont, {:ok, String.replace(current, "{#{key}}", to_string(replacement))}}
+      end
+    end)
+  end
+
+  defp interpolate_values(value, values) when is_binary(value) and is_map(values) do
+    value
+    |> template_keys()
+    |> Enum.uniq()
+    |> Enum.reduce_while({:ok, value}, fn key, {:ok, current} ->
+      case Map.get(values, key) do
         nil ->
           {:halt,
            {:error,
