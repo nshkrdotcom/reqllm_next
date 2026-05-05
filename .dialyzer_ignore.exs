@@ -1,10 +1,3 @@
 [
-  ~r|lib/req_llm_next/scenarios/tool_parallel\.ex:1:pattern_match|,
-  ~r|lib/req_llm_next/providers/openai/transport_responses_websocket\.ex:28:14:pattern_match|,
-  ~r|lib/req_llm_next/providers/openai/transport_responses_websocket\.ex:99:54:call|,
-  ~r|lib/req_llm_next/providers/openai/transport_responses_websocket\.ex:99:54:call_without_opaque|,
-  ~r|lib/req_llm_next/providers/openai/transport_responses_websocket\.ex:145:7:pattern_match|,
-  ~r|lib/req_llm_next/providers/openai/transport_responses_websocket\.ex:248:8:no_return|,
-  ~r|lib/req_llm_next/providers/openai/transport_responses_websocket\.ex:249:27:call|,
-  ~r|lib/req_llm_next/providers/openai/transport_responses_websocket\.ex:249:27:call_without_opaque|
+  {"lib/req_llm_next/scenarios/tool_parallel.ex", :pattern_match, 1}
 ]
