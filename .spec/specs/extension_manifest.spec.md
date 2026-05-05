@@ -24,7 +24,7 @@ surface:
 
 ```spec-requirements
 - id: reqllm.extension_manifest.plain_runtime_contract
-  statement: ReqLlmNext shall model execution extension behavior as plain runtime data made of providers, families, rules, criteria, seam patches, and manifests so the runtime consumes a stable contract independent of any authoring DSL, with built-in declaration packs discovered from provider and family slice homes such as `lib/req_llm_next/families/**/definition.ex` and `lib/req_llm_next/providers/**/definition.ex`, merged into one compiled manifest at compile time, and expanded into a manifest-backed runtime registry for globally-addressable provider, session-runtime, protocol, wire, and transport seam keys plus plan-local seam overrides for provider or family stacks that intentionally shadow the shared fallback registry.
+  statement: ReqLlmNext shall model execution extension behavior as plain runtime data made of providers, families, rules, criteria, seam patches, and manifests so the runtime consumes a stable contract independent of any authoring DSL, with built-in declaration packs discovered from provider and family slice homes such as `lib/req_llm_next/families/**/definition.ex` and `lib/req_llm_next/providers/**/definition.ex`, merged into one compiled manifest at compile time, and expanded into a manifest-backed runtime registry for globally-addressable provider, session-runtime, protocol, wire, and transport seam keys plus plan-local seam overrides for provider or family stacks that intentionally shadow the shared fallback registry; built-in module discovery shall parse declared module names deterministically and resolve only existing modules without creating module atoms from source text.
   priority: must
   stability: evolving
 

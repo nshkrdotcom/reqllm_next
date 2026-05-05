@@ -3,12 +3,13 @@ defmodule ReqLlmNext.SurfacePreparation.GoogleGenerateContentTest do
 
   alias ReqLlmNext.Error
   alias ReqLlmNext.ExecutionSurface
+  alias ReqLlmNext.ModelProfile.SurfaceCatalog.Helpers
   alias ReqLlmNext.SurfacePreparation.GoogleGenerateContent
   alias ReqLlmNext.Tool
 
   defp surface(operation) do
     ExecutionSurface.new!(%{
-      id: :"google_generate_content_#{operation}_http_sse",
+      id: Helpers.surface_id(:google_generate_content, operation, :http_sse),
       operation: operation,
       semantic_protocol: :google_generate_content,
       wire_format: :google_generate_content_sse_json,

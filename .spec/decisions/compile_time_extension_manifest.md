@@ -46,6 +46,11 @@ The package therefore has three distinct pieces:
 
 Built-in declarations should live in small provider or family definition packs under `lib/req_llm_next/families/**/definition.ex` and `lib/req_llm_next/providers/**/definition.ex` rather than one monolithic built-ins file or a hand-maintained central registration list so OpenAI-compatible defaults, provider-specific families, and narrow model or mode overrides stay obvious to contributors.
 
+Automatic discovery of built-in declarations may parse provider and family
+definition source files, but it must resolve only declared existing modules and
+must not create module atoms from provider, fixture, generated, persisted,
+operator, or other runtime input.
+
 Family resolution must prefer declarative criteria matches first, then provider-registered default families, and finally explicit global default families.
 
 Shared profile construction must consume provider-facts and surface-catalog seams from the compiled manifest rather than branching on provider atoms in generic code.
@@ -70,3 +75,4 @@ Guardrails:
 1. Spark declarations may not become the runtime extension API
 2. built-in declarations must still compile down to plain manifest data before execution, even when discovered automatically from definition-pack files
 3. contributor-facing extension work should prefer declared families and rules over edits to shared planner or executor branching
+4. module discovery must stay deterministic, source-owned, and fail closed when a declared module cannot be resolved

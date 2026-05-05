@@ -87,7 +87,7 @@ defmodule ReqLlmNext.Extensions.Definition do
   defp extract_declared_module!(contents, path) do
     case declared_module_name(contents) do
       {:ok, module_name} ->
-        Module.concat([module_name])
+        Module.safe_concat([module_name])
 
       :error ->
         raise ArgumentError,

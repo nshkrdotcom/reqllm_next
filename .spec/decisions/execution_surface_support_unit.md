@@ -32,6 +32,11 @@ Each `ExecutionSurface` bundles:
 
 `ModelProfile` declares the surfaces a model supports, and planning chooses among those declared surfaces.
 
+Surface ids are source-owned. They are selected from a bounded registry keyed
+by declared surface prefix, operation, and transport rather than assembled from
+provider, model, fixture, or generated input. Unknown tuples fail closed before
+profile construction.
+
 ## Consequences
 
 Support is explicit and easier to inspect, test, and override.
@@ -39,3 +44,7 @@ Support is explicit and easier to inspect, test, and override.
 Fallback planning becomes more coherent because the system falls back from one named surface to another rather than recomputing combinations from independent lists.
 
 Adding a new endpoint style usually means adding a new surface plus the matching layer implementations instead of overloading existing metadata fields.
+
+The registry gives source policy a concrete boundary: adding a new endpoint
+style requires adding the named surface and its registry entry in source, with
+tests for both accepted and unknown tuples.

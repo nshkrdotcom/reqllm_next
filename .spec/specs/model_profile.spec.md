@@ -40,7 +40,7 @@ resolved execution plan projection only.
   stability: evolving
 
 - id: reqllm.model_profile.execution_surfaces_declared
-  statement: `ModelProfile` shall declare explicit named `ExecutionSurface` entries for supported endpoint styles instead of implying support from independent protocol, wire-format, and transport lists, including multiple transport variants for one semantic family when the provider truly supports them, allowing one provider-owned media catalog to emit several explicit media-operation surfaces when the provider facts already disambiguate which family is active, and carrying an explicit owning family id on each surface whether that surface came from an extension-backed catalog or the generic typed-metadata best-effort catalog.
+  statement: `ModelProfile` shall declare explicit named `ExecutionSurface` entries for supported endpoint styles instead of implying support from independent protocol, wire-format, and transport lists, including multiple transport variants for one semantic family when the provider truly supports them, allowing one provider-owned media catalog to emit several explicit media-operation surfaces when the provider facts already disambiguate which family is active, and carrying an explicit owning family id on each surface whether that surface came from an extension-backed catalog or the generic typed-metadata best-effort catalog; surface ids shall come from a source-owned registry and unknown prefix, operation, or transport tuples shall fail closed before profile construction.
   priority: must
   stability: evolving
 

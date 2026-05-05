@@ -47,7 +47,7 @@ governed execution.
   stability: evolving
 
 - id: reqllm.package.execution_planning
-  statement: ReqLlmNext shall route supported requests through a deterministic planning path that normalizes model facts into `ModelProfile`, request intent into `ExecutionMode`, selects explicit `ExecutionSurface` support through compatibility-aware policy, validates surface-specific parameter compatibility, materializes an `ExecutionPlan`, and resolves an execution stack of provider, session runtime, semantic protocol, wire, and transport modules before runtime execution, with provider facts, runtime-module lookup, and surface catalog construction driven from the compiled extension manifest for first-class providers and from typed `LLMDB.Provider.runtime` plus `LLMDB.Model.execution` metadata for best-effort providers rather than from central provider branching, and the provider layer shall honor typed runtime auth styles, templated provider configuration, and per-operation `base_url`, `path`, and `provider_model_id` overrides declared by that upstream contract while shared wire dispatch continues to honor provider-owned optional callbacks such as custom request builders and wire-specific headers even when those wire modules were not preloaded earlier in the VM lifetime.
+  statement: ReqLlmNext shall route supported requests through a deterministic planning path that normalizes model facts into `ModelProfile`, request intent into `ExecutionMode`, selects explicit `ExecutionSurface` support through compatibility-aware policy, validates surface-specific parameter compatibility, materializes an `ExecutionPlan`, and resolves an execution stack of provider, session runtime, semantic protocol, wire, and transport modules before runtime execution, with provider facts, runtime-module lookup, and surface catalog construction driven from the compiled extension manifest for first-class providers and from typed `LLMDB.Provider.runtime` plus `LLMDB.Model.execution` metadata for best-effort providers rather than from central provider branching, and the provider layer shall honor typed runtime auth styles, templated provider configuration, and per-operation `base_url`, `path`, and `provider_model_id` overrides declared by that upstream contract while shared wire dispatch continues to honor provider-owned optional callbacks such as custom request builders and wire-specific headers even when those wire modules were not preloaded earlier in the VM lifetime; surface id selection shall use a bounded source-owned registry, and extension module discovery shall resolve only existing declared modules.
   priority: must
   stability: evolving
 
@@ -155,6 +155,13 @@ governed execution.
 
 - kind: command
   target: mix test test/model_profile_test.exs
+  execute: true
+  covers:
+    - reqllm.package.execution_planning
+    - reqllm.package.compile_time_extensions
+
+- kind: command
+  target: mix test test/req_llm_next/source_policy_test.exs test/req_llm_next/extensions/manifest_test.exs
   execute: true
   covers:
     - reqllm.package.execution_planning

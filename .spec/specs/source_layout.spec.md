@@ -37,7 +37,7 @@ telemetry test files.
 
 ```spec-requirements
 - id: reqllm.source_layout.concern_homes
-  statement: ReqLlmNext shall keep model-boundary concerns, support-tier introspection, typed runtime-metadata interpretation, provider-scoped fact extraction, manifest-backed provider registration, family-owned or provider-owned surface catalog modules, profile construction, mode normalization, policy resolution, surface-owned request preparation, session-runtime modules, semantic protocol normalization, wire envelopes, transport mechanics, shared response output-item materialization, fixture replay, curated best-effort provider proof matrices, provider-feature probes, sparse live verifier probes, media input and output contracts, realtime commands and session state, and telemetry emission in distinct source locations that match the architecture, while co-locating concrete family implementations under `lib/req_llm_next/families/` and provider-owned implementations and utilities under `lib/req_llm_next/providers/`, including provider-local chat and media variants such as the Groq, OpenRouter, and xAI slices, simple provider registrations such as the vLLM slice, native-family slices such as the Google Gemini generateContent plus Google embedding and image wires, ElevenLabs media, and Cohere chat implementations, and central generic best-effort runtime helpers such as `runtime_metadata.ex`, `support.ex`, and `providers/generic.ex`, with generic auth and URL resolution remaining owned by the central provider layer rather than leaking into planner, wire, or transport modules, and with shared wire helpers loading provider-owned optional callbacks before dispatch so provider-specific headers and dynamic request builders stay owned by the provider wire homes instead of being duplicated upward.
+  statement: ReqLlmNext shall keep model-boundary concerns, support-tier introspection, typed runtime-metadata interpretation, provider-scoped fact extraction, manifest-backed provider registration, family-owned or provider-owned surface catalog modules, profile construction, mode normalization, policy resolution, surface-owned request preparation, session-runtime modules, semantic protocol normalization, wire envelopes, transport mechanics, shared response output-item materialization, fixture replay, curated best-effort provider proof matrices, provider-feature probes, sparse live verifier probes, media input and output contracts, realtime commands and session state, telemetry emission, and source-policy checks for dynamic atom creation, direct module-name construction, and pattern-engine APIs in distinct source locations that match the architecture, while co-locating concrete family implementations under `lib/req_llm_next/families/` and provider-owned implementations and utilities under `lib/req_llm_next/providers/`, including provider-local chat and media variants such as the Groq, OpenRouter, and xAI slices, simple provider registrations such as the vLLM slice, native-family slices such as the Google Gemini generateContent plus Google embedding and image wires, ElevenLabs media, and Cohere chat implementations, and central generic best-effort runtime helpers such as `runtime_metadata.ex`, `support.ex`, and `providers/generic.ex`, with generic auth and URL resolution remaining owned by the central provider layer rather than leaking into planner, wire, or transport modules, and with shared wire helpers loading provider-owned optional callbacks before dispatch so provider-specific headers and dynamic request builders stay owned by the provider wire homes instead of being duplicated upward.
   priority: must
   stability: evolving
 
@@ -62,7 +62,7 @@ telemetry test files.
   stability: evolving
 
 - id: reqllm.source_layout.extension_contract_home
-  statement: Compile-time execution extension contracts shall live in a dedicated `lib/req_llm_next/extensions/` home for the plain runtime structs, Spark DSL authoring modules, inheritance expansion, manifest verifiers, compiled manifest modules, and runtime registries, while built-in provider or family definition packs are discovered from co-located slice homes under `lib/req_llm_next/families/**/definition.ex` and `lib/req_llm_next/providers/**/definition.ex`, so default execution families and edge-case override rules are defined outside the shared planner and executor code.
+  statement: Compile-time execution extension contracts shall live in a dedicated `lib/req_llm_next/extensions/` home for the plain runtime structs, Spark DSL authoring modules, inheritance expansion, manifest verifiers, compiled manifest modules, runtime registries, and safe existing-module resolution for built-in declarations, while built-in provider or family definition packs are discovered from co-located slice homes under `lib/req_llm_next/families/**/definition.ex` and `lib/req_llm_next/providers/**/definition.ex`, so default execution families and edge-case override rules are defined outside the shared planner and executor code.
   priority: should
   stability: evolving
 
@@ -104,4 +104,11 @@ telemetry test files.
   covers:
     - reqllm.source_layout.concern_homes
     - reqllm.source_layout.governed_authority_home
+
+- kind: command
+  target: mix test test/req_llm_next/source_policy_test.exs test/model_profile_test.exs test/req_llm_next/extensions/manifest_test.exs
+  execute: true
+  covers:
+    - reqllm.source_layout.concern_homes
+    - reqllm.source_layout.extension_contract_home
 ```

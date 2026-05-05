@@ -2,6 +2,7 @@ defmodule ReqLlmNext.ModelProfileTest do
   use ExUnit.Case, async: true
 
   alias ReqLlmNext.ModelProfile
+  alias ReqLlmNext.ModelProfile.SurfaceCatalog.Helpers
 
   test "uses extension-backed surface catalogs for anthropic models" do
     {:ok, model} = LLMDB.model("anthropic:claude-haiku-4-5")
@@ -141,5 +142,14 @@ defmodule ReqLlmNext.ModelProfileTest do
 
     assert profile.family == :openai_chat_compatible
     assert [%{id: :openai_chat_text_http_sse}] = ModelProfile.surfaces_for(profile, :text)
+  end
+
+  test "surface id registry rejects unknown execution surfaces" do
+    error =
+      assert_raise ArgumentError, fn ->
+        Helpers.surface_id(:unknown_provider, :text, :http_sse)
+      end
+
+    assert String.contains?(Exception.message(error), "unknown execution surface id")
   end
 end

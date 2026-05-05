@@ -4,6 +4,25 @@ defmodule ReqLlmNext.ModelProfile.SurfaceCatalog.Helpers do
   alias ReqLlmNext.ExecutionSurface
   alias ReqLlmNext.ModelHelpers
 
+  @surface_ids %{
+    {:anthropic_messages, :text, :http_sse} => :anthropic_messages_text_http_sse,
+    {:anthropic_messages, :object, :http_sse} => :anthropic_messages_object_http_sse,
+    {:cohere_chat, :text, :http_sse} => :cohere_chat_text_http_sse,
+    {:cohere_chat, :object, :http_sse} => :cohere_chat_object_http_sse,
+    {:google_generate_content, :text, :http_sse} => :google_generate_content_text_http_sse,
+    {:google_generate_content, :object, :http_sse} => :google_generate_content_object_http_sse,
+    {:openai_chat, :text, :http_sse} => :openai_chat_text_http_sse,
+    {:openai_chat, :object, :http_sse} => :openai_chat_object_http_sse,
+    {:openai_responses, :text, :http_sse} => :openai_responses_text_http_sse,
+    {:openai_responses, :object, :http_sse} => :openai_responses_object_http_sse,
+    {:openai_responses, :text, :websocket} => :openai_responses_text_websocket,
+    {:openai_responses, :object, :websocket} => :openai_responses_object_websocket,
+    {:xai_responses, :text, :http_sse} => :xai_responses_text_http_sse,
+    {:xai_responses, :object, :http_sse} => :xai_responses_object_http_sse,
+    {:zenmux_responses, :text, :http_sse} => :zenmux_responses_text_http_sse,
+    {:zenmux_responses, :object, :http_sse} => :zenmux_responses_object_http_sse
+  }
+
   @spec maybe_put_surfaces(map(), ReqLlmNext.ModelProfile.operation(), [ExecutionSurface.t()]) ::
           map()
   def maybe_put_surfaces(map, _operation, []), do: map
@@ -78,7 +97,14 @@ defmodule ReqLlmNext.ModelProfile.SurfaceCatalog.Helpers do
 
   @spec surface_id(atom(), atom(), atom()) :: atom()
   def surface_id(surface_prefix, operation, transport) do
-    :"#{surface_prefix}_#{operation}_#{transport}"
+    case Map.fetch(@surface_ids, {surface_prefix, operation, transport}) do
+      {:ok, surface_id} ->
+        surface_id
+
+      :error ->
+        raise ArgumentError,
+              "unknown execution surface id #{inspect({surface_prefix, operation, transport})}"
+    end
   end
 
   @spec surface_features(LLMDB.Model.t(), :text | :object, map()) :: map()

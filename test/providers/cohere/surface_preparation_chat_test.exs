@@ -3,12 +3,13 @@ defmodule ReqLlmNext.SurfacePreparation.CohereChatTest do
 
   alias ReqLlmNext.Error
   alias ReqLlmNext.ExecutionSurface
+  alias ReqLlmNext.ModelProfile.SurfaceCatalog.Helpers
   alias ReqLlmNext.SurfacePreparation.CohereChat
   alias ReqLlmNext.Tool
 
   defp surface(operation) do
     ExecutionSurface.new!(%{
-      id: :"cohere_chat_#{operation}_http_sse",
+      id: Helpers.surface_id(:cohere_chat, operation, :http_sse),
       operation: operation,
       semantic_protocol: :cohere_chat,
       wire_format: :cohere_chat_sse_json,
