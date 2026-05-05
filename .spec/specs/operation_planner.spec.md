@@ -23,6 +23,14 @@ decisions:
   - reqllm.decision.five_scope_policy_rules
 ```
 
+## Phase 10 Governed Authority Update
+
+The operation planner now projects governed authority into `ExecutionPlan`
+through a ref-only `authority_refs` map. Planning multiple provider keys or
+multiple providers in one workflow must preserve distinct credential,
+provider-account, target, and operation-policy refs without reading env or raw
+provider options.
+
 ## Requirements
 
 ```spec-requirements

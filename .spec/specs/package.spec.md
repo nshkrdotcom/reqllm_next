@@ -24,6 +24,15 @@ decisions:
   - reqllm.decision.governed_authority_boundary
 ```
 
+## Phase 10 Governed Authority Update
+
+The package contract now includes ref-only governed planning and realtime
+authority. Governed mode binds provider keys, endpoint roots, account refs,
+realtime session token refs, reconnect token refs, stream refs, lease refs,
+target refs, cleanup policy refs, operation policy refs, and redaction refs
+while standalone env and direct option behavior remains available only outside
+governed execution.
+
 ## Requirements
 
 ```spec-requirements

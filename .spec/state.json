@@ -89,8 +89,21 @@
       {
         "affects": [
           "reqllm.architecture",
+          "reqllm.diagnostics",
+          "reqllm.enforcement",
+          "reqllm.execution_mode",
+          "reqllm.execution_plan",
+          "reqllm.execution_surfaces",
+          "reqllm.model_compat",
+          "reqllm.model_input",
+          "reqllm.model_profile",
+          "reqllm.operation_planner",
           "reqllm.provider",
           "reqllm.package",
+          "reqllm.policy_rules",
+          "reqllm.session_runtime",
+          "reqllm.telemetry",
+          "reqllm.workflow",
           "reqllm.layer_boundaries",
           "reqllm.source_layout"
         ],

@@ -28,6 +28,13 @@ decisions:
   - reqllm.decision.governed_authority_boundary
 ```
 
+## Phase 10 Governed Authority Update
+
+Model input boundaries still accept only supported model specs or
+`%LLMDB.Model{}` values. Governed authority is supplied as explicit execution
+metadata and must not be inferred from model identifiers, provider names, env
+keys, base URLs, retry callbacks, or singleton clients.
+
 ## Requirements
 
 ```spec-requirements

@@ -16,6 +16,14 @@ surface:
   - lib/req_llm_next/operation_planner.ex
 ```
 
+## Phase 10 Governed Authority Update
+
+Governed ReqLlmNext authority is a hard validation boundary. Provider-key,
+base-url, cleanup-policy, lease, target, and redaction refs are required for
+governed HTTP planning, and realtime operations additionally require session,
+session-token, reconnect-token, and stream refs plus active lease, granted
+target, and current revocation status.
+
 ## Requirements
 
 ```spec-requirements

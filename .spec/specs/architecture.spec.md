@@ -54,6 +54,15 @@ decisions:
   - reqllm.decision.governed_authority_boundary
 ```
 
+## Phase 10 Governed Authority Update
+
+Phase 10 keeps standalone provider behavior as the default path and makes
+governed authority a ref-only runtime lane. The architecture now carries
+provider-key, base-url, cleanup-policy, realtime-session-token, reconnect-token,
+stream, endpoint-account, lease, target, operation-policy, redaction, and
+revocation refs through planning, realtime validation, cleanup projection, and
+telemetry without exposing materialized provider credentials.
+
 ## Requirements
 
 ```spec-requirements

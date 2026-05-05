@@ -6,11 +6,100 @@ defmodule ReqLlmNext.OperationPlannerTest do
     Context,
     Error,
     ExecutionModules,
+    GovernedAuthority,
     OpenAI,
     OperationPlanner,
     TestModels,
     Tool
   }
+
+  describe "governed authority planning" do
+    test "adds credential and routing refs to execution plans" do
+      model = TestModels.openai()
+
+      assert {:ok, plan} =
+               OperationPlanner.plan(
+                 model,
+                 :text,
+                 "Hello",
+                 governed_authority: authority(provider_key_ref: "provider-key://openai/a")
+               )
+
+      assert plan.authority_refs.provider_key_ref == "provider-key://openai/a"
+      assert plan.authority_refs.credential_ref == "credential://reqllm/openai/default"
+      assert plan.authority_refs.base_url_ref == "base-url://openai/default"
+      refute inspect(plan.authority_refs) =~ "governed-credential"
+    end
+
+    test "keeps multiple provider keys distinct in one workflow planning pass" do
+      model = TestModels.openai()
+
+      assert {:ok, first_plan} =
+               OperationPlanner.plan(
+                 model,
+                 :text,
+                 "Hello",
+                 governed_authority:
+                   authority(
+                     provider_key_ref: "provider-key://openai/primary",
+                     credential_ref: "credential://reqllm/openai/primary"
+                   )
+               )
+
+      assert {:ok, second_plan} =
+               OperationPlanner.plan(
+                 model,
+                 :text,
+                 "Hello again",
+                 governed_authority:
+                   authority(
+                     provider_key_ref: "provider-key://openai/secondary",
+                     credential_ref: "credential://reqllm/openai/secondary"
+                   )
+               )
+
+      refute first_plan.authority_refs.provider_key_ref ==
+               second_plan.authority_refs.provider_key_ref
+
+      refute first_plan.authority_refs.credential_ref == second_plan.authority_refs.credential_ref
+    end
+
+    test "keeps multiple providers distinct by provider account and target refs" do
+      openai = TestModels.openai()
+      anthropic = TestModels.anthropic()
+
+      assert {:ok, openai_plan} =
+               OperationPlanner.plan(
+                 openai,
+                 :text,
+                 "Hello",
+                 governed_authority:
+                   authority(
+                     provider_ref: "provider://openai",
+                     provider_account_ref: "provider-account://openai/default",
+                     target_ref: "target://reqllm/openai/default"
+                   )
+               )
+
+      assert {:ok, anthropic_plan} =
+               OperationPlanner.plan(
+                 anthropic,
+                 :text,
+                 "Hello",
+                 governed_authority:
+                   authority(
+                     provider_ref: "provider://anthropic",
+                     provider_account_ref: "provider-account://anthropic/default",
+                     target_ref: "target://reqllm/anthropic/default"
+                   )
+               )
+
+      refute openai_plan.authority_refs.provider_account_ref ==
+               anthropic_plan.authority_refs.provider_account_ref
+
+      refute openai_plan.authority_refs.target_ref == anthropic_plan.authority_refs.target_ref
+    end
+  end
 
   describe "plan/4 for anthropic starter slice" do
     test "builds a deterministic text plan for claude-haiku-4-5" do
@@ -420,5 +509,35 @@ defmodule ReqLlmNext.OperationPlannerTest do
       assert wire_mod == ReqLlmNext.Wire.OpenAIEmbeddings
       assert transport_mod == ReqLlmNext.Transports.HTTPRequest
     end
+  end
+
+  defp authority(overrides) do
+    [
+      base_url: "https://governed.example",
+      credential_ref: "credential://reqllm/openai/default",
+      credential_lease_ref: "lease://reqllm/openai/default",
+      provider_key_ref: "provider-key://openai/default",
+      base_url_ref: "base-url://openai/default",
+      target_ref: "target://reqllm/openai/default",
+      operation_policy_ref: "operation-policy://reqllm/openai/read",
+      cleanup_policy_ref: "cleanup-policy://reqllm/openai/default",
+      redaction_ref: "redaction://reqllm/default",
+      provider_ref: "provider://openai",
+      provider_account_ref: "provider-account://openai/default",
+      endpoint_account_ref: "endpoint-account://openai/default",
+      model_account_ref: "model-account://openai/default",
+      organization_ref: "organization://openai/default",
+      project_ref: "project://openai/default",
+      realtime_session_ref: "realtime-session://openai/default",
+      realtime_session_token_ref: "realtime-token://openai/default",
+      reconnect_token_ref: "reconnect-token://openai/default",
+      stream_ref: "stream://openai/default",
+      revocation_epoch: 7,
+      headers: [{"authorization", "governed-credential"}],
+      query: %{},
+      template_values: %{}
+    ]
+    |> Keyword.merge(overrides)
+    |> GovernedAuthority.new!()
   end
 end

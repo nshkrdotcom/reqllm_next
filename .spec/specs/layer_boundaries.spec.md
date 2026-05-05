@@ -30,6 +30,14 @@ decisions:
   - reqllm.decision.governed_authority_boundary
 ```
 
+## Phase 10 Governed Authority Update
+
+The provider layer owns governed authority validation and projection. Planner
+layers may carry ref-only `authority_refs`; realtime layers must revalidate
+lease, target, and revocation state before websocket URL construction or
+streaming; telemetry may emit refs only; wire and semantic-protocol layers must
+not inspect or materialize credentials.
+
 ## Requirements
 
 ```spec-requirements

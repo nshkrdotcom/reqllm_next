@@ -16,6 +16,14 @@ surface:
   - test/req_llm_next/telemetry_test.exs
 ```
 
+## Phase 10 Governed Authority Update
+
+Plan telemetry may include governed `authority_refs`, but those refs are the
+only governed credential signal permitted in telemetry. Materialized
+authorization headers, provider-key values, realtime session tokens, reconnect
+tokens, stream auth, env-derived secrets, and raw provider payloads remain
+forbidden from emitted telemetry metadata.
+
 ## Requirements
 
 ```spec-requirements

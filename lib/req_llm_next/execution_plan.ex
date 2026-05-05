@@ -24,7 +24,8 @@ defmodule ReqLlmNext.ExecutionPlan do
               timeout_ms: Zoi.integer() |> Zoi.default(30_000),
               session_strategy: Zoi.map() |> Zoi.default(%{mode: :none}),
               fallback_surfaces: Zoi.array(Zoi.atom()) |> Zoi.default([]),
-              plan_adapters: Zoi.array(Zoi.any()) |> Zoi.default([])
+              plan_adapters: Zoi.array(Zoi.any()) |> Zoi.default([]),
+              authority_refs: Zoi.map() |> Zoi.default(%{})
             },
             coerce: true
           )
@@ -43,7 +44,8 @@ defmodule ReqLlmNext.ExecutionPlan do
           timeout_ms: non_neg_integer(),
           session_strategy: map(),
           fallback_surfaces: [atom()],
-          plan_adapters: [module()]
+          plan_adapters: [module()],
+          authority_refs: map()
         }
 
   @enforce_keys Zoi.Struct.enforce_keys(@schema)

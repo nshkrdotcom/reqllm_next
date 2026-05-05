@@ -9,6 +9,7 @@ defmodule ReqLlmNext.OperationPlanner do
     ExecutionMode,
     ExecutionPlan,
     Extensions,
+    GovernedAuthority,
     ModelProfile,
     PolicyRules,
     SurfacePreparation,
@@ -26,7 +27,8 @@ defmodule ReqLlmNext.OperationPlanner do
          :ok <- Validation.validate!(profile, mode),
          {:ok, policy} <- PolicyRules.resolve(profile, mode, opts),
          {:ok, parameter_values} <-
-           SurfacePreparation.prepare(model, profile, mode, policy.surface, prompt, opts) do
+           SurfacePreparation.prepare(model, profile, mode, policy.surface, prompt, opts),
+         {:ok, authority_refs} <- authority_refs(opts) do
       plan =
         ExecutionPlan.new!(%{
           model: profile,
@@ -43,7 +45,8 @@ defmodule ReqLlmNext.OperationPlanner do
           timeout_ms: policy.timeout_ms,
           session_strategy: policy.session_strategy,
           fallback_surfaces: policy.fallback_surfaces,
-          plan_adapters: plan_adapters_for(model, profile, mode, policy.surface)
+          plan_adapters: plan_adapters_for(model, profile, mode, policy.surface),
+          authority_refs: authority_refs
         })
 
       Telemetry.emit_plan_resolved(plan)
@@ -58,6 +61,14 @@ defmodule ReqLlmNext.OperationPlanner do
 
       {:error, :no_matching_family} ->
         []
+    end
+  end
+
+  defp authority_refs(opts) do
+    case GovernedAuthority.fetch(opts) do
+      {:ok, authority} -> {:ok, GovernedAuthority.ref_projection(authority)}
+      {:error, _reason} = error -> error
+      :error -> {:ok, %{}}
     end
   end
 

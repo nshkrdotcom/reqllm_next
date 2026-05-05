@@ -5,6 +5,7 @@ defmodule ReqLlmNext.Realtime do
 
   alias ReqLlmNext.Error
   alias ReqLlmNext.Extensions
+  alias ReqLlmNext.GovernedAuthority
   alias ReqLlmNext.ModelResolver
   alias ReqLlmNext.Realtime.{Command, Event, Session}
   alias ReqLlmNext.Telemetry
@@ -66,7 +67,8 @@ defmodule ReqLlmNext.Realtime do
 
   @spec websocket_url(ReqLlmNext.model_spec(), keyword()) :: {:ok, String.t()} | {:error, term()}
   def websocket_url(model_source, opts \\ []) do
-    with {:ok, model} <- ModelResolver.resolve(model_source),
+    with :ok <- GovernedAuthority.validate_realtime_opts(opts),
+         {:ok, model} <- ModelResolver.resolve(model_source),
          {:ok, adapter} <- adapter_module(model),
          true <- adapter_exports?(adapter, :websocket_url, 2) do
       {:ok, adapter.websocket_url(model, opts)}
@@ -79,7 +81,8 @@ defmodule ReqLlmNext.Realtime do
   @spec stream(ReqLlmNext.model_spec(), [Command.t()], keyword()) ::
           {:ok, Enumerable.t()} | {:error, term()}
   def stream(model_source, commands, opts \\ []) when is_list(commands) do
-    with {:ok, model} <- ModelResolver.resolve(model_source),
+    with :ok <- GovernedAuthority.validate_realtime_opts(opts),
+         {:ok, model} <- ModelResolver.resolve(model_source),
          {:ok, adapter} <- adapter_module(model),
          true <- adapter_exports?(adapter, :stream_commands, 3),
          {:ok, stream} <- adapter.stream_commands(model, commands, opts) do

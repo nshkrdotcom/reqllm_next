@@ -21,6 +21,13 @@ decisions:
   - reqllm.decision.execution_surface_support_unit
 ```
 
+## Phase 10 Governed Authority Update
+
+Execution surfaces remain selected by profile, mode, and policy. Governed
+authority does not add synthetic provider support; it supplies refs for the
+provider keys, endpoint roots, target posture, realtime session, and cleanup
+policy used by the already-selected surface.
+
 ## Requirements
 
 ```spec-requirements

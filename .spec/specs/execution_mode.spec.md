@@ -16,6 +16,13 @@ decisions:
   - reqllm.decision.execution_mode_first_class
 ```
 
+## Phase 10 Governed Authority Update
+
+Execution mode remains provider-agnostic. Governed authority refs are attached
+to the resolved execution plan and realtime validation path, not to
+`ExecutionMode`; mode flags can select realtime or streaming behavior but do not
+carry provider credentials, raw tokens, or authority material.
+
 ## Requirements
 
 ```spec-requirements

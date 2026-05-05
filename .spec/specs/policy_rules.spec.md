@@ -17,6 +17,13 @@ decisions:
   - reqllm.decision.layer_scoped_plan_aware_adapters
 ```
 
+## Phase 10 Governed Authority Update
+
+Policy rules still choose surfaces and fallback behavior from declared
+capabilities. They do not select provider credentials or token material;
+governed authority refs are projected after policy resolution and cannot patch
+unsupported operations, provider identity, or target posture into a plan.
+
 ## Requirements
 
 ```spec-requirements

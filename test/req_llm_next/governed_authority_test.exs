@@ -127,6 +127,77 @@ defmodule ReqLlmNext.GovernedAuthorityTest do
     assert url == "wss://governed-realtime.example/v1/realtime?model=test-model&voice=alloy"
   end
 
+  test "governed authority requires provider key base url and cleanup refs" do
+    for field <- [:provider_key_ref, :base_url_ref, :cleanup_policy_ref] do
+      attrs =
+        authority_attrs()
+        |> Keyword.delete(field)
+
+      assert_raise ArgumentError, fn ->
+        GovernedAuthority.new!(attrs)
+      end
+    end
+  end
+
+  test "redacted authority projection carries refs and no materialized credentials" do
+    projection =
+      authority()
+      |> GovernedAuthority.ref_projection()
+
+    assert projection.credential_ref == "credential://reqllm/openai/default"
+    assert projection.provider_key_ref == "provider-key://openai/default"
+    assert projection.base_url_ref == "base-url://openai/default"
+    assert projection.realtime_session_token_ref == "realtime-token://openai/default"
+    assert projection.reconnect_token_ref == "reconnect-token://openai/default"
+    assert projection.stream_ref == "stream://openai/default"
+    refute inspect(projection) =~ "governed-credential"
+    refute inspect(projection) =~ "https://governed.example"
+  end
+
+  test "governed realtime reconnect revalidates lease target and revocation state" do
+    assert {:ok, _url} =
+             ReqLlmNext.Realtime.websocket_url(
+               TestModels.openai(),
+               governed_authority: authority(),
+               _realtime_reconnect?: true
+             )
+
+    rejected_statuses = [
+      _credential_lease_status: :revoked,
+      _target_grant_status: :denied,
+      _revocation_status: :stale
+    ]
+
+    for {key, value} <- rejected_statuses do
+      assert {:error, error} =
+               ReqLlmNext.Realtime.websocket_url(
+                 TestModels.openai(),
+                 [{:governed_authority, authority()}, {:_realtime_reconnect?, true}, {key, value}]
+               )
+
+      assert Exception.message(error) =~ "governed ReqLlmNext realtime"
+    end
+  end
+
+  test "realtime cleanup projection removes materialized session tokens" do
+    projection =
+      GovernedAuthority.cleanup_realtime_materialization(authority(), %{
+        headers: [{"authorization", "governed-credential"}],
+        realtime_session_token: "raw-realtime-session-token",
+        reconnect_token: "raw-reconnect-token",
+        stream_auth: "raw-stream-token"
+      })
+
+    assert projection.cleanup_status == :complete
+    assert projection.realtime_session_token_ref == "realtime-token://openai/default"
+    assert projection.reconnect_token_ref == "reconnect-token://openai/default"
+    assert projection.stream_ref == "stream://openai/default"
+    refute inspect(projection) =~ "raw-realtime-session-token"
+    refute inspect(projection) =~ "raw-reconnect-token"
+    refute inspect(projection) =~ "raw-stream-token"
+    refute inspect(projection) =~ "governed-credential"
+  end
+
   test "governed Google embedding and image wires use authority base URL" do
     google_authority = authority(base_url: "https://governed-google.example/custom/v1beta")
 
@@ -186,27 +257,38 @@ defmodule ReqLlmNext.GovernedAuthorityTest do
   end
 
   defp authority(overrides \\ []) do
+    authority_attrs(overrides)
+    |> GovernedAuthority.new!()
+  end
+
+  defp authority_attrs(overrides \\ []) do
     defaults = [
       base_url: "https://governed.example",
       credential_ref: "credential://reqllm/openai/default",
       credential_lease_ref: "lease://reqllm/openai/default",
+      provider_key_ref: "provider-key://openai/default",
+      base_url_ref: "base-url://openai/default",
       target_ref: "target://reqllm/openai/default",
       operation_policy_ref: "operation-policy://reqllm/openai/read",
+      cleanup_policy_ref: "cleanup-policy://reqllm/openai/default",
       redaction_ref: "redaction://reqllm/default",
       provider_ref: "provider://openai",
       provider_account_ref: "provider-account://openai/default",
+      endpoint_account_ref: "endpoint-account://openai/default",
       model_account_ref: "model-account://openai/default",
       organization_ref: "organization://openai/default",
       project_ref: "project://openai/default",
       realtime_session_ref: "realtime-session://openai/default",
+      realtime_session_token_ref: "realtime-token://openai/default",
+      reconnect_token_ref: "reconnect-token://openai/default",
+      stream_ref: "stream://openai/default",
+      revocation_epoch: 7,
       headers: [{"authorization", "governed-credential"}],
       query: %{},
       template_values: %{}
     ]
 
-    defaults
-    |> Keyword.merge(overrides)
-    |> GovernedAuthority.new!()
+    Keyword.merge(defaults, overrides)
   end
 
   defp runtime_model do

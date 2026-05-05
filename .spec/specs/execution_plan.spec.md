@@ -20,6 +20,15 @@ decisions:
   - reqllm.decision.five_scope_policy_rules
 ```
 
+## Phase 10 Governed Authority Update
+
+`ExecutionPlan` now includes `authority_refs` when governed execution is
+selected. The field is ref-only and can carry credential, credential lease,
+provider key, base URL, provider account, endpoint account, model account,
+organization, project, target, operation policy, cleanup policy, redaction,
+realtime session, realtime token, reconnect token, stream, and revocation epoch
+refs. It must never carry materialized credential headers or raw token values.
+
 ## Requirements
 
 ```spec-requirements

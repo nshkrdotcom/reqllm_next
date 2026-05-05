@@ -18,6 +18,15 @@ decisions:
   - reqllm.decision.governed_authority_boundary
 ```
 
+## Phase 10 Governed Authority Update
+
+Governed provider authority now includes explicit provider-key and base-url refs
+plus cleanup policy, endpoint account, realtime session token, reconnect token,
+stream, and revocation refs. Provider code may use materialized headers and
+base URLs only from the selected authority and must reject unmanaged direct
+provider keys, raw realtime token options, direct headers, direct URLs, and env
+credential fallback in governed mode.
+
 ## Requirements
 
 ```spec-requirements

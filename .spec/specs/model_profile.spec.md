@@ -24,6 +24,13 @@ decisions:
   - reqllm.decision.execution_surface_support_unit
 ```
 
+## Phase 10 Governed Authority Update
+
+`ModelProfile` remains descriptive provider and model fact state. It does not
+store governed credential refs, realtime token refs, target refs, or cleanup
+policy refs; those refs are carried by governed authority and copied into the
+resolved execution plan projection only.
+
 ## Requirements
 
 ```spec-requirements

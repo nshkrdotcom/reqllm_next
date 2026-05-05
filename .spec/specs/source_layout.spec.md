@@ -24,6 +24,15 @@ decisions:
   - reqllm.decision.governed_authority_boundary
 ```
 
+## Phase 10 Governed Authority Update
+
+Governed authority source ownership remains centralized in
+`lib/req_llm_next/governed_authority.ex`; planning projection belongs in
+`operation_planner.ex` and `execution_plan.ex`; realtime revalidation belongs
+in `realtime.ex`; telemetry ref projection belongs in `telemetry.ex`; tests for
+these contracts live in the focused governed authority, operation planner, and
+telemetry test files.
+
 ## Requirements
 
 ```spec-requirements

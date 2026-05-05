@@ -19,6 +19,13 @@ decisions:
   - reqllm.decision.execution_layers
 ```
 
+## Phase 10 Governed Authority Update
+
+Realtime session runtime must revalidate governed lease, target grant, and
+revocation status before reconnect or streaming and must project cleanup as refs
+only. Realtime session token, reconnect token, and stream auth values are
+materialized effect state and must be removed from cleanup evidence.
+
 ## Requirements
 
 ```spec-requirements

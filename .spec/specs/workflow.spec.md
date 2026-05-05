@@ -30,6 +30,14 @@ decisions:
   - reqllm.decision.governed_authority_boundary
 ```
 
+## Phase 10 Governed Authority Update
+
+Governed authority workflow updates must keep subject specs, ADRs when the
+boundary changes, focused governed tests, root QC, fixed-string scans, and
+phase evidence synchronized. The Phase 10 loop proves multiple provider keys
+and multiple providers can be planned with distinct refs while preserving
+standalone env ergonomics outside governed execution.
+
 ## Requirements
 
 ```spec-requirements

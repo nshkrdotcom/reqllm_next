@@ -39,6 +39,14 @@ decisions:
   - reqllm.decision.governed_authority_boundary
 ```
 
+## Phase 10 Governed Authority Update
+
+Model compatibility remains independent from credential selection. Governed
+authority refs cannot make an unsupported model, operation, surface, or
+transport valid; they only bind credentials, endpoint authority, target posture,
+and cleanup evidence for a model and surface that compatibility checks already
+approved.
+
 ## Requirements
 
 ```spec-requirements

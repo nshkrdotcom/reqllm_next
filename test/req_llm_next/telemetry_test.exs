@@ -1,7 +1,15 @@
 defmodule ReqLlmNext.TelemetryTest do
   use ExUnit.Case, async: false
 
-  alias ReqLlmNext.{Context, ExecutionModules, OperationPlanner, Response, Telemetry}
+  alias ReqLlmNext.{
+    Context,
+    ExecutionModules,
+    GovernedAuthority,
+    OperationPlanner,
+    Response,
+    Telemetry
+  }
+
   alias ReqLlmNext.TestModels
 
   setup do
@@ -102,6 +110,26 @@ defmodule ReqLlmNext.TelemetryTest do
     assert stack_metadata.wire_module == "ReqLlmNext.Wire.OpenAIResponses"
   end
 
+  test "planner telemetry carries governed token refs without materialized secrets" do
+    model = TestModels.openai()
+
+    assert {:ok, _plan} =
+             OperationPlanner.plan(
+               model,
+               :text,
+               "hello",
+               governed_authority: authority()
+             )
+
+    assert_receive {:telemetry_event, [:req_llm_next, :plan, :resolved], _measurements, metadata}
+
+    assert metadata.authority_refs.provider_key_ref == "provider-key://openai/default"
+    assert metadata.authority_refs.credential_ref == "credential://reqllm/openai/default"
+    assert metadata.authority_refs.stream_ref == "stream://openai/default"
+    refute inspect(metadata) =~ "governed-credential"
+    refute inspect(metadata) =~ "https://governed.example"
+  end
+
   test "instrumented streams emit lifecycle events and finish metadata" do
     stream =
       ["Hello", {:thinking, "world"}, {:meta, %{finish_reason: :stop, terminal?: true}}]
@@ -140,5 +168,33 @@ defmodule ReqLlmNext.TelemetryTest do
 
     assert stop_measurements.chunk_count == 3
     assert stop_metadata.finish_reason == :stop
+  end
+
+  defp authority do
+    GovernedAuthority.new!(
+      base_url: "https://governed.example",
+      credential_ref: "credential://reqllm/openai/default",
+      credential_lease_ref: "lease://reqllm/openai/default",
+      provider_key_ref: "provider-key://openai/default",
+      base_url_ref: "base-url://openai/default",
+      target_ref: "target://reqllm/openai/default",
+      operation_policy_ref: "operation-policy://reqllm/openai/read",
+      cleanup_policy_ref: "cleanup-policy://reqllm/openai/default",
+      redaction_ref: "redaction://reqllm/default",
+      provider_ref: "provider://openai",
+      provider_account_ref: "provider-account://openai/default",
+      endpoint_account_ref: "endpoint-account://openai/default",
+      model_account_ref: "model-account://openai/default",
+      organization_ref: "organization://openai/default",
+      project_ref: "project://openai/default",
+      realtime_session_ref: "realtime-session://openai/default",
+      realtime_session_token_ref: "realtime-token://openai/default",
+      reconnect_token_ref: "reconnect-token://openai/default",
+      stream_ref: "stream://openai/default",
+      revocation_epoch: 7,
+      headers: [{"authorization", "governed-credential"}],
+      query: %{},
+      template_values: %{}
+    )
   end
 end

@@ -8,19 +8,35 @@ defmodule ReqLlmNext.GovernedAuthority do
   @required_refs [
     :credential_ref,
     :credential_lease_ref,
+    :provider_key_ref,
+    :base_url_ref,
     :target_ref,
     :operation_policy_ref,
+    :cleanup_policy_ref,
     :redaction_ref
   ]
 
   @optional_refs [
     :provider_ref,
     :provider_account_ref,
+    :endpoint_account_ref,
     :model_account_ref,
     :organization_ref,
     :project_ref,
-    :realtime_session_ref
+    :realtime_session_ref,
+    :realtime_session_token_ref,
+    :reconnect_token_ref,
+    :stream_ref
   ]
+
+  @realtime_required_refs [
+    :realtime_session_ref,
+    :realtime_session_token_ref,
+    :reconnect_token_ref,
+    :stream_ref
+  ]
+
+  @projection_fields @required_refs ++ @optional_refs ++ [:revocation_epoch]
 
   @unmanaged_keys [
     :api_key,
@@ -46,15 +62,23 @@ defmodule ReqLlmNext.GovernedAuthority do
               base_url: Zoi.string(),
               credential_ref: Zoi.string(),
               credential_lease_ref: Zoi.string(),
+              provider_key_ref: Zoi.string(),
+              base_url_ref: Zoi.string(),
               target_ref: Zoi.string(),
               operation_policy_ref: Zoi.string(),
+              cleanup_policy_ref: Zoi.string(),
               redaction_ref: Zoi.string(),
               provider_ref: Zoi.string() |> Zoi.nullish() |> Zoi.default(nil),
               provider_account_ref: Zoi.string() |> Zoi.nullish() |> Zoi.default(nil),
+              endpoint_account_ref: Zoi.string() |> Zoi.nullish() |> Zoi.default(nil),
               model_account_ref: Zoi.string() |> Zoi.nullish() |> Zoi.default(nil),
               organization_ref: Zoi.string() |> Zoi.nullish() |> Zoi.default(nil),
               project_ref: Zoi.string() |> Zoi.nullish() |> Zoi.default(nil),
               realtime_session_ref: Zoi.string() |> Zoi.nullish() |> Zoi.default(nil),
+              realtime_session_token_ref: Zoi.string() |> Zoi.nullish() |> Zoi.default(nil),
+              reconnect_token_ref: Zoi.string() |> Zoi.nullish() |> Zoi.default(nil),
+              stream_ref: Zoi.string() |> Zoi.nullish() |> Zoi.default(nil),
+              revocation_epoch: Zoi.integer() |> Zoi.default(0),
               headers: Zoi.array(Zoi.any()) |> Zoi.default([]),
               query: Zoi.map() |> Zoi.default(%{}),
               template_values: Zoi.map() |> Zoi.default(%{})
@@ -68,15 +92,23 @@ defmodule ReqLlmNext.GovernedAuthority do
           base_url: String.t(),
           credential_ref: String.t(),
           credential_lease_ref: String.t(),
+          provider_key_ref: String.t(),
+          base_url_ref: String.t(),
           target_ref: String.t(),
           operation_policy_ref: String.t(),
+          cleanup_policy_ref: String.t(),
           redaction_ref: String.t(),
           provider_ref: String.t() | nil,
           provider_account_ref: String.t() | nil,
+          endpoint_account_ref: String.t() | nil,
           model_account_ref: String.t() | nil,
           organization_ref: String.t() | nil,
           project_ref: String.t() | nil,
           realtime_session_ref: String.t() | nil,
+          realtime_session_token_ref: String.t() | nil,
+          reconnect_token_ref: String.t() | nil,
+          stream_ref: String.t() | nil,
+          revocation_epoch: non_neg_integer(),
           headers: [header()],
           query: %{optional(String.t()) => String.t()},
           template_values: %{optional(String.t()) => String.t()}
@@ -139,6 +171,37 @@ defmodule ReqLlmNext.GovernedAuthority do
   @spec base_url(t()) :: String.t()
   def base_url(%__MODULE__{base_url: base_url}), do: base_url
 
+  @spec ref_projection(t()) :: map()
+  def ref_projection(%__MODULE__{} = authority) do
+    Enum.reduce(@projection_fields, %{}, fn field, projection ->
+      case Map.fetch!(authority, field) do
+        nil -> projection
+        value -> Map.put(projection, field, value)
+      end
+    end)
+  end
+
+  @spec cleanup_realtime_materialization(t(), map()) :: map()
+  def cleanup_realtime_materialization(%__MODULE__{} = authority, materialized)
+      when is_map(materialized) do
+    authority
+    |> ref_projection()
+    |> Map.take([
+      :credential_lease_ref,
+      :target_ref,
+      :operation_policy_ref,
+      :cleanup_policy_ref,
+      :redaction_ref,
+      :realtime_session_ref,
+      :realtime_session_token_ref,
+      :reconnect_token_ref,
+      :stream_ref,
+      :revocation_epoch
+    ])
+    |> Map.put(:cleanup_status, :complete)
+    |> Map.put(:removed_materialized_keys, materialized_key_names(materialized))
+  end
+
   @spec reject_unmanaged_opts(keyword()) :: :ok | {:error, term()}
   def reject_unmanaged_opts(opts) when is_list(opts) do
     case Enum.find(opts, &unmanaged_option?/1) do
@@ -156,6 +219,25 @@ defmodule ReqLlmNext.GovernedAuthority do
       message: "Cannot use unmanaged #{key_name(key)} with governed ReqLlmNext authority"
     )
   end
+
+  @spec validate_realtime_opts(keyword()) :: :ok | {:error, term()}
+  def validate_realtime_opts(opts) when is_list(opts) do
+    case fetch(opts) do
+      {:ok, authority} ->
+        with :ok <- reject_unmanaged_opts(opts),
+             :ok <- validate_refs(authority, @realtime_required_refs, :required) do
+          validate_realtime_statuses(opts)
+        end
+
+      {:error, _reason} = error ->
+        error
+
+      :error ->
+        :ok
+    end
+  end
+
+  def validate_realtime_opts(_opts), do: :ok
 
   defp validate(%__MODULE__{} = authority) do
     with :ok <- validate_non_empty(:base_url, authority.base_url),
@@ -232,6 +314,27 @@ defmodule ReqLlmNext.GovernedAuthority do
     {:error, invalid("Invalid governed ReqLlmNext authority #{field}")}
   end
 
+  defp validate_realtime_statuses(opts) do
+    with :ok <- validate_realtime_status(opts, :_credential_lease_status, :active),
+         :ok <- validate_realtime_status(opts, :_target_grant_status, :granted) do
+      validate_realtime_status(opts, :_revocation_status, :current)
+    end
+  end
+
+  defp validate_realtime_status(opts, key, expected) do
+    case Keyword.get(opts, key, expected) do
+      ^expected -> :ok
+      status -> {:error, realtime_error("#{key_name(key)} is #{key_name(status)}")}
+    end
+  end
+
+  defp materialized_key_names(materialized) do
+    materialized
+    |> Map.keys()
+    |> Enum.map(&key_name/1)
+    |> Enum.sort()
+  end
+
   defp unmanaged_option?({:governed_authority, _value}), do: false
 
   defp unmanaged_option?({key, _value}) when is_atom(key) do
@@ -250,5 +353,11 @@ defmodule ReqLlmNext.GovernedAuthority do
 
   defp invalid(message) do
     Error.Invalid.Provider.exception(message: message)
+  end
+
+  defp realtime_error(message) do
+    Error.Invalid.Provider.exception(
+      message: "Invalid governed ReqLlmNext realtime authority: #{message}"
+    )
   end
 end

@@ -16,6 +16,14 @@ surface:
   - test/req_llm_next/telemetry_test.exs
 ```
 
+## Phase 10 Governed Authority Update
+
+Diagnostics for governed ReqLlmNext effects may include authority refs such as
+credential, provider-key, base-url, realtime session, stream, cleanup policy,
+target, and operation-policy refs. Diagnostics must not include materialized
+provider headers, realtime session tokens, reconnect tokens, stream auth, env
+credentials, or direct unmanaged option values.
+
 ## Requirements
 
 ```spec-requirements

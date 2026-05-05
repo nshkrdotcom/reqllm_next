@@ -172,6 +172,7 @@ defmodule ReqLlmNext.Telemetry do
       session_strategy: Map.get(plan.session_strategy, :mode, :none),
       session_runtime: plan.session_runtime
     }
+    |> maybe_put_authority_refs(plan.authority_refs)
   end
 
   @spec provider_request_metadata(atom(), LLMDB.Model.t() | nil, keyword(), map()) :: metadata()
@@ -471,6 +472,11 @@ defmodule ReqLlmNext.Telemetry do
 
   defp maybe_put(map, _key, nil), do: map
   defp maybe_put(map, key, value), do: Map.put(map, key, value)
+
+  defp maybe_put_authority_refs(map, authority_refs) when map_size(authority_refs) == 0, do: map
+
+  defp maybe_put_authority_refs(map, authority_refs),
+    do: Map.put(map, :authority_refs, authority_refs)
 
   defp maybe_put_measurement(map, _key, nil), do: map
   defp maybe_put_measurement(map, key, value) when is_integer(value), do: Map.put(map, key, value)
