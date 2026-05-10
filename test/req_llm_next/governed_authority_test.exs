@@ -13,8 +13,8 @@ defmodule ReqLlmNext.GovernedAuthorityTest do
   alias ReqLlmNext.Wire.GoogleImages
 
   setup do
-    original_openai = System.get_env("OPENAI_API_KEY")
-    original_runtime = System.get_env("RUNTIME_TEST_API_KEY")
+    original_openai = ReqLlmNext.Env.get("OPENAI_API_KEY")
+    original_runtime = ReqLlmNext.Env.get("RUNTIME_TEST_API_KEY")
 
     on_exit(fn ->
       restore_env("OPENAI_API_KEY", original_openai)
@@ -25,7 +25,7 @@ defmodule ReqLlmNext.GovernedAuthorityTest do
   end
 
   test "governed provider URL and headers come from authority not env" do
-    System.put_env("OPENAI_API_KEY", "env-openai-key")
+    ReqLlmNext.Env.put("OPENAI_API_KEY", "env-openai-key")
     model = TestModels.openai()
     opts = [governed_authority: authority(base_url: "https://governed.example/v1")]
 
@@ -69,7 +69,7 @@ defmodule ReqLlmNext.GovernedAuthorityTest do
   end
 
   test "governed runtime metadata ignores env credentials and uses authority template values" do
-    System.put_env("RUNTIME_TEST_API_KEY", "runtime-env-secret")
+    ReqLlmNext.Env.put("RUNTIME_TEST_API_KEY", "runtime-env-secret")
     model = runtime_model()
 
     runtime = %{
@@ -299,6 +299,6 @@ defmodule ReqLlmNext.GovernedAuthorityTest do
     })
   end
 
-  defp restore_env(key, nil), do: System.delete_env(key)
-  defp restore_env(key, value), do: System.put_env(key, value)
+  defp restore_env(key, nil), do: ReqLlmNext.Env.delete(key)
+  defp restore_env(key, value), do: ReqLlmNext.Env.put(key, value)
 end

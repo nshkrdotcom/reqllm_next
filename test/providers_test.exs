@@ -329,8 +329,8 @@ defmodule ReqLlmNext.ProvidersTest do
 
   describe "Providers.Alibaba" do
     test "base_url returns DashScope international URL by default" do
-      System.delete_env("DASHSCOPE_BASE_URL")
-      System.delete_env("DASHSCOPE_REGION")
+      ReqLlmNext.Env.delete("DASHSCOPE_BASE_URL")
+      ReqLlmNext.Env.delete("DASHSCOPE_REGION")
 
       assert Alibaba.base_url() == "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
     end
@@ -425,26 +425,26 @@ defmodule ReqLlmNext.ProvidersTest do
     end
 
     test "OpenAI raises when no key available" do
-      original = System.get_env("OPENAI_API_KEY")
-      System.delete_env("OPENAI_API_KEY")
+      original = ReqLlmNext.Env.get("OPENAI_API_KEY")
+      ReqLlmNext.Env.delete("OPENAI_API_KEY")
 
       try do
         error = assert_raise RuntimeError, fn -> OpenAI.get_api_key([]) end
         assert error.message =~ "OPENAI_API_KEY not set"
       after
-        if original, do: System.put_env("OPENAI_API_KEY", original)
+        if original, do: ReqLlmNext.Env.put("OPENAI_API_KEY", original)
       end
     end
 
     test "Anthropic raises when no key available" do
-      original = System.get_env("ANTHROPIC_API_KEY")
-      System.delete_env("ANTHROPIC_API_KEY")
+      original = ReqLlmNext.Env.get("ANTHROPIC_API_KEY")
+      ReqLlmNext.Env.delete("ANTHROPIC_API_KEY")
 
       try do
         error = assert_raise RuntimeError, fn -> Anthropic.get_api_key([]) end
         assert error.message =~ "ANTHROPIC_API_KEY not set"
       after
-        if original, do: System.put_env("ANTHROPIC_API_KEY", original)
+        if original, do: ReqLlmNext.Env.put("ANTHROPIC_API_KEY", original)
       end
     end
   end

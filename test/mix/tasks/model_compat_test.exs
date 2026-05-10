@@ -150,13 +150,13 @@ defmodule Mix.Tasks.ReqLlmNext.ModelCompatTest do
 
   describe "run/1 with --record flag" do
     setup do
-      original = System.get_env("REQ_LLM_NEXT_FIXTURES_MODE")
+      original = ReqLlmNext.Env.get("REQ_LLM_NEXT_FIXTURES_MODE")
 
       on_exit(fn ->
         if original do
-          System.put_env("REQ_LLM_NEXT_FIXTURES_MODE", original)
+          ReqLlmNext.Env.put("REQ_LLM_NEXT_FIXTURES_MODE", original)
         else
-          System.delete_env("REQ_LLM_NEXT_FIXTURES_MODE")
+          ReqLlmNext.Env.delete("REQ_LLM_NEXT_FIXTURES_MODE")
         end
       end)
 
@@ -164,15 +164,15 @@ defmodule Mix.Tasks.ReqLlmNext.ModelCompatTest do
     end
 
     test "record flag sets environment variable" do
-      System.delete_env("REQ_LLM_NEXT_FIXTURES_MODE")
+      ReqLlmNext.Env.delete("REQ_LLM_NEXT_FIXTURES_MODE")
 
       ModelCompat.run(["openai:gpt-4o-mini", "--scenario", "basic", "--record"])
 
-      assert System.get_env("REQ_LLM_NEXT_FIXTURES_MODE") == "record"
+      assert ReqLlmNext.Env.get("REQ_LLM_NEXT_FIXTURES_MODE") == "record"
     end
 
     test "record flag combined with json output" do
-      System.delete_env("REQ_LLM_NEXT_FIXTURES_MODE")
+      ReqLlmNext.Env.delete("REQ_LLM_NEXT_FIXTURES_MODE")
 
       import ExUnit.CaptureIO
 
@@ -181,7 +181,7 @@ defmodule Mix.Tasks.ReqLlmNext.ModelCompatTest do
           ModelCompat.run(["openai:gpt-4o-mini", "--scenario", "basic", "--record", "--json"])
         end)
 
-      assert System.get_env("REQ_LLM_NEXT_FIXTURES_MODE") == "record"
+      assert ReqLlmNext.Env.get("REQ_LLM_NEXT_FIXTURES_MODE") == "record"
       assert {:ok, parsed} = Jason.decode(output)
       assert is_list(parsed)
     end

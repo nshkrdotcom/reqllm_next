@@ -33,6 +33,16 @@ target refs, cleanup policy refs, operation policy refs, and redaction refs
 while standalone env and direct option behavior remains available only outside
 governed execution.
 
+## Phase 2 Dependency And Env Bootstrap Update
+
+Standalone environment access is now materialized through `ReqLlmNext.Env`.
+Runtime provider code reads explicit options, governed authority, or the
+application env map populated by `config/runtime.exs` and local `.env` loading;
+library code no longer reads or mutates process env directly. ExecutionPlane
+package dependencies are selected through checked-in dependency source manifests
+so local path, GitHub subdir, and Hex fallback behavior stays explicit and does
+not depend on environment variables.
+
 ## Requirements
 
 ```spec-requirements
@@ -62,7 +72,7 @@ governed execution.
   stability: evolving
 
 - id: reqllm.package.local_env_loading
-  statement: ReqLlmNext shall support standalone local development and replay or live verification by loading a local `.env` file without overriding shell-provided environment variables, so API keys can be supplied for tests and compatibility runs without being committed; this local env path shall not be treated as governed credential authority.
+  statement: ReqLlmNext shall support standalone local development and replay or live verification by loading a local `.env` file into materialized application env without overriding values already populated by runtime config or the caller, so API keys can be supplied for tests and compatibility runs without being committed; this local env path shall not be treated as governed credential authority.
   priority: should
   stability: evolving
 

@@ -1,10 +1,9 @@
+unless Code.ensure_loaded?(DependencySources) do
+  Code.require_file("build_support/dependency_sources.exs", __DIR__)
+end
+
 defmodule ReqLlmNext.MixProject do
   use Mix.Project
-
-  @execution_plane_version "~> 0.1.0"
-  @execution_plane_http_version "~> 0.1.0"
-  @execution_plane_sse_version "~> 0.1.0"
-  @execution_plane_websocket_version "~> 0.1.0"
 
   def project do
     [
@@ -48,7 +47,8 @@ defmodule ReqLlmNext.MixProject do
             "guides/anthropic_openai_compatibility.md"
           ]
         ]
-      ]
+      ],
+      package: package()
     ]
   end
 
@@ -71,6 +71,19 @@ defmodule ReqLlmNext.MixProject do
     [
       extra_applications: [:logger],
       mod: {ReqLlmNext.Application, []}
+    ]
+  end
+
+  defp package do
+    [
+      files: [
+        "lib",
+        "guides",
+        "build_support",
+        ".formatter.exs",
+        "mix.exs",
+        "README.md"
+      ]
     ]
   end
 
@@ -99,46 +112,19 @@ defmodule ReqLlmNext.MixProject do
   end
 
   defp execution_plane_dep do
-    case local_dep_path("../execution_plane/core/execution_plane") do
-      nil -> {:execution_plane, @execution_plane_version}
-      path -> {:execution_plane, path: path}
-    end
+    DependencySources.dep(:execution_plane, __DIR__)
   end
 
   defp execution_plane_http_dep do
-    case local_dep_path("../execution_plane/protocols/execution_plane_http") do
-      nil -> {:execution_plane_http, @execution_plane_http_version}
-      path -> {:execution_plane_http, path: path}
-    end
+    DependencySources.dep(:execution_plane_http, __DIR__)
   end
 
   defp execution_plane_sse_dep do
-    case local_dep_path("../execution_plane/streaming/execution_plane_sse") do
-      nil -> {:execution_plane_sse, @execution_plane_sse_version}
-      path -> {:execution_plane_sse, path: path}
-    end
+    DependencySources.dep(:execution_plane_sse, __DIR__)
   end
 
   defp execution_plane_websocket_dep do
-    case local_dep_path("../execution_plane/streaming/execution_plane_websocket") do
-      nil -> {:execution_plane_websocket, @execution_plane_websocket_version}
-      path -> {:execution_plane_websocket, path: path}
-    end
-  end
-
-  defp local_dep_path(relative_path) do
-    if local_workspace_deps?() do
-      path = Path.expand(relative_path, __DIR__)
-      if File.dir?(path), do: path
-    end
-  end
-
-  defp local_workspace_deps? do
-    not hex_packaging_task?() and not Enum.member?(Path.split(__DIR__), "deps")
-  end
-
-  defp hex_packaging_task? do
-    Enum.any?(System.argv(), &(&1 in ["hex.build", "hex.publish"]))
+    DependencySources.dep(:execution_plane_websocket, __DIR__)
   end
 
   defp aliases do

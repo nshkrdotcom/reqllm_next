@@ -91,8 +91,8 @@ defmodule ReqLlmNext.OpenAI.ClientTest do
   end
 
   test "json_request uses governed authority for utility URLs and headers" do
-    original_key = System.get_env("OPENAI_API_KEY")
-    System.put_env("OPENAI_API_KEY", "env-openai-key")
+    original_key = ReqLlmNext.Env.get("OPENAI_API_KEY")
+    ReqLlmNext.Env.put("OPENAI_API_KEY", "env-openai-key")
 
     on_exit(fn -> restore_env("OPENAI_API_KEY", original_key) end)
 
@@ -153,6 +153,6 @@ defmodule ReqLlmNext.OpenAI.ClientTest do
     |> GovernedAuthority.new!()
   end
 
-  defp restore_env(key, nil), do: System.delete_env(key)
-  defp restore_env(key, value), do: System.put_env(key, value)
+  defp restore_env(key, nil), do: ReqLlmNext.Env.delete(key)
+  defp restore_env(key, value), do: ReqLlmNext.Env.put(key, value)
 end

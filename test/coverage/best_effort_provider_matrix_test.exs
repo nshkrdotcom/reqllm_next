@@ -1,5 +1,5 @@
 defmodule ReqLlmNext.BestEffortProviderMatrixTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   alias ReqLlmNext.{
     ExecutionModules,
@@ -84,10 +84,11 @@ defmodule ReqLlmNext.BestEffortProviderMatrixTest do
       {:ok, runtime} = RuntimeMetadata.provider_runtime(model)
       {:ok, execution_entry} = RuntimeMetadata.execution_entry(model, :text)
 
-      System.put_env(provider.env, "test-best-effort-key")
+      original = ReqLlmNext.Env.get(provider.env)
+      ReqLlmNext.Env.put(provider.env, "test-best-effort-key")
 
       on_exit(fn ->
-        System.delete_env(provider.env)
+        restore_env(provider.env, original)
       end)
 
       opts =
@@ -109,6 +110,9 @@ defmodule ReqLlmNext.BestEffortProviderMatrixTest do
       assert {"Content-Type", "application/json"} in headers
     end
   end
+
+  defp restore_env(key, nil), do: ReqLlmNext.Env.delete(key)
+  defp restore_env(key, value), do: ReqLlmNext.Env.put(key, value)
 
   defp best_effort_model!(provider) do
     provider

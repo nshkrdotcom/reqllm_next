@@ -35,6 +35,16 @@ Model input boundaries still accept only supported model specs or
 metadata and must not be inferred from model identifiers, provider names, env
 keys, base URLs, retry callbacks, or singleton clients.
 
+## Phase 2 Env And Dependency Bootstrap
+
+This subject is affected by the Phase 2 bootstrap only at the boundary level:
+runtime code receives credentials and fixture mode through the materialized
+`ReqLlmNext.Env` application env map, and ExecutionPlane package dependency
+selection is owned by checked-in dependency source manifests rather than
+one-off resolver logic or environment variables. This update does not change
+the subject-specific planning, wire, transport, telemetry, or verifier semantics
+beyond that boundary.
+
 ## Requirements
 
 ```spec-requirements

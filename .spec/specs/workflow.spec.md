@@ -38,6 +38,16 @@ phase evidence synchronized. The Phase 10 loop proves multiple provider keys
 and multiple providers can be planned with distinct refs while preserving
 standalone env ergonomics outside governed execution.
 
+## Phase 2 Env And Dependency Bootstrap
+
+This subject is affected by the Phase 2 bootstrap only at the boundary level:
+runtime code receives credentials and fixture mode through the materialized
+`ReqLlmNext.Env` application env map, and ExecutionPlane package dependency
+selection is owned by checked-in dependency source manifests rather than
+one-off resolver logic or environment variables. This update does not change
+the subject-specific planning, wire, transport, telemetry, or verifier semantics
+beyond that boundary.
+
 ## Requirements
 
 ```spec-requirements
@@ -107,13 +117,6 @@ standalone env ergonomics outside governed execution.
     - reqllm.workflow.provider_surface_guides
     - reqllm.workflow.extension_dsl_guidance
     - reqllm.workflow.governed_authority_verification
-
-- kind: source_file
-  target: mix.exs
-  covers:
-    - reqllm.workflow.provider_surface_guides
-    - reqllm.workflow.starter_slice_verification
-    - reqllm.workflow.live_verifier_commands
 
 - kind: source_file
   target: .spec/AGENTS.md

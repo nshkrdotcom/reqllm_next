@@ -47,10 +47,10 @@ defmodule ReqLlmNext.BestEffortRuntimeTest do
     {:ok, runtime} = RuntimeMetadata.provider_runtime(model)
     {:ok, execution_entry} = RuntimeMetadata.execution_entry(model, :text)
 
-    System.put_env("MISTRAL_API_KEY", "test-mistral-key")
+    ReqLlmNext.Env.put("MISTRAL_API_KEY", "test-mistral-key")
 
     on_exit(fn ->
-      System.delete_env("MISTRAL_API_KEY")
+      ReqLlmNext.Env.delete("MISTRAL_API_KEY")
     end)
 
     opts = [

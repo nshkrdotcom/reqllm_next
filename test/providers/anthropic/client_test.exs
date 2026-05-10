@@ -6,8 +6,8 @@ defmodule ReqLlmNext.Anthropic.ClientTest do
   alias ReqLlmNext.TestSupport.OpenAIUtilityHarness
 
   test "json_request uses governed authority for utility URLs and headers" do
-    original_key = System.get_env("ANTHROPIC_API_KEY")
-    System.put_env("ANTHROPIC_API_KEY", "env-anthropic-key")
+    original_key = ReqLlmNext.Env.get("ANTHROPIC_API_KEY")
+    ReqLlmNext.Env.put("ANTHROPIC_API_KEY", "env-anthropic-key")
 
     on_exit(fn -> restore_env("ANTHROPIC_API_KEY", original_key) end)
 
@@ -59,6 +59,6 @@ defmodule ReqLlmNext.Anthropic.ClientTest do
     |> GovernedAuthority.new!()
   end
 
-  defp restore_env(key, nil), do: System.delete_env(key)
-  defp restore_env(key, value), do: System.put_env(key, value)
+  defp restore_env(key, nil), do: ReqLlmNext.Env.delete(key)
+  defp restore_env(key, value), do: ReqLlmNext.Env.put(key, value)
 end

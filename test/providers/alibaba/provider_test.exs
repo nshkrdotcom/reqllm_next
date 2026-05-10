@@ -4,8 +4,8 @@ defmodule ReqLlmNext.Providers.Alibaba.ProviderTest do
   alias ReqLlmNext.Providers.Alibaba
 
   setup do
-    original_base_url = System.get_env("DASHSCOPE_BASE_URL")
-    original_region = System.get_env("DASHSCOPE_REGION")
+    original_base_url = ReqLlmNext.Env.get("DASHSCOPE_BASE_URL")
+    original_region = ReqLlmNext.Env.get("DASHSCOPE_REGION")
 
     on_exit(fn ->
       restore_env("DASHSCOPE_BASE_URL", original_base_url)
@@ -16,29 +16,29 @@ defmodule ReqLlmNext.Providers.Alibaba.ProviderTest do
   end
 
   test "defaults to the international DashScope endpoint" do
-    System.delete_env("DASHSCOPE_BASE_URL")
-    System.delete_env("DASHSCOPE_REGION")
+    ReqLlmNext.Env.delete("DASHSCOPE_BASE_URL")
+    ReqLlmNext.Env.delete("DASHSCOPE_REGION")
 
     assert Alibaba.base_url() == "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
   end
 
   test "supports explicit base URL override" do
-    System.put_env("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
-    System.delete_env("DASHSCOPE_REGION")
+    ReqLlmNext.Env.put("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
+    ReqLlmNext.Env.delete("DASHSCOPE_REGION")
 
     assert Alibaba.base_url() == "https://dashscope.aliyuncs.com/compatible-mode/v1"
   end
 
   test "supports Beijing region shorthand" do
-    System.delete_env("DASHSCOPE_BASE_URL")
-    System.put_env("DASHSCOPE_REGION", "beijing")
+    ReqLlmNext.Env.delete("DASHSCOPE_BASE_URL")
+    ReqLlmNext.Env.put("DASHSCOPE_REGION", "beijing")
 
     assert Alibaba.base_url() == "https://dashscope.aliyuncs.com/compatible-mode/v1"
   end
 
-  defp restore_env(_key, nil), do: :ok
+  defp restore_env(key, nil), do: ReqLlmNext.Env.delete(key)
 
   defp restore_env(key, value) do
-    System.put_env(key, value)
+    ReqLlmNext.Env.put(key, value)
   end
 end

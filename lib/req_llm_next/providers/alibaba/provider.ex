@@ -13,7 +13,8 @@ defmodule ReqLlmNext.Providers.Alibaba do
 
   @impl ReqLlmNext.Provider
   def base_url do
-    System.get_env("DASHSCOPE_BASE_URL") || region_base_url(System.get_env("DASHSCOPE_REGION"))
+    ReqLlmNext.Env.get("DASHSCOPE_BASE_URL") ||
+      region_base_url(ReqLlmNext.Env.get("DASHSCOPE_REGION"))
   end
 
   defp region_base_url(region) when region in ["cn", "china", "beijing"], do: @cn_base_url

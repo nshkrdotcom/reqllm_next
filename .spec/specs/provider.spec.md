@@ -27,11 +27,19 @@ base URLs only from the selected authority and must reject unmanaged direct
 provider keys, raw realtime token options, direct headers, direct URLs, and env
 credential fallback in governed mode.
 
+## Phase 2 Materialized Env Update
+
+Standalone provider credential fallback now uses the materialized
+`ReqLlmNext.Env` application env map instead of direct process env reads.
+Provider-owned base URL, auth header, runtime metadata query/header credentials,
+and Alibaba region/base URL fallbacks must resolve through explicit options,
+governed authority, or that materialized env boundary.
+
 ## Requirements
 
 ```spec-requirements
 - id: reqllm.provider.auth_and_roots
-  statement: Provider shall own provider identity, API-key lookup, auth strategy, provider headers, and endpoint roots by transport family.
+  statement: Provider shall own provider identity, API-key lookup from explicit options or materialized application env, auth strategy, provider headers, and endpoint roots by transport family.
   priority: must
   stability: evolving
 

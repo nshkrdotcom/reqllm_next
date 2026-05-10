@@ -173,6 +173,6 @@ defmodule ReqLlmNext.ProviderFeatures.AnthropicAdvancedMessagesTest do
   end
 
   defp recording_fixtures? do
-    System.get_env("REQ_LLM_NEXT_FIXTURES_MODE") == "record"
+    ReqLlmNext.Env.get("REQ_LLM_NEXT_FIXTURES_MODE") == "record"
   end
 end

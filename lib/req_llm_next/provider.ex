@@ -52,7 +52,7 @@ defmodule ReqLlmNext.Provider do
 
           :error ->
             Keyword.get(opts, :api_key) ||
-              System.get_env(env_key()) ||
+              ReqLlmNext.Env.get(env_key()) ||
               raise "#{env_key()} not set"
         end
       end
@@ -369,7 +369,7 @@ defmodule ReqLlmNext.Provider do
 
   defp credential(auth, opts) do
     envs = Map.get(auth, :env, [])
-    value = Keyword.get(opts, :api_key) || Enum.find_value(envs, &System.get_env/1)
+    value = Keyword.get(opts, :api_key) || Enum.find_value(envs, &ReqLlmNext.Env.get/1)
 
     if is_binary(value) and value != "" do
       {:ok, value}
@@ -399,7 +399,7 @@ defmodule ReqLlmNext.Provider do
     end
   end
 
-  defp env_or_nil(env) when is_binary(env), do: System.get_env(env)
+  defp env_or_nil(env) when is_binary(env), do: ReqLlmNext.Env.get(env)
   defp env_or_nil(_env), do: nil
 
   defp provider_model_id(model, execution_entry) do

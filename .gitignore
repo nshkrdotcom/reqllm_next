@@ -24,3 +24,4 @@ req_llm_next-*.tar
 
 # Local API keys and fixture mode overrides.
 .env
+.dependency_sources.local.exs

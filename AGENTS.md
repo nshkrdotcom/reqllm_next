@@ -149,6 +149,16 @@ Fixtures are first-class evidence, not just mocks.
 
 - `.tool-versions` pins Erlang `28.3.1` and Elixir `1.19.5-otp-28`; use that
   repo-local ASDF toolchain instead of relying on a shell-global Elixir.
+- Dependency source selection is handled by
+  `build_support/dependency_sources.exs` and
+  `build_support/dependency_sources.config.exs`.
+- Local dependency overrides use `.dependency_sources.local.exs`.
+- Default dependency priority is `path -> GitHub -> Hex`; publish mode is
+  Hex-only and must fail with exact blockers if an internal dep is unavailable
+  on Hex.
+- Dependency source selection must not use environment variables.
+- This repo is not a Weld consumer in this pass and must not receive a blind
+  Weld dependency. Weld verification is limited to discovered Weld consumers.
 - Local sibling development uses `../execution_plane/core/execution_plane` for
   `:execution_plane`.
 - Realtime lane deps keep their package-home paths:
@@ -159,6 +169,14 @@ Fixtures are first-class evidence, not just mocks.
   non-published Blitz workspace project, not the Hex package.
 - Release builds must keep the Hex version fallback for all Execution Plane
   packages.
+- Runtime application code under `lib/**` must not call direct OS env APIs such
+  as `System.get_env`, `System.fetch_env`, `System.put_env`, or
+  `System.delete_env`.
+- Runtime and deployment env reads belong in `config/runtime.exs` or an
+  explicit `Config.Provider`.
+- Provider credentials enter through explicit options, governed authority,
+  application config materialized by the top-level app, or caller-supplied env
+  maps.
 
 ## Commands
 

@@ -391,7 +391,7 @@ defmodule ReqLlmNext do
   """
   @spec get_key(atom() | String.t()) :: String.t() | nil
   def get_key(key) when is_atom(key), do: Application.get_env(:req_llm_next, key)
-  def get_key(key) when is_binary(key), do: System.get_env(key)
+  def get_key(key) when is_binary(key), do: ReqLlmNext.Env.get(key)
 
   # ===========================================================================
   # Context API

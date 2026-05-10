@@ -39,10 +39,10 @@ defmodule ReqLlmNext.ProviderRuntimeMetadataTest do
 
     execution_entry = %{supported: true, path: "/chat/completions"}
 
-    System.put_env("QUERY_RUNTIME_KEY", "query-secret")
+    ReqLlmNext.Env.put("QUERY_RUNTIME_KEY", "query-secret")
 
     on_exit(fn ->
-      System.delete_env("QUERY_RUNTIME_KEY")
+      ReqLlmNext.Env.delete("QUERY_RUNTIME_KEY")
     end)
 
     opts = runtime_opts(runtime, execution_entry)
@@ -74,10 +74,10 @@ defmodule ReqLlmNext.ProviderRuntimeMetadataTest do
 
     execution_entry = %{supported: true, path: "/chat/completions"}
 
-    System.put_env("MULTI_RUNTIME_KEY", "multi-secret")
+    ReqLlmNext.Env.put("MULTI_RUNTIME_KEY", "multi-secret")
 
     on_exit(fn ->
-      System.delete_env("MULTI_RUNTIME_KEY")
+      ReqLlmNext.Env.delete("MULTI_RUNTIME_KEY")
     end)
 
     opts =

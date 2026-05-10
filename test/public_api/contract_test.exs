@@ -46,12 +46,12 @@ defmodule ReqLlmNext.PublicAPI.ContractTest do
     end
 
     test "get_key/1 with string key reads from environment" do
-      System.put_env("REQ_LLM_NEXT_TEST_KEY", "env-value")
+      ReqLlmNext.Env.put("REQ_LLM_NEXT_TEST_KEY", "env-value")
 
       try do
         assert ReqLlmNext.get_key("REQ_LLM_NEXT_TEST_KEY") == "env-value"
       after
-        System.delete_env("REQ_LLM_NEXT_TEST_KEY")
+        ReqLlmNext.Env.delete("REQ_LLM_NEXT_TEST_KEY")
       end
     end
 

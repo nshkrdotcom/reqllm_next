@@ -70,8 +70,8 @@ Best-effort support is intentionally narrower than first-class support:
 ReqLlmNext has two credential modes:
 
 1. standalone mode
-   - local application code may pass `:api_key` or provider-specific options directly, and provider modules may read local environment variables such as `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`
-   - `.env` loading exists only for local development, replay, and opt-in live verification ergonomics
+   - local application code may pass `:api_key` or provider-specific options directly, and provider modules may read materialized application env such as `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`
+   - `.env` loading updates materialized app env only and exists for local development, replay, and opt-in live verification ergonomics
 2. governed mode
    - callers pass `:governed_authority` with an externally issued `ReqLlmNext.GovernedAuthority`
    - provider keys, base URLs, direct URLs, headers, realtime tokens, account ids, model-account ids, organization ids, project ids, and runtime metadata env credential fallbacks are rejected as unmanaged request authority

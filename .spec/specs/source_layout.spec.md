@@ -33,6 +33,15 @@ in `realtime.ex`; telemetry ref projection belongs in `telemetry.ex`; tests for
 these contracts live in the focused governed authority, operation planner, and
 telemetry test files.
 
+## Phase 2 Dependency And Env Bootstrap Update
+
+`lib/req_llm_next/env.ex` owns materialized environment access for standalone
+runtime code and local `.env` loading. Dependency source selection for
+ExecutionPlane package deps belongs in `build_support/dependency_sources.exs`
+and `build_support/dependency_sources.config.exs`; `mix.exs` consumes those
+checked-in manifests and must not reintroduce one-off environment-driven
+resolver logic.
+
 ## Requirements
 
 ```spec-requirements

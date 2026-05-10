@@ -132,7 +132,7 @@ defmodule Mix.Tasks.ReqLlmNext.ModelCompat do
 
   defp run_coverage(model_spec, opts) do
     if opts[:record] do
-      System.put_env("REQ_LLM_NEXT_FIXTURES_MODE", "record")
+      ReqLlmNext.Env.put("REQ_LLM_NEXT_FIXTURES_MODE", "record")
     end
 
     models = expand_model_spec(model_spec)

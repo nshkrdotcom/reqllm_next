@@ -19,7 +19,7 @@ defmodule ReqLlmNext.Fixtures do
 
   @spec mode() :: mode()
   def mode do
-    case System.get_env("REQ_LLM_NEXT_FIXTURES_MODE") do
+    case ReqLlmNext.Env.get("REQ_LLM_NEXT_FIXTURES_MODE") do
       "record" -> :record
       _ -> :replay
     end

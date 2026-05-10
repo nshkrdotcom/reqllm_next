@@ -56,18 +56,18 @@ defmodule ReqLlmNext.ProviderTest do
     end
 
     test "get_api_key/1 falls back to env var" do
-      System.put_env("EXAMPLE_API_KEY", "from_env")
+      ReqLlmNext.Env.put("EXAMPLE_API_KEY", "from_env")
 
       try do
         key = BearerProvider.get_api_key([])
         assert key == "from_env"
       after
-        System.delete_env("EXAMPLE_API_KEY")
+        ReqLlmNext.Env.delete("EXAMPLE_API_KEY")
       end
     end
 
     test "get_api_key/1 raises when no key available" do
-      System.delete_env("EXAMPLE_API_KEY")
+      ReqLlmNext.Env.delete("EXAMPLE_API_KEY")
 
       error = assert_raise RuntimeError, fn -> BearerProvider.get_api_key([]) end
       assert error.message =~ "EXAMPLE_API_KEY not set"
